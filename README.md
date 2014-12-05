@@ -1,6 +1,6 @@
 # Anorm
 
-![Travis build status](https://travis-ci.org/playframework/anorm.svg?branch=master)
+[Travis](https://travis-ci.org/playframework/anorm): ![Travis build status](https://travis-ci.org/playframework/anorm.svg?branch=master)
 
 ## Documentation
 
