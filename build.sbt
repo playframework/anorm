@@ -7,8 +7,7 @@ lazy val docs = project
   .dependsOn(anorm)
 
 name := "anorm"
-organization := "com.typesafe.play"
-    
+
 libraryDependencies ++= Seq(
   "com.jsuereth" %% "scala-arm" % "1.4",
   "joda-time" % "joda-time" % "2.6",
@@ -28,28 +27,7 @@ libraryDependencies ++= Seq(
   "specs2-mock"
 ).map("org.specs2" %% _ % "2.4.9" % Test)
 
-scalaVersion := sys.props.get("scala.version").getOrElse("2.10.4")
-crossScalaVersions := Seq("2.10.4", "2.11.1")
-
-libraryDependencies := {
-  CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((2, scalaMajor)) if scalaMajor >= 11 =>
-      libraryDependencies.value :+ ("org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.1")
-    case _ =>
-      libraryDependencies.value
-  }
-}
-
-scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "utf8")
-(javacOptions in compile) := Seq("-source", "1.7", "-target", "1.7")
-(javacOptions in doc) := Seq("-source", "1.7")
-
-fork in Test := true
-
 scalariformSettings
-
-resolvers ++= DefaultOptions.resolvers(snapshot = true)
-resolvers += Resolver.typesafeRepo("releases")
 
 // Release settings
 
