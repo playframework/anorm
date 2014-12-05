@@ -48,7 +48,7 @@ You will need to add Anorm and jdbc plugin to your dependencies :
 ```scala
 libraryDependencies ++= Seq(
   jdbc,
-  "com.typesafe.play" %% "anorm" % "1.0.0"
+  "com.typesafe.play" %% "anorm" % "2.4.0"
 )
 ```
 
