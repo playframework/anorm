@@ -27,6 +27,7 @@ object Common extends AutoPlugin {
     fork in Test := true,
 
     resolvers ++= DefaultOptions.resolvers(snapshot = true),
-    resolvers += Resolver.typesafeRepo("releases")
+    resolvers += Resolver.typesafeRepo("releases"),
+    resolvers += "Scalaz Bintray Repo" at "http://dl.bintray.com/scalaz/releases" // specs2 depends on scalaz-stream
   )
 }
