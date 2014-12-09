@@ -1,5 +1,6 @@
 lazy val anorm = project
   .in(file("."))
+  .enablePlugins(Playdoc, Omnidoc)
 
 lazy val docs = project
   .in(file("docs"))
@@ -58,23 +59,5 @@ pomExtra := {
 }
 pomIncludeRepository := { _ => false }
 
-// Aggregated documentation
-projectID := {
-  val baseUrl = "https://github.com/playframework/anorm"
-  val sourceTree = if (isSnapshot.value) "master" else "v" + version.value
-  val sourceDirectory = IO.relativize((baseDirectory in ThisBuild).value, baseDirectory.value).getOrElse("")
-  val sourceUrl = s"$baseUrl/tree/$sourceTree/$sourceDirectory"
-  projectID.value.extra("info.sourceUrl" -> sourceUrl)
-}
-
-val packagePlaydoc = TaskKey[File]("package-playdoc", "Package play documentation")
-
-Defaults.packageTaskSettings(packagePlaydoc, mappings in packagePlaydoc)
-mappings in packagePlaydoc := {
-  val base = (baseDirectory in ThisBuild).value / "docs"
-  (base / "manual").***.get pair relativeTo(base)
-}
-artifactClassifier in packagePlaydoc := Some("playdoc")
-artifact in packagePlaydoc ~= { _.copy(configurations = Seq(Docs)) }
-
-addArtifact(artifact in packagePlaydoc, packagePlaydoc)
+OmnidocKeys.githubRepo := "playframework/anorm"
+OmnidocKeys.tagPrefix := ""
