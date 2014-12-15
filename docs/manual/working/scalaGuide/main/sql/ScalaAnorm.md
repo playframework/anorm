@@ -200,6 +200,18 @@ val code: String = SQL"""
 
 This feature tries to make faster, more concise and easier to read the way to retrieve data in Anorm. Please, feel free to use it wherever you see a combination of `SQL().on()` functions (or even an only `SQL()` without parameters).
 
+By using `#$value` instead of `$value`, interpolated value will be part of the prepared statement, rather being passed as a parameter when executing this SQL statement (e.g. `#$cmd` and `#$table` in example bellow).
+
+```scala
+val cmd = "SELECT"
+val table = "Test"
+
+SQL"""#$cmd * FROM #$table WHERE id = ${"id1"} AND code IN (${Seq(2, 5)})"""
+
+// prepare the SQL statement, with 1 string and 2 integer parameters:
+// SELECT * FROM Test WHERE id = ? AND code IN (?, ?)
+```
+
 ## Streaming results
 
 Query results can be processed row per row, not having all loaded in memory.

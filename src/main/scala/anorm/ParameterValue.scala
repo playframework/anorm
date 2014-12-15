@@ -23,6 +23,9 @@ sealed trait ParameterValue {
    * @param index Parameter index
    */
   def set(s: PreparedStatement, index: Int): Unit
+
+  /** Returns string representation of this value. */
+  def stringValue: String
 }
 
 /**
@@ -56,6 +59,7 @@ object ParameterValue {
 
       def set(s: PreparedStatement, i: Int) = toStmt.set(s, i, value)
 
+      lazy val stringValue = s"$value"
       override lazy val toString = s"ParameterValue($value)"
       override lazy val hashCode = value.hashCode
 

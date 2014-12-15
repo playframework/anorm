@@ -50,19 +50,31 @@ package object anorm {
    * }}}
    */
   implicit class SqlStringInterpolation(val sc: StringContext) extends AnyVal {
-    def SQL(args: ParameterValue*) = prepare(args)
+    def SQL(args: ParameterValue*): SimpleSql[Row] =
+      prepareSql(sc.parts, args, "", Nil, 0)
 
-    private def prepare(params: Seq[ParameterValue]) = {
-      // Generates the string query with "%s" for each parameter placeholder
-      val sql = sc.parts.mkString("%s")
-
-      val (ns, ps): (List[String], Map[String, ParameterValue]) =
-        namedParams(params)
-
-      SimpleSql(SqlQuery.prepare(sql, ns), ps,
-        defaultParser = RowParser(row => Success(row)))
-    }
   }
+
+  @annotation.tailrec
+  private def prepareSql(parts: Seq[String], args: Seq[ParameterValue], sql: String, params: Seq[ParameterValue], argIndex: Int): SimpleSql[Row] =
+    (parts.headOption, args.headOption) match {
+      case (Some(part), Some(a)) =>
+        // Generates the string query with "%s" for each parameter placeholder
+        if (part.length > 0 && part.takeRight(1) == "#") {
+          prepareSql(parts.tail, args.tail,
+            sql + part.dropRight(1) + a.stringValue, params, argIndex + 1)
+
+        } else prepareSql(parts.tail, args.tail,
+          sql + part + "%s", params :+ a, argIndex + 1)
+
+      case _ =>
+        val (ns, ps): (List[String], Map[String, ParameterValue]) =
+          namedParams(params)
+
+        SimpleSql(SqlQuery.prepare(sql + parts.mkString(""), ns), ps,
+          defaultParser = RowParser(Success(_)))
+
+    }
 
   /* Prepares parameter mappings, arbitrary names and converted values. */
   @annotation.tailrec

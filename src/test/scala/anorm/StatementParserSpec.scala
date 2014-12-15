@@ -1,7 +1,12 @@
 package anorm
 
+import acolyte.jdbc.{
+  QueryExecution,
+  DefinedParameter => DParam,
+  ParameterMetaData => ParamMeta
+}
 import acolyte.jdbc.RowLists.stringList
-import acolyte.jdbc.AcolyteDSL.withQueryResult
+import acolyte.jdbc.AcolyteDSL.{ connection, handleQuery, withQueryResult }
 import acolyte.jdbc.Implicits._
 
 object StatementParserSpec extends org.specs2.mutable.Specification {
@@ -57,6 +62,23 @@ object StatementParserSpec extends org.specs2.mutable.Specification {
     "return no prepared query" in {
       Sql.rewrite("SELECT * FROM Test WHERE id = ?", "x").
         aka("rewrited") must beNone
+    }
+  }
+
+  "String interpolation" should {
+    "handle values as '#' escaped part in statement or SQL parameters" in {
+      val cmd = "SELECT"
+      val table = "Test"
+      implicit val con = connection(handleQuery {
+        case QueryExecution(
+          "SELECT * FROM Test WHERE id = ? AND code IN (?, ?)",
+          DParam("id1", ParamMeta.Str) :: DParam(2, ParamMeta.Int) ::
+            DParam(5, ParamMeta.Int) :: Nil) => stringList :+ "ok"
+
+        case QueryExecution(s, p) => stringList :+ "ko"
+      })
+
+      SQL"""#$cmd * FROM #$table WHERE id = ${"id1"} AND code IN (${Seq(2, 5)})""".as(SqlParser.scalar[String].single) must_== "ok"
     }
   }
 }
