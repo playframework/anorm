@@ -2,6 +2,9 @@
  * Copyright (C) 2009-2013 Typesafe Inc. <http://www.typesafe.com>
  */
 
+import java.util.StringTokenizer
+import scala.collection.JavaConverters.enumerationAsScalaIteratorConverter
+
 /**
  * Anorm API
  *
@@ -30,10 +33,8 @@ package object anorm {
    * val query = SQL("SELECT * FROM Country")
    * }}}
    */
-  def SQL(stmt: String): SqlQuery = {
-    val (sql, paramsNames) = SqlStatementParser.parse(stmt)
-    SqlQuery.prepare(sql, paramsNames)
-  }
+  def SQL(stmt: String): SqlQuery =
+    SqlStatementParser.parse(stmt).map(ts => SqlQuery.prepare(ts, ts.names)).get
 
   /**
    * Creates an SQL query using String Interpolation feature.
@@ -50,39 +51,66 @@ package object anorm {
    * }}}
    */
   implicit class SqlStringInterpolation(val sc: StringContext) extends AnyVal {
-    def SQL(args: ParameterValue*): SimpleSql[Row] =
-      prepareSql(sc.parts, args, "", Nil, 0)
-
+    def SQL(args: ParameterValue*) = {
+      val (ts, ps) = TokenizedStatement.stringInterpolation(sc.parts, args)
+      SimpleSql(SqlQuery.prepare(ts, ts.names), ps, RowParser(Success(_)))
+    }
   }
 
   @annotation.tailrec
-  private def prepareSql(parts: Seq[String], args: Seq[ParameterValue], sql: String, params: Seq[ParameterValue], argIndex: Int): SimpleSql[Row] =
-    (parts.headOption, args.headOption) match {
-      case (Some(part), Some(a)) =>
-        // Generates the string query with "%s" for each parameter placeholder
-        if (part.length > 0 && part.takeRight(1) == "#") {
-          prepareSql(parts.tail, args.tail,
-            sql + part.dropRight(1) + a.stringValue, params, argIndex + 1)
+  private[anorm] def tokenize(ti: Iterator[Any], tks: List[StatementToken], parts: Seq[String], ps: Seq[ParameterValue], gs: List[TokenGroup], ns: List[String], m: Map[String, ParameterValue]): (TokenizedStatement, Map[String, ParameterValue]) = if (ti.hasNext) ti.next match {
+    case "%" => tokenize(ti, PercentToken :: tks, parts, ps, gs, ns, m)
+    case s: String =>
+      tokenize(ti, StringToken(s) :: tks, parts, ps, gs, ns, m)
+    case _ => /* should not occur */ tokenize(ti, tks, parts, ps, gs, ns, m)
+  }
+  else {
+    if (tks.nonEmpty) {
+      gs match {
+        case prev :: groups => ps.headOption match {
+          case Some(v) => prev match {
+            case TokenGroup(StringToken(str) :: gts, pl) if (
+              str endsWith "#" /* escaped part */ ) =>
 
-        } else prepareSql(parts.tail, args.tail,
-          sql + part + "%s", params :+ a, argIndex + 1)
+              val before = if (str == "#") gts.reverse else {
+                StringToken(str dropRight 1) :: gts.reverse
+              }
+              val ng = TokenGroup((tks ::: StringToken(v.show) ::
+                before), pl)
+
+              tokenize(ti, tks.tail, parts, ps.tail, (ng :: groups), ns, m)
+
+            case _ =>
+              val ng = TokenGroup(tks, None)
+              val n = '_'.toString + ns.size
+              tokenize(ti, tks.tail, parts, ps.tail,
+                (ng :: prev.copy(placeholder = Some(n)) :: groups),
+                (n :: ns), m + (n -> v))
+          }
+          case _ =>
+            sys.error(s"No parameter value for placeholder: ${gs.size}")
+        }
+        case _ => tokenize(ti, tks.tail, parts, ps,
+          List(TokenGroup(tks, None)), ns, m)
+      }
+    } else parts.headOption match {
+      case Some(part) =>
+        val it = new StringTokenizer(part, "%", true).asScala
+
+        if (!it.hasNext /* empty */ ) {
+          tokenize(it, List(StringToken("")), parts.tail, ps, gs, ns, m)
+        } else tokenize(it, tks, parts.tail, ps, gs, ns, m)
 
       case _ =>
-        val (ns, ps): (List[String], Map[String, ParameterValue]) =
-          namedParams(params)
+        val groups = ((gs match {
+          case TokenGroup(List(StringToken("")), None) :: tgs => tgs // trim end
+          case _ => gs
+        }) map {
+          case TokenGroup(pr, pl) => TokenGroup(pr.reverse, pl)
+        }).reverse
 
-        SimpleSql(SqlQuery.prepare(sql + parts.mkString(""), ns), ps,
-          defaultParser = RowParser(Success(_)))
-
+        TokenizedStatement(groups, ns.reverse) -> m
     }
-
-  /* Prepares parameter mappings, arbitrary names and converted values. */
-  @annotation.tailrec
-  private[anorm] def namedParams(params: Seq[ParameterValue], i: Int = 0, names: List[String] = List.empty, named: Map[String, ParameterValue] = Map.empty): (List[String], Map[String, ParameterValue]) = params.headOption match {
-    case Some(p) =>
-      val n = '_'.toString + i
-      namedParams(params.tail, i + 1, names :+ n, named + (n -> p))
-    case _ => (names, named)
   }
 
   /** Activable features */

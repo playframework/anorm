@@ -116,10 +116,12 @@ sealed trait BatchSql {
   private def fill(con: Connection, statement: PreparedStatement, getGeneratedKeys: Boolean = false, pm: Seq[Map[String, ParameterValue]]): PreparedStatement =
     (statement, pm.headOption) match {
       case (null, Some(ps)) => { // First
-        val st: (String, Seq[(Int, ParameterValue)]) = Sql.prepareQuery(
-          sql.statement, 0, sql.paramsInitialOrder.map(ps), Nil)
+        val st: (TokenizedStatement, Seq[(Int, ParameterValue)]) =
+          Sql.prepareQuery(sql.stmt, 0,
+            sql.paramsInitialOrder.map(ps), Nil)
 
-        val stmt = if (getGeneratedKeys) con.prepareStatement(st._1, java.sql.Statement.RETURN_GENERATED_KEYS) else con.prepareStatement(st._1)
+        val psql = TokenizedStatement.toSql(st._1).get // TODO: Make it safe
+        val stmt = if (getGeneratedKeys) con.prepareStatement(psql, java.sql.Statement.RETURN_GENERATED_KEYS) else con.prepareStatement(psql)
 
         sql.timeout.foreach(stmt.setQueryTimeout(_))
 
@@ -127,7 +129,7 @@ sealed trait BatchSql {
       }
       case (stmt, Some(ps)) => {
         val vs: Seq[(Int, ParameterValue)] = Sql.prepareQuery(
-          sql.statement, 0, sql.paramsInitialOrder.map(ps), Nil)._2
+          sql.stmt, 0, sql.paramsInitialOrder.map(ps), Nil)._2
 
         fill(con, addBatchParams(stmt, vs), getGeneratedKeys, pm.tail)
       }

@@ -190,7 +190,9 @@ object ParameterSpec
       SQL("set-str {a}").on("a" -> "string").
         aka("query") must beLike {
           case q @ SimpleSql( // check accross construction
-            SqlQuery("set-str %s", List("a"), _), ps, _) if (ps contains "a") =>
+            SqlQuery(TokenizedStatement(List(
+              TokenGroup(List(StringToken("set-str ")), Some("a"))), List("a")),
+              List("a"), _), ps, _) if (ps contains "a") =>
 
             // execute = false: update ok but returns no resultset
             // see java.sql.PreparedStatement#execute
@@ -202,7 +204,9 @@ object ParameterSpec
       SQL("set-str {b}").on('b -> "string").
         aka("query") must beLike {
           case q @ SimpleSql( // check accross construction
-            SqlQuery("set-str %s", List("b"), _), ps, _) if (ps contains "b") =>
+            SqlQuery(TokenizedStatement(List(
+              TokenGroup(List(StringToken("set-str ")), Some("b"))), List("b")),
+              List("b"), _), ps, _) if (ps contains "b") =>
             q.execute() aka "execution" must beFalse
         }
     }
@@ -212,8 +216,11 @@ object ParameterSpec
         SQL"""set-str ${"string"}""".
           aka("query") must beLike {
             case q @ SimpleSql( // check accross construction
-              SqlQuery("set-str %s", List("_0"), _), ps, _) if (
+              SqlQuery(TokenizedStatement(List(
+                TokenGroup(List(StringToken("set-str ")), Some("_0"))),
+                List("_0")), List("_0"), _), ps, _) if (
               ps contains "_0") => q.execute() aka "execution" must beFalse
+
           }
     }
 
@@ -231,7 +238,9 @@ object ParameterSpec
       (SQL("set-char {b}").on('b -> new java.lang.Character('x')).
         aka("query") must beLike {
           case q @ SimpleSql( // check accross construction
-            SqlQuery("set-char %s", List("b"), _), ps, _) if (
+            SqlQuery(TokenizedStatement(List(
+              TokenGroup(List(StringToken("set-char ")), Some("b"))),
+              List("b")), List("b"), _), ps, _) if (
             ps contains "b") => q.execute() aka "execution" must beFalse
         }).and(SQL("set-char {b}").on('b -> Character.valueOf('x')).
           execute() aka "execution" must beFalse)
@@ -466,8 +475,11 @@ object ParameterSpec
         SQL("set-s-jbd {a}, {b}").on("a" -> "string", "b" -> Jbd1).
           aka("query") must beLike {
             case q @ SimpleSql(
-              SqlQuery("set-s-jbd %s, %s", List("a", "b"), _),
-              ps, _) if (ps.contains("a") && ps.contains("b")) =>
+              SqlQuery(TokenizedStatement(List(
+                TokenGroup(List(StringToken("set-s-jbd ")), Some("a")),
+                TokenGroup(List(StringToken(", ")), Some("b"))),
+                List("a", "b")), List("a", "b"), _), ps, _) if (
+              ps.contains("a") && ps.contains("b")) =>
               q.execute() aka "execution" must beFalse
 
           }
@@ -489,8 +501,11 @@ object ParameterSpec
       SQL("reorder-s-jbd {b}, {a}").on("a" -> "string", "b" -> Jbd1).
         aka("query") must beLike {
           case q @ SimpleSql(
-            SqlQuery("reorder-s-jbd %s, %s", List("b", "a"), _),
-            ps, _) if (ps.contains("a") && ps.contains("b")) =>
+            SqlQuery(TokenizedStatement(List(
+              TokenGroup(List(StringToken("reorder-s-jbd ")), Some("b")),
+              TokenGroup(List(StringToken(", ")), Some("a"))),
+              List("b", "a")), List("b", "a"), _), ps, _) if (
+            ps.contains("a") && ps.contains("b")) =>
             q.execute() aka "execution" must beFalse
 
         }
@@ -571,7 +586,7 @@ object ParameterSpec
         val name: Any = "untyped"
         SQL("set-old {untyped}").on(name -> 2l) aka "query" must beLike {
           case q @ SimpleSql(
-            SqlQuery("set-old %s", "untyped" :: Nil, _), ps, _) if (
+            SqlQuery(TokenizedStatement(List(TokenGroup(List(StringToken("set-old ")), Some("untyped"))), List("untyped")), "untyped" :: Nil, _), ps, _) if (
             ps contains "untyped") => q.execute() aka "execution" must beFalse
 
         }
@@ -585,9 +600,8 @@ object ParameterSpec
         val params: Seq[NamedParameter] = Seq("mod" -> d, "id" -> "idv")
         SQL("UPDATE item SET last_modified = {mod} WHERE id = {id}").
           on(params: _*) aka "update" must beLike {
-            case q @ SimpleSql(
-              SqlQuery("UPDATE item SET last_modified = %s WHERE id = %s",
-                "mod" :: "id" :: Nil, _), ps, _) if (ps.contains("mod") &&
+            case q @ SimpleSql(SqlQuery(TokenizedStatement(
+              List(TokenGroup(List(StringToken("UPDATE item SET last_modified = ")), Some("mod")), TokenGroup(List(StringToken(" WHERE id = ")), Some("id"))), List("mod", "id")), "mod" :: "id" :: Nil, _), ps, _) if (ps.contains("mod") &&
               ps.contains("id")) => q.execute() aka "execution" must {
               throwA[SQLFeatureNotSupportedException](
                 message = "Unsupported parameter type: java.util.Date")
@@ -607,8 +621,8 @@ object ParameterSpec
       "accept List" in withConnection() { implicit c =>
         SQL("set-list {list}").on('list -> List(1, 3, 7)).
           aka("query") must beLike {
-            case q @ SimpleSql(
-              SqlQuery("set-list %s", "list" :: Nil, _), ps, _) if (
+            case q @ SimpleSql(SqlQuery(
+              TokenizedStatement(List(TokenGroup(List(StringToken("set-list ")), Some("list"))), List("list")), "list" :: Nil, _), ps, _) if (
               ps.size == 1 && ps.contains("list")) =>
               q.execute() aka "execution" must beFalse
           }
@@ -618,7 +632,7 @@ object ParameterSpec
         SQL("set-seq {seq}").
           on('seq -> Seq("a", "b", "c")) aka "query" must beLike {
             case q @ SimpleSql(
-              SqlQuery("set-seq %s", "seq" :: Nil, _), ps, _) if (
+              SqlQuery(TokenizedStatement(List(TokenGroup(List(StringToken("set-seq ")), Some("seq"))), List("seq")), "seq" :: Nil, _), ps, _) if (
               ps.size == 1 && ps.contains("seq")) =>
               q.execute() aka "execution" must beFalse
           }
@@ -628,7 +642,7 @@ object ParameterSpec
         SQL("set-set {set}").on('set -> Set(1, 3, 7)).
           aka("query") must beLike {
             case q @ SimpleSql(
-              SqlQuery("set-set %s", "set" :: Nil, _), ps, _) if (
+              SqlQuery(TokenizedStatement(List(TokenGroup(List(StringToken("set-set ")), Some("set"))), List("set")), "set" :: Nil, _), ps, _) if (
               ps.size == 1 && ps.contains("set")) =>
               q.execute() aka "execution" must beFalse
           }
@@ -638,18 +652,19 @@ object ParameterSpec
         SQL("set-sortedset {sortedset}").
           on('sortedset -> SortedSet("a", "b", "c")) aka "query" must beLike {
             case q @ SimpleSql(
-              SqlQuery("set-sortedset %s", "sortedset" :: Nil, _), ps, _) if (
+              SqlQuery(TokenizedStatement(List(TokenGroup(List(StringToken("set-sortedset ")), Some("sortedset"))), List("sortedset")), "sortedset" :: Nil, _), ps, _) if (
               ps.size == 1 && ps.contains("sortedset")) =>
               q.execute() aka "execution" must beFalse
           }
       }
 
       "accept Stream" in withConnection() { implicit c =>
-        SQL("set-set {set}").on('set -> Stream(1, 3, 7)).
+        SQL("set-stream {stream}").on('stream -> Stream(1, 3, 7)).
           aka("query") must beLike {
-            case q @ SimpleSql(
-              SqlQuery("set-set %s", "set" :: Nil, _), ps, _) if (
-              ps.size == 1 && ps.contains("set")) =>
+            case q @ SimpleSql(SqlQuery(TokenizedStatement(List(TokenGroup(
+              List(StringToken("set-stream ")), Some("stream"))),
+              List("stream")), "stream" :: Nil, _), ps, _) if (
+              ps.size == 1 && ps.contains("stream")) =>
               q.execute() aka "execution" must beFalse
           }
       }
@@ -658,7 +673,7 @@ object ParameterSpec
         SQL("set-vector {vector}").
           on('vector -> Vector("a", "b", "c")) aka "query" must beLike {
             case q @ SimpleSql(
-              SqlQuery("set-vector %s", "vector" :: Nil, _), ps, _) if (
+              SqlQuery(TokenizedStatement(List(TokenGroup(List(StringToken("set-vector ")), Some("vector"))), List("vector")), "vector" :: Nil, _), ps, _) if (
               ps.size == 1 && ps.contains("vector")) =>
               q.execute() aka "execution" must beFalse
           }
@@ -668,7 +683,7 @@ object ParameterSpec
         SQL("set-array {array}").on("array" -> Array("a", "b", "c")).
           aka("query") must beLike {
             case q @ SimpleSql(
-              SqlQuery("set-array %s", "array" :: Nil, _), ps, _) if (
+              SqlQuery(TokenizedStatement(List(TokenGroup(List(StringToken("set-array ")), Some("array"))), List("array")), "array" :: Nil, _), ps, _) if (
               ps.size == 1 && ps.contains("array")) =>
               q.execute() aka "execution" must beFalse
           }
@@ -720,7 +735,7 @@ object ParameterSpec
         SeqParameter(Seq(1.2f, 23.4f, 5.6f), " OR ", "cat = ")).
         aka("query") must beLike {
           case q @ SimpleSql(
-            SqlQuery("set-seqp %s", "p" :: Nil, _), ps, _) if (
+            SqlQuery(TokenizedStatement(List(TokenGroup(List(StringToken("set-seqp ")), Some("p"))), List("p")), "p" :: Nil, _), ps, _) if (
             ps.size == 1 && ps.contains("p")) =>
             q.execute() aka "execution" must beFalse
         }
@@ -730,16 +745,17 @@ object ParameterSpec
       "accept custom formatting" in withConnection() { implicit c =>
         SQL"""set-seqp ${SeqParameter(Seq(1.2f, 23.4f, 5.6f), " OR ", "cat = ")}""" aka "query" must beLike {
           case q @ SimpleSql(
-            SqlQuery("set-seqp %s", "_0" :: Nil, _), ps, _) if (
+            SqlQuery(TokenizedStatement(List(TokenGroup(List(StringToken("set-seqp ")), Some("_0"))), List("_0")), "_0" :: Nil, _), ps, _) if (
             ps.size == 1 && ps.contains("_0")) =>
             q.execute() aka "execution" must beFalse
+
         }
       }
 
       "accept Seq" in withConnection() { implicit c =>
         SQL"""set-seq ${Seq("a", "b", "c")}""" aka "query" must beLike {
           case q @ SimpleSql(
-            SqlQuery("set-seq %s", "_0" :: Nil, _), ps, _) if (
+            SqlQuery(TokenizedStatement(List(TokenGroup(List(StringToken("set-seq ")), Some("_0"))), List("_0")), "_0" :: Nil, _), ps, _) if (
             ps.size == 1 && ps.contains("_0")) =>
             q.execute() aka "execution" must beFalse
         }
@@ -751,7 +767,7 @@ object ParameterSpec
     "be one string" in withConnection() { implicit c =>
       SQL("set-str {p}").onParams(pv("string")) aka "query" must beLike {
         case q @ SimpleSql( // check accross construction
-          SqlQuery("set-str %s", List("p"), _), ps, _) if (ps contains "p") =>
+          SqlQuery(TokenizedStatement(List(TokenGroup(List(StringToken("set-str ")), Some("p"))), List("p")), List("p"), _), ps, _) if (ps contains "p") =>
 
           // execute = false: update ok but returns no resultset
           // see java.sql.PreparedStatement#execute
@@ -827,7 +843,10 @@ object ParameterSpec
         SQL("set-s-jbd {a}, {b}").onParams(pv("string"), pv(Jbd1)).
           aka("query") must beLike {
             case q @ SimpleSql(
-              SqlQuery("set-s-jbd %s, %s", List("a", "b"), _), ps, _) if (
+              SqlQuery(TokenizedStatement(List(
+                TokenGroup(List(StringToken("set-s-jbd ")), Some("a")),
+                TokenGroup(List(StringToken(", ")), Some("b"))),
+                List("a", "b")), List("a", "b"), _), ps, _) if (
               ps.contains("a") && ps.contains("b")) =>
               q.execute() aka "execution" must beFalse
 
