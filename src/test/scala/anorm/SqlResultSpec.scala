@@ -162,6 +162,26 @@ object SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
 
       }
 
+    "release resources (with degraded result set)" in withQueryResult(
+      (stringList :+ "A" :+ "B" :+ "C"), List(
+        "acolyte.resultSet.initOnFirstRow" -> "true")) { implicit c =>
+
+        val res: SqlQueryResult =
+          SQL"SELECT str".withResultSetOnFirstRow(true).executeQuery()
+        var closed = false
+        val probe = resource.managed(
+          new java.io.Closeable { def close() = closed = true })
+
+        var i = 0
+        val stream: Stream[Int] = res.copy(resultSet =
+          res.resultSet.and(probe).map(_._1)).apply() map { r => i = i + 1; i }
+
+        stream aka "streaming" must_== List(1, 2, 3) and (
+          closed aka "resource release" must beTrue) and (
+            i aka "row count" must_== 3)
+
+      }
+
     "release resources on exception" in withQueryResult(
       stringList :+ "A" :+ "B" :+ "C") { implicit c =>
 
@@ -220,10 +240,32 @@ object SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
 
       }
 
-    "release resources on exception" in withQueryResult(
+    "release resources" in withQueryResult(
       stringList :+ "A" :+ "B" :+ "C") { implicit c =>
 
         val res: SqlQueryResult = SQL"SELECT str".executeQuery()
+        var closed = false
+        val probe = resource.managed(
+          new java.io.Closeable { def close() = closed = true })
+
+        var i = 0
+        lazy val agg = res.copy(resultSet =
+          res.resultSet.and(probe).map(_._1)).fold(List[Int]()) {
+          (l, _) => i = i + 1; l :+ i
+        }
+
+        agg aka "aggregation" must_== Right(List(1, 2, 3)) and (
+          closed aka "resource release" must beTrue) and (
+            i aka "row count" must_== 3)
+
+      }
+
+    "release resources on exception (with degraded result set)" in {
+      withQueryResult((stringList :+ "A" :+ "B" :+ "C"), List(
+        "acolyte.resultSet.initOnFirstRow" -> "true")) { implicit c =>
+
+        val res: SqlQueryResult =
+          SQL"SELECT str".withResultSetOnFirstRow(true).executeQuery()
         var closed = false
         val probe = resource.managed(
           new java.io.Closeable { def close() = closed = true })
@@ -241,6 +283,7 @@ object SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
           i aka "row count" must_== 1)
 
       }
+    }
   }
 
   "Aggregation over variable number of rows" should {
@@ -392,7 +435,6 @@ object SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
       }
   }
 
-  def withQueryResult[A](r: QueryResult)(f: java.sql.Connection => A): A =
-    f(connection(handleQuery { _ => r }))
+  def withQueryResult[A](r: QueryResult, ps: List[(String, String)] = List.empty)(f: java.sql.Connection => A): A = f(connection(handleQuery { _ => r }, ps: _*))
 
 }

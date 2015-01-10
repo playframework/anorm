@@ -442,6 +442,14 @@ SQL("UPDATE item SET last_modified = {mod} WHERE id = {id}").on(params:_*)
 It's not recommanded because moreover hiding implicit resolution issues, as untyped it could lead to runtime conversion error, with values are passed on statement using `setObject`.
 In previous example, `java.util.Date` is accepted as parameter but would with most databases raise error (as it's not valid JDBC type).
 
+In some cases, some JDBC drivers returns a result set positioned on the first row rather than [before this first row](http://docs.oracle.com/javase/7/docs/api/java/sql/ResultSet.html) (e.g. stored procedured with Oracle JDBC driver).
+To handle such edge-case, `.withResultSetOnFirstRow(true)` can be used as following.
+
+```scala
+SQL("EXEC stored_proc {arg}").on("arg" -> "val").withResultSetOnFirstRow(true)
+SQL"""EXEC stored_proc ${"val"}""".withResultSetOnFirstRow(true)
+```
+
 ## Using Pattern Matching
 
 You can also use Pattern Matching to match and extract the `Row` content. In this case the column name doesn’t matter. Only the order and the type of the parameters is used to match.
