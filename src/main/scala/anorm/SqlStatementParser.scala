@@ -3,16 +3,15 @@
  */
 package anorm
 
+import scala.util.Try
 import scala.language.postfixOps
-
 import scala.util.parsing.combinator._
 
 /** Parser for SQL statement. */
 object SqlStatementParser extends JavaTokenParsers {
-
   /**
-   * Returns updated statement and associated parameter names.
-   * Extracts parameter names from {placeholder}s, replaces with ?.
+   * Returns tokenized statement and associated parameter names.
+   * Extracts parameter names from {placeholder}s.
    *
    * {{{
    * import anorm.SqlStatementParser.parse
@@ -24,27 +23,69 @@ object SqlStatementParser extends JavaTokenParsers {
    * //    List("name"))
    * }}}
    */
-  def parse(sql: String): (String, List[String]) = {
-    val r = parse(instr, sql.trim()).get
-    (r.flatMap(_._1).mkString, (r.flatMap(_._2)))
+  def parse(sql: String): Try[TokenizedStatement] = Try(parse(instr, sql).get)
+
+  private val simpleLiteral: Parser[StringToken] =
+    "[^'^{^\r^\n]+".r ^^ { StringToken(_) }
+
+  private val instr: Parser[TokenizedStatement] = {
+    @inline def normalize(t: StatementToken): Option[TokenGroup] = t match {
+      case StringToken("") => Option.empty[TokenGroup]
+      case StringToken(s) if (s.trim == "") =>
+        Some(TokenGroup(List(StringToken(" ")), None))
+
+      case _ => Some(TokenGroup(List(t), None))
+    }
+
+    "[ \t\r\n]*".r ~> rep(simpleLiteral.map(normalize) |
+      quotedLiteral.map(Some(_)) | variable.map(Some(_)) |
+      skipped.map(normalize)) ^^ {
+      _.foldLeft(List.empty[TokenGroup] -> List.empty[String]) {
+        case ((TokenGroup(ts, None) :: groups, ns),
+          Some(TokenGroup(Nil, Some(n)))) =>
+          (TokenGroup(ts, Some(n)) :: groups) -> (n :: ns)
+
+        case ((TokenGroup(a, None) :: groups, ns), Some(TokenGroup(b, None))) =>
+          (TokenGroup(a ::: b, None) :: groups) -> ns // merge groups
+
+        case ((gs, ns), Some(g)) => (g :: gs) -> ns
+        case ((gs, ns), _) => gs -> ns
+      }
+    } map {
+      case (TokenGroup(List(StringToken(" ")), None) :: gs, ns) =>
+        TokenizedStatement(gs.reverse, ns.reverse) // trim end #1
+
+      case (TokenGroup(ts, pl) :: gs, ns) if ( // trim end #2
+        ts.lastOption.filter(_ == StringToken(" ")).isDefined) =>
+        TokenizedStatement((TokenGroup(ts.dropRight(1), pl) :: gs).reverse,
+          ns.reverse)
+
+      case (gs, ns) => TokenizedStatement(gs.reverse, ns.reverse)
+    }
   }
 
-  private val instr: Parser[List[(String, Option[String])]] =
-    rep(literal | variable | other)
+  private val variable: Parser[TokenGroup] =
+    "{" ~> (ident ~ (("." ~> ident)?)) <~ "}" ^^ {
+      case i1 ~ i2 =>
+        TokenGroup(Nil, Some(i1 + i2.map("." + _).getOrElse("")))
+    }
 
-  private val literal: Parser[(String, Option[String])] =
-    (stringLiteral | simpleQuotes) ^^ { case s => (s, None) }
+  private val reserved: Parser[PercentToken.type] =
+    "%".r ^^ { _ => PercentToken }
 
-  private val variable = "{" ~> (ident ~ (("." ~> ident)?)) <~ "}" ^^ {
-    case i1 ~ i2 => ("%s": String, Some(i1 + i2.map("." + _).getOrElse("")))
+  private lazy val quotedLiteral: Parser[TokenGroup] = {
+    // TODO: Remove as quoted should not be a special case now
+    val simpleQuoted: Parser[StringToken] =
+      """([^'^%\p{Cntrl}\\]|\\[\\/bfnrt]|\\u[a-fA-F0-9]{4})+""".
+        r ^^ { StringToken(_) }
+
+    "'" ~> rep(reserved | simpleQuoted) <~ "'" ^^ { ts =>
+      TokenGroup(StringToken("'") :: (ts :+ StringToken("'")), None)
+    }
   }
 
-  private val other: Parser[(String, Option[String])] = """(.|[\r\n])""".r ^^ {
-    case element => (element, None)
-  }
-
-  private val simpleQuotes =
-    ("'" + """([^'\p{Cntrl}\\]|\\[\\/bfnrt]|\\u[a-fA-F0-9]{4})*""" + "'").r
+  private val skipped: Parser[StringToken] =
+    """[\r\n]""".r ^^ { _ => StringToken("") }
 
   override def skipWhitespace = false
 }

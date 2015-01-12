@@ -5,8 +5,11 @@ import resource.ManagedResource
 
 /** Initial SQL query, without parameter values. */
 sealed trait SqlQuery {
+  private[anorm] def stmt: TokenizedStatement
+
   /** SQL statement */
-  def statement: String
+  @deprecated(message = "Will be made private", since = "2.3.8")
+  final def statement: String = TokenizedStatement.toSql(stmt).get
 
   @deprecated(message = "Use [[statement]]", since = "2.3.2")
   final def query = statement
@@ -27,7 +30,8 @@ sealed trait SqlQuery {
   def getFilledStatement(connection: Connection, getGeneratedKeys: Boolean = false): PreparedStatement = asSimple.getFilledStatement(connection, getGeneratedKeys)
 
   /** Returns this query with timeout updated to `seconds` delay. */
-  def withQueryTimeout(seconds: Option[Int]): SqlQuery = SqlQuery.prepare(statement, paramsInitialOrder, seconds)
+  def withQueryTimeout(seconds: Option[Int]): SqlQuery =
+    SqlQuery.prepare(stmt, paramsInitialOrder, seconds)
 
   private[anorm] def asSimple: SimpleSql[Row] = asSimple(defaultParser)
 
@@ -45,14 +49,15 @@ sealed trait SqlQuery {
     SimpleSql(this, Map.empty, parser)
 
   @deprecated(message = """Directly use BatchSql("stmt")""", since = "2.3.2")
-  def asBatch[T]: BatchSql = BatchSql(this.query, Nil)
+  def asBatch[T]: BatchSql = BatchSql.Checked(this, Nil)
 
   private def defaultParser: RowParser[Row] = RowParser(Success(_))
 
   // TODO: Make it private
   @deprecated(
     "Use anorm.SQL(…) as SqlQuery should not be directly created", "2.3.2")
-  def copy(statement: String = this.statement, paramsInitialOrder: List[String] = this.paramsInitialOrder, timeout: Option[Int] = this.timeout) = SqlQuery(statement, paramsInitialOrder, timeout)
+  def copy(statement: TokenizedStatement = this.stmt, paramsInitialOrder: List[String] = this.paramsInitialOrder, timeout: Option[Int] = this.timeout) = SqlQuery.prepare(statement, paramsInitialOrder, timeout)
+
 }
 
 /* TODO: Make it private[anorm] to prevent SqlQuery from being created with
@@ -60,7 +65,8 @@ sealed trait SqlQuery {
 object SqlQuery {
 
   @deprecated(message = "Use anorm.SQL(…)", since = "2.3.2")
-  def apply(st: String, params: List[String] = List.empty, tmout: Option[Int] = None): SqlQuery = prepare(st, params, tmout)
+  def apply(st: String, params: List[String] = List.empty, tmout: Option[Int] = None): SqlQuery =
+    SqlStatementParser.parse(st).map(prepare(_, params, tmout)).get
 
   /**
    * Returns prepared SQL query.
@@ -69,13 +75,12 @@ object SqlQuery {
    * @param params Parameter names in initial order (see [[SqlQuery.paramsInitialOrder]])
    * @param tmout Query execution timeout (see [[SqlQuery.timeout]])
    */
-  private[anorm] def prepare(st: String, params: List[String] = List.empty, tmout: Option[Int] = None): SqlQuery = new SqlQuery {
-    val statement = st
+  private[anorm] def prepare(st: TokenizedStatement, params: List[String] = List.empty, tmout: Option[Int] = None): SqlQuery = new SqlQuery {
+    val stmt = st
     val paramsInitialOrder = params
     val timeout = tmout
   }
 
   /** Extractor for pattern matching */
-  def unapply(query: SqlQuery): Option[(String, List[String], Option[Int])] =
-    Option(query).map(q => (q.statement, q.paramsInitialOrder, q.timeout))
+  def unapply(query: SqlQuery): Option[(TokenizedStatement, List[String], Option[Int])] = Option(query).map(q => (q.stmt, q.paramsInitialOrder, q.timeout))
 }

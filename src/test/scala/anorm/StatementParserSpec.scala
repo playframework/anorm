@@ -17,15 +17,22 @@ object StatementParserSpec extends org.specs2.mutable.Specification {
       SqlStatementParser.parse("""
         SELECT * FROM schema.table 
         WHERE (name = {name} AND category = {cat}) OR id = ?
-      """) aka "updated statement and parameters" mustEqual (
-        """SELECT * FROM schema.table 
-        WHERE (name = %s AND category = %s) OR id = ?""" -> List("name", "cat"))
+      """) aka "updated statement and parameters" must beSuccessfulTry(
+        TokenizedStatement(List(TokenGroup(List(StringToken("SELECT * FROM schema.table "), StringToken("        WHERE (name = ")), Some("name")), TokenGroup(List(StringToken(" AND category = ")), Some("cat")), TokenGroup(List(StringToken(") OR id = ?")), None)), List("name", "cat")))
+
     }
 
     "detect missing query parameter" in withQueryResult(stringList :+ "test") {
       implicit con =>
         SQL("SELECT name FROM t WHERE id = {id}").apply().
           aka("query") must throwA[java.util.NoSuchElementException]
+    }
+
+    "reserved '%' character must be preserved as special token" in {
+      SqlStatementParser.parse(
+        "SELECT * FROM Test WHERE id = {id} AND n LIKE '%strange%s fruit%s'").
+        aka("statement") must beSuccessfulTry(TokenizedStatement(
+          List(TokenGroup(List(StringToken("SELECT * FROM Test WHERE id = ")), Some("id")), TokenGroup(List(StringToken(" AND n LIKE "), StringToken("'"), PercentToken, StringToken("strange"), PercentToken, StringToken("s fruit"), PercentToken, StringToken("s"), StringToken("'")), None)), List("id")))
     }
   }
 
@@ -49,19 +56,41 @@ object StatementParserSpec extends org.specs2.mutable.Specification {
 
   "Rewriting" should {
     "return some prepared query with updated statement" in {
-      Sql.rewrite("SELECT * FROM t WHERE c IN (%s) AND id = %s", "?, ?") must {
-        beSome.which { rewrited =>
-          (rewrited aka "first rewrite" mustEqual (
-            "SELECT * FROM t WHERE c IN (?, ?) AND id = %s")).
-            and(Sql.rewrite(rewrited, "?") aka "second rewrite" must beSome(
-              "SELECT * FROM t WHERE c IN (?, ?) AND id = ?"))
-        }
+      val stmt1 = TokenizedStatement(List(TokenGroup(List(StringToken("SELECT * FROM t WHERE c IN (")), Some("cs")), TokenGroup(List(StringToken(") AND id = ")), Some("id"))), List("cs", "id"))
+
+      val stmt2 = TokenizedStatement(List(TokenGroup(List(StringToken("SELECT * FROM t WHERE c IN ("), StringToken("?, ?"), StringToken(") AND id = ")), Some("id"))), List("cs", "id"))
+
+      val stmt3 = TokenizedStatement(List(TokenGroup(List(StringToken("SELECT * FROM t WHERE c IN ("), StringToken("?, ?"), StringToken(") AND id = "), StringToken("?")), None)), List("cs", "id"))
+
+      TokenizedStatement.rewrite(stmt1, "?, ?") must beSuccessfulTry.like {
+        case rw1 =>
+          rw1 aka "first rewrite" mustEqual stmt2 and (
+            TokenizedStatement.rewrite(rw1, "?").
+            aka("second rewrite") must beSuccessfulTry.like {
+              case rw2 => rw2 aka "final statement" must_== stmt3
+            })
       }
     }
 
     "return no prepared query" in {
-      Sql.rewrite("SELECT * FROM Test WHERE id = ?", "x").
-        aka("rewrited") must beNone
+      TokenizedStatement.rewrite(TokenizedStatement(List(TokenGroup(
+        List(StringToken("SELECT * FROM Test WHERE id = ?")), None)), Nil),
+        "x") aka "rewrite" must beFailedTry
+    }
+  }
+
+  "Tokenized statement" should {
+    val stmt = TokenizedStatement(List(TokenGroup(List(StringToken("SELECT * FROM name LIKE "), StringToken("'"), PercentToken, StringToken("strange"), StringToken("'"), StringToken(" AND id = ")), Some("id"))), List("id"))
+
+    "not be prepared as SQL if there is some placeholder not rewritten" in {
+      TokenizedStatement.toSql(stmt) must beFailedTry
+    }
+
+    "properly written as prepared SQL" in {
+      TokenizedStatement.rewrite(stmt, "?") must beSuccessfulTry.like {
+        case rw =>
+          TokenizedStatement.toSql(rw) must beSuccessfulTry("SELECT * FROM name LIKE '%strange' AND id = ?")
+      }
     }
   }
 

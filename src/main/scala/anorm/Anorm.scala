@@ -309,36 +309,11 @@ object Sql { // TODO: Rename to SQL
     case _ => ps
   }
 
-  /**
-   * Rewrites next format placeholder (%s) in statement, with fragment using
-   * [[java.sql.PreparedStatement]] syntax (with one or more '?').
-   *
-   * @param statement SQL statement (with %s placeholders)
-   * @param frag Statement fragment
-   * @return Some rewrited statement, or None if there no available placeholder
-   *
-   * {{{
-   * Sql.rewrite("SELECT * FROM Test WHERE cat IN (%s)", "?, ?")
-   * // Some("SELECT * FROM Test WHERE cat IN (?, ?)")
-   * }}}
-   */
-  private[anorm] def rewrite(stmt: String, frag: String): Option[String] = {
-    val idx = stmt.indexOf("%s")
-
-    if (idx == -1) None
-    else {
-      val parts = stmt.splitAt(idx)
-      Some(parts._1 + frag + parts._2.drop(2))
-    }
-  }
-
   @annotation.tailrec
-  private[anorm] def prepareQuery(sql: String, i: Int, ps: Seq[ParameterValue], vs: Seq[(Int, ParameterValue)]): (String, Seq[(Int, ParameterValue)]) = {
-    ps.headOption match {
-      case Some(p) =>
-        val st: (String, Int) = p.toSql(sql, i)
-        prepareQuery(st._1, st._2, ps.tail, vs :+ (i -> p))
-      case _ => (sql, vs)
-    }
+  private[anorm] def prepareQuery(stmt: TokenizedStatement, i: Int, ps: Seq[ParameterValue], vs: Seq[(Int, ParameterValue)]): (TokenizedStatement, Seq[(Int, ParameterValue)]) = ps.headOption match {
+    case Some(p) =>
+      val st: (TokenizedStatement, Int) = p.toSql(stmt, i)
+      prepareQuery(st._1, st._2, ps.tail, vs :+ (i -> p))
+    case _ => (stmt, vs)
   }
 }

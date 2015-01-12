@@ -54,10 +54,11 @@ case class SimpleSql[T](sql: SqlQuery, params: Map[String, ParameterValue], defa
 
   @deprecated(message = "Use [[preparedStatement]]", since = "2.3.6")
   def getFilledStatement(connection: Connection, getGeneratedKeys: Boolean = false) = {
-    val st: (String, Seq[(Int, ParameterValue)]) = Sql.prepareQuery(
-      sql.statement, 0, sql.paramsInitialOrder.map(params), Nil)
+    val st: (TokenizedStatement, Seq[(Int, ParameterValue)]) = Sql.prepareQuery(
+      sql.stmt, 0, sql.paramsInitialOrder.map(params), Nil)
 
-    val stmt = if (getGeneratedKeys) connection.prepareStatement(st._1, java.sql.Statement.RETURN_GENERATED_KEYS) else connection.prepareStatement(st._1)
+    val psql = TokenizedStatement.toSql(st._1).get // TODO: Make it safe
+    val stmt = if (getGeneratedKeys) connection.prepareStatement(psql, java.sql.Statement.RETURN_GENERATED_KEYS) else connection.prepareStatement(psql)
 
     sql.timeout.foreach(stmt.setQueryTimeout(_))
 
