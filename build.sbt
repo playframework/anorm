@@ -1,9 +1,12 @@
-lazy val tokenizer = project.in(file("tokenizer"))
+lazy val tokenizer = project
+  .in(file("tokenizer"))
+  .enablePlugins(Omnidoc, Publish)
 
 lazy val anorm = project
   .in(file("."))
-  .enablePlugins(Playdoc, Omnidoc)
+  .enablePlugins(Playdoc, Omnidoc, Publish)
   .dependsOn(tokenizer)
+  .aggregate(tokenizer)
 
 lazy val docs = project
   .in(file("docs"))

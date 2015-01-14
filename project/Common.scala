@@ -26,9 +26,14 @@ object Common extends AutoPlugin {
     resolvers += Resolver.typesafeRepo("releases"),
     resolvers += "Scalaz Bintray Repo" at {
       "http://dl.bintray.com/scalaz/releases" // specs2 depends on scalaz-stream
-    },
+    }
+  )
+}
 
-    // Publish settings
+object Publish extends AutoPlugin {
+  override def trigger = noTrigger
+
+  override def projectSettings = Seq(
     publishTo := {
       if (isSnapshot.value) Some(Opts.resolver.sonatypeSnapshots)
       else Some(Opts.resolver.sonatypeStaging)
@@ -56,6 +61,6 @@ object Common extends AutoPlugin {
   ) ++ scalariformSettings ++ releaseSettings ++ Seq(
     ReleaseKeys.crossBuild := true,
     ReleaseKeys.publishArtifactsAction := PgpKeys.publishSigned.value,
-    ReleaseKeys.tagName := (version in ThisBuild).value)
-
+    ReleaseKeys.tagName := (version in ThisBuild).value
+  )
 }
