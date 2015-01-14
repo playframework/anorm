@@ -31,6 +31,23 @@ object Cursor {
       def next = apply(rs, meta, columns)
     })
 
+  /**
+   * Returns a cursor for a result set initialized on the first row.
+   *
+   * @param rs Result set, initialized on the first row
+   */
+  private[anorm] def onFirstRow(rs: ResultSet): Option[Cursor] = try {
+    Some(new Cursor {
+      val meta = metaData(rs)
+      val columns: List[Int] = List.range(1, meta.columnCount + 1)
+      val row = ResultRow(meta, columns.map(rs.getObject(_)))
+
+      def next = apply(rs, meta, columns)
+    })
+  } catch {
+    case _: Throwable => Option.empty[Cursor]
+  }
+
   /** Creates cursor after the first one, as meta data is already known. */
   private def apply(rs: ResultSet, meta: MetaData, columns: List[Int]): Option[Cursor] = if (!rs.next) None else Some(new Cursor {
     val row = ResultRow(meta, columns.map(rs.getObject(_)))

@@ -33,6 +33,9 @@ case class Error(msg: SqlRequestError) extends SqlResult[Nothing]
 private[anorm] trait WithResult {
   import java.sql.Connection
 
+  /** ResultSet is initialized on first row (JDBC degraded) */
+  def resultSetOnFirstRow: Boolean
+
   /** Returns underlying result set */
   protected def resultSet(connection: Connection): resource.ManagedResource[java.sql.ResultSet]
 
@@ -48,7 +51,8 @@ private[anorm] trait WithResult {
       case _ => s
     }
 
-    Sql.withResult(resultSet(connection))(go(_, Stream.empty[Row])).acquireAndGet(identity)
+    Sql.withResult(resultSet(connection), resultSetOnFirstRow)(
+      go(_, Stream.empty[Row])).acquireAndGet(identity)
   }
 
   /**
@@ -107,12 +111,13 @@ private[anorm] trait WithResult {
    *   SQL"SELECT * FROM Test".withResult(go)
    * }}}
    */
-  def withResult[T](op: Option[Cursor] => T)(implicit connection: Connection): Either[List[Throwable], T] = Sql.withResult(resultSet(connection))(op).acquireFor(identity)
+  def withResult[T](op: Option[Cursor] => T)(implicit connection: Connection): Either[List[Throwable], T] = Sql.withResult(resultSet(connection), resultSetOnFirstRow)(op).acquireFor(identity)
 
   /**
    * Converts this query result as `T`, using parser.
    */
   def as[T](parser: ResultSetParser[T])(implicit connection: Connection): T =
-    Sql.asTry(parser, resultSet(connection)).get // TODO: Safe alternative
+    Sql.asTry(parser, resultSet(connection), resultSetOnFirstRow).get
+  // TODO: Safe alternative
 
 }

@@ -13,9 +13,10 @@ import resource.ManagedResource
  */
 final case class SqlQueryResult(
     /** Underlying result set */
-    resultSet: ManagedResource[java.sql.ResultSet]) extends WithResult {
+    resultSet: ManagedResource[java.sql.ResultSet],
+    resultSetOnFirstRow: Boolean = false) extends WithResult {
 
-  protected def resultSet(c: java.sql.Connection) = resultSet
+  protected def resultSet(c: Connection) = resultSet
 
   /** Query statement already executed */
   val statement: ManagedResource[java.sql.Statement] =

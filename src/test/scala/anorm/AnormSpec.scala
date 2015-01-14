@@ -384,7 +384,8 @@ object AnormSpec extends Specification with H2Database with AnormTest {
       rowList1(classOf[String] -> "foo") :+ "A" :+ "B") { implicit c =>
         var i = 0
         SQL"SELECT str".foldWhile(Set[String]()) { (l, row) =>
-          if (i == 0) { i = i + 1; (l + row[String]("foo")) -> true } else (l, false)
+          if (i == 0) { i = i + 1; (l + row[String]("foo")) -> true }
+          else (l, false)
 
         } aka "partial aggregate" must_== Right(Set("A"))
       }
@@ -397,6 +398,10 @@ object AnormSpec extends Specification with H2Database with AnormTest {
       case _ => l
     }
 
+    @inline def withQRes[T](r: => QueryResult)(f: java.sql.Connection => T): T =
+      f(connection(handleQuery(_ => r),
+        "acolyte.resultSet.initOnFirstRow" -> "true"))
+
     "do nothing when there is no result" in withQueryResult(QueryResult.Nil) {
       implicit c =>
         SQL"EXEC test".withResult(go(_)) aka "iteration" must beRight.which {
@@ -404,10 +409,32 @@ object AnormSpec extends Specification with H2Database with AnormTest {
         }
     }
 
+    "do nothing when there is no result (with degraded result set)" in {
+      withQRes(QueryResult.Nil) {
+        implicit c =>
+          SQL"EXEC test".withResultSetOnFirstRow(true).withResult(go(_)).
+            aka("iteration") must beRight[List[Row]].like {
+              case Row() :: Nil => ok
+            }
+      }
+    }
+
     "handle failure" in withQueryResult(
       rowList1(classOf[String] -> "foo") :+ "A" :+ "B") { implicit c =>
         var first = false
         SQL"SELECT str" withResult {
+          case Some(_) =>
+            first = true; sys.error("Failure")
+          case _ => sys.error("Unexpected")
+        } aka "processing with failure" must beLeft.like {
+          case err :: Nil => err.getMessage aka "failure" must_== "Failure"
+        } and (first aka "first read" must beTrue)
+      }
+
+    "handle failure (with degraded result set)" in withQRes(
+      rowList1(classOf[String] -> "foo") :+ "A" :+ "B") { implicit c =>
+        var first = false
+        SQL"SELECT str".withResultSetOnFirstRow(true) withResult {
           case Some(_) =>
             first = true; sys.error("Failure")
           case _ => sys.error("Unexpected")
@@ -423,6 +450,15 @@ object AnormSpec extends Specification with H2Database with AnormTest {
           case _ => Set.empty[String]
         } aka "partial processing" must_== Right(Set("A"))
       }
+
+    "stop after first row without failure (with degraded result set)" in {
+      withQRes(rowList1(classOf[String] -> "foo") :+ "A" :+ "B") { implicit c =>
+        SQL"SELECT str".withResultSetOnFirstRow(true) withResult {
+          case Some(first) => Set(first.row[String]("foo"))
+          case _ => Set.empty[String]
+        } aka "partial processing" must_== Right(Set("A"))
+      }
+    }
   }
 
   "Insertion" should {

@@ -269,7 +269,7 @@ private[anorm] trait Sql extends WithResult {
       flatMap { stmt =>
         stmt.executeUpdate()
         managed(stmt.getGeneratedKeys)
-      }).get // TODO: Safe alternative
+      }, resultSetOnFirstRow).get // TODO: Safe alternative
 
   /**
    * Executes this SQL query, and returns its result.
@@ -284,20 +284,22 @@ private[anorm] trait Sql extends WithResult {
    * }}}
    */
   def executeQuery()(implicit connection: Connection): SqlQueryResult =
-    SqlQueryResult(resultSet(connection))
+    SqlQueryResult(resultSet(connection), resultSetOnFirstRow)
 
 }
 
 object Sql { // TODO: Rename to SQL
   import scala.util.{ Success => TrySuccess, Try }
 
-  private[anorm] def withResult[T](res: ManagedResource[ResultSet])(op: Option[Cursor] => T): ManagedResource[T] = res.map(rs => op(Cursor(rs)))
+  private[anorm] def withResult[T](res: ManagedResource[ResultSet], onFirstRow: Boolean)(op: Option[Cursor] => T): ManagedResource[T] =
+    res.map(rs => op(if (onFirstRow) Cursor.onFirstRow(rs) else Cursor(rs)))
 
-  private[anorm] def asTry[T](parser: ResultSetParser[T], rs: ManagedResource[ResultSet])(implicit connection: Connection): Try[T] = {
+  private[anorm] def asTry[T](parser: ResultSetParser[T], rs: ManagedResource[ResultSet], onFirstRow: Boolean)(implicit connection: Connection): Try[T] = {
     def stream(c: Option[Cursor]): Stream[Row] =
       c.fold(Stream.empty[Row]) { cur => cur.row #:: stream(cur.next) }
 
-    Try(withResult(rs)(c => parser(stream(c))) acquireAndGet identity).
+    Try(withResult(rs, onFirstRow)(c =>
+      parser(stream(c))) acquireAndGet identity).
       flatMap(_.fold[Try[T]](_.toFailure, TrySuccess.apply))
 
   }

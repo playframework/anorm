@@ -3,7 +3,7 @@ package anorm
 import java.sql.Connection
 
 /** Simple/plain SQL. */
-case class SimpleSql[T](sql: SqlQuery, params: Map[String, ParameterValue], defaultParser: RowParser[T]) extends Sql {
+case class SimpleSql[T](sql: SqlQuery, params: Map[String, ParameterValue], defaultParser: RowParser[T], resultSetOnFirstRow: Boolean = false) extends Sql {
 
   /**
    * Returns query prepared with named parameters.
@@ -88,7 +88,11 @@ case class SimpleSql[T](sql: SqlQuery, params: Map[String, ParameterValue], defa
   def map[A](f: T => A): SimpleSql[A] =
     copy(defaultParser = defaultParser.map(f))
 
+  /** Returns a copy with updated timeout. */
   def withQueryTimeout(seconds: Option[Int]): SimpleSql[T] =
     copy(sql = sql.withQueryTimeout(seconds))
 
+  /** Returns a copy with updated flag. */
+  def withResultSetOnFirstRow(onFirst: Boolean): SimpleSql[T] =
+    copy(resultSetOnFirstRow = onFirst)
 }
