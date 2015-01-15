@@ -1,6 +1,6 @@
 package anorm
 
-import scala.util.{ Failure, Try, Success }
+import scala.util.{ Failure, Try, Success => TrySuccess }
 
 trait Show {
   def show: String
@@ -114,7 +114,7 @@ private[anorm] object TokenizedStatement {
   def rewrite(stmt: TokenizedStatement, frag: String): Try[TokenizedStatement] = stmt.tokens match {
     case TokenGroup(pr, Some(pl)) :: gs =>
       val prepared = pr :+ StringToken(frag)
-      Success(TokenizedStatement(gs match {
+      TrySuccess(TokenizedStatement(gs match {
         case TokenGroup(x, y) :: ts => TokenGroup(prepared ++ x, y) :: ts
         case _ => TokenGroup(prepared, None) :: Nil
       }, stmt.names))
@@ -127,7 +127,7 @@ private[anorm] object TokenizedStatement {
     case TokenGroup(_, Some(pl)) :: _ =>
       Failure(new IllegalStateException(s"Placeholder not prepared: $pl"))
 
-    case TokenGroup(pr, None) :: Nil => Success(pr.foldLeft("") {
+    case TokenGroup(pr, None) :: Nil => TrySuccess(pr.foldLeft("") {
       case (sql, StringToken(t)) => sql + t
       case (sql, PercentToken) => sql + '%'
       case (sql, _) => sql
