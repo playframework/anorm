@@ -32,6 +32,7 @@ object Common extends AutoPlugin {
 
 object Publish extends AutoPlugin {
   override def trigger = noTrigger
+  override def requires = interplay.Omnidoc
 
   override def projectSettings = Seq(
     publishTo := {
