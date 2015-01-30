@@ -839,7 +839,7 @@ Long         | Yes                  | Yes
 Timestamp    | Yes                  | Yes
 
 - 1. Type `org.joda.time.DateTime`.
-- 2. Type `org.joda.time.Instant`.
+- 2. Type `org.joda.time.Instant` and `java.time.Instant` (see [Java 8](#Java_8)).
 
 It's possible to add custom mapping, for example if underlying DB doesn't support boolean datatype and returns integer instead. To do so, you have to provide a new implicit conversion for `Column[T]`, where `T` is the target Scala type:
 
@@ -911,10 +911,10 @@ Vector                    | Multi-value, with `T` mapping for each element      
 JVM                  | JDBC
 ---------------------|-----------
 DateTime<sup>1</sup> | Timestamp
-Instant<sup>2</sup>  | Timstamp
+Instant<sup>2</sup>  | Timestamp
 
 - 1. Type `org.joda.time.DateTime`.
-- 2. Type `org.joda.time.Instant`.
+- 2. Type `org.joda.time.Instant` and `java.time.Instant` (see [Java 8](#Java_8)).
 
 Custom or specific DB conversion for parameter can also be provided:
 
@@ -938,3 +938,7 @@ In this case at your own risk, `setObject` will be used on statement.
 val anyVal: Any = myVal
 SQL("UPDATE t SET v = {opaque}").on('opaque -> anorm.Object(anyVal))
 ```
+
+### Java 8
+
+Types specific to Java 8 are supported as parameters or in column parsing by importing `anorm.Java8._`.

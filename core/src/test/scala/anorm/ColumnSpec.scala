@@ -529,6 +529,14 @@ object ColumnSpec
           aka("parsed date") must_== new java.util.Date(time)
       }
 
+    "be parsed from time" in withQueryResult(
+      timeList :+ new java.sql.Time(time)) { implicit con =>
+        SQL("SELECT ts").as(scalar[java.util.Date].single).
+          aka("parsed date") must beLike {
+            case d => d.getTime aka "time" must_== time
+          }
+      }
+
     "be parsed from timestamp" in withQueryResult(
       timestampList :+ new java.sql.Timestamp(time)) { implicit con =>
         SQL("SELECT ts").as(scalar[java.util.Date].single).
@@ -537,9 +545,10 @@ object ColumnSpec
           }
       }
 
-    "be parsed from time" in withQueryResult(longList :+ time) { implicit con =>
-      SQL("SELECT time").as(scalar[java.util.Date].single).
-        aka("parsed date") must_== new java.util.Date(time)
+    "be parsed from numeric time" in withQueryResult(longList :+ time) {
+      implicit con =>
+        SQL("SELECT time").as(scalar[java.util.Date].single).
+          aka("parsed date") must_== new java.util.Date(time)
 
     }
   }
