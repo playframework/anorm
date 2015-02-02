@@ -16,6 +16,22 @@ BatchSql("SQL")
 // Simpler and safer, as SqlQuery is created&validated internally
 ```
 
+## Execution
+
+The string interpolation in Anorm has been updated. By using `#$value` instead of `$value`, interpolated value will be part of the prepared statement, rather being passed as a parameter when executing this SQL statement (e.g. `#$cmd` and `#$table` in example bellow).
+
+```scala
+val cmd = "SELECT"
+val table = "Test"
+
+SQL"""#$cmd * FROM #$table WHERE id = ${"id1"} AND code IN (${Seq(2, 5)})"""
+
+// prepare the SQL statement, with 1 string and 2 integer parameters:
+// SELECT * FROM Test WHERE id = ? AND code IN (?, ?)
+```
+
+The preparation of statement was also improved, for better performance.
+
 ## Parsing
 
 It's now possible to get value from `Row` using column index.
@@ -67,6 +83,25 @@ def go(c: Option[Cursor], l: List[String]): List[String] = c match {
 val books: Either[List[Throwable], List[String]] =
   SQL("Select name from Books").withResult(go(_, List.empty[String]))
 ```
+
+`RowParser` can be directly applied, which is useful with row streaming.
+
+```scala
+import anorm.SqlParser.{ int, str }
+
+val parseOnlyFirstRow =
+  SQL"SELECT * FROM Table".withResult(_.map(_.row.as(
+    str("foo") ~ int(2) map {
+      case a ~ b => b -> a
+    })))
+    // Either[List[Throwable], Option[Try[(Int, String)]]]
+    
+val optionalParseRes =
+  parseOnlyFirstRow.right.map(_.flatMap(_.toOption))
+  // Either[List[Throwable], Option[(Int, String)]]
+```
+
+Compatibility is added for JDBC driver exposing degraded ResultSet (not respecting JDBC specs about row iteration, like Oracle one).
 
 ## Type mappings
 
@@ -147,9 +182,22 @@ Int                | BigDecimal
 Long               | Int
 Short              | BigDecimal
 
+**Temporal types**
+
+Column (JDBC type) | (as) JVM/Scala type
+-------------------|---------------------
+Date               | DateTime<sup>1</sup>
+Date               | Instant<sup>2</sup>
+Long               | DateTime
+Long               | Instant
+Timestamp          | DateTime
+Timestamp          | Instant
+
+- 1: Joda `DateTime`
+- 2: Java8 or Joda `Instant`
+
 **Misc**
 
 - **Binary data**: New column conversions for binary columns (bytes, stream, blob), to be parsed as `Array[Byte]` or `InputStream`.
-- **Joda Time**: New conversions for Joda `Instant` or `DateTime`, from `Long`, `Date` or `Timestamp` column.
 - Parses text column as `UUID` value: `SQL("SELECT uuid_as_text").as(scalar[UUID].single)`.
 - Passing `None` for a nullable parameter is deprecated, and typesafe `Option.empty[T]` must be use instead.
