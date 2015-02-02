@@ -507,9 +507,9 @@ val str: Option[String] =
   }
 ```
 
-## Working with optional/nullable columns
+## Working with optional/nullable values
 
-If a column in database can contain `Null` values, you need to manipulate it as an `Option` type.
+If a column in database can contain `Null` values, you need to parse it as an `Option` type.
 
 For example, the `indepYear` of the `Country` table is nullable, so you need to match it as `Option[Int]`:
 
@@ -533,7 +533,28 @@ SQL("Select name,indepYear from Country")().map { row =>
 
 This will produce an `UnexpectedNullableFound(COUNTRY.INDEPYEAR)` exception if it encounters a null value, so you need to map it properly to an `Option[Int]`.
 
-> Nullable parameters are also passed `Option[T]`, `T` being parameter base type (see *Parameters* section thereafter).
+A nullable parameter is also passed as `Option[T]`, `T` being parameter base type (see *Parameters* section thereafter).
+
+> Passing directly `None` for a NULL value is not supported, as inferred as `Option[Nothing]` (`Nothing` being unsafe for a parameter value). In this case, `Option.empty[T]` must be used.
+
+```scala
+// OK: 
+
+SQL("INSERT INTO Test(title) VALUES({title})").on("title" -> Some("Title"))
+
+val title1 = Some("Title1")
+SQL("INSERT INTO Test(title) VALUES({title})").on("title" -> title1)
+
+val title2: Option[String] = None
+// None inferred as Option[String] on assignment
+SQL("INSERT INTO Test(title) VALUES({title})").on("title" -> title2)
+
+// Not OK:
+SQL("INSERT INTO Test(title) VALUES({title})").on("title" -> None)
+
+// OK:
+SQL"INSERT INTO Test(title) VALUES(${Option.empty[String]})"
+```
 
 ## Using the Parser API
 
