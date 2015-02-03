@@ -43,7 +43,7 @@ Writing SQL queries yourself can be tedious for a simple ‘Hello World’ appli
 
 ## Add Anorm to your project
 
-You will need to add Anorm and jdbc plugin to your dependencies : 
+You will need to add Anorm and JDBC plugin to your dependencies : 
 
 ```scala
 libraryDependencies ++= Seq(
@@ -927,15 +927,19 @@ Vector                    | Multi-value, with `T` mapping for each element      
 
 > Passing `None` for a nullable parameter is deprecated, and typesafe `Option.empty[T]` must be use instead.
 
-[Joda](http://www.joda.org) temporal types are supported as parameters:
+[Joda](http://www.joda.org) and [Java 8](#Java_8) temporal types are supported as parameters:
 
-JVM                  | JDBC
----------------------|-----------
-DateTime<sup>1</sup> | Timestamp
-Instant<sup>2</sup>  | Timestamp
+JVM                       | JDBC
+--------------------------|-----------
+DateTime<sup>1</sup>      | Timestamp
+Instant<sup>2</sup>       | Timestamp
+LocalDateTime<sup>3</sup> | Timestamp
+ZonedDateTime<sup>4</sup> | Timestamp
 
 - 1. Type `org.joda.time.DateTime`.
-- 2. Type `org.joda.time.Instant` and `java.time.Instant` (see [Java 8](#Java_8)).
+- 2. Type `org.joda.time.Instant` and `java.time.Instant`.
+- 3. Type `org.joda.time.LocalDateTime`.
+- 4. Type `org.joda.time.ZonedDateTime`
 
 Custom or specific DB conversion for parameter can also be provided:
 
@@ -960,6 +964,10 @@ val anyVal: Any = myVal
 SQL("UPDATE t SET v = {opaque}").on('opaque -> anorm.Object(anyVal))
 ```
 
-### Java 8
+### More mappings
 
-Types specific to Java 8 are supported as parameters or in column parsing by importing `anorm.Java8._`.
+Types which are specific to Java 8 are supported, as parameters or in column parsing, by importing `anorm.Java8._` and after adding following project dependency.
+
+```scala
+libraryDependencies += "com.typesafe.play" %% "anorm-java8" % "2.4.0"
+```

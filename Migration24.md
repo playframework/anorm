@@ -184,17 +184,41 @@ Short              | BigDecimal
 
 **Temporal types**
 
+[Joda](http://www.joda.org) and [Java 8](#Java_8) temporal types are supported as parameters:
+
+JVM                       | JDBC
+--------------------------|-----------
+DateTime<sup>1</sup>      | Timestamp
+Instant<sup>2</sup>       | Timestamp
+LocalDateTime<sup>3</sup> | Timestamp
+ZonedDateTime<sup>4</sup> | Timestamp
+
+- 1. Type `org.joda.time.DateTime`.
+- 2. Type `org.joda.time.Instant` and `java.time.Instant`.
+- 3. Type `org.joda.time.LocalDateTime`.
+- 4. Type `org.joda.time.ZonedDateTime`
+
+These types are also supported in column mappings.
+
 Column (JDBC type) | (as) JVM/Scala type
--------------------|---------------------
+-------------------|---------------------------
 Date               | DateTime<sup>1</sup>
 Date               | Instant<sup>2</sup>
+Date               | LocalDateTime<sup>3</sup>
+Date               | ZonedDateTime<sup>4</sup>
 Long               | DateTime
 Long               | Instant
+Long               | LocalDateTime
+Long               | ZonedDateTime
 Timestamp          | DateTime
 Timestamp          | Instant
+Timestamp          | LocalDateTime
+Timestamp          | ZonedDateTime
 
 - 1: Joda `DateTime`
 - 2: Java8 or Joda `Instant`
+- 3. Type `org.joda.time.LocalDateTime`.
+- 4. Type `org.joda.time.ZonedDateTime`
 
 **Misc**
 

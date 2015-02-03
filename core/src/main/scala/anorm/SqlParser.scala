@@ -530,14 +530,18 @@ trait RowParser[+A] extends (Row => SqlResult[A]) { parent =>
   def flatMap[B](k: A => RowParser[B]): RowParser[B] =
     RowParser(row => parent(row).flatMap(k(_)(row)))
 
+  // TODO: Scaladoc
   def ~[B](p: RowParser[B]): RowParser[A ~ B] =
     RowParser(row => parent(row).flatMap(a => p(row).map(new ~(a, _))))
 
+  // TODO: Scaladoc
   def ~>[B](p: RowParser[B]): RowParser[B] =
     RowParser(row => parent(row).flatMap(_ => p(row)))
 
+  // TODO: Scaladoc
   def <~[B](p: RowParser[B]): RowParser[A] = parent.~(p).map(_._1)
 
+  // TODO: Scaladoc
   def |[B >: A](p: RowParser[B]): RowParser[B] = RowParser { row =>
     parent(row) match {
       case Error(_) => p(row)

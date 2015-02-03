@@ -9,6 +9,6 @@ This page highlights the new features of Anorm 2.4. If you want learn about the 
 - Supports array (`java.sql.Array`) from column (e.g. `SQL("SELECT str_arr FROM tbl").as(scalar[Array[String]].*)`) or as parameter (e.g. `SQL"""UPDATE Test SET langs = ${Array("fr", "en", "ja")}""".execute()`).
 - Improved conversions for numeric and boolean columns.
 - New conversions for binary columns (bytes, stream, blob), to parsed them as `Array[Byte]` or `InputStream`.
-- New conversions for temporal types. For Java8 `Instant`, Joda `Instant` or `DateTime`, from `Long`, `Date` or `Timestamp` column.
+- New conversions for temporal types. For Java8 `Instant`, `LocalDateTime`, `ZonedDateTime`, Joda `Instant` or `DateTime`, from `Long`, `Date` or `Timestamp` column.
 - Added conversions to support `List[T]`, `Set[T]`, `SortedSet[T]`, `Stream[T]` and `Vector[T]` as multi-value parameter.
 - New conversion to parse text column as UUID (e.g. `SQL("SELECT uuid_as_text").as(scalar[java.util.UUID].single)`).
