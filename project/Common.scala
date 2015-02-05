@@ -65,3 +65,14 @@ object Publish extends AutoPlugin {
     ReleaseKeys.tagName := (version in ThisBuild).value
   )
 }
+
+object NoPublish extends AutoPlugin {
+  override def trigger = noTrigger
+  override def requires = JvmPlugin
+
+  override def projectSettings = Seq(
+    publish := (),
+    publishLocal := (),
+    publishTo := Some(Resolver.file("no-publish", crossTarget.value / "no-publish"))
+  )
+}

@@ -36,8 +36,9 @@ lazy val java8 = project
   .enablePlugins(Omnidoc, Publish)
   .settings(javacOptions := Seq("-source", "1.8", "-target", "1.8"))
 
-lazy val root = Project(id = "anorm-parent", base = file(".")).
-  aggregate(tokenizer, anorm) configure { p =>
+lazy val root = Project(id = "anorm-parent", base = file("."))
+  .enablePlugins(NoPublish)
+  .aggregate(tokenizer, anorm) configure { p =>
     if (isJavaAtLeast("1.8")) p.aggregate(java8) else p
   }
 
