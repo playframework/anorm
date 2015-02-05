@@ -1,7 +1,7 @@
 package anorm
 
 import java.sql.{ PreparedStatement, Timestamp, Types }
-import java.time.Instant
+import java.time.{ Instant, LocalDateTime, ZonedDateTime, ZoneId }
 
 /** Provides Java8 specific typeclasses. */
 object Java8 {
@@ -10,6 +10,7 @@ object Java8 {
    *
    * {{{
    * import java.time.Instant
+   * import anorm.Java8._
    *
    * SQL("SELECT * FROM Test WHERE time < {b}").on('b -> Instant.now)
    * }}}
@@ -20,8 +21,56 @@ object Java8 {
       else s.setTimestamp(i, Timestamp from t)
   }
 
+  /**
+   * Sets a local date/time on statement.
+   *
+   * {{{
+   * import java.time.LocalDateTime
+   * import anorm.Java8._
+   *
+   * SQL("SELECT * FROM Test WHERE time < {b}").on('b -> LocalDateTime.now)
+   * }}}
+   */
+  implicit object localDateTimeToStatement extends ToStatement[LocalDateTime] {
+    def set(s: PreparedStatement, i: Int, t: LocalDateTime): Unit =
+      if (t == null) s.setNull(i, Types.TIMESTAMP)
+      else s.setTimestamp(i, Timestamp valueOf t)
+  }
+
+  /**
+   * Sets a zoned date/time on statement.
+   *
+   * {{{
+   * import java.time.ZonedDateTime
+   * import anorm.Java8._
+   *
+   * SQL("SELECT * FROM Test WHERE time < {b}").on('b -> ZonedDateTime.now)
+   * }}}
+   */
+  implicit object zonedDateTimeToStatement extends ToStatement[ZonedDateTime] {
+    def set(s: PreparedStatement, i: Int, t: ZonedDateTime): Unit =
+      if (t == null) s.setNull(i, Types.TIMESTAMP)
+      else s.setTimestamp(i, Timestamp from t.toInstant)
+  }
+
   /** Parameter metadata for Java8 instant */
   implicit object InstantParameterMetaData extends ParameterMetaData[Instant] {
+    val sqlType = "TIMESTAMP"
+    val jdbcType = Types.TIMESTAMP
+  }
+
+  /** Parameter metadata for Java8 local date/time */
+  implicit object LocalDateTimeParameterMetaData
+      extends ParameterMetaData[LocalDateTime] {
+
+    val sqlType = "TIMESTAMP"
+    val jdbcType = Types.TIMESTAMP
+  }
+
+  /** Parameter metadata for Java8 zoned date/time */
+  implicit object ZonedDateTimeParameterMetaData
+      extends ParameterMetaData[ZonedDateTime] {
+
     val sqlType = "TIMESTAMP"
     val jdbcType = Types.TIMESTAMP
   }
@@ -33,6 +82,7 @@ object Java8 {
    *
    * {{{
    * import java.time.Instant
+   * import anorm.Java8._
    *
    * val i: Instant = SQL("SELECT last_mod FROM tbl").as(scalar[Instant].single)
    * }}}
@@ -46,4 +96,58 @@ object Java8 {
         case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${value.asInstanceOf[AnyRef].getClass} to Java8 Instant for column $qualified"))
       }
     }
+
+  /**
+   * Parses column as Java8 local date/time.
+   * Time zone offset is the one of default JVM time zone
+   * (see [[java.time.ZoneId.systemDefault]]).
+   *
+   * {{{
+   * import java.time.LocalDateTime
+   * import anorm.Java8._
+   *
+   * val i: LocalDateTime = SQL("SELECT last_mod FROM tbl").
+   *   as(scalar[LocalDateTime].single)
+   * }}}
+   */
+  implicit val columnToLocalDateTime: Column[LocalDateTime] = {
+    @inline def dateTime(ts: Long) = LocalDateTime.ofInstant(
+      Instant.ofEpochMilli(ts), ZoneId.systemDefault)
+
+    Column.nonNull1 { (value, meta) =>
+      val MetaDataItem(qualified, nullable, clazz) = meta
+      value match {
+        case date: java.util.Date => Right(dateTime(date.getTime))
+        case time: Long => Right(dateTime(time))
+        case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${value.asInstanceOf[AnyRef].getClass} to Java8 LocalDateTime for column $qualified"))
+      }
+    }
+  }
+
+  /**
+   * Parses column as Java8 zoned date/time.
+   * Time zone offset is the one of default JVM time zone
+   * (see [[java.time.ZoneId.systemDefault]]).
+   *
+   * {{{
+   * import java.time.ZonedDateTime
+   * import anorm.Java8._
+   *
+   * val i: ZonedDateTime = SQL("SELECT last_mod FROM tbl").
+   *   as(scalar[ZonedDateTime].single)
+   * }}}
+   */
+  implicit val columnToZonedDateTime: Column[ZonedDateTime] = {
+    @inline def dateTime(ts: Long) = ZonedDateTime.ofInstant(
+      Instant.ofEpochMilli(ts), ZoneId.systemDefault)
+
+    Column.nonNull1 { (value, meta) =>
+      val MetaDataItem(qualified, nullable, clazz) = meta
+      value match {
+        case date: java.util.Date => Right(dateTime(date.getTime))
+        case time: Long => Right(dateTime(time))
+        case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${value.asInstanceOf[AnyRef].getClass} to Java8 ZonedDateTime for column $qualified"))
+      }
+    }
+  }
 }
