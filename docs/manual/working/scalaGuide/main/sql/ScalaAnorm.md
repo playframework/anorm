@@ -589,7 +589,7 @@ If expected single result is optional (0 or 1 row), then `scalar` parser can be 
 
 ```scala
 val name: Option[String] =
-  SQL"SELECT name From Country WHERE code = $code" as scalar[String].singleOpt
+  SQL"SELECT name FROM Country WHERE code = $code" as scalar[String].singleOpt
 ```
 
 ### Getting a single optional result
@@ -598,7 +598,7 @@ Let's say you want to retrieve the country_id from the country name, but the que
 
 ```scala
 val countryId: Option[Long] = 
-  SQL("select country_id from Country C where C.country='France'")
+  SQL("SELECT country_id FROM Country C WHERE C.country='France'")
   .as(scalar[Long].singleOpt)
 ```
 
@@ -609,9 +609,8 @@ Let’s write a more complicated parser:
 `str("name") ~ int("population")`, will create a `RowParser` able to parse a row containing a String `name` column and an Integer `population` column. Then we can create a `ResultSetParser` that will parse as many rows of this kind as it can, using `*`: 
 
 ```scala
-val populations: List[String~Int] = {
-  SQL("select * from Country").as( str("name") ~ int("population") * ) 
-}
+val populations: List[String ~ Int] = 
+  SQL("SELECT * FROM Country").as((str("name") ~ int("population")).*) 
 ```
 
 As you see, this query’s result type is `List[String~Int]` - a list of country name and population items.
@@ -619,28 +618,42 @@ As you see, this query’s result type is `List[String~Int]` - a list of country
 You can also rewrite the same code as:
 
 ```scala
-val result: List[String~Int] = {
-  SQL("select * from Country")
-  .as(get[String]("name") ~ get[Int]("population") *)
-}
+val result: List[String ~ Int] = SQL("SELECT * FROM Country").
+  as((get[String]("name") ~ get[Int]("population")).*)
+
 ```
 
 Now what about the `String~Int` type? This is an **Anorm** type that is not really convenient to use outside of your database access code. You would rather have a simple tuple `(String, Int)` instead. You can use the `map` function on a `RowParser` to transform its result to a more convenient type:
 
 ```scala
-val parser = str("name") ~ int("population") map { case n~p => (n,p) }
+val parser = str("name") ~ int("population") map { case n ~ p => (n, p) }
 ```
 
-> **Note:** We created a tuple `(String,Int)` here, but there is nothing stopping you from transforming the `RowParser` result to any other type, such as a custom case class.
+> **Note:** We created a tuple `(String, Int)` here, but there is nothing stopping you from transforming the `RowParser` result to any other type, such as a custom case class.
 
 Now, because transforming `A ~ B ~ C` types to `(A, B, C)` is a common task, we provide a `flatten` function that does exactly that. So you finally write:
 
 ```scala
 val result: List[(String, Int)] = 
-  SQL("select * from Country").as(parser.*)
+  SQL("select * from Country").as(parser.flatten.*)
 ```
 
 If list should not be empty, `parser.+` can be used instead of `parser.*`.
+
+Anorm is providing parser combinators other than the most common `~` one: `~>`, `<~`.
+
+```scala
+import anorm.{ SQL, SqlParser }, SqlParser.{ int, str }
+
+// Combinator ~>
+val String = SQL("SELECT * FROM test").as((int("id") ~> str("val")).single)
+  // row has to have an int column 'id' and a string 'val' one,
+  // keeping only 'val' in result
+
+val Int = SQL("SELECT * FROM test").as((int("id") <~ str("val")).single)
+  // row has to have an int column 'id' and a string 'val' one,
+  // keeping only 'id' in result
+```
 
 ### A more complicated example
 
