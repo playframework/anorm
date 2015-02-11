@@ -215,9 +215,9 @@ object SqlParser {
    * Parses specified column as binary stream.
    *
    * {{{
-   * import anorm.{ SQL, SqlParser }
+   * import anorm.{ SQL, SqlParser }, SqlParser.{ str, byteArray }
    *
-   * val parser = SqlParser.str("name") ~ SqlParser.byteArray("data")
+   * val parser = (str("name") ~ byteArray("data")).flatten
    * val file: (String, Array[Byte]) = SQL("SELECT name, data FROM files").
    *   as(parser.single)
    * }}}
@@ -228,9 +228,9 @@ object SqlParser {
    * Parses specified column as binary stream.
    *
    * {{{
-   * import anorm.{ SQL, SqlParser }
+   * import anorm.{ SQL, SqlParser }, SqlParser.{ str, byteArray }
    *
-   * val parser = SqlParser.str(1) ~ SqlParser.byteArray(2)
+   * val parser = (SqlParser.str(1) ~ SqlParser.byteArray(2)).flatten
    * val file: (String, Array[Byte]) = SQL("SELECT name, data FROM files").
    *   as(parser.single)
    * }}}
@@ -514,6 +514,21 @@ object RowParser {
 
 trait RowParser[+A] extends (Row => SqlResult[A]) { parent =>
 
+  /**
+   * Returns a parser that will apply given function `f`
+   * to the result of this first parser. If the current parser is not
+   * successful, the new one will return encountered [[Error]].
+   *
+   * @param f Function applied on the successful parser result
+   *
+   * {{{
+   * import anorm.{ RowParser, SQL, SqlParser }
+   *
+   * val parser: RowParser[Int] = SqlParser.str("col").map(_.length)
+   * // Prepares a parser that first get 'col' string value,
+   * // an then returns the length of that
+   * }}}
+   */
   def map[B](f: A => B): RowParser[B] = RowParser(parent.andThen(_.map(f)))
 
   /**
@@ -530,15 +545,50 @@ trait RowParser[+A] extends (Row => SqlResult[A]) { parent =>
   def flatMap[B](k: A => RowParser[B]): RowParser[B] =
     RowParser(row => parent(row).flatMap(k(_)(row)))
 
-  // TODO: Scaladoc
+  /**
+   * Combines this parser on the left of the parser `p` given as argument.
+   *
+   * @param p Parser on the right
+   *
+   * {{{
+   * val populations: List[String ~ Int] =
+   *   SQL("SELECT * FROM Country").as((str("name") ~ int("population")).*)
+   * }}}
+   */
   def ~[B](p: RowParser[B]): RowParser[A ~ B] =
     RowParser(row => parent(row).flatMap(a => p(row).map(new ~(a, _))))
 
-  // TODO: Scaladoc
+  /**
+   * Combines this current parser with the one given as argument `p`,
+   * if and only if the current parser can first/on left side successfully
+   * parse a row, without keeping these values in parsed result.
+   *
+   * {{{
+   * import anorm.{ SQL, SqlParser }, SqlParser.{ int, str }
+   *
+   * val String = SQL("SELECT * FROM test").
+   *   as((int("id") ~> str("val")).single)
+   * // row has to have an int column 'id' and a string 'val' one,
+   * // keeping only 'val' in result
+   * }}}
+   */
   def ~>[B](p: RowParser[B]): RowParser[B] =
     RowParser(row => parent(row).flatMap(_ => p(row)))
 
-  // TODO: Scaladoc
+  /**
+   * Combines this current parser with the one given as argument `p`,
+   * if and only if the current parser can first successfully
+   * parse a row, without keeping the values of the parser `p`.
+   *
+   * {{{
+   * import anorm.{ SQL, SqlParser }, SqlParser.{ int, str }
+   *
+   * val Int = SQL("SELECT * FROM test").
+   *   as((int("id") <~ str("val")).single)
+   * // row has to have an int column 'id' and a string 'val' one,
+   * // keeping only 'id' in result
+   * }}}
+   */
   def <~[B](p: RowParser[B]): RowParser[A] = parent.~(p).map(_._1)
 
   // TODO: Scaladoc
@@ -562,6 +612,7 @@ trait RowParser[+A] extends (Row => SqlResult[A]) { parent =>
     }
   }
 
+  /** Alias for [[flatMap]] */
   def >>[B](f: A => RowParser[B]): RowParser[B] = flatMap(f)
 
   /**

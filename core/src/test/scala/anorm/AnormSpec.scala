@@ -149,6 +149,46 @@ object AnormSpec extends Specification with H2Database with AnormTest {
           aka("mismatching type") must throwA[Exception]("TypeDoesNotMatch")
 
     }
+
+    lazy val rows1 = rowList1(classOf[String] -> "val") :+ "str"
+    lazy val rows2 = rowList2(
+      classOf[Int] -> "id", classOf[String] -> "val") :+ (2, "str")
+
+    "check column is found on left" >> {
+      "successfully with mandatory value" in withQueryResult(rows2) {
+        implicit c =>
+          SQL("SELECT * FROM test").as(
+            (SqlParser.int("id") ~> SqlParser.str("val")).single).
+            aka("mapped data") must_== "str"
+
+      }
+
+      "successfully with optional value" in withQueryResult(rows1) {
+        implicit c =>
+          SQL("SELECT * FROM test").as(
+            (SqlParser.int("id").? ~> SqlParser.str("val")).single).
+            aka("mapped data") must_== "str"
+
+      }
+    }
+
+    "check column is found on left" >> {
+      "successfully with mandatory value" in withQueryResult(rows2) {
+        implicit c =>
+          SQL("SELECT * FROM test").as(
+            (SqlParser.int("id") <~ SqlParser.str("val")).single).
+            aka("mapped data") must_== 2
+
+      }
+
+      "successfully with optional value" in withQueryResult(rows1) {
+        implicit c =>
+          SQL("SELECT * FROM test").as(
+            (SqlParser.str("val") <~ SqlParser.int("id").?).single).
+            aka("mapped data") must_== "str"
+
+      }
+    }
   }
 
   "Instance of case class" should {
