@@ -113,28 +113,35 @@ sealed trait BatchSql {
   }
 
   @annotation.tailrec
-  private def fill(con: Connection, statement: PreparedStatement, getGeneratedKeys: Boolean = false, pm: Seq[Map[String, ParameterValue]]): PreparedStatement =
-    (statement, pm.headOption) match {
-      case (null, Some(ps)) => { // First
-        val st: (TokenizedStatement, Seq[(Int, ParameterValue)]) =
-          Sql.prepareQuery(sql.stmt, 0,
-            sql.paramsInitialOrder.map(ps), Nil)
+  private def fill(con: Connection, statement: PreparedStatement, getGeneratedKeys: Boolean = false, pm: Seq[Map[String, ParameterValue]]): PreparedStatement = (statement, pm.headOption) match {
+    case (null, Some(ps)) => { // First with parameters
+      val st: (TokenizedStatement, Seq[(Int, ParameterValue)]) =
+        Sql.prepareQuery(sql.stmt, 0,
+          sql.paramsInitialOrder.map(ps), Nil)
 
-        val psql = TokenizedStatement.toSql(st._1).get // TODO: Make it safe
-        val stmt = if (getGeneratedKeys) con.prepareStatement(psql, java.sql.Statement.RETURN_GENERATED_KEYS) else con.prepareStatement(psql)
+      val psql = TokenizedStatement.toSql(st._1).get // TODO: Make it safe
+      val stmt = if (getGeneratedKeys) con.prepareStatement(psql, java.sql.Statement.RETURN_GENERATED_KEYS) else con.prepareStatement(psql)
 
-        sql.timeout.foreach(stmt.setQueryTimeout(_))
+      sql.timeout.foreach(stmt.setQueryTimeout(_))
 
-        fill(con, addBatchParams(stmt, st._2), getGeneratedKeys, pm.tail)
-      }
-      case (stmt, Some(ps)) => {
-        val vs: Seq[(Int, ParameterValue)] = Sql.prepareQuery(
-          sql.stmt, 0, sql.paramsInitialOrder.map(ps), Nil)._2
-
-        fill(con, addBatchParams(stmt, vs), getGeneratedKeys, pm.tail)
-      }
-      case _ => statement
+      fill(con, addBatchParams(stmt, st._2), getGeneratedKeys, pm.tail)
     }
+    case (null, _ /*None*/ ) => { // First with no parameter
+      val psql = TokenizedStatement.toSql(sql.stmt).get
+      val stmt = if (getGeneratedKeys) con.prepareStatement(psql, java.sql.Statement.RETURN_GENERATED_KEYS) else con.prepareStatement(psql)
+
+      sql.timeout.foreach(stmt.setQueryTimeout(_))
+
+      stmt
+    }
+    case (stmt, Some(ps)) => {
+      val vs: Seq[(Int, ParameterValue)] = Sql.prepareQuery(
+        sql.stmt, 0, sql.paramsInitialOrder.map(ps), Nil)._2
+
+      fill(con, addBatchParams(stmt, vs), getGeneratedKeys, pm.tail)
+    }
+    case _ => statement
+  }
 
   @inline private def toMap(args: Seq[NamedParameter]): Map[String, ParameterValue] = args.foldLeft(Map[String, ParameterValue]())((m, np) => m + np.tupled)
 

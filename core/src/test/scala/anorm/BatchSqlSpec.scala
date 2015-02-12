@@ -287,5 +287,16 @@ object BatchSqlSpec
       batch.sql.stmt aka "parsed statement" mustEqual stmt and (
         batch.execute() aka "batch result" mustEqual Array(1, 1))
     }
+
+    "not fail when there is no parameter" in {
+      var x: Boolean = false
+      implicit val con = AcolyteDSL.connection(
+        AcolyteDSL.handleStatement.withUpdateHandler {
+          case _ => x = true; 1
+        })
+
+      BatchSql("EXEC batch", Nil).execute().toList.
+        aka("batch result") must beEmpty and (x aka "executed" must beFalse)
+    }
   }
 }
