@@ -5,11 +5,10 @@ import scala.util.Random
 
 trait H2Database {
 
-  def withH2Database[R](block: Connection => R) = {
-    val dbName = "test" + Random.alphanumeric.take(6).mkString("")
+  def withH2Database[R](block: Connection => R): R = {
+    val url = "jdbc:h2:mem:test" + Random.alphanumeric.take(6).mkString("")
+    val connection = DriverManager.getConnection(url, "sa", "")
 
-    Class.forName("org.h2.Driver")
-    val connection = DriverManager.getConnection("jdbc:h2:mem:" + dbName, "sa", "")
     try {
       block(connection)
     } finally {
