@@ -16,6 +16,19 @@ BatchSql("SQL")
 // Simpler and safer, as SqlQuery is created&validated internally
 ```
 
+Moreover, a first list of parameter (for the first execution item of the batch) will be mandatory.
+
+```scala
+import anorm.{ BatchSql, NamedParameter }
+
+val firstMandatory = Seq[NamedParameter]("a" -> 1, "b" -> 2)
+
+BatchSql("EXEC proc ?, ?", firstMandatory) // 1 execution item
+
+BatchSql("EXEC proc ?, ?", firstMandatory,
+  Seq[NamedParameter]("a" -> 3, "b" -> 4)) // 2 execution items
+```
+
 ## Execution
 
 The string interpolation in Anorm has been updated. By using `#$value` instead of `$value`, interpolated value will be part of the prepared statement, rather being passed as a parameter when executing this SQL statement (e.g. `#$cmd` and `#$table` in example bellow).

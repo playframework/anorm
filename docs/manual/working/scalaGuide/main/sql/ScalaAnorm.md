@@ -364,13 +364,14 @@ import anorm.BatchSql
 
 val batch = BatchSql(
   "INSERT INTO books(title, author) VALUES({title}, {author}", 
-  Seq(Seq[NamedParameter](
-    "title" -> "Play 2 for Scala", "author" -> Peter Hilton"),
-    Seq[NamedParameter]("title" -> "Learning Play! Framework 2",
-      "author" -> "Andy Petrella")))
+  Seq[NamedParameter]("title" -> "Play 2 for Scala", "author" -> Peter Hilton"),
+  Seq[NamedParameter]("title" -> "Learning Play! Framework 2",
+    "author" -> "Andy Petrella"))
 
 val res: Array[Int] = batch.execute() // array of update count
 ```
+
+> Batch update must be called with at least one list of parameter. If a batch is executed with the mandatory first list of parameter being empty (e.g. `Nil`), only one statement will be executed (without parameter), which is equivalent to `SQL(statement).executeUpdate()`.
 
 ### Edge cases
 

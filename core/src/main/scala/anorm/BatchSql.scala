@@ -165,8 +165,33 @@ sealed trait BatchSql {
 object BatchSql {
   @throws[IllegalArgumentException](BatchSqlErrors.HeterogeneousParameterMaps)
   @throws[IllegalArgumentException](BatchSqlErrors.ParameterNamesNotMatchingPlaceholders)
+  @deprecated(message = "Use `BatchSql(sql, first, other)`", since = "2.3.8")
   def apply(sql: String, ps: Seq[Seq[NamedParameter]] = Nil): BatchSql =
     Checked(SQL(sql), ps.map(_.map(_.tupled).toMap))
+
+  /**
+   * Creates a batch from given `sql` statement,
+   * with a `first` parameter list for for SQL execution, and zero or many
+   * `other` parameter lists for other SQL executions, after in the same batch.
+   *
+   * @param sql SQL statement
+   * @param first Parameter list for the first SQL execution
+   * @param other Parameter lists for other SQL executions in the same batch
+   *
+   * {{{
+   * import anorm.{ BatchSql, NamedParameter }
+   *
+   * BatchSql("EXEC proc ?, ?", // Batch with 1 execution
+   *   Seq[NamedParameter]("a" -> "Foo", "b" -> "Bar"))
+   *
+   * BatchSql("EXEC proc ?, ?", // Batch with 2 executions
+   *   Seq[NamedParameter]("a" -> "Foo", "b" -> "Bar"),
+   *   Seq[NamedParameter]("a" -> "Lorem", "b" -> "Ipsum"))
+   * }}}
+   */
+  @throws[IllegalArgumentException](BatchSqlErrors.HeterogeneousParameterMaps)
+  @throws[IllegalArgumentException](BatchSqlErrors.ParameterNamesNotMatchingPlaceholders)
+  def apply(sql: String, first: Seq[NamedParameter], other: Seq[NamedParameter]*): BatchSql = Checked(SQL(sql), (Seq(first) ++: other).map(_.map(_.tupled).toMap))
 
   @throws[IllegalArgumentException](BatchSqlErrors.HeterogeneousParameterMaps)
   @throws[IllegalArgumentException](BatchSqlErrors.ParameterNamesNotMatchingPlaceholders)
