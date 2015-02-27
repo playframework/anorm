@@ -314,6 +314,9 @@ object Column extends JodaColumn {
     value match {
       case date: Date => Right(date)
       case time: Long => Right(new Date(time))
+      case tsw: TimestampWrapper1 =>
+        Option(tsw.getTimestamp).fold(Right(null.asInstanceOf[Date]))(
+          ts => Right(new Date(ts.getTime)))
       case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${value.asInstanceOf[AnyRef].getClass} to Date for column $qualified"))
     }
   }

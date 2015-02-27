@@ -15,9 +15,9 @@ object Java8 {
    * SQL("SELECT * FROM Test WHERE time < {b}").on('b -> Instant.now)
    * }}}
    */
-  implicit object instantToStatement extends ToStatement[Instant] {
+  implicit def instantToStatement(implicit meta: ParameterMetaData[Instant]): ToStatement[Instant] = new ToStatement[Instant] {
     def set(s: PreparedStatement, i: Int, t: Instant): Unit =
-      if (t == null) s.setNull(i, Types.TIMESTAMP)
+      if (t == null) s.setNull(i, meta.jdbcType)
       else s.setTimestamp(i, Timestamp from t)
   }
 
@@ -31,9 +31,9 @@ object Java8 {
    * SQL("SELECT * FROM Test WHERE time < {b}").on('b -> LocalDateTime.now)
    * }}}
    */
-  implicit object localDateTimeToStatement extends ToStatement[LocalDateTime] {
+  implicit def localDateTimeToStatement(implicit meta: ParameterMetaData[LocalDateTime]): ToStatement[LocalDateTime] = new ToStatement[LocalDateTime] {
     def set(s: PreparedStatement, i: Int, t: LocalDateTime): Unit =
-      if (t == null) s.setNull(i, Types.TIMESTAMP)
+      if (t == null) s.setNull(i, meta.jdbcType)
       else s.setTimestamp(i, Timestamp valueOf t)
   }
 
@@ -47,9 +47,9 @@ object Java8 {
    * SQL("SELECT * FROM Test WHERE time < {b}").on('b -> ZonedDateTime.now)
    * }}}
    */
-  implicit object zonedDateTimeToStatement extends ToStatement[ZonedDateTime] {
+  implicit def zonedDateTimeToStatement(implicit meta: ParameterMetaData[ZonedDateTime]): ToStatement[ZonedDateTime] = new ToStatement[ZonedDateTime] {
     def set(s: PreparedStatement, i: Int, t: ZonedDateTime): Unit =
-      if (t == null) s.setNull(i, Types.TIMESTAMP)
+      if (t == null) s.setNull(i, meta.jdbcType)
       else s.setTimestamp(i, Timestamp from t.toInstant)
   }
 
@@ -93,6 +93,9 @@ object Java8 {
       value match {
         case date: java.util.Date => Right(Instant ofEpochMilli date.getTime)
         case time: Long => Right(Instant ofEpochMilli time)
+        case tsw: TimestampWrapper1 =>
+          Option(tsw.getTimestamp).fold(Right(null.asInstanceOf[Instant]))(t =>
+            Right(Instant ofEpochMilli t.getTime))
         case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${value.asInstanceOf[AnyRef].getClass} to Java8 Instant for column $qualified"))
       }
     }
@@ -119,6 +122,9 @@ object Java8 {
       value match {
         case date: java.util.Date => Right(dateTime(date.getTime))
         case time: Long => Right(dateTime(time))
+        case tsw: TimestampWrapper1 => Option(tsw.getTimestamp).
+          fold(Right(null.asInstanceOf[LocalDateTime]))(t =>
+            Right(dateTime(t.getTime)))
         case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${value.asInstanceOf[AnyRef].getClass} to Java8 LocalDateTime for column $qualified"))
       }
     }
@@ -146,6 +152,9 @@ object Java8 {
       value match {
         case date: java.util.Date => Right(dateTime(date.getTime))
         case time: Long => Right(dateTime(time))
+        case tsw: TimestampWrapper1 => Option(tsw.getTimestamp).
+          fold(Right(null.asInstanceOf[ZonedDateTime]))(t =>
+            Right(dateTime(t.getTime)))
         case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${value.asInstanceOf[AnyRef].getClass} to Java8 ZonedDateTime for column $qualified"))
       }
     }

@@ -11,7 +11,7 @@ import java.lang.{
   Short => JShort
 }
 
-import java.util.{ UUID => JUUID }
+import java.util.{ Date => JDate, UUID => JUUID }
 
 import java.math.{ BigDecimal => JBigDec, BigInteger }
 
@@ -31,6 +31,11 @@ object ParameterMetaDataSpec extends org.specs2.mutable.Specification {
 
       s"of type Java Boolean" in {
         Option(implicitly[ParameterMetaData[JBool]].sqlType).
+          aka("SQL type") must beSome
+      }
+
+      s"of type Java Date" in {
+        Option(implicitly[ParameterMetaData[JDate]].sqlType).
           aka("SQL type") must beSome
       }
 
@@ -116,6 +121,11 @@ object ParameterMetaDataSpec extends org.specs2.mutable.Specification {
 
       s"of type Timestamp" in {
         Option(implicitly[ParameterMetaData[Timestamp]].sqlType).
+          aka("SQL type") must beSome
+      }
+
+      s"of type TimestampWrapper1" in {
+        Option(implicitly[ParameterMetaData[TimestampWrapper1]].sqlType).
           aka("SQL type") must beSome
       }
 

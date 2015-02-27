@@ -19,6 +19,9 @@ import scala.collection.JavaConverters.enumerationAsScalaIteratorConverter
 package object anorm {
   import scala.language.implicitConversions
 
+  /** Structural type for timestamp wrapper. */
+  type TimestampWrapper1 = { def getTimestamp: java.sql.Timestamp }
+
   // TODO: Review implicit usage there 
   // (add explicit functions on SqlQuery?)
   implicit def sqlToSimple(sql: SqlQuery): SimpleSql[Row] = sql.asSimple
