@@ -134,6 +134,10 @@ object ParameterMetaData {
     val sqlType = TimestampParameterMetaData.sqlType
     val jdbcType = TimestampParameterMetaData.jdbcType
   }
+  implicit def TimestampWrapper1MetaData[T <: TimestampWrapper1]: ParameterMetaData[T] = new ParameterMetaData[T] {
+    val sqlType = TimestampParameterMetaData.sqlType
+    val jdbcType = TimestampParameterMetaData.jdbcType
+  }
 
   /** String/VARCHAR parameter meta data */
   implicit object StringParameterMetaData extends ParameterMetaData[String] {

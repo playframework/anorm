@@ -788,17 +788,16 @@ Short                  | Yes                    | No                     | No   
 - 1. Types `java.math.BigDecimal` and `scala.math.BigDecimal`.
 - 2. Types `java.math.BigInteger` and `scala.math.BigInt`.
 
-Second table shows mapping for other supported types (texts, dates, ...).
+The second table shows mappings for the other supported types.
 
-↓JDBC / JVM➞         | Array[T]<sup>3</sup> | Char | Date | List<sup>3</sup> | String | UUID<sup>4</sup>
--------------------- | -------------------- | ---- | ---- | ---------------- | ------ | ----------------
-Array<sup>5</sup>    | Yes                  | No   | No   | Yes              | No     | No
-Clob                 | No                   | Yes  | No   | No               | Yes    | No
-Date                 | No                   | No   | Yes  | No               | No     | No
-Iterable<sup>6</sup> | Yes                  | No   | Yes  | Yes              | No     | No
-Long                 | No                   | No   | Yes  | No               | No     | No
-String               | No                   | Yes  | No   | No               | Yes    | Yes
-UUID                 | No                   | No   | No   | No               | No     | Yes
+↓JDBC / JVM➞         | Array[T]<sup>3</sup> | Char | List<sup>3</sup> | String | UUID<sup>4</sup>
+-------------------- | -------------------- | ---- | ---------------- | ------ | ----------------
+Array<sup>5</sup>    | Yes                  | No   | Yes              | No     | No
+Clob                 | No                   | Yes  | No               | Yes    | No
+Iterable<sup>6</sup> | Yes                  | No   | Yes              | No     | No
+Long                 | No                   | No   | No               | No     | No
+String               | No                   | Yes  | No               | Yes    | Yes
+UUID                 | No                   | No   | No               | No     | Yes
 
 - 3. Array which type `T` of elements is supported.
 - 4. Type `java.util.UUID`.
@@ -865,16 +864,19 @@ String                  | str
 
 - 1. Type `java.io.InputStream`.
 
-Temporal types from [Joda](http://www.joda.org) are also supported:
+The [Joda](http://www.joda.org) and [Java 8](#Java_8) temporal types are also supported.
 
-↓JDBC / JVM➞ | DateTime<sup>1</sup> | Instant<sup>2</sup>
------------- | -------------------- | -------------------
-Date         | Yes                  | Yes
-Long         | Yes                  | Yes
-Timestamp    | Yes                  | Yes
+↓JDBC / JVM➞                  | Date<sup>1</sup> | DateTime<sup>2</sup> | Instant<sup>3</sup>
+----------------------------- | ---------------- | -------------------- | -------------------
+Date                          | Yes              | Yes                  | Yes
+Long                          | Yes              | Yes                  | Yes
+Timestamp                     | Yes              | Yes                  | Yes
+Timestamp wrapper<sup>5</sup> | Yes              | Yes                  | Yes
 
-- 1. Type `org.joda.time.DateTime`.
-- 2. Type `org.joda.time.Instant` and `java.time.Instant` (see [Java 8](#Java_8)).
+- 1. Type `java.util.Date`.
+- 2. Types `org.joda.time.DateTime`, `java.time.LocalDateTime` and `java.time.ZonedDateTime`.
+- 3. Type `org.joda.time.Instant` and `java.time.Instant` (see Java 8).
+- 5. Any type with a getter `getTimestamp` returning a `java.sql.Timestamp`.
 
 It's possible to add custom mapping, for example if underlying DB doesn't support boolean datatype and returns integer instead. To do so, you have to provide a new implicit conversion for `Column[T]`, where `T` is the target Scala type:
 
@@ -928,16 +930,17 @@ Vector                    | Multi-value, with `T` mapping for each element      
 - 5. Types `Boolean` and `java.lang.Boolean`.
 - 6. Types `Byte` and `java.lang.Byte`.
 - 7. Types `Char` and `java.lang.Character`.
-- 8. Types `Double` and `java.lang.Double`.
-- 9. Types `Float` and `java.lang.Float`.
-- 10. Types `Int` and `java.lang.Integer`.
-- 11. Types `Long` and `java.lang.Long`.
-- 12. Type `anorm.Object`, wrapping opaque object.
-- 13. Multi-value parameter, with one JDBC placeholder (`?`) added for each element.
-- 14. Type `scala.collection.immutable.Set`.
-- 15. Types `Short` and `java.lang.Short`.
-- 16. Type `scala.collection.immutable.SortedSet`.
-- 17. Not-null value extracted using `.toString`.
+- 8. Types compatible with `java.util.Date`, and any wrapper type with `getTimestamp: java.sql.Timestamp`.
+- 9. Types `Double` and `java.lang.Double`.
+- 10. Types `Float` and `java.lang.Float`.
+- 11. Types `Int` and `java.lang.Integer`.
+- 12. Types `Long` and `java.lang.Long`.
+- 13. Type `anorm.Object`, wrapping opaque object.
+- 14. Multi-value parameter, with one JDBC placeholder (`?`) added for each element.
+- 15. Type `scala.collection.immutable.Set`.
+- 16. Types `Short` and `java.lang.Short`.
+- 17. Type `scala.collection.immutable.SortedSet`.
+- 18. Not-null value extracted using `.toString`.
 
 > Passing `None` for a nullable parameter is deprecated, and typesafe `Option.empty[T]` must be use instead.
 

@@ -522,6 +522,10 @@ object ColumnSpec
 
   "Column mapped as date" should {
     val time = System.currentTimeMillis
+    trait TWrapper { def getTimestamp: java.sql.Timestamp }
+    val tsw1 = new TWrapper {
+      lazy val getTimestamp = new java.sql.Timestamp(time)
+    }
 
     "be parsed from date" in withQueryResult(
       dateList :+ new java.sql.Date(time)) { implicit con =>
@@ -550,6 +554,23 @@ object ColumnSpec
         SQL("SELECT time").as(scalar[java.util.Date].single).
           aka("parsed date") must_== new java.util.Date(time)
 
+    }
+
+    "be parsed from a timestamp wrapper" >> {
+      "with a not null value" in withQueryResult(
+        rowList1(classOf[TWrapper]) :+ tsw1) { implicit con =>
+          SQL("SELECT time").as(scalar[java.util.Date].single).
+            aka("parsed date") must_== new java.util.Date(time)
+
+        }
+
+      "with a null value" in withQueryResult(
+        rowList1(classOf[TWrapper]) :+ null.asInstanceOf[TWrapper]) {
+          implicit con =>
+            SQL("SELECT time").as(scalar[java.util.Date].singleOpt).
+              aka("parsed date") must beNone
+
+        }
     }
   }
 

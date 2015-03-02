@@ -209,29 +209,35 @@ ZonedDateTime<sup>4</sup> | Timestamp
 - 1. Type `org.joda.time.DateTime`.
 - 2. Type `org.joda.time.Instant` and `java.time.Instant`.
 - 3. Type `org.joda.time.LocalDateTime`.
-- 4. Type `org.joda.time.ZonedDateTime`
+- 4. Type `org.joda.time.ZonedDateTime`.
 
 These types are also supported in column mappings.
 
-Column (JDBC type) | (as) JVM/Scala type
--------------------|---------------------------
-Date               | DateTime<sup>1</sup>
-Date               | Instant<sup>2</sup>
-Date               | LocalDateTime<sup>3</sup>
-Date               | ZonedDateTime<sup>4</sup>
-Long               | DateTime
-Long               | Instant
-Long               | LocalDateTime
-Long               | ZonedDateTime
-Timestamp          | DateTime
-Timestamp          | Instant
-Timestamp          | LocalDateTime
-Timestamp          | ZonedDateTime
+Column (JDBC type)    | (as) JVM/Scala type
+----------------------|---------------------------
+Date                  | DateTime<sup>1</sup>
+Date                  | Instant<sup>2</sup>
+Date                  | LocalDateTime<sup>3</sup>
+Date                  | ZonedDateTime<sup>4</sup>
+Long                  | DateTime
+Long                  | Instant
+Long                  | LocalDateTime
+Long                  | ZonedDateTime
+Timestamp             | DateTime
+Timestamp             | Instant
+Timestamp             | LocalDateTime
+Timestamp             | ZonedDateTime
+*Wrapper*<sup>5</sup> | Date
+*Wrapper*             | DateTime<sup>1</sup>
+*Wrapper*             | Instant<sup>2</sup>
+*Wrapper*             | LocalDateTime<sup>3</sup>
+*Wrapper*             | ZonedDateTime<sup>4</sup>
 
 - 1: Joda `DateTime`
 - 2: Java8 or Joda `Instant`
 - 3. Type `org.joda.time.LocalDateTime`.
 - 4. Type `org.joda.time.ZonedDateTime`
+- 5. Any type with a getter `getTimestamp` returning a `java.sql.Timestamp`.
 
 **Misc**
 

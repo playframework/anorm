@@ -38,6 +38,7 @@ object ParameterSpec
   val sbi1 = BigInt(jbi1)
   val Date1 = new Date()
   val Timestamp1 = { val ts = new Timestamp(123l); ts.setNanos(123456789); ts }
+  val TsWrapper1 = new { val getTimestamp = Timestamp1 }
   val uuid1 = java.util.UUID.randomUUID; val Uuid1str = uuid1.toString
   val SqlArr = ParamMeta.Array
   val SqlStr = ParamMeta.Str
@@ -431,18 +432,39 @@ object ParameterSpec
         on("p" -> (None: Option[Date])).execute() must beFalse
     }
 
-    "be timestamp" in withConnection() { implicit c =>
-      SQL("set-timestamp {p}").on("p" -> Timestamp1).execute() must beFalse
+    "be not null timestamp" >> {
+      "directly" in withConnection() { implicit c =>
+        SQL("set-timestamp {p}").on("p" -> Timestamp1).execute() must beFalse
+      }
+
+      "wrapped" in withConnection() { implicit c =>
+        SQL("set-timestamp {p}").on("p" -> TsWrapper1).execute() must beFalse
+      }
     }
 
-    "be null timestamp" in withConnection() { implicit c =>
-      SQL("set-null-ts {p}").
-        on("p" -> null.asInstanceOf[Timestamp]).execute() must beFalse
+    "be null timestamp" >> {
+      "directly" in withConnection() { implicit c =>
+        SQL("set-null-ts {p}").
+          on("p" -> null.asInstanceOf[Timestamp]).execute() must beFalse
+      }
+
+      "wrapped" in withConnection() { implicit c =>
+        SQL("set-null-ts {p}").
+          on("p" -> null.asInstanceOf[TimestampWrapper1]).execute() must beFalse
+
+      }
     }
 
-    "be undefined timestamp" in withConnection() { implicit c =>
-      SQL("set-null-ts {p}").
-        on("p" -> (None: Option[Timestamp])).execute() must beFalse
+    "be undefined timestamp" >> {
+      "directly" in withConnection() { implicit c =>
+        SQL("set-null-ts {p}").
+          on("p" -> (None: Option[Timestamp])).execute() must beFalse
+      }
+
+      "wrapped" in withConnection() { implicit c =>
+        SQL("set-null-ts {p}").
+          on("p" -> (None: Option[TimestampWrapper1])).execute() must beFalse
+      }
     }
 
     "be UUID" in withConnection() { implicit c =>
@@ -919,4 +941,5 @@ object ParameterSpec
 
   private def pv[A](v: A)(implicit s: ToSql[A] = null, p: ToStatement[A]) =
     ParameterValue(v, s, p)
+
 }
