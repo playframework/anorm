@@ -66,18 +66,14 @@ object SqlStatementParser extends JavaTokenParsers {
 
   private val variable: Parser[TokenGroup] =
     "{" ~> (ident ~ (("." ~> ident)?)) <~ "}" ^^ {
-      case i1 ~ i2 =>
-        TokenGroup(Nil, Some(i1 + i2.map("." + _).getOrElse("")))
+      case i1 ~ i2 => TokenGroup(Nil, Some(i1 + i2.fold("")("." + _)))
     }
 
   private val reserved: Parser[PercentToken.type] =
     "%".r ^^ { _ => PercentToken }
 
   private lazy val quotedLiteral: Parser[TokenGroup] = {
-    // TODO: Remove as quoted should not be a special case now
-    val simpleQuoted: Parser[StringToken] =
-      """([^'^%\p{Cntrl}\\]|\\[\\/bfnrt]|\\u[a-fA-F0-9]{4})+""".
-        r ^^ { StringToken(_) }
+    val simpleQuoted: Parser[StringToken] = "([^'^%])+".r ^^ { StringToken(_) }
 
     "'" ~> rep(reserved | simpleQuoted) <~ "'" ^^ { ts =>
       TokenGroup(StringToken("'") :: (ts :+ StringToken("'")), None)
