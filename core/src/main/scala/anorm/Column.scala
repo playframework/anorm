@@ -301,7 +301,7 @@ object Column extends JodaColumn {
   /**
    * Parses column as Java Date.
    * Time zone offset is the one of default JVM time zone
-   * (see [[java.util.TimeZone.getDefault]]).
+   * (see [[java.util.TimeZone#getDefault TimeZone.getDefault]]).
    *
    * {{{
    * import java.util.Date
