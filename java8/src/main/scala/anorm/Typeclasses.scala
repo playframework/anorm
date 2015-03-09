@@ -78,7 +78,7 @@ object Java8 {
   /**
    * Parses column as Java8 instant.
    * Time zone offset is the one of default JVM time zone
-   * (see [[java.time.ZoneId.systemDefault]]).
+   * (see [[java.time.ZoneId#systemDefault ZoneId.systemDefault]]).
    *
    * {{{
    * import java.time.Instant
@@ -103,7 +103,7 @@ object Java8 {
   /**
    * Parses column as Java8 local date/time.
    * Time zone offset is the one of default JVM time zone
-   * (see [[java.time.ZoneId.systemDefault]]).
+   * (see [[java.time.ZoneId#systemDefault ZoneId.systemDefault]]).
    *
    * {{{
    * import java.time.LocalDateTime
@@ -133,7 +133,7 @@ object Java8 {
   /**
    * Parses column as Java8 zoned date/time.
    * Time zone offset is the one of default JVM time zone
-   * (see [[java.time.ZoneId.systemDefault]]).
+   * (see [[java.time.ZoneId#systemDefault ZoneId.systemDefault]]).
    *
    * {{{
    * import java.time.ZonedDateTime

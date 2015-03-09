@@ -45,11 +45,11 @@ package object anorm {
    *
    * {{{
    * SQL"""
-   *   UPDATE computer SET name = ${computer.name},
-   *   introduced = ${computer.introduced},
-   *   discontinued = ${computer.discontinued},
-   *   company_id = ${computer.companyId}
-   *   WHERE id = $id
+   *   UPDATE computer SET name = \\${computer.name},
+   *   introduced = \\${computer.introduced},
+   *   discontinued = \\${computer.discontinued},
+   *   company_id = \\${computer.companyId}
+   *   WHERE id = \\$id
    * """.executeUpdate()
    * }}}
    */

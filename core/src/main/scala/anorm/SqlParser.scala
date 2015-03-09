@@ -620,7 +620,7 @@ trait RowParser[+A] extends (Row => SqlResult[A]) { parent =>
    *
    * {{{
    * val price = 125
-   * SQL"SELECT name FROM item WHERE price < $price".as(scalar[String].*)
+   * SQL"SELECT name FROM item WHERE price < \\$price".as(scalar[String].*)
    * }}}
    */
   def * : ResultSetParser[List[A]] = ResultSetParser.list(parent)

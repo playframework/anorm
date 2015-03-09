@@ -296,7 +296,7 @@ object ToStatement extends JodaToStatement {
    *
    * {{{
    * SQL("SELECT * FROM Test WHERE category = {c}").on('c -> Option("cat"))
-   * SQL"SELECT * FROM Test WHERE nullable_int = ${Option.empty[Int]}"
+   * SQL"SELECT * FROM Test WHERE nullable_int = \\${Option.empty[Int]}"
    * }}}
    */
   implicit def optionToStatement[A >: Nothing](implicit c: ToStatement[A], meta: ParameterMetaData[A]) =

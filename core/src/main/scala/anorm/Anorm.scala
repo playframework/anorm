@@ -225,7 +225,7 @@ private[anorm] trait Sql extends WithResult {
    *
    * {{{
    * val res: Boolean =
-   *   SQL"""INSERT INTO Test(a, b) VALUES(${"A"}, ${"B"}""".execute()
+   *   SQL"""INSERT INTO Test(a, b) VALUES(\\${"A"}, \\${"B"}""".execute()
    * }}}
    */
   def execute()(implicit connection: Connection): Boolean =
@@ -312,10 +312,10 @@ object Sql { // TODO: Rename to SQL
   }
 
   @annotation.tailrec
-  private[anorm] def prepareQuery(stmt: TokenizedStatement, i: Int, ps: Seq[ParameterValue], vs: Seq[(Int, ParameterValue)]): (TokenizedStatement, Seq[(Int, ParameterValue)]) = ps.headOption match {
+  private[anorm] def prepareQuery(stmt: TokenizedStatement, i: Int, ps: Seq[ParameterValue], vs: List[(Int, ParameterValue)]): (TokenizedStatement, Seq[(Int, ParameterValue)]) = ps.headOption match {
     case Some(p) =>
       val st: (TokenizedStatement, Int) = p.toSql(stmt, i)
-      prepareQuery(st._1, st._2, ps.tail, vs :+ (i -> p))
-    case _ => (stmt, vs)
+      prepareQuery(st._1, st._2, ps.tail, (i, p) :: vs)
+    case _ => (stmt, vs.reverse)
   }
 }
