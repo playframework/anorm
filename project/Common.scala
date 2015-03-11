@@ -34,7 +34,7 @@ object Publish extends AutoPlugin {
   override def trigger = noTrigger
   override def requires = interplay.Omnidoc
 
-  override def projectSettings = Seq(
+  override def projectSettings = Release.settings ++ Seq(
     publishTo := {
       if (isSnapshot.value) Some(Opts.resolver.sonatypeSnapshots)
       else Some(Opts.resolver.sonatypeStaging)
@@ -59,20 +59,24 @@ object Publish extends AutoPlugin {
 
     OmnidocKeys.githubRepo := "playframework/anorm",
     OmnidocKeys.tagPrefix := ""
-  ) ++ scalariformSettings ++ releaseSettings ++ Seq(
-    ReleaseKeys.crossBuild := true,
-    ReleaseKeys.publishArtifactsAction := PgpKeys.publishSigned.value,
-    ReleaseKeys.tagName := (version in ThisBuild).value
-  )
+  ) ++ scalariformSettings
 }
 
 object NoPublish extends AutoPlugin {
   override def trigger = noTrigger
   override def requires = JvmPlugin
 
-  override def projectSettings = Seq(
+  override def projectSettings = Release.settings ++ Seq(
     publish := (),
     publishLocal := (),
     publishTo := Some(Resolver.file("no-publish", crossTarget.value / "no-publish"))
+  )
+}
+
+object Release {
+  def settings = releaseSettings ++  Seq(
+    ReleaseKeys.crossBuild := true,
+    ReleaseKeys.publishArtifactsAction := PgpKeys.publishSigned.value,
+    ReleaseKeys.tagName := (version in ThisBuild).value
   )
 }
