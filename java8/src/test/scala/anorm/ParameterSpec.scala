@@ -17,25 +17,25 @@ object Java8ParameterSpec extends org.specs2.mutable.Specification {
 
   val Instant1 = Instant.ofEpochSecond(123456789)
   val LocalDateTime1 = LocalDateTime.ofInstant(Instant1, ZoneId.of("UTC"))
+  val LocalDateTime1Epoch = LocalDateTime1.atZone(ZoneId.systemDefault()).toEpochSecond * 1000
   val ZonedDateTime1 = ZonedDateTime.ofInstant(Instant1, ZoneId.of("UTC"))
   val SqlTimestamp = ParamMeta.Timestamp
 
   def withConnection[A](ps: (String, String)*)(f: java.sql.Connection => A): A = f(connection(handleStatement withUpdateHandler {
     case UpdateExecution("set-instant ?",
-      DParam(t: java.sql.Timestamp, SqlTimestamp) :: Nil) if (t.getTime == 123456789000L) => 1 /* case ok */
+      DParam(t: java.sql.Timestamp, SqlTimestamp) :: Nil) if t.getTime == 123456789000L => 1 /* case ok */
     case UpdateExecution("set-null-instant ?",
       DParam(null, SqlTimestamp) :: Nil) => 1 /* case ok */
     case UpdateExecution("set-local-date-time ?",
-      DParam(t: java.sql.Timestamp, SqlTimestamp) :: Nil) if (
-      t.getTime == 123453189000L) => 1 /* case ok */
+      DParam(t: java.sql.Timestamp, SqlTimestamp) :: Nil) if
+      t.getTime == LocalDateTime1Epoch => 1 /* case ok */
     case UpdateExecution("set-null-local-date-time ?",
       DParam(null, SqlTimestamp) :: Nil) => 1 /* case ok */
     case UpdateExecution("set-zoned-date-time ?",
-      DParam(t: java.sql.Timestamp, SqlTimestamp) :: Nil) if (
-      t.getTime == 123456789000L) => 1 /* case ok */
+      DParam(t: java.sql.Timestamp, SqlTimestamp) :: Nil) if
+      t.getTime == 123456789000L => 1 /* case ok */
     case UpdateExecution("set-null-zoned-date-time ?",
       DParam(null, SqlTimestamp) :: Nil) => 1 /* case ok */
-
   }, ps: _*))
 
   "Named parameters" should {
@@ -50,7 +50,7 @@ object Java8ParameterSpec extends org.specs2.mutable.Specification {
 
     "be undefined instant" in withConnection() { implicit c =>
       SQL("set-null-instant {p}").
-        on("p" -> (Option.empty[Instant])).execute() must beFalse
+        on("p" -> Option.empty[Instant]).execute() must beFalse
     }
 
     "be local date/time" in withConnection() { implicit c =>
@@ -65,7 +65,7 @@ object Java8ParameterSpec extends org.specs2.mutable.Specification {
 
     "be undefined local date/time" in withConnection() { implicit c =>
       SQL("set-null-local-date-time {p}").
-        on("p" -> (Option.empty[LocalDateTime])).execute() must beFalse
+        on("p" -> Option.empty[LocalDateTime]).execute() must beFalse
     }
 
     "be zoned date/time" in withConnection() { implicit c =>
@@ -80,7 +80,7 @@ object Java8ParameterSpec extends org.specs2.mutable.Specification {
 
     "be undefined zoned date/time" in withConnection() { implicit c =>
       SQL("set-null-zoned-date-time {p}").
-        on("p" -> (Option.empty[ZonedDateTime])).execute() must beFalse
+        on("p" -> Option.empty[ZonedDateTime]).execute() must beFalse
     }
   }
 
