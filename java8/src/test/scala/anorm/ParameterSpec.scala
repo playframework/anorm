@@ -27,13 +27,11 @@ object Java8ParameterSpec extends org.specs2.mutable.Specification {
     case UpdateExecution("set-null-instant ?",
       DParam(null, SqlTimestamp) :: Nil) => 1 /* case ok */
     case UpdateExecution("set-local-date-time ?",
-      DParam(t: java.sql.Timestamp, SqlTimestamp) :: Nil) if
-      t.getTime == LocalDateTime1Epoch => 1 /* case ok */
+      DParam(t: java.sql.Timestamp, SqlTimestamp) :: Nil) if t.getTime == LocalDateTime1Epoch => 1 /* case ok */
     case UpdateExecution("set-null-local-date-time ?",
       DParam(null, SqlTimestamp) :: Nil) => 1 /* case ok */
     case UpdateExecution("set-zoned-date-time ?",
-      DParam(t: java.sql.Timestamp, SqlTimestamp) :: Nil) if
-      t.getTime == 123456789000L => 1 /* case ok */
+      DParam(t: java.sql.Timestamp, SqlTimestamp) :: Nil) if t.getTime == 123456789000L => 1 /* case ok */
     case UpdateExecution("set-null-zoned-date-time ?",
       DParam(null, SqlTimestamp) :: Nil) => 1 /* case ok */
   }, ps: _*))
