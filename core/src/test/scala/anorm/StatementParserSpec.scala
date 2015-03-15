@@ -54,6 +54,7 @@ object StatementParserSpec extends org.specs2.mutable.Specification {
     }
   }
 
+  /* TODO: Refactor
   "Rewriting" should {
     "return some prepared query with updated statement" in {
       val stmt1 = TokenizedStatement(List(TokenGroup(List(StringToken("SELECT * FROM t WHERE c IN (")), Some("cs")), TokenGroup(List(StringToken(") AND id = ")), Some("id"))), List("cs", "id"))
@@ -93,6 +94,7 @@ object StatementParserSpec extends org.specs2.mutable.Specification {
       }
     }
   }
+   */
 
   "String interpolation" should {
     "handle values as '#' escaped part in statement or SQL parameters" in {

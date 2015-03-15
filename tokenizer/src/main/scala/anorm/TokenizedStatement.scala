@@ -1,7 +1,5 @@
 package anorm
 
-import scala.util.{ Failure, Try, Success => TrySuccess }
-
 trait Show {
   def show: String
 }
@@ -10,19 +8,19 @@ private[anorm] sealed trait StatementToken
 private[anorm] case class StringToken(value: String) extends StatementToken
 private[anorm] case object PercentToken extends StatementToken
 
+/**
+ * @param prepared Already prepared tokens, not requiring to rewrite placeholder.
+ * @param placeholder Optional placeholder (name), after already prepared tokens
+ */
 private[anorm] case class TokenGroup(
-  /** Already prepared tokens, not requiring to rewrite placeholder. */
-  prepared: List[StatementToken],
+  prepared: List[StatementToken], placeholder: Option[String])
 
-  /** Optional placeholder (name), after already prepared tokens */
-  placeholder: Option[String])
-
+/**
+ * @param tokens Token groups
+ * @param names Binding names of parsed placeholders
+ */
 private[anorm] case class TokenizedStatement(
-  /** Token groups */
-  tokens: List[TokenGroup],
-
-  /** Binding names of parsed placeholders */
-  names: List[String])
+  tokens: List[TokenGroup], names: List[String])
 
 private[anorm] object TokenizedStatement {
   import java.util.StringTokenizer
@@ -79,8 +77,7 @@ private[anorm] object TokenizedStatement {
       }
     } else parts.headOption match {
       case Some(part) =>
-        val it = new StringTokenizer(part, "%", true).
-          asScala.map(_.toString)
+        val it = new StringTokenizer(part, "%", true).asScala.map(_.toString)
 
         if (!it.hasNext /* empty */ ) {
           tokenize(it, List(StringToken("")), parts.tail, ps, gs, ns, m)
@@ -96,44 +93,5 @@ private[anorm] object TokenizedStatement {
 
         TokenizedStatement(groups, ns.reverse) -> m
     }
-  }
-
-  /**
-   * Rewrites next placeholder in statement, with fragment using
-   * [[java.sql.PreparedStatement]] syntax (with one or more '?').
-   *
-   * @param stmt Tokenized statement
-   * @param frag Statement fragment
-   * @return Rewritten statement
-   *
-   * {{{
-   * Sql.rewrite("SELECT * FROM Test WHERE cat IN (%s)", "?, ?")
-   * // Some("SELECT * FROM Test WHERE cat IN (?, ?)")
-   * }}}
-   */
-  def rewrite(stmt: TokenizedStatement, frag: String): Try[TokenizedStatement] = stmt.tokens match {
-    case TokenGroup(pr, Some(pl)) :: gs =>
-      val prepared = pr :+ StringToken(frag)
-      TrySuccess(TokenizedStatement(gs match {
-        case TokenGroup(x, y) :: ts => TokenGroup(prepared ++ x, y) :: ts
-        case _ => TokenGroup(prepared, None) :: Nil
-      }, stmt.names))
-
-    case _ => Failure(new Exception("No more placeholder"))
-  }
-
-  /** Returns statement as SQL string. */
-  def toSql(stmt: TokenizedStatement): Try[String] = stmt.tokens match {
-    case TokenGroup(_, Some(pl)) :: _ =>
-      Failure(new IllegalStateException(s"Placeholder not prepared: $pl"))
-
-    case TokenGroup(pr, None) :: Nil => TrySuccess(pr.foldLeft("") {
-      case (sql, StringToken(t)) => sql + t
-      case (sql, PercentToken) => sql + '%'
-      case (sql, _) => sql
-    })
-
-    case _ =>
-      Failure(new IllegalStateException(s"Unexpected statement: $stmt"))
   }
 }

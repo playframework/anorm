@@ -6,15 +6,10 @@ import java.sql.PreparedStatement
 sealed trait ParameterValue extends Show {
 
   /**
-   * Writes placeholder(s) in [[java.sql.PreparedStatement]] syntax
-   * (with '?') for this parameter in initial statement (with % placeholder).
-   *
-   * @param stmt SQL statement (with %s placeholders)
-   * @param offset Position offset for this parameter
-   * @return Update statement with '?' placeholder(s) for parameter,
-   * with offset for next parameter
+   * Returns SQL fragment (with '?' placeholders) for the parameter
+   * at specified position in given tokenized statement.
    */
-  def toSql(stmt: TokenizedStatement, offset: Int): (TokenizedStatement, Int)
+  def toSql: (String, Int)
   // @todo Type with validation
 
   /**
@@ -30,6 +25,25 @@ sealed trait ParameterValue extends Show {
 
   @deprecated(message = "Use [[show]]", since = "2.3.8")
   final def stringValue = show
+}
+
+final class DefaultParameterValue[A](
+  val value: A, s: ToSql[A], toStmt: ToStatement[A])
+    extends ParameterValue with ParameterValue.Wrapper[A] {
+
+  lazy val toSql: (String, Int) =
+    if (s == null) ("?" -> 1) else s.fragment(value)
+
+  def set(s: PreparedStatement, i: Int) = toStmt.set(s, i, value)
+
+  lazy val show = s"$value"
+  override lazy val toString = s"ParameterValue($value)"
+  override lazy val hashCode = value.hashCode
+
+  override def equals(that: Any) = that match {
+    case o: DefaultParameterValue[A] => (o.value == value)
+    case _ => false
+  }
 }
 
 /**
@@ -49,29 +63,7 @@ object ParameterValue {
   @throws[IllegalArgumentException]("if value `v` is null whereas `toStmt` is marked with [[anorm.NotNullGuard]]") // TODO: MayErr on conversion to parameter values?
   def apply[A](v: A, s: ToSql[A], toStmt: ToStatement[A]) = (v, toStmt) match {
     case (null, _: NotNullGuard) => throw new IllegalArgumentException()
-    case _ => new ParameterValue with Wrapper[A] {
-      val value = v
-
-      def toSql(stmt: TokenizedStatement, o: Int): (TokenizedStatement, Int) = {
-        val frag: (String, Int) =
-          if (s == null) ("?" -> 1) else s.fragment(value)
-
-        TokenizedStatement.rewrite(stmt, frag._1).toOption.
-          fold[(TokenizedStatement, Int)](
-            /* ignore extra parameter */ stmt -> o)((_, o + frag._2))
-      }
-
-      def set(s: PreparedStatement, i: Int) = toStmt.set(s, i, value)
-
-      lazy val show = s"$value"
-      override lazy val toString = s"ParameterValue($value)"
-      override lazy val hashCode = value.hashCode
-
-      override def equals(that: Any) = that match {
-        case o: Wrapper[A] => (o.value == value)
-        case _ => false
-      }
-    }
+    case _ => new DefaultParameterValue(v, s, toStmt)
   }
 
   implicit def toParameterValue[A](a: A)(implicit s: ToSql[A] = null, p: ToStatement[A]): ParameterValue = apply(a, s, p)

@@ -116,6 +116,17 @@ package object anorm {
     }
   }
 
+  // Optimized resource typeclass not using reflection
+  object StatementResource
+      extends resource.Resource[java.sql.PreparedStatement] {
+    def close(stmt: java.sql.PreparedStatement) = stmt.close()
+  }
+
+  // Optimized resource typeclass not using reflection
+  object ResultSetResource extends resource.Resource[java.sql.ResultSet] {
+    def close(rs: java.sql.ResultSet) = rs.close()
+  }
+
   /** Activable features */
   object features {
 
