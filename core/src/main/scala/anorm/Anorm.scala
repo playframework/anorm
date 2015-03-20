@@ -189,7 +189,7 @@ object NamedParameter {
    * of parameter as string.
    *
    * {{{
-   * val p: Parameter = ("name" -> 1l)
+   * val p: Parameter = ("name" -> 1L)
    * }}}
    */
   implicit def string[V](t: (String, V))(implicit c: V => ParameterValue): NamedParameter = NamedParameter(t._1, c(t._2))
@@ -199,7 +199,7 @@ object NamedParameter {
    * with first element being symbolic name or parameter.
    *
    * {{{
-   * val p: Parameter = ('name -> 1l)
+   * val p: Parameter = ('name -> 1L)
    * }}}
    */
   implicit def symbol[V](t: (Symbol, V))(implicit c: V => ParameterValue): NamedParameter = NamedParameter(t._1.name, c(t._2))
@@ -216,7 +216,10 @@ private[anorm] trait Sql extends WithResult {
    * Executes this statement as query (see [[executeQuery]]) and returns result.
    */
   protected def resultSet(connection: Connection): ManagedResource[ResultSet] =
-    preparedStatement(connection).flatMap(stmt => managed(stmt.executeQuery()))
+    preparedStatement(connection) flatMap { stmt =>
+      implicit val res = ResultSetResource
+      managed(stmt.executeQuery())
+    }
 
   /**
    * Executes this SQL statement.
@@ -290,6 +293,7 @@ private[anorm] trait Sql extends WithResult {
 
 object Sql { // TODO: Rename to SQL
   import scala.util.{ Success => TrySuccess, Try }
+  import scala.util.control.NoStackTrace
 
   private[anorm] def withResult[T](res: ManagedResource[ResultSet], onFirstRow: Boolean)(op: Option[Cursor] => T): ManagedResource[T] =
     res.map(rs => op(if (onFirstRow) Cursor.onFirstRow(rs) else Cursor(rs)))
@@ -306,16 +310,42 @@ object Sql { // TODO: Rename to SQL
 
   @annotation.tailrec
   private[anorm] def zipParams(ns: Seq[String], vs: Seq[ParameterValue], ps: Map[String, ParameterValue]): Map[String, ParameterValue] = (ns.headOption, vs.headOption) match {
-    case (Some(n), Some(v)) =>
-      zipParams(ns.tail, vs.tail, ps + (n -> v))
+    case (Some(n), Some(v)) => zipParams(ns.tail, vs.tail, ps + (n -> v))
     case _ => ps
   }
 
-  @annotation.tailrec
-  private[anorm] def prepareQuery(stmt: TokenizedStatement, i: Int, ps: Seq[ParameterValue], vs: List[(Int, ParameterValue)]): (TokenizedStatement, Seq[(Int, ParameterValue)]) = ps.headOption match {
-    case Some(p) =>
-      val st: (TokenizedStatement, Int) = p.toSql(stmt, i)
-      prepareQuery(st._1, st._2, ps.tail, (i, p) :: vs)
-    case _ => (stmt, vs.reverse)
+  @inline
+  private def toSql(ts: List[StatementToken], buf: StringBuilder): StringBuilder = ts.foldLeft(buf) {
+    case (sql, StringToken(t)) => sql ++= t
+    case (sql, PercentToken) => sql += '%'
+    case (sql, _) => sql
   }
+
+  private class MissingParameter(after: String) extends java.util.NoSuchElementException(s"Missing parameter value after: $after") with NoStackTrace {}
+
+  private object NoMorePlaceholder extends Exception("No more placeholder")
+    with NoStackTrace {}
+
+  @annotation.tailrec
+  def prepareQuery(tok: List[TokenGroup], ns: List[String], ps: Map[String, ParameterValue], i: Int, buf: StringBuilder, vs: List[(Int, ParameterValue)]): Try[(String, Seq[(Int, ParameterValue)])] =
+    (tok.headOption, ns.headOption.flatMap(ps.lift(_))) match {
+      case (Some(TokenGroup(pr, Some(pl))), Some(p)) => {
+        val (frag, c): (String, Int) = p.toSql
+        val prepared = toSql(pr, buf) ++= frag
+
+        prepareQuery(tok.tail, ns.tail, ps, i + c, prepared, (i, p) :: vs)
+      }
+      case (Some(TokenGroup(pr, Some(pl))), _) =>
+        Failure(new MissingParameter(pr mkString ""))
+
+      case (Some(TokenGroup(pr, None)), _) =>
+        prepareQuery(tok.tail, ns, ps, i, toSql(pr, buf), vs)
+
+      case (_, Some(p)) => {
+        val (frag, c): (String, Int) = p.toSql
+        prepareQuery(tok, ns.tail, ps, i + c, buf, (i, p) :: vs)
+      }
+      case (None, _) | (_, None) => TrySuccess(buf.toString -> vs.reverse)
+      case _ => Failure(NoMorePlaceholder)
+    }
 }

@@ -104,10 +104,7 @@ sealed trait BatchSql {
 
   /** Add batch parameters to given statement. */
   private def addBatchParams(stmt: PreparedStatement, ps: Seq[(Int, ParameterValue)]): PreparedStatement = {
-    ps foreach { p =>
-      val (i, v) = p
-      v.set(stmt, i + 1)
-    }
+    ps foreach { case (i, v) => v.set(stmt, i + 1) }
     stmt.addBatch()
     stmt
   }
@@ -115,19 +112,21 @@ sealed trait BatchSql {
   @annotation.tailrec
   private def fill(con: Connection, statement: PreparedStatement, getGeneratedKeys: Boolean = false, pm: Seq[Map[String, ParameterValue]]): PreparedStatement = (statement, pm.headOption) match {
     case (null, Some(ps)) => { // First with parameters
-      val st: (TokenizedStatement, Seq[(Int, ParameterValue)]) =
-        Sql.prepareQuery(sql.stmt, 0,
-          sql.paramsInitialOrder.map(ps), Nil)
+      val (psql, vs): (String, Seq[(Int, ParameterValue)]) =
+        Sql.prepareQuery(sql.stmt.tokens, sql.paramsInitialOrder, ps,
+          0, new StringBuilder(), List.empty[(Int, ParameterValue)]).get
 
-      val psql = TokenizedStatement.toSql(st._1).get // TODO: Make it safe
       val stmt = if (getGeneratedKeys) con.prepareStatement(psql, java.sql.Statement.RETURN_GENERATED_KEYS) else con.prepareStatement(psql)
 
       sql.timeout.foreach(stmt.setQueryTimeout(_))
 
-      fill(con, addBatchParams(stmt, st._2), getGeneratedKeys, pm.tail)
+      fill(con, addBatchParams(stmt, vs), getGeneratedKeys, pm.tail)
     }
     case (null, _ /*None*/ ) => { // First with no parameter
-      val psql = TokenizedStatement.toSql(sql.stmt).get
+      val (psql, _): (String, Seq[(Int, ParameterValue)]) =
+        Sql.prepareQuery(sql.stmt.tokens, sql.paramsInitialOrder, Map.empty,
+          0, new StringBuilder(), List.empty[(Int, ParameterValue)]).get
+
       val stmt = if (getGeneratedKeys) con.prepareStatement(psql, java.sql.Statement.RETURN_GENERATED_KEYS) else con.prepareStatement(psql)
 
       sql.timeout.foreach(stmt.setQueryTimeout(_))
@@ -135,8 +134,9 @@ sealed trait BatchSql {
       stmt
     }
     case (stmt, Some(ps)) => {
-      val vs: Seq[(Int, ParameterValue)] = Sql.prepareQuery(
-        sql.stmt, 0, sql.paramsInitialOrder.map(ps), Nil)._2
+      val (_, vs) = Sql.prepareQuery(
+        sql.stmt.tokens, sql.paramsInitialOrder, ps,
+        0, new StringBuilder(), List.empty[(Int, ParameterValue)]).get
 
       fill(con, addBatchParams(stmt, vs), getGeneratedKeys, pm.tail)
     }

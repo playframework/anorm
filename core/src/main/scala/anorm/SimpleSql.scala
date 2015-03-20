@@ -54,23 +54,21 @@ case class SimpleSql[T](sql: SqlQuery, params: Map[String, ParameterValue], defa
 
   @deprecated(message = "Use [[preparedStatement]]", since = "2.3.6")
   def getFilledStatement(connection: Connection, getGeneratedKeys: Boolean = false) = {
-    val st: (TokenizedStatement, Seq[(Int, ParameterValue)]) = Sql.prepareQuery(
-      sql.stmt, 0, sql.paramsInitialOrder.map(params), Nil)
+    val (psql, vs): (String, Seq[(Int, ParameterValue)]) = Sql.prepareQuery(sql.stmt.tokens, sql.paramsInitialOrder, params, 0, new StringBuilder(), List.empty[(Int, ParameterValue)]).get
 
-    val psql = TokenizedStatement.toSql(st._1).get // TODO: Make it safe
     val stmt = if (getGeneratedKeys) connection.prepareStatement(psql, java.sql.Statement.RETURN_GENERATED_KEYS) else connection.prepareStatement(psql)
 
     sql.timeout.foreach(stmt.setQueryTimeout(_))
 
-    st._2 foreach { p =>
-      val (i, v) = p
-      v.set(stmt, i + 1)
-    }
+    vs foreach { case (i, v) => v.set(stmt, i + 1) }
 
     stmt
   }
 
-  def preparedStatement(connection: Connection, getGeneratedKeys: Boolean = false) = resource.managed(getFilledStatement(connection, getGeneratedKeys))
+  def preparedStatement(connection: Connection, getGeneratedKeys: Boolean = false) = {
+    implicit val res = StatementResource
+    resource.managed(getFilledStatement(connection, getGeneratedKeys))
+  }
 
   /**
    * Prepares query with given row parser.
