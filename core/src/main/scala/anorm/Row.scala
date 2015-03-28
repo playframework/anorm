@@ -19,8 +19,8 @@ trait Row {
    *
    * @see #as
    */
-  lazy val asList: List[Any] = data.foldLeft[List[Any]](Nil) { (l, v) =>
-    if (metaData.ms(l.size).nullable) l :+ Option(v) else l :+ v
+  lazy val asList: List[Any] = (data, metaData.ms).zipped.map { (v, m) =>
+    if (m.nullable) Option(v) else v
   }
 
   /**
@@ -34,12 +34,10 @@ trait Row {
    *
    * @see #as
    */
-  lazy val asMap: Map[String, Any] =
-    data.foldLeft[Map[String, Any]](Map.empty) { (m, v) =>
-      val d = metaData.ms(m.size)
-      val k = d.column.qualified
-      if (d.nullable) m + (k -> Option(v)) else m + (k -> v)
-    }
+  lazy val asMap: Map[String, Any] = (data, metaData.ms).zipped.map { (v, m) =>
+    val k = m.column.qualified
+    if (m.nullable) (k -> Option(v)) else k -> v
+  }.toMap
 
   /**
    * Returns row as `T`.
@@ -105,16 +103,9 @@ trait Row {
     }).get // TODO: Safe alternative
 
   // Data per column name
-  private lazy val columnsDictionary: Map[String, Any] = {
-    @annotation.tailrec
-    def loop(meta: List[MetaDataItem], dt: List[Any], r: Map[String, Any]): Map[String, Any] = (meta, dt) match {
-      case (m :: ms, d :: ds) => loop(ms, ds,
-        r + (m.column.qualified.toUpperCase -> d))
-      case _ => r
-    }
-
-    loop(metaData.ms, data, Map.empty)
-  }
+  private lazy val columnsDictionary: Map[String, Any] =
+    (metaData.ms, data).zipped.map((m, v) =>
+      m.column.qualified.toUpperCase -> v).toMap
 
   // Data per column alias
   private lazy val aliasesDictionary: Map[String, Any] = {
