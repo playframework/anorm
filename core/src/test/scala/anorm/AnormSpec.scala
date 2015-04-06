@@ -82,7 +82,7 @@ object AnormSpec extends Specification with H2Database with AnormTest {
             }
         }
 
-      "throw exception when there is more than 1 required or option row" in {
+      "raise error when there is more than 1 required or optional row" in {
         withQueryResult(stringList :+ "A" :+ "B") { implicit c =>
           lazy val sql = SQL("SELECT 1")
 

@@ -298,15 +298,9 @@ object Sql { // TODO: Rename to SQL
   private[anorm] def withResult[T](res: ManagedResource[ResultSet], onFirstRow: Boolean)(op: Option[Cursor] => T): ManagedResource[T] =
     res.map(rs => op(if (onFirstRow) Cursor.onFirstRow(rs) else Cursor(rs)))
 
-  private[anorm] def asTry[T](parser: ResultSetParser[T], rs: ManagedResource[ResultSet], onFirstRow: Boolean)(implicit connection: Connection): Try[T] = {
-    def stream(c: Option[Cursor]): Stream[Row] =
-      c.fold(Stream.empty[Row]) { cur => cur.row #:: stream(cur.next) }
-
-    Try(withResult(rs, onFirstRow)(c =>
-      parser(stream(c))) acquireAndGet identity).
+  private[anorm] def asTry[T](parser: ResultSetParser[T], rs: ManagedResource[ResultSet], onFirstRow: Boolean)(implicit connection: Connection): Try[T] =
+    Try(withResult(rs, onFirstRow)(parser) acquireAndGet identity).
       flatMap(_.fold[Try[T]](_.toFailure, TrySuccess.apply))
-
-  }
 
   @annotation.tailrec
   private[anorm] def zipParams(ns: Seq[String], vs: Seq[ParameterValue], ps: Map[String, ParameterValue]): Map[String, ParameterValue] = (ns.headOption, vs.headOption) match {
