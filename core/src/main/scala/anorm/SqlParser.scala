@@ -667,28 +667,31 @@ trait RowParser[+A] extends (Row => SqlResult[A]) { parent =>
 /** Parser for scalar row (row of one single column). */
 sealed trait ScalarRowParser[+A] extends RowParser[A] {
   override def singleOpt: ResultSetParser[Option[A]] = ResultSetParser {
-    case head #:: Stream.Empty if (head.data.headOption == Some(null)) =>
-      // one column present in head row, but column value is null
-      Success(None)
-    case head #:: Stream.Empty => map(Some(_))(head)
-    case Stream.Empty => Success(None)
+    case Some(cur) if cur.next.isEmpty => cur.row.data match {
+      case null :: _ =>
+        // one column present in head row, but column value is null
+        Success(Option.empty[A])
+
+      case c :: _ => map(Some(_))(cur.row)
+    }
+
+    case None => Success(Option.empty[A])
+
     case _ => Error(SqlMappingError(
       "too many rows when expecting a single one"))
   }
 }
 
-// TODO: Refactor with Cursor
-sealed trait ResultSetParser[+A] extends (Stream[Row] => SqlResult[A]) {
+/** Parses result from the cursor. */
+sealed trait ResultSetParser[+A] extends (Option[Cursor] => SqlResult[A]) {
   parent =>
-  def map[B](f: A => B): ResultSetParser[B] =
-    ResultSetParser(parent(_).map(f))
-
+  def map[B](f: A => B): ResultSetParser[B] = ResultSetParser(parent(_).map(f))
 }
 
 private[anorm] object ResultSetParser {
-  def apply[A](f: Stream[Row] => SqlResult[A]): ResultSetParser[A] =
-    new ResultSetParser[A] { rows =>
-      def apply(rows: Stream[Row]): SqlResult[A] = f(rows)
+  def apply[A](f: Option[Cursor] => SqlResult[A]): ResultSetParser[A] =
+    new ResultSetParser[A] { cur =>
+      def apply(cur: Option[Cursor]): SqlResult[A] = f(cur)
     }
 
   def list[A](p: RowParser[A]): ResultSetParser[List[A]] = {
@@ -697,14 +700,16 @@ private[anorm] object ResultSetParser {
     // result set to a List.  Prepending is O(1), so we use prepend, and then reverse the result
     // in the map function below.
     @annotation.tailrec
-    def sequence(results: SqlResult[List[A]], rows: Stream[Row]): SqlResult[List[A]] = {
-      (results, rows) match {
-        case (Success(rs), row #:: tail) => sequence(p(row).map(_ +: rs), tail)
-        case (r, _) => r
+    def sequence(results: List[A], cur: Option[Cursor]): SqlResult[List[A]] =
+      cur match {
+        case Some(c) => p(c.row) match {
+          case Success(a) => sequence(a :: results, c.next)
+          case Error(msg) => Error(msg)
+        }
+        case _ => Success(results.reverse)
       }
-    }
 
-    ResultSetParser { rows => sequence(Success(List()), rows).map(_.reverse) }
+    ResultSetParser { c => sequence(List.empty[A], c) }
   }
 
   def nonEmptyList[A](p: RowParser[A]): ResultSetParser[List[A]] =
@@ -713,10 +718,8 @@ private[anorm] object ResultSetParser {
       else list(p)(rows))
 
   def single[A](p: RowParser[A]): ResultSetParser[A] = ResultSetParser {
-    case head #:: Stream.Empty => p(head)
-    case Stream.Empty => Error(SqlMappingError(
-      "No rows when expecting a single one"))
-
+    case Some(cur) if cur.next.isEmpty => p(cur.row)
+    case None => Error(SqlMappingError("No rows when expecting a single one"))
     case _ => Error(SqlMappingError(
       "too many rows when expecting a single one"))
 
@@ -724,8 +727,8 @@ private[anorm] object ResultSetParser {
 
   def singleOpt[A](p: RowParser[A]): ResultSetParser[Option[A]] =
     ResultSetParser {
-      case head #:: Stream.Empty => p.map(Some(_))(head)
-      case Stream.Empty => Success(None)
+      case Some(cur) if cur.next.isEmpty => p.map(Some(_))(cur.row)
+      case None => Success(Option.empty[A])
       case _ => Error(SqlMappingError(
         "too many rows when expecting a single one"))
     }
