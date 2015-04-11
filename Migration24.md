@@ -116,6 +116,17 @@ val optionalParseRes =
 
 Compatibility is added for JDBC driver exposing degraded ResultSet (not respecting JDBC specs about row iteration, like Oracle one).
 
+A function can be directly applied on columns with parser combinator `to`.
+
+```scala
+import anorm.SqlParser.{ int, str, to }
+
+def display(name: String, population: Int): String = 
+  s"The population in $name is of $population."
+
+val parser = str("name") ~ int("population") map (to(display _))
+```
+
 ## Type mappings
 
 More parameter and column conversions are available.

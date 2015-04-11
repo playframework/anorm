@@ -5,8 +5,9 @@ import play.api.test._
 import play.api.test.Helpers._
 
 object ScalaAnorm extends Specification {
+  "Code samples" title
 
-  "anorm" should {
+  "Anorm" should {
     "be usable in play" in new WithApplication(FakeApplication(additionalConfiguration = inMemoryDatabase())) {
       //#playdb
       import anorm._
@@ -19,5 +20,4 @@ object ScalaAnorm extends Specification {
       ok
     }
   }
-
 }

@@ -7,237 +7,250 @@ import acolyte.jdbc.Rows._
 import acolyte.jdbc.AcolyteDSL.withQueryResult
 import acolyte.jdbc.Implicits._
 
-object TupleFlattenerSpec extends org.specs2.mutable.Specification {
-  "Tuple flattener" title
+object FunctionAdapterSpec extends org.specs2.mutable.Specification {
+  "Function flattener" title
+
+  "Single column" should {
+    "be applied with parser function" in withQueryResult(intList :+ 123) {
+      implicit c =>
+        SQL("SELECT * FROM test").as(
+          int(1) map (SqlParser.to(_.toString)) single) must_== "123"
+    }
+  }
 
   "Raw tuple-like" should {
-    "be flatten from 2 columns to Tuple2" in {
+    "be applied with 2 columns to Function2" in {
+      def foo(a: String, b: Int) = "Fn2"
       val schema = rowList2(classOf[String] -> "A", classOf[Int] -> "B")
 
       withQueryResult(schema :+ ("A", 2)) { implicit c =>
         SQL("SELECT * FROM test").as(
-          str("A") ~ int("B") map (SqlParser.flatten) single).
-          aka("flatten columns") must_== Tuple2("A", 2)
+          str("A") ~ int("B") map (SqlParser.to(foo _)) single).
+          aka("function result") must_== "Fn2"
 
       }
     }
 
-    "be flatten from 3 columns to Tuple3" in {
+    "be applied with 3 columns to Function3" in {
+      case class Foo(a: String, b: Int, c: Long)
       val schema = rowList3(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C")
 
-      withQueryResult(schema :+ ("A", 2, 3l)) { implicit c =>
+      withQueryResult(schema :+ ("A", 2, 3L)) { implicit c =>
         SQL("SELECT * FROM test").as(
-          str("A") ~ int("B") ~ long("C") map (SqlParser.flatten) single).
-          aka("flatten columns") must_== Tuple3("A", 2, 3l)
+          str("A") ~ int("B") ~ long("C") map (
+            SqlParser.to(Foo.apply _)) single).
+          aka("function result") must_== Foo("A", 2, 3L)
 
       }
     }
 
-    "be flatten from 4 columns to Tuple4" in {
+    "be applied with 4 columns to Function4" in {
+      def foo(a: String, b: Int, c: Long, d: Double) = "Fn4"
       val schema = rowList4(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D")
 
       withQueryResult(schema :+ ("A", 2, 3l, 4.56d)) { implicit c =>
         SQL("SELECT * FROM test").as(
-          str("A") ~ int("B") ~ long("C") ~ get[Double]("D") map (SqlParser.flatten) single).
-          aka("flatten columns") must_== Tuple4("A", 2, 3l, 4.56d)
+          str("A") ~ int("B") ~ long("C") ~ get[Double]("D") map (SqlParser.to(foo _)) single).
+          aka("function result") must_== "Fn4"
 
       }
     }
 
-    "be flatten from 5 columns to Tuple5" in {
+    "be applied with 5 columns to Function5" in {
+      def foo(a: String, b: Int, c: Long, d: Double, e: Short) = "Fn5"
       val schema = rowList5(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D", classOf[Short] -> "E")
 
       withQueryResult(schema :+ ("A", 2, 3l, 4.56d, 9.toShort)) { implicit c =>
         SQL("SELECT * FROM test").as(
-          str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") map (SqlParser.flatten) single).
-          aka("flatten columns") must_== Tuple5("A", 2, 3l, 4.56d, 9.toShort)
+          str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") map (SqlParser.to(foo _)) single).
+          aka("function result") must_== "Fn5"
 
       }
     }
 
-    "be flatten from 6 columns to Tuple6" in {
+    "be applied with 6 columns to Function6" in {
+      def foo(a: String, b: Int, c: Long, d: Double, e: Short, f: Byte) = "Fn6"
       val schema = rowList6(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D", classOf[Short] -> "E", classOf[Byte] -> "F")
 
       withQueryResult(schema :+ ("A", 2, 3l, 4.56d, 9.toShort, 10.toByte)) { implicit c =>
         SQL("SELECT * FROM test").as(
-          str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") map (SqlParser.flatten) single).
-          aka("flatten columns") must_== Tuple6("A", 2, 3l, 4.56d, 9.toShort, 10.toByte)
+          str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") map (SqlParser.to(foo _)) single).
+          aka("function result") must_== "Fn6"
 
       }
     }
 
-    "be flatten from 7 columns to Tuple7" in {
+    "be applied with 7 columns to Function7" in {
+      def foo(a: String, b: Int, c: Long, d: Double, e: Short, f: Byte, g: Boolean) = "Fn7"
       val schema = rowList7(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D", classOf[Short] -> "E", classOf[Byte] -> "F", classOf[Boolean] -> "G")
 
       withQueryResult(schema :+ ("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true)) { implicit c =>
         SQL("SELECT * FROM test").as(
-          str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") map (SqlParser.flatten) single).
-          aka("flatten columns") must_== Tuple7("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true)
+          str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") map (SqlParser.to(foo _)) single).aka("function result") must_== "Fn7"
 
       }
     }
 
-    "be flatten from 8 columns to Tuple8" in {
+    "be applied with 8 columns to Function8" in {
+      def foo(a: String, b: Int, c: Long, d: Double, e: Short, f: Byte, g: Boolean, h: String) = "Fn8"
       val schema = rowList8(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D", classOf[Short] -> "E", classOf[Byte] -> "F", classOf[Boolean] -> "G", classOf[String] -> "H")
 
       withQueryResult(schema :+ ("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B")) { implicit c =>
         SQL("SELECT * FROM test").as(
-          str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") map (SqlParser.flatten) single).
-          aka("flatten columns") must_== Tuple8("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B")
+          str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") map (SqlParser.to(foo _)) single).aka("function result") must_== "Fn8"
 
       }
     }
 
-    "be flatten from 9 columns to Tuple9" in {
+    "be applied with 9 columns to Function9" in {
+      def foo(a: String, b: Int, c: Long, d: Double, e: Short, f: Byte, g: Boolean, h: String, i: Int) = "Fn9"
       val schema = rowList9(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D", classOf[Short] -> "E", classOf[Byte] -> "F", classOf[Boolean] -> "G", classOf[String] -> "H", classOf[Int] -> "I")
 
       withQueryResult(schema :+ ("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B", 3)) { implicit c =>
         SQL("SELECT * FROM test").as(
-          str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") map (SqlParser.flatten) single).
-          aka("flatten columns") must_== Tuple9("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B", 3)
+          str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") map (SqlParser.to(foo _)) single).aka("function result") must_== "Fn9"
 
       }
     }
 
-    "be flatten from 10 columns to Tuple10" in {
+    "be applied with 10 columns to Function10" in {
+      def foo(a: String, b: Int, c: Long, d: Double, e: Short, f: Byte, g: Boolean, h: String, i: Int, j: Long) = "Fn10"
       val schema = rowList10(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D", classOf[Short] -> "E", classOf[Byte] -> "F", classOf[Boolean] -> "G", classOf[String] -> "H", classOf[Int] -> "I", classOf[Long] -> "J")
 
       withQueryResult(schema :+ ("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4l)) { implicit c =>
         SQL("SELECT * FROM test").as(
-          str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") map (SqlParser.flatten) single).
-          aka("flatten columns") must_== Tuple10("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4l)
+          str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") map (SqlParser.to(foo _)) single).aka("function result") must_== "Fn10"
 
       }
     }
 
-    "be flatten from 11 columns to Tuple11" in {
+    "be applied with 11 columns to Function11" in {
+      def foo(a: String, b: Int, c: Long, d: Double, e: Short, f: Byte, g: Boolean, h: String, i: Int, j: Long, k: Double) = "Fn11"
       val schema = rowList11(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D", classOf[Short] -> "E", classOf[Byte] -> "F", classOf[Boolean] -> "G", classOf[String] -> "H", classOf[Int] -> "I", classOf[Long] -> "J", classOf[Double] -> "K")
 
       withQueryResult(schema :+ ("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4l, 5.67d)) { implicit c =>
         SQL("SELECT * FROM test").as(
-          str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") map (SqlParser.flatten) single).
-          aka("flatten columns") must_== Tuple11("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4l, 5.67d)
+          str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") map (SqlParser.to(foo _)) single).aka("function result") must_== "Fn11"
 
       }
     }
 
-    "be flatten from 12 columns to Tuple12" in {
+    "be applied with 12 columns to Function12" in {
+      def foo(a: String, b: Int, c: Long, d: Double, e: Short, f: Byte, g: Boolean, h: String, i: Int, j: Long, k: Double, l: Short) = "Fn12"
       val schema = rowList12(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D", classOf[Short] -> "E", classOf[Byte] -> "F", classOf[Boolean] -> "G", classOf[String] -> "H", classOf[Int] -> "I", classOf[Long] -> "J", classOf[Double] -> "K", classOf[Short] -> "L")
 
       withQueryResult(schema :+ ("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4l, 5.67d, 10.toShort)) { implicit c =>
         SQL("SELECT * FROM test").as(
-          str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") map (SqlParser.flatten) single).
-          aka("flatten columns") must_== Tuple12("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4l, 5.67d, 10.toShort)
+          str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") map (SqlParser.to(foo _)) single).aka("function result") must_== "Fn12"
 
       }
     }
 
-    "be flatten from 13 columns to Tuple13" in {
+    "be applied with 13 columns to Function13" in {
+      def foo(a: String, b: Int, c: Long, d: Double, e: Short, f: Byte, g: Boolean, h: String, i: Int, j: Long, k: Double, l: Short, m: Byte) = "Fn13"
       val schema = rowList13(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D", classOf[Short] -> "E", classOf[Byte] -> "F", classOf[Boolean] -> "G", classOf[String] -> "H", classOf[Int] -> "I", classOf[Long] -> "J", classOf[Double] -> "K", classOf[Short] -> "L", classOf[Byte] -> "M")
 
       withQueryResult(schema :+ ("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4l, 5.67d, 10.toShort, 11.toByte)) { implicit c =>
         SQL("SELECT * FROM test").as(
-          str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") map (SqlParser.flatten) single).
-          aka("flatten columns") must_== Tuple13("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4l, 5.67d, 10.toShort, 11.toByte)
+          str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") map (SqlParser.to(foo _)) single).
+          aka("function result") must_== "Fn13"
 
       }
     }
 
-    "be flatten from 14 columns to Tuple14" in {
+    "be applied with 14 columns to Function14" in {
+      def foo(a: String, b: Int, c: Long, d: Double, e: Short, f: Byte, g: Boolean, h: String, i: Int, j: Long, k: Double, l: Short, m: Byte, n: Boolean) = "Fn14"
       val schema = rowList14(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D", classOf[Short] -> "E", classOf[Byte] -> "F", classOf[Boolean] -> "G", classOf[String] -> "H", classOf[Int] -> "I", classOf[Long] -> "J", classOf[Double] -> "K", classOf[Short] -> "L", classOf[Byte] -> "M", classOf[Boolean] -> "N")
 
       withQueryResult(schema :+ ("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4l, 5.67d, 10.toShort, 11.toByte, false)) { implicit c =>
         SQL("SELECT * FROM test").as(
-          str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N") map (SqlParser.flatten) single).
-          aka("flatten columns") must_== Tuple14("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4l, 5.67d, 10.toShort, 11.toByte, false)
+          str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N") map (SqlParser.to(foo _)) single).aka("function result") must_== "Fn14"
 
       }
     }
 
-    "be flatten from 15 columns to Tuple15" in {
+    "be applied with 15 columns to Function15" in {
+      def foo(a: String, b: Int, c: Long, d: Double, e: Short, f: Byte, g: Boolean, h: String, i: Int, j: Long, k: Double, l: Short, m: Byte, n: Boolean, o: String) = "Fn15"
       val schema = rowList15(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D", classOf[Short] -> "E", classOf[Byte] -> "F", classOf[Boolean] -> "G", classOf[String] -> "H", classOf[Int] -> "I", classOf[Long] -> "J", classOf[Double] -> "K", classOf[Short] -> "L", classOf[Byte] -> "M", classOf[Boolean] -> "N", classOf[String] -> "O")
 
       withQueryResult(schema :+ ("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4l, 5.67d, 10.toShort, 11.toByte, false, "C")) { implicit c =>
         SQL("SELECT * FROM test").as(
-          str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N") ~ str("O") map (SqlParser.flatten) single).
-          aka("flatten columns") must_== Tuple15("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4l, 5.67d, 10.toShort, 11.toByte, false, "C")
+          str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N") ~ str("O") map (SqlParser.to(foo _)) single).aka("function result") must_== "Fn15"
 
       }
     }
 
-    "be flatten from 16 columns to Tuple16" in {
+    "be applied with 16 columns to Function16" in {
+      def foo(a: String, b: Int, c: Long, d: Double, e: Short, f: Byte, g: Boolean, h: String, i: Int, j: Long, k: Double, l: Short, m: Byte, n: Boolean, o: String, p: Int) = "Fn16"
       val schema = rowList16(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D", classOf[Short] -> "E", classOf[Byte] -> "F", classOf[Boolean] -> "G", classOf[String] -> "H", classOf[Int] -> "I", classOf[Long] -> "J", classOf[Double] -> "K", classOf[Short] -> "L", classOf[Byte] -> "M", classOf[Boolean] -> "N", classOf[String] -> "O", classOf[Int] -> "P")
 
       withQueryResult(schema :+ ("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4l, 5.67d, 10.toShort, 11.toByte, false, "C", 3)) { implicit c =>
         SQL("SELECT * FROM test").as(
-          str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N") ~ str("O") ~ int("P") map (SqlParser.flatten) single).
-          aka("flatten columns") must_== Tuple16("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4l, 5.67d, 10.toShort, 11.toByte, false, "C", 3)
+          str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N") ~ str("O") ~ int("P") map (SqlParser.to(foo _)) single).aka("function result") must_== "Fn16"
 
       }
     }
 
-    "be flatten from 17 columns to Tuple17" in {
+    "be applied with 17 columns to Function17" in {
+      def foo(a: String, b: Int, c: Long, d: Double, e: Short, f: Byte, g: Boolean, h: String, i: Int, j: Long, k: Double, l: Short, m: Byte, n: Boolean, o: String, p: Int, q: Long) = "Fn17"
       val schema = rowList17(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D", classOf[Short] -> "E", classOf[Byte] -> "F", classOf[Boolean] -> "G", classOf[String] -> "H", classOf[Int] -> "I", classOf[Long] -> "J", classOf[Double] -> "K", classOf[Short] -> "L", classOf[Byte] -> "M", classOf[Boolean] -> "N", classOf[String] -> "O", classOf[Int] -> "P", classOf[Long] -> "Q")
 
       withQueryResult(schema :+ ("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4l, 5.67d, 10.toShort, 11.toByte, false, "C", 3, 4l)) { implicit c =>
         SQL("SELECT * FROM test").as(
-          str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N") ~ str("O") ~ int("P") ~ long("Q") map (SqlParser.flatten) single).
-          aka("flatten columns") must_== Tuple17("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4l, 5.67d, 10.toShort, 11.toByte, false, "C", 3, 4l)
+          str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N") ~ str("O") ~ int("P") ~ long("Q") map (SqlParser.to(foo _)) single).aka("function result") must_== "Fn17"
 
       }
     }
 
-    "be flatten from 18 columns to Tuple18" in {
+    "be applied with 18 columns to Function18" in {
+      def foo(a: String, b: Int, c: Long, d: Double, e: Short, f: Byte, g: Boolean, h: String, i: Int, j: Long, k: Double, l: Short, m: Byte, n: Boolean, o: String, p: Int, q: Long, r: Double) = "Fn18"
       val schema = rowList18(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D", classOf[Short] -> "E", classOf[Byte] -> "F", classOf[Boolean] -> "G", classOf[String] -> "H", classOf[Int] -> "I", classOf[Long] -> "J", classOf[Double] -> "K", classOf[Short] -> "L", classOf[Byte] -> "M", classOf[Boolean] -> "N", classOf[String] -> "O", classOf[Int] -> "P", classOf[Long] -> "Q", classOf[Double] -> "R")
 
       withQueryResult(schema :+ ("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4l, 5.67d, 10.toShort, 11.toByte, false, "C", 3, 4l, 5.678d)) { implicit c =>
         SQL("SELECT * FROM test").as(
-          str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N") ~ str("O") ~ int("P") ~ long("Q") ~ get[Double]("R") map (SqlParser.flatten) single).
-          aka("flatten columns") must_== Tuple18("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4l, 5.67d, 10.toShort, 11.toByte, false, "C", 3, 4l, 5.678d)
+          str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N") ~ str("O") ~ int("P") ~ long("Q") ~ get[Double]("R") map (SqlParser.to(foo _)) single).aka("function result") must_== "Fn18"
 
       }
     }
 
-    "be flatten from 19 columns to Tuple19" in {
+    "be applied with 19 columns to Function19" in {
+      def foo(a: String, b: Int, c: Long, d: Double, e: Short, f: Byte, g: Boolean, h: String, i: Int, j: Long, k: Double, l: Short, m: Byte, n: Boolean, o: String, p: Int, q: Long, r: Double, s: Short) = "Fn19"
       val schema = rowList19(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D", classOf[Short] -> "E", classOf[Byte] -> "F", classOf[Boolean] -> "G", classOf[String] -> "H", classOf[Int] -> "I", classOf[Long] -> "J", classOf[Double] -> "K", classOf[Short] -> "L", classOf[Byte] -> "M", classOf[Boolean] -> "N", classOf[String] -> "O", classOf[Int] -> "P", classOf[Long] -> "Q", classOf[Double] -> "R", classOf[Short] -> "S")
 
       withQueryResult(schema :+ ("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4l, 5.67d, 10.toShort, 11.toByte, false, "C", 3, 4l, 5.678d, 16.toShort)) { implicit c =>
         SQL("SELECT * FROM test").as(
-          str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N") ~ str("O") ~ int("P") ~ long("Q") ~ get[Double]("R") ~ get[Short]("S") map (SqlParser.flatten) single).
-          aka("flatten columns") must_== Tuple19("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4l, 5.67d, 10.toShort, 11.toByte, false, "C", 3, 4l, 5.678d, 16.toShort)
+          str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N") ~ str("O") ~ int("P") ~ long("Q") ~ get[Double]("R") ~ get[Short]("S") map (SqlParser.to(foo _)) single).aka("function result") must_== "Fn19"
 
       }
     }
 
-    "be flatten from 20 columns to Tuple20" in {
+    "be applied with 20 columns to Function20" in {
+      def foo(a: String, b: Int, c: Long, d: Double, e: Short, f: Byte, g: Boolean, h: String, i: Int, j: Long, k: Double, l: Short, m: Byte, n: Boolean, o: String, p: Int, q: Long, r: Double, s: Short, t: String) = "Fn20"
       val schema = rowList20(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D", classOf[Short] -> "E", classOf[Byte] -> "F", classOf[Boolean] -> "G", classOf[String] -> "H", classOf[Int] -> "I", classOf[Long] -> "J", classOf[Double] -> "K", classOf[Short] -> "L", classOf[Byte] -> "M", classOf[Boolean] -> "N", classOf[String] -> "O", classOf[Int] -> "P", classOf[Long] -> "Q", classOf[Double] -> "R", classOf[Short] -> "S", classOf[String] -> "T")
 
       withQueryResult(schema :+ ("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4l, 5.67d, 10.toShort, 11.toByte, false, "C", 3, 4l, 5.678d, 16.toShort, "D")) { implicit c =>
-        SQL("SELECT * FROM test").as(
-          str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N") ~ str("O") ~ int("P") ~ long("Q") ~ get[Double]("R") ~ get[Short]("S") ~ str("T") map (SqlParser.flatten) single).
-          aka("flatten columns") must_== Tuple20("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4l, 5.67d, 10.toShort, 11.toByte, false, "C", 3, 4l, 5.678d, 16.toShort, "D")
+        SQL("SELECT * FROM test").as(str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N") ~ str("O") ~ int("P") ~ long("Q") ~ get[Double]("R") ~ get[Short]("S") ~ str("T") map (SqlParser.to(foo _)) single).aka("function result") must_== "Fn20"
 
       }
     }
 
-    "be flatten from 21 columns to Tuple21" in {
+    "be applied with 21 columns to Function21" in {
+      def foo(a: String, b: Int, c: Long, d: Double, e: Short, f: Byte, g: Boolean, h: String, i: Int, j: Long, k: Double, l: Short, m: Byte, n: Boolean, o: String, p: Int, q: Long, r: Double, s: Short, t: String, u: Int) = "Fn21"
       val schema = rowList21(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D", classOf[Short] -> "E", classOf[Byte] -> "F", classOf[Boolean] -> "G", classOf[String] -> "H", classOf[Int] -> "I", classOf[Long] -> "J", classOf[Double] -> "K", classOf[Short] -> "L", classOf[Byte] -> "M", classOf[Boolean] -> "N", classOf[String] -> "O", classOf[Int] -> "P", classOf[Long] -> "Q", classOf[Double] -> "R", classOf[Short] -> "S", classOf[String] -> "T", classOf[Int] -> "U")
 
       withQueryResult(schema :+ ("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4l, 5.67d, 10.toShort, 11.toByte, false, "C", 3, 4l, 5.678d, 16.toShort, "D", 4)) { implicit c =>
-        SQL("SELECT * FROM test").as(
-          str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N") ~ str("O") ~ int("P") ~ long("Q") ~ get[Double]("R") ~ get[Short]("S") ~ str("T") ~ int("U") map (SqlParser.flatten) single).
-          aka("flatten columns") must_== Tuple21("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4l, 5.67d, 10.toShort, 11.toByte, false, "C", 3, 4l, 5.678d, 16.toShort, "D", 4)
+        SQL("SELECT * FROM test").as(str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N") ~ str("O") ~ int("P") ~ long("Q") ~ get[Double]("R") ~ get[Short]("S") ~ str("T") ~ int("U") map (SqlParser.to(foo _)) single).aka("function result") must_== "Fn21"
 
       }
     }
 
-    "be flatten from 22 columns to Tuple22" in {
+    "be applied with 22 columns to Function22" in {
+      def foo(a: String, b: Int, c: Long, d: Double, e: Short, f: Byte, g: Boolean, h: String, i: Int, j: Long, k: Double, l: Short, m: Byte, n: Boolean, o: String, p: Int, q: Long, r: Double, s: Short, t: String, u: Int, v: Long) = "Fn22"
       val schema = rowList22(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D", classOf[Short] -> "E", classOf[Byte] -> "F", classOf[Boolean] -> "G", classOf[String] -> "H", classOf[Int] -> "I", classOf[Long] -> "J", classOf[Double] -> "K", classOf[Short] -> "L", classOf[Byte] -> "M", classOf[Boolean] -> "N", classOf[String] -> "O", classOf[Int] -> "P", classOf[Long] -> "Q", classOf[Double] -> "R", classOf[Short] -> "S", classOf[String] -> "T", classOf[Int] -> "U", classOf[Long] -> "V")
 
       withQueryResult(schema :+ ("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4l, 5.67d, 10.toShort, 11.toByte, false, "C", 3, 4l, 5.678d, 16.toShort, "D", 4, 5l)) { implicit c =>
         SQL("SELECT * FROM test").as(
-          str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N") ~ str("O") ~ int("P") ~ long("Q") ~ get[Double]("R") ~ get[Short]("S") ~ str("T") ~ int("U") ~ long("V") map (SqlParser.flatten) single).
-          aka("flatten columns") must_== Tuple22("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4l, 5.67d, 10.toShort, 11.toByte, false, "C", 3, 4l, 5.678d, 16.toShort, "D", 4, 5l)
+          str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N") ~ str("O") ~ int("P") ~ long("Q") ~ get[Double]("R") ~ get[Short]("S") ~ str("T") ~ int("U") ~ long("V") map (SqlParser.to(foo _)) single).aka("function result") must_== "Fn22"
 
       }
     }

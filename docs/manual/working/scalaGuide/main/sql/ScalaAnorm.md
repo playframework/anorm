@@ -614,7 +614,7 @@ val populations: List[String ~ Int] =
   SQL("SELECT * FROM Country").as((str("name") ~ int("population")).*) 
 ```
 
-As you see, this query’s result type is `List[String~Int]` - a list of country name and population items.
+As you see, this query’s result type is `List[String ~ Int]` - a list of country name and population items.
 
 You can also rewrite the same code as:
 
@@ -638,6 +638,19 @@ Now, because transforming `A ~ B ~ C` types to `(A, B, C)` is a common task, we 
 val result: List[(String, Int)] = 
   SQL("select * from Country").as(parser.flatten.*)
 ```
+
+A `RowParser` can be combined with any function to applied it with extracted columns.
+
+```scala
+import anorm.SqlParser.{ int, str, to }
+
+def display(name: String, population: Int): String = 
+  s"The population in $name is of $population."
+
+val parser = str("name") ~ int("population") map (to(display _))
+```
+
+> **Note:** The mapping function must be partially applied (syntax `fn _`) when given `to` the parser (see [SLS 6.26.2, 6.26.5 - Eta expansion](http://www.scala-lang.org/docu/files/ScalaReference.pdf)).
 
 If list should not be empty, `parser.+` can be used instead of `parser.*`.
 
