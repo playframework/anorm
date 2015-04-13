@@ -1,4 +1,5 @@
 import scala.util.Properties.isJavaAtLeast
+import AnormGeneration.{ generateFunctionAdapter => GFA }
 
 lazy val tokenizer = project
   .in(file("tokenizer"))
@@ -7,6 +8,10 @@ lazy val tokenizer = project
 lazy val anorm = project
   .in(file("core"))
   .enablePlugins(Playdoc, Omnidoc, Publish)
+  .settings({
+    sourceGenerators in Compile <+= (
+      sourceManaged in Compile).map(m => Seq(GFA(m / "anorm")))
+  })
   .settings({
     libraryDependencies ++= Seq(
       "com.jsuereth" %% "scala-arm" % "1.4",
