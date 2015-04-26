@@ -1,6 +1,9 @@
 import scala.util.Properties.isJavaAtLeast
 import AnormGeneration.{ generateFunctionAdapter => GFA }
 
+lazy val acolyteVersion =
+  if (isJavaAtLeast("1.7")) "1.0.33-j7p" else "1.0.33"
+
 lazy val tokenizer = project
   .in(file("tokenizer"))
   .enablePlugins(Omnidoc, Publish)
@@ -19,7 +22,7 @@ lazy val anorm = project
       "org.joda" % "joda-convert" % "1.7",
 
       "com.h2database" % "h2" % "1.4.182" % Test,
-      "org.eu.acolyte" %% "jdbc-scala" % "1.0.32" % Test,
+      "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test,
       "com.chuusai" % "shapeless" % "2.0.0" % Test cross CrossVersion.
         binaryMapped {
           case "2.10" => "2.10.4"
