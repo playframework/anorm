@@ -14,7 +14,7 @@ object Common extends AutoPlugin {
     organization := "com.typesafe.play",
 
     scalaVersion := sys.props.get("scala.version").getOrElse("2.10.4"),
-    crossScalaVersions := Seq("2.10.4", "2.11.4"),
+    crossScalaVersions := Seq("2.10.4", "2.11.6"),
 
     scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "utf8"),
     (javacOptions in compile) := Seq("-source", "1.7", "-target", "1.7"),
