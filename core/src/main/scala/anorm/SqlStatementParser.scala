@@ -26,7 +26,7 @@ object SqlStatementParser extends JavaTokenParsers {
   def parse(sql: String): Try[TokenizedStatement] = Try(parse(instr, sql).get)
 
   private val simpleLiteral: Parser[StringToken] =
-    "[^'^{^\r^\n]+".r ^^ { StringToken(_) }
+    "[^'^{]+".r ^^ { StringToken(_) }
 
   private val instr: Parser[TokenizedStatement] = {
     @inline def normalize(t: StatementToken): Option[TokenGroup] = t match {
@@ -37,9 +37,8 @@ object SqlStatementParser extends JavaTokenParsers {
       case _ => Some(TokenGroup(List(t), None))
     }
 
-    "[ \t\r\n]*".r ~> rep(simpleLiteral.map(normalize) |
-      quotedLiteral.map(Some(_)) | variable.map(Some(_)) |
-      skipped.map(normalize)) ^^ {
+    "[ \r\n\t]*".r ~> rep(simpleLiteral.map(normalize) |
+      quotedLiteral.map(Some(_)) | variable.map(Some(_))) ^^ {
       _.foldLeft(List.empty[TokenGroup] -> List.empty[String]) {
         case ((TokenGroup(ts, None) :: groups, ns),
           Some(TokenGroup(Nil, Some(n)))) =>
