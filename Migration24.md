@@ -47,7 +47,7 @@ The preparation of statement was also improved, for better performance.
 
 ## Parsing
 
-It's now possible to get value from `Row` using column index.
+It's now possible to get a value from `Row` using a column index.
 
 ```scala
 val res: (String, String) = SQL("SELECT * FROM Test").map(row =>
@@ -161,19 +161,19 @@ New conversions are available to pass `List[T]`, `Set[T]`, `SortedSet[T]`, `Stre
 
 ```scala
 SQL("SELECT * FROM Test WHERE cat IN ({categories})").
- on('categories -> List(1, 3, 4)
+ on('categories -> List(1, 3, 4))
 
 SQL("SELECT * FROM Test WHERE cat IN ({categories})").
- on('categories -> Set(1, 3, 4)
+ on('categories -> Set(1, 3, 4))
 
 SQL("SELECT * FROM Test WHERE cat IN ({categories})").
- on('categories -> SortedSet("a", "b", "c")
+ on('categories -> SortedSet("a", "b", "c"))
 
 SQL("SELECT * FROM Test WHERE cat IN ({categories})").
- on('categories -> Stream(1, 3, 4)
+ on('categories -> Stream(1, 3, 4))
 
 SQL("SELECT * FROM Test WHERE cat IN ({categories})").
- on('categories -> Vector("a", "b", "c")
+ on('categories -> Vector("a", "b", "c"))
 ```
 
 **Numeric and boolean types**
