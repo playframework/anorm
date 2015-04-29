@@ -26,11 +26,64 @@ trait ToStatement[A] {
   def set(s: PreparedStatement, index: Int, v: A): Unit
 }
 
-/**
- * Provided conversions to set statement parameter.
+/*
+ * Provided instances of `ToStatement` with the lower priority.
+ * Actually it makes sure that `byteArrayToStatement`
+ * (defined in `ToStatementPriority1`) is resolved before `arrayToParameter`.
  */
-object ToStatement extends JodaToStatement {
+sealed trait ToStatementPriority0 {
   import scala.collection.immutable.SortedSet
+  import java.io.{ InputStream, Reader }
+
+  /**
+   * Sets a binary stream as parameter on statement.
+   * For `null` value, `setNull` with `LONGVARBINARY` is called on statement.
+   *
+   * {{{
+   * SQL("INSERT INTO Table(bin) VALUES {b}").on("b" -> inputStream)
+   * }}}
+   */
+  implicit def binaryStreamToStatement[S <: InputStream]: ToStatement[S] =
+    new ToStatement[S] {
+      val jdbcType = implicitly[ParameterMetaData[InputStream]].jdbcType
+      def set(s: PreparedStatement, i: Int, bin: S) =
+        if (bin == null) s.setNull(i, jdbcType)
+        else s.setBinaryStream(i, bin)
+    }
+
+  /**
+   * Sets a blob as parameter on statement.
+   * For `null` value, `setNull` with `BLOB` is called on statement.
+   *
+   * {{{
+   * val blob = con.createBlob()
+   * blob.setBytes(1, byteArray)
+   * SQL("INSERT INTO Table(bin) VALUES {b}").on("b" -> blob)
+   * }}}
+   */
+  implicit def blobToStatement[B <: java.sql.Blob]: ToStatement[B] =
+    new ToStatement[B] {
+      val jdbcType = implicitly[ParameterMetaData[java.sql.Blob]].jdbcType
+      def set(s: PreparedStatement, i: Int, blob: B) =
+        if (blob == null) s.setNull(i, jdbcType)
+        else s.setBlob(i, blob)
+    }
+
+  /**
+   * Sets a character stream as parameter on statement.
+   * For `null` value, `setNull` with `VARCHAR` is called on statement.
+   *
+   * {{{
+   * SQL("INSERT INTO Table(chars) VALUES {c}").on("c" -> reader)
+   * }}}
+   */
+  implicit def characterStreamToStatement[R <: Reader]: ToStatement[R] =
+    new ToStatement[R] {
+      val jdbcType = implicitly[ParameterMetaData[Reader]].jdbcType
+      def set(s: PreparedStatement, i: Int, chars: R) =
+        if (chars == null) s.setNull(i, jdbcType)
+        else s.setCharacterStream(i, chars)
+    }
 
   /**
    * Sets boolean value on statement.
@@ -548,7 +601,7 @@ object ToStatement extends JodaToStatement {
    * @see [[java.sql.Array]]
    *
    * {{{
-   * SQL("INSERT INTO Table(arr) VALUES {a}").on(Array("A", "2", "C"))
+   * SQL("INSERT INTO Table(arr) VALUES {a}").on("a" -> Array("A", "2", "C"))
    * }}}
    */
   implicit def arrayToParameter[A <: AnyRef](implicit m: ParameterMetaData[A]) =
@@ -613,3 +666,25 @@ sealed trait JodaToStatement { // TODO: Move in a separate file
       else s.setNull(index, meta.jdbcType)
   }
 }
+
+sealed trait ToStatementPriority1 extends ToStatementPriority0 {
+  /**
+   * Sets an array of byte as parameter on statement.
+   * For `null` value, `setNull` with `LONGVARBINARY` is called on statement.
+   *
+   * {{{
+   * SQL("INSERT INTO Table(bin) VALUES {b}").on("b" -> arrayOfBytes)
+   * }}}
+   */
+  implicit object byteArrayToStatement extends ToStatement[Array[Byte]] {
+    val jdbcType = implicitly[ParameterMetaData[Array[Byte]]].jdbcType
+    def set(s: PreparedStatement, i: Int, bin: Array[Byte]) =
+      if (bin == null) s.setNull(i, jdbcType)
+      else s.setBytes(i, bin)
+  }
+}
+
+/**
+ * Provided conversions to set statement parameter.
+ */
+object ToStatement extends ToStatementPriority1 with JodaToStatement

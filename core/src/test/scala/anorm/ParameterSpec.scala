@@ -13,6 +13,7 @@ import java.util.Date
 
 import java.sql.{
   Array => JdbcArray,
+  Blob => JdbcBlob,
   SQLFeatureNotSupportedException,
   Timestamp
 }
@@ -53,6 +54,9 @@ object ParameterSpec
   val SqlTimestamp = ParamMeta.Timestamp
   val SqlInt1 = ParamMeta.Numeric(Jbi1bd)
   val SqlDec1 = ParamMeta.Numeric(Jbd1)
+  val byteArr = "Binary".getBytes
+  def binStream = new java.io.ByteArrayInputStream(byteArr)
+  def charStream = new java.io.StringReader("string")
 
   def withConnection[A](ps: (String, String)*)(f: java.sql.Connection => A): A = f(connection(handleStatement withUpdateHandler {
     case UpdateExecution("set-str ?",
@@ -176,6 +180,17 @@ object ParameterSpec
     case UpdateExecution("set-array ?", DParam(
       a: JdbcArray, SqlArr) :: Nil) if (
       a.getArray.asInstanceOf[Array[_]].toList == List("a", "b", "c")) => 1 // ok
+    case UpdateExecution("set-binary ?", DParam(b: Array[Byte], _) :: Nil) if (
+      new String(b) == "Binary") => 1
+    case UpdateExecution("set-null-binary ?", DParam(b, _) :: Nil) if (
+      b == null) => 1
+
+    case UpdateExecution("set-blob ?", DParam(b: JdbcBlob, _) :: Nil) if (
+      new String(b.getBytes(1, b.length.toInt)) == "Binary") => 1
+
+    case UpdateExecution("set-null-blob ?", DParam(b, _) :: Nil) if (
+      b == null) => 1
+
   }, ps: _*))
 
   "Named parameters" should {
@@ -232,6 +247,35 @@ object ParameterSpec
 
     "be undefined string" in withConnection() { implicit c =>
       SQL("set-null-str {p}").on("p" -> (None: Option[String])).
+        execute() must beFalse
+    }
+
+    "be array of byte" in withConnection() { implicit c =>
+      SQL("set-binary {p}").on("p" -> byteArr).execute() must beFalse
+    }
+
+    "be null array of byte" in withConnection() { implicit c =>
+      SQL"set-null-binary ${null.asInstanceOf[Array[Byte]]}".
+        execute() must beFalse
+    }
+
+    "be binary stream" in withConnection() { implicit c =>
+      SQL"set-binary ${binStream}".execute() must beFalse
+    }
+
+    "be null binary stream" in withConnection() { implicit c =>
+      SQL("set-null-binary {p}").on("p" ->
+        null.asInstanceOf[java.io.InputStream]).execute() must beFalse
+    }
+
+    "be blob" in withConnection() { implicit c =>
+      val blob = c.createBlob()
+      blob.setBytes(1, byteArr)
+      SQL("set-blob {p}").on("p" -> blob).execute() must beFalse
+    }
+
+    "be null blob" in withConnection() { implicit c =>
+      SQL("set-null-blob {p}").on("p" -> null.asInstanceOf[java.sql.Blob]).
         execute() must beFalse
     }
 
@@ -795,6 +839,35 @@ object ParameterSpec
           // see java.sql.PreparedStatement#execute
           q.execute() aka "execution" must beFalse
       }
+    }
+
+    "be array of byte" in withConnection() { implicit c =>
+      SQL("set-binary {p}").onParams(pv(byteArr)).execute() must beFalse
+    }
+
+    "be null array of byte" in withConnection() { implicit c =>
+      SQL("set-null-binary {p}").onParams(pv(null.asInstanceOf[Array[Byte]])).
+        execute() must beFalse
+    }
+
+    "be binary stream" in withConnection() { implicit c =>
+      SQL("set-binary {p}").onParams(pv(binStream)).execute() must beFalse
+    }
+
+    "be null binary stream" in withConnection() { implicit c =>
+      SQL("set-null-binary {p}").onParams(pv(
+        null.asInstanceOf[java.io.InputStream])).execute() must beFalse
+    }
+
+    "be blob" in withConnection() { implicit c =>
+      val blob = c.createBlob()
+      blob.setBytes(1, byteArr)
+      SQL("set-blob {p}").onParams(pv(blob)).execute() must beFalse
+    }
+
+    "be null blob" in withConnection() { implicit c =>
+      SQL("set-null-blob {p}").onParams(pv(null.asInstanceOf[java.sql.Blob])).
+        execute() must beFalse
     }
 
     "be boolean true" in withConnection() { implicit c =>
