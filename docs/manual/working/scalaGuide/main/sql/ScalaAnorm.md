@@ -957,6 +957,19 @@ Vector                    | Multi-value, with `T` mapping for each element      
 
 > Passing `None` for a nullable parameter is deprecated, and typesafe `Option.empty[T]` must be use instead.
 
+Large and stream parameters are also supported.
+
+JVM                     | JDBC
+------------------------|---------------
+Array[Byte]             | Long varbinary
+Blob<sup>1</sup>        | Blob
+InputStream<sup>2</sup> | Long varbinary
+Reader<sup>3</sup>      | Long varchar
+
+- 1. Type `java.sql.Blob`
+- 2. Type `java.io.InputStream`
+- 3. Type `java.io.Reader`
+
 [Joda](http://www.joda.org) and [Java 8](#Java_8) temporal types are supported as parameters:
 
 JVM                       | JDBC

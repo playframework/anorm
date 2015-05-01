@@ -38,6 +38,25 @@ trait ParameterMetaData[T] { // TODO: Move in separate file
 object ParameterMetaData {
   import JodaParameterMetaData._
 
+  /** Binary meta data */
+  implicit object BlobParameterMetaData
+      extends ParameterMetaData[java.sql.Blob] {
+    val sqlType = "BLOB"
+    val jdbcType = Types.BLOB
+  }
+
+  /** Array of byte meta data */
+  implicit object ByteArrayParameterMetaData
+      extends ParameterMetaData[Array[Byte]] {
+    val sqlType = "LONGVARBINARY"
+    val jdbcType = Types.LONGVARBINARY
+  }
+  implicit object InputStreamParameterMetaData
+      extends ParameterMetaData[java.io.InputStream] {
+    val sqlType = ByteArrayParameterMetaData.sqlType
+    val jdbcType = ByteArrayParameterMetaData.jdbcType
+  }
+
   /** Boolean parameter meta data */
   implicit object BooleanParameterMetaData extends ParameterMetaData[Boolean] {
     val sqlType = "BOOLEAN"
@@ -46,6 +65,13 @@ object ParameterMetaData {
   implicit object JBooleanParameterMetaData extends ParameterMetaData[JBool] {
     val sqlType = BooleanParameterMetaData.sqlType
     val jdbcType = BooleanParameterMetaData.jdbcType
+  }
+
+  /** Clob meta data */
+  implicit object ClobParameterMetaData
+      extends ParameterMetaData[java.sql.Clob] {
+    val sqlType = "CLOB"
+    val jdbcType = Types.CLOB
   }
 
   /** Double parameter meta data */
@@ -145,6 +171,11 @@ object ParameterMetaData {
     val jdbcType = Types.VARCHAR
   }
   implicit object UUIDParameterMetaData extends ParameterMetaData[JUUID] {
+    val sqlType = StringParameterMetaData.sqlType
+    val jdbcType = StringParameterMetaData.jdbcType
+  }
+  implicit object CharacterStreamMetaData
+      extends ParameterMetaData[java.io.Reader] {
     val sqlType = StringParameterMetaData.sqlType
     val jdbcType = StringParameterMetaData.jdbcType
   }
