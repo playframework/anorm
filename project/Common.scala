@@ -5,6 +5,7 @@ import com.typesafe.sbt.SbtScalariform._
 import sbtrelease.ReleasePlugin._
 import com.typesafe.sbt.pgp.PgpKeys
 import interplay.Omnidoc.Import._
+import xerial.sbt.Sonatype
 
 object Common extends AutoPlugin {
   override def trigger = allRequirements
@@ -23,11 +24,10 @@ object Common extends AutoPlugin {
     fork in Test := true,
 
     resolvers ++= DefaultOptions.resolvers(snapshot = true),
-    resolvers += Resolver.typesafeRepo("releases"),
     resolvers += "Scalaz Bintray Repo" at {
       "http://dl.bintray.com/scalaz/releases" // specs2 depends on scalaz-stream
     }
-  )
+  ) ++ scalariformSettings
 }
 
 object AnormGeneration {
@@ -87,10 +87,6 @@ object Publish extends AutoPlugin {
   override def requires = interplay.Omnidoc
 
   override def projectSettings = Release.settings ++ Seq(
-    publishTo := {
-      if (isSnapshot.value) Some(Opts.resolver.sonatypeSnapshots)
-      else Some(Opts.resolver.sonatypeStaging)
-    },
     homepage := Some(url("https://github.com/playframework/anorm")),
     licenses := Seq("Apache 2" -> url(
       "http://www.apache.org/licenses/LICENSE-2.0")),
@@ -111,7 +107,7 @@ object Publish extends AutoPlugin {
 
     OmnidocKeys.githubRepo := "playframework/anorm",
     OmnidocKeys.tagPrefix := ""
-  ) ++ scalariformSettings
+  )
 }
 
 object NoPublish extends AutoPlugin {
@@ -121,14 +117,42 @@ object NoPublish extends AutoPlugin {
   override def projectSettings = Release.settings ++ Seq(
     publish := (),
     publishLocal := (),
+    PgpKeys.publishSigned := (),
     publishTo := Some(Resolver.file("no-publish", crossTarget.value / "no-publish"))
   )
 }
 
 object Release {
-  def settings = releaseSettings ++  Seq(
+  import sbtrelease._
+  import ReleaseStateTransformations._
+  import ReleaseKeys._
+  import sbt.complete.Parser
+
+  def settings = releaseSettings ++ Seq(
     ReleaseKeys.crossBuild := true,
     ReleaseKeys.publishArtifactsAction := PgpKeys.publishSigned.value,
-    ReleaseKeys.tagName := (version in ThisBuild).value
+    ReleaseKeys.tagName := (version in ThisBuild).value,
+    Sonatype.autoImport.sonatypeProfileName := "com.typeasfe",
+
+    releaseProcess := Seq[ReleaseStep](
+      checkSnapshotDependencies,
+      inquireVersions,
+      runClean,
+      runTest,
+      setReleaseVersion,
+      commitReleaseVersion,
+      tagRelease,
+      publishArtifacts,
+      ReleaseStep(action = { state =>
+        Parser.parse("", Sonatype.SonatypeCommand.sonatypeRelease.parser(state)) match {
+          case Right(command) => command()
+          case Left(msg) => throw sys.error(s"Bad input for release command: $msg")
+        }
+      }),
+      setNextVersion,
+      commitNextVersion,
+      pushChanges
+    )
+
   )
 }
