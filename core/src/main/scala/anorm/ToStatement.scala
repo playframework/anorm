@@ -3,11 +3,9 @@ package anorm
 import java.lang.{
   Boolean => JBool,
   Byte => JByte,
-  Character,
   Double => JDouble,
   Float => JFloat,
   Long => JLong,
-  Integer,
   Short => JShort
 }
 
@@ -613,10 +611,10 @@ sealed trait ToStatementPriority0 {
     }
 }
 
-import org.joda.time.{ DateTime, Instant }
-
 /** Meta data for Joda parameters */
 object JodaParameterMetaData {
+  import org.joda.time.{ DateTime, Instant }
+
   import java.sql.Types
 
   /** Date/time parameter meta data */
@@ -632,7 +630,10 @@ object JodaParameterMetaData {
   }
 }
 
-sealed trait JodaToStatement { // TODO: Move in a separate file
+sealed trait JodaToStatement {
+
+  import org.joda.time.{ DateTime, Instant }
+
   /**
    * Sets joda-time DateTime as statement parameter.
    * For `null` value, `setNull` with `TIMESTAMP` is called on statement.
@@ -667,6 +668,59 @@ sealed trait JodaToStatement { // TODO: Move in a separate file
   }
 }
 
+sealed trait JavaTimeToStatement {
+
+  import java.time.{ Instant, LocalDateTime, ZonedDateTime }
+
+  /**
+   * Sets a temporal instant on statement.
+   *
+   * {{{
+   * import java.time.Instant
+   * import anorm.Java8._
+   *
+   * SQL("SELECT * FROM Test WHERE time < {b}").on('b -> Instant.now)
+   * }}}
+   */
+  implicit def instantToStatement(implicit meta: ParameterMetaData[Instant]): ToStatement[Instant] = new ToStatement[Instant] {
+    def set(s: PreparedStatement, i: Int, t: Instant): Unit =
+      if (t == null) s.setNull(i, meta.jdbcType)
+      else s.setTimestamp(i, Timestamp from t)
+  }
+
+  /**
+   * Sets a local date/time on statement.
+   *
+   * {{{
+   * import java.time.LocalDateTime
+   * import anorm.Java8._
+   *
+   * SQL("SELECT * FROM Test WHERE time < {b}").on('b -> LocalDateTime.now)
+   * }}}
+   */
+  implicit def localDateTimeToStatement(implicit meta: ParameterMetaData[LocalDateTime]): ToStatement[LocalDateTime] = new ToStatement[LocalDateTime] {
+    def set(s: PreparedStatement, i: Int, t: LocalDateTime): Unit =
+      if (t == null) s.setNull(i, meta.jdbcType)
+      else s.setTimestamp(i, Timestamp valueOf t)
+  }
+
+  /**
+   * Sets a zoned date/time on statement.
+   *
+   * {{{
+   * import java.time.ZonedDateTime
+   * import anorm.Java8._
+   *
+   * SQL("SELECT * FROM Test WHERE time < {b}").on('b -> ZonedDateTime.now)
+   * }}}
+   */
+  implicit def zonedDateTimeToStatement(implicit meta: ParameterMetaData[ZonedDateTime]): ToStatement[ZonedDateTime] = new ToStatement[ZonedDateTime] {
+    def set(s: PreparedStatement, i: Int, t: ZonedDateTime): Unit =
+      if (t == null) s.setNull(i, meta.jdbcType)
+      else s.setTimestamp(i, Timestamp from t.toInstant)
+  }
+}
+
 sealed trait ToStatementPriority1 extends ToStatementPriority0 {
   /**
    * Sets an array of byte as parameter on statement.
@@ -687,4 +741,4 @@ sealed trait ToStatementPriority1 extends ToStatementPriority0 {
 /**
  * Provided conversions to set statement parameter.
  */
-object ToStatement extends ToStatementPriority1 with JodaToStatement
+object ToStatement extends ToStatementPriority1 with JodaToStatement with JavaTimeToStatement

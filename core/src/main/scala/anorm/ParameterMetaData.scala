@@ -3,11 +3,9 @@ package anorm
 import java.lang.{
   Boolean => JBool,
   Byte => JByte,
-  Character,
   Double => JDouble,
   Float => JFloat,
   Long => JLong,
-  Integer,
   Short => JShort
 }
 
@@ -35,8 +33,7 @@ trait ParameterMetaData[T] { // TODO: Move in separate file
 /**
  * ParameterMetaData companion, providing defaults based on SQL92.
  */
-object ParameterMetaData {
-  import JodaParameterMetaData._
+object ParameterMetaData extends JavaTimeParameterMetaData {
 
   /** Binary meta data */
   implicit object BlobParameterMetaData
@@ -189,5 +186,31 @@ object ParameterMetaData {
       extends ParameterMetaData[Character] {
     val sqlType = CharParameterMetaData.sqlType
     val jdbcType = CharParameterMetaData.jdbcType
+  }
+}
+
+sealed trait JavaTimeParameterMetaData {
+  import java.time.{ Instant, LocalDateTime, ZonedDateTime }
+
+  /** Parameter metadata for Java8 instant */
+  implicit object InstantParameterMetaData extends ParameterMetaData[Instant] {
+    val sqlType = "TIMESTAMP"
+    val jdbcType = Types.TIMESTAMP
+  }
+
+  /** Parameter metadata for Java8 local date/time */
+  implicit object LocalDateTimeParameterMetaData
+      extends ParameterMetaData[LocalDateTime] {
+
+    val sqlType = "TIMESTAMP"
+    val jdbcType = Types.TIMESTAMP
+  }
+
+  /** Parameter metadata for Java8 zoned date/time */
+  implicit object ZonedDateTimeParameterMetaData
+      extends ParameterMetaData[ZonedDateTime] {
+
+    val sqlType = "TIMESTAMP"
+    val jdbcType = Types.TIMESTAMP
   }
 }

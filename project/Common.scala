@@ -17,8 +17,8 @@ object Common extends AutoPlugin {
     crossScalaVersions := Seq("2.10.4", "2.11.6"),
 
     scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "utf8"),
-    (javacOptions in compile) := Seq("-source", "1.7", "-target", "1.7"),
-    (javacOptions in doc) := Seq("-source", "1.7"),
+    (javacOptions in compile) := Seq("-source", "1.8", "-target", "1.8"),
+    (javacOptions in doc) := Seq("-source", "1.8"),
 
     fork in Test := true,
 

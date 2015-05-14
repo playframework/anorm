@@ -1006,11 +1006,3 @@ In this case at your own risk, `setObject` will be used on statement.
 val anyVal: Any = myVal
 SQL("UPDATE t SET v = {opaque}").on('opaque -> anorm.Object(anyVal))
 ```
-
-### More mappings
-
-Types which are specific to Java 8 are supported, as parameters or in column parsing, by importing `anorm.Java8._` and after adding following project dependency.
-
-```scala
-libraryDependencies += "com.typesafe.play" %% "anorm-java8" % "2.4.0"
-```
