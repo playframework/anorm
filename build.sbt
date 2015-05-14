@@ -1,16 +1,21 @@
-import scala.util.Properties.isJavaAtLeast
 import AnormGeneration.{ generateFunctionAdapter => GFA }
 
-lazy val acolyteVersion =
-  if (isJavaAtLeast("1.7")) "1.0.33-j7p" else "1.0.33"
+lazy val acolyteVersion = "1.0.33-j7p"
 
-lazy val tokenizer = project
+lazy val `anorm-tokenizer` = project
   .in(file("tokenizer"))
-  .enablePlugins(Omnidoc, Publish)
+  .enablePlugins(PlayLibrary)
+  .settings(scalariformSettings: _*)
+  .settings(
+    libraryDependencies ++= Seq(
+      "org.scala-lang" % "scala-reflect" % scalaVersion.value
+    )
+  )
 
 lazy val anorm = project
   .in(file("core"))
-  .enablePlugins(Playdoc, Omnidoc, Publish)
+  .enablePlugins(Playdoc, PlayLibrary)
+  .settings(scalariformSettings: _*)
   .settings({
     sourceGenerators in Compile <+= (
       sourceManaged in Compile).map(m => Seq(GFA(m / "anorm")))
@@ -18,7 +23,7 @@ lazy val anorm = project
   .settings({
     libraryDependencies ++= Seq(
       "com.jsuereth" %% "scala-arm" % "1.4",
-      "joda-time" % "joda-time" % "2.6", // TODO: scope as 'provided' ?
+      "joda-time" % "joda-time" % "2.6",
       "org.joda" % "joda-convert" % "1.7",
 
       "com.h2database" % "h2" % "1.4.182" % Test,
@@ -36,23 +41,15 @@ lazy val anorm = project
       "specs2-core",
       "specs2-junit"
     ).map("org.specs2" %% _ % "2.4.9" % Test)
-  }).dependsOn(tokenizer)
+  }).dependsOn(`anorm-tokenizer`)
 
-lazy val java8 = project
-  .in(file("java8"))
-  .dependsOn(anorm)
-  .enablePlugins(Omnidoc, Publish)
-  .settings(javacOptions := Seq("-source", "1.8", "-target", "1.8"))
-
-lazy val root = Project(id = "anorm-parent", base = file("."))
-  .enablePlugins(NoPublish)
-  .aggregate(tokenizer, anorm) configure { p =>
-    if (isJavaAtLeast("1.8")) p.aggregate(java8) else p
-  }
+lazy val `anorm-parent` = (project in file("."))
+  .enablePlugins(PlayRootProject)
+  .aggregate(`anorm-tokenizer`, anorm)
 
 lazy val docs = project
   .in(file("docs"))
   .enablePlugins(PlayDocsPlugin)
   .dependsOn(anorm)
 
-name := "root"
+playBuildRepoName in ThisBuild := "anorm"

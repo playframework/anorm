@@ -15,7 +15,7 @@ import resource.managed
 trait Column[A] extends ((Any, MetaDataItem) => MayErr[SqlRequestError, A])
 
 /** Column companion, providing default conversions. */
-object Column extends JodaColumn {
+object Column extends JodaColumn with JavaTimeColumn {
 
   def apply[A](transformer: ((Any, MetaDataItem) => MayErr[SqlRequestError, A])): Column[A] = new Column[A] {
 
@@ -443,9 +443,10 @@ object Column extends JodaColumn {
   }
 }
 
-import org.joda.time.{ DateTime, Instant }
-
 sealed trait JodaColumn {
+
+  import org.joda.time.{ DateTime, Instant }
+
   /**
    * Parses column as joda DateTime
    *
@@ -482,5 +483,95 @@ sealed trait JodaColumn {
         case time: Long => Right(new Instant(time))
         case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${value.asInstanceOf[AnyRef].getClass} to Instant for column $qualified"))
       }
+  }
+}
+
+sealed trait JavaTimeColumn {
+
+  import java.time.{ ZonedDateTime, ZoneId, LocalDateTime, Instant }
+
+  /**
+   * Parses column as Java8 instant.
+   * Time zone offset is the one of default JVM time zone
+   * (see [[java.time.ZoneId#systemDefault ZoneId.systemDefault]]).
+   *
+   * {{{
+   * import java.time.Instant
+   * import anorm.Java8._
+   *
+   * val i: Instant = SQL("SELECT last_mod FROM tbl").as(scalar[Instant].single)
+   * }}}
+   */
+  implicit val columnToInstant: Column[Instant] =
+    Column.nonNull1 { (value, meta) =>
+      val MetaDataItem(qualified, nullable, clazz) = meta
+      value match {
+        case date: java.util.Date => Right(Instant ofEpochMilli date.getTime)
+        case time: Long => Right(Instant ofEpochMilli time)
+        case tsw: TimestampWrapper1 =>
+          Option(tsw.getTimestamp).fold(Right(null.asInstanceOf[Instant]))(t =>
+            Right(Instant ofEpochMilli t.getTime))
+        case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${value.asInstanceOf[AnyRef].getClass} to Java8 Instant for column $qualified"))
+      }
+    }
+
+  /**
+   * Parses column as Java8 local date/time.
+   * Time zone offset is the one of default JVM time zone
+   * (see [[java.time.ZoneId#systemDefault ZoneId.systemDefault]]).
+   *
+   * {{{
+   * import java.time.LocalDateTime
+   * import anorm.Java8._
+   *
+   * val i: LocalDateTime = SQL("SELECT last_mod FROM tbl").
+   *   as(scalar[LocalDateTime].single)
+   * }}}
+   */
+  implicit val columnToLocalDateTime: Column[LocalDateTime] = {
+    @inline def dateTime(ts: Long) = LocalDateTime.ofInstant(
+      Instant.ofEpochMilli(ts), ZoneId.systemDefault)
+
+    Column.nonNull1 { (value, meta) =>
+      val MetaDataItem(qualified, nullable, clazz) = meta
+      value match {
+        case date: java.util.Date => Right(dateTime(date.getTime))
+        case time: Long => Right(dateTime(time))
+        case tsw: TimestampWrapper1 => Option(tsw.getTimestamp).
+          fold(Right(null.asInstanceOf[LocalDateTime]))(t =>
+            Right(dateTime(t.getTime)))
+        case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${value.asInstanceOf[AnyRef].getClass} to Java8 LocalDateTime for column $qualified"))
+      }
+    }
+  }
+
+  /**
+   * Parses column as Java8 zoned date/time.
+   * Time zone offset is the one of default JVM time zone
+   * (see [[java.time.ZoneId#systemDefault ZoneId.systemDefault]]).
+   *
+   * {{{
+   * import java.time.ZonedDateTime
+   * import anorm.Java8._
+   *
+   * val i: ZonedDateTime = SQL("SELECT last_mod FROM tbl").
+   *   as(scalar[ZonedDateTime].single)
+   * }}}
+   */
+  implicit val columnToZonedDateTime: Column[ZonedDateTime] = {
+    @inline def dateTime(ts: Long) = ZonedDateTime.ofInstant(
+      Instant.ofEpochMilli(ts), ZoneId.systemDefault)
+
+    Column.nonNull1 { (value, meta) =>
+      val MetaDataItem(qualified, nullable, clazz) = meta
+      value match {
+        case date: java.util.Date => Right(dateTime(date.getTime))
+        case time: Long => Right(dateTime(time))
+        case tsw: TimestampWrapper1 => Option(tsw.getTimestamp).
+          fold(Right(null.asInstanceOf[ZonedDateTime]))(t =>
+            Right(dateTime(t.getTime)))
+        case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${value.asInstanceOf[AnyRef].getClass} to Java8 ZonedDateTime for column $qualified"))
+      }
+    }
   }
 }
