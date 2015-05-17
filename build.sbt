@@ -20,6 +20,7 @@ lazy val anorm = project
     sourceGenerators in Compile <+= (
       sourceManaged in Compile).map(m => Seq(GFA(m / "anorm")))
   })
+  .settings(scalacOptions += "-Xlog-free-terms")
   .settings({
     libraryDependencies ++= Seq(
       "com.jsuereth" %% "scala-arm" % "1.4",
@@ -36,7 +37,9 @@ lazy val anorm = project
     ) ++ (CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, scalaMajor)) if scalaMajor >= 11 =>
         Seq("org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.1")
-      case _ => Nil
+      case _ => Seq(
+        compilerPlugin("org.scalamacros" % "paradise" % "2.1.0-M5" cross CrossVersion.full),
+        "org.scalamacros" %% "quasiquotes" % "2.1.0-M5" cross CrossVersion.binary)        
     }) ++ Seq(
       "specs2-core",
       "specs2-junit"
