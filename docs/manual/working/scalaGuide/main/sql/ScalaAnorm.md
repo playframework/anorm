@@ -984,6 +984,8 @@ ZonedDateTime<sup>4</sup> | Timestamp
 - 3. Type `org.joda.time.LocalDateTime`.
 - 4. Type `org.joda.time.ZonedDateTime`
 
+To enable Joda types as parameter, the `import anorm.JodaParameterMetaData._` must be used.
+
 Custom or specific DB conversion for parameter can also be provided:
 
 ```
