@@ -645,34 +645,22 @@ object ParameterSpec
           execute() aka "execution" must beFalse
       }
 
-    "accept deprecated untyped name when feature enabled" in withConnection() {
-      implicit c =>
-        import anorm.features.parameterWithUntypedName
+    withConnection() { implicit c =>
+      // Do not accept untyped name when feature enabled
+      val name: Any = "untyped"
 
-        val name: Any = "untyped"
-        SQL("set-old {untyped}").on(name -> 2l) aka "query" must beLike {
-          case q @ SimpleSql(
-            SqlQuery(TokenizedStatement(List(TokenGroup(List(StringToken("set-old ")), Some("untyped"))), List("untyped")), "untyped" :: Nil, _), ps, _, _) if (
-            ps contains "untyped") => q.execute() aka "execution" must beFalse
-
-        }
+      shapeless.test.illTyped {
+        """SQL("set-old {untyped}").on(name -> 2l)"""
+      }
     }
 
-    "accept deprecated untyped value when feature enabled" in withConnection() {
-      implicit c =>
-        import anorm.features.anyToStatement
+    withConnection() { implicit c =>
+      // Do not accept untyped value when feature enabled
+      val d: Any = new java.util.Date()
 
-        val d = new java.util.Date()
-        val params: Seq[NamedParameter] = Seq("mod" -> d, "id" -> "idv")
-        SQL("UPDATE item SET last_modified = {mod} WHERE id = {id}").
-          on(params: _*) aka "update" must beLike {
-            case q @ SimpleSql(SqlQuery(TokenizedStatement(
-              List(TokenGroup(List(StringToken("UPDATE item SET last_modified = ")), Some("mod")), TokenGroup(List(StringToken(" WHERE id = ")), Some("id"))), List("mod", "id")), "mod" :: "id" :: Nil, _), ps, _, _) if (ps.contains("mod") &&
-              ps.contains("id")) => q.execute() aka "execution" must {
-              throwA[SQLFeatureNotSupportedException](
-                message = "Unsupported parameter type: java.util.Date")
-            }
-          }
+      shapeless.test.illTyped {
+        """val params: Seq[NamedParameter] = Seq("mod" -> d, "id" -> "idv")"""
+      }
     }
 
     "accept value wrapped as opaque parameter object" in withConnection() {

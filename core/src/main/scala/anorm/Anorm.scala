@@ -100,12 +100,6 @@ private[anorm] case class MetaData(ms: List[MetaDataItem]) {
       orElse(aliasedDictionary.get(key))
   }
 
-  @deprecated(
-    message = "No longer distinction between plain and aliased column",
-    since = "2.3.3")
-  def getAliased(aliasName: String): Option[MetaDataItem] =
-    aliasedDictionary.get(aliasName.toUpperCase)
-
   private lazy val dictionary: Map[String, MetaDataItem] =
     ms.map(m => m.column.qualified.toUpperCase() -> m).toMap
 
@@ -126,23 +120,6 @@ private[anorm] case class MetaData(ms: List[MetaDataItem]) {
   lazy val availableColumns: List[String] =
     ms.flatMap(i => i.column.qualified :: i.column.alias.toList)
 
-}
-
-@deprecated(message = "Use directly Stream", since = "2.3.3")
-object Useful {
-
-  case class Var[T](var content: T)
-
-  @deprecated(message = "Use directly Stream value", since = "2.3.2")
-  def unfold1[T, R](init: T)(f: T => Option[(R, T)]): (Stream[R], T) = f(init) match {
-    case None => (Stream.Empty, init)
-    case Some((r, v)) => (Stream.cons(r, unfold(v)(f)), v)
-  }
-
-  def unfold[T, R](init: T)(f: T => Option[(R, T)]): Stream[R] = f(init) match {
-    case None => Stream.Empty
-    case Some((r, v)) => Stream.cons(r, unfold(v)(f))
-  }
 }
 
 /**
@@ -234,12 +211,6 @@ private[anorm] trait Sql extends WithResult {
   def execute()(implicit connection: Connection): Boolean =
     preparedStatement(connection).acquireAndGet(_.execute())
   // TODO: Safe alternative
-
-  @deprecated(message = "Will be made private, use [[executeUpdate]] or [[executeInsert]]", since = "2.3.2")
-  def execute1(getGeneratedKeys: Boolean = false)(implicit connection: Connection): (PreparedStatement, Int) = {
-    val statement = getFilledStatement(connection, getGeneratedKeys)
-    (statement, statement.executeUpdate())
-  }
 
   /**
    * Executes this SQL as an update statement.

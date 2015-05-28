@@ -21,32 +21,6 @@ sealed trait BatchSql {
   /** Named parameters */
   def params: Seq[Map[String, ParameterValue]] // checked: maps have same keys
 
-  @throws[IllegalArgumentException](BatchSqlErrors.UnexpectedParameterName)
-  @throws[IllegalArgumentException](BatchSqlErrors.MissingParameter)
-  @throws[IllegalArgumentException](BatchSqlErrors.ParameterNamesNotMatchingPlaceholders)
-  @deprecated(message = "Use [[addBatchParams]]", since = "2.3.0")
-  def addBatch(args: NamedParameter*): BatchSql = {
-    if (params.isEmpty) { // first parameter map
-      val ps = toMap(args)
-      val ks = ps.keySet
-
-      if (!BatchSql.matchPlaceholders(sql, ks))
-        throw new IllegalArgumentException(s"""Expected parameter names don't correspond to placeholders in query: ${ks mkString ", "} not matching ${sql.paramsInitialOrder mkString ", "}""")
-
-      copy(names = ks, params = Seq(ps))
-    } else copy(params = this.params :+ checkedMap(args))
-  }
-
-  @throws[IllegalArgumentException](BatchSqlErrors.UnexpectedParameterName)
-  @throws[IllegalArgumentException](BatchSqlErrors.MissingParameter)
-  @throws[IllegalArgumentException](BatchSqlErrors.HeterogeneousParameterMaps)
-  @throws[IllegalArgumentException](BatchSqlErrors.ParameterNamesNotMatchingPlaceholders)
-  @deprecated(message = "Use [[addBatchParamsList]]", since = "2.3.0")
-  def addBatchList(args: Traversable[Seq[NamedParameter]]): BatchSql = {
-    if (params.isEmpty) BatchSql.Checked(sql, args.map(_.map(_.tupled).toMap))
-    else copy(params = this.params ++ args.map(checkedMap))
-  }
-
   /**
    * Adds a parameter map, created by zipping values with query placeholders
    * ([[SqlQuery.paramsInitialOrder]]). If parameter is used for more than one
@@ -91,10 +65,6 @@ sealed trait BatchSql {
   }
 
   def getFilledStatement(connection: Connection, getGeneratedKeys: Boolean = false) = fill(connection, null, getGeneratedKeys, params)
-
-  @deprecated(message = "Use [[getFilledStatement]]", since = "2.3.0")
-  def filledStatement(implicit connection: Connection) =
-    getFilledStatement(connection)
 
   def execute()(implicit connection: Connection): Array[Int] =
     getFilledStatement(connection).executeBatch()

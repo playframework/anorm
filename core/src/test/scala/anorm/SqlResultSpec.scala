@@ -410,11 +410,9 @@ object SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
     val foo = s"alias-${System.identityHashCode(this)}"
     val (v1, v2) = (s"1-$foo", s"2-$foo")
 
-    "be found either by name and alias" in withTestDB(v1) { implicit c =>
+    "be found either by name" in withTestDB(v1) { implicit c =>
       SQL"SELECT foo AS AL, bar FROM test1".as(SqlParser.str("foo").single).
-        aka("by name") must_== v1 and (SQL"SELECT foo AS AL, bar FROM test1".
-          as(SqlParser.getAliased[String]("AL").single).
-          aka("by alias") must_== v1)
+        aka("by name") must_== v1
 
     }
 
