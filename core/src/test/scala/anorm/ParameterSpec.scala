@@ -525,17 +525,6 @@ object ParameterSpec
         on("p" -> (None: Option[java.util.UUID])).execute() must beFalse
     }
 
-    "be Id of string" in withConnection() { implicit c =>
-      SQL("set-id-str {p}").on("p" -> Id("str")).execute() must beFalse
-    }
-
-    "be not assigned" in withConnection(
-      "acolyte.parameter.untypedNull" -> "true") { implicit c =>
-
-        SQL("set-not-assigned {p}").on("p" -> NotAssigned).
-          execute() must beFalse
-      }
-
     "be multiple (string, Java big decimal)" in withConnection() {
       implicit c =>
         SQL("set-s-jbd {a}, {b}").on("a" -> "string", "b" -> Jbd1).
@@ -921,17 +910,6 @@ object ParameterSpec
     "be one timestamp" in withConnection() { implicit c =>
       SQL("set-timestamp {p}").onParams(pv(Timestamp1)).execute() must beFalse
     }
-
-    "be Id of string" in withConnection() { implicit c =>
-      SQL("set-id-str {p}").onParams(pv(Id("str"))).execute() must beFalse
-    }
-
-    "be not assigned" in withConnection(
-      "acolyte.parameter.untypedNull" -> "true") { implicit c =>
-
-        SQL("set-not-assigned {p}").onParams(pv(NotAssigned)).
-          execute() must beFalse
-      }
 
     "be multiple (string, Java big decimal)" in withConnection() {
       implicit c =>

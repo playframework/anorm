@@ -26,8 +26,6 @@ package object anorm {
   // (add explicit functions on SqlQuery?)
   implicit def sqlToSimple(sql: SqlQuery): SimpleSql[Row] = sql.asSimple
 
-  implicit def implicitID[ID](id: Id[ID]): ID = id.id
-
   /**
    * Creates an SQL query with given statement.
    * @param stmt SQL statement

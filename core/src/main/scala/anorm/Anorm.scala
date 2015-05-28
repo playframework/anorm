@@ -45,41 +45,6 @@ case class TypeDoesNotMatch(reason: String) extends SqlRequestError {
   override lazy val toString = message
 }
 
-@deprecated(
-  message = "Do not use directly, but consider [[Id]] or [[NotAssigned]].",
-  since = "2.3.0")
-trait Pk[+ID] extends NotNull {
-
-  def toOption: Option[ID] = this match {
-    case Id(x) => Some(x)
-    case NotAssigned => None
-  }
-
-  def isDefined: Boolean = toOption.isDefined
-  def get: ID = toOption.get
-  def getOrElse[V >: ID](id: V): V = toOption.getOrElse(id)
-  def map[B](f: ID => B) = toOption.map(f)
-  def flatMap[B](f: ID => Option[B]) = toOption.flatMap(f)
-  def foreach(f: ID => Unit) = toOption.foreach(f)
-
-}
-
-/**
- * Workaround to suppress deprecation warnings within the Play build.
- * Based on https://issues.scala-lang.org/browse/SI-7934
- */
-private[anorm] object Pk {
-  type Deprecated[A] = Pk[A]
-}
-
-case class Id[ID](id: ID) extends Pk.Deprecated[ID] {
-  override def toString() = id.toString
-}
-
-case object NotAssigned extends Pk.Deprecated[Nothing] {
-  override def toString() = "NotAssigned"
-}
-
 /**
  * Untyped value wrapper.
  *

@@ -304,18 +304,6 @@ sealed trait ToStatementPriority0 {
   }
 
   /**
-   * Sets null for not assigned value.
-   *
-   * {{{
-   * SQL("SELECT * FROM Test WHERE category = {c}").on('c -> NotAssigned)
-   * }}}
-   */
-  implicit object notAssignedToStatement extends ToStatement[NotAssigned.type] {
-    def set(s: PreparedStatement, i: Int, n: NotAssigned.type): Unit =
-      s.setObject(i, null)
-  }
-
-  /**
    * Sets null for None value.
    *
    * {{{
@@ -494,20 +482,6 @@ sealed trait ToStatementPriority0 {
     def set(s: PreparedStatement, index: Int, o: anorm.Object): Unit =
       s.setObject(index, o.value)
   }
-
-  /**
-   * Sets Id parameter on statement.
-   *
-   * {{{
-   * SQL("INSERT INTO tbl(id, name) VALUES ({i}, {v}").
-   *   on("i" -> anorm.Id("id"), "v" -> "name")
-   * }}}
-   */
-  implicit def idToStatement[A](implicit c: ToStatement[A]) =
-    new ToStatement[Id[A]] with NotNullGuard {
-      def set(s: PreparedStatement, index: Int, id: Id[A]): Unit =
-        c.set(s, index, id.get)
-    }
 
   /**
    * Sets multi-value parameter from list on statement.
