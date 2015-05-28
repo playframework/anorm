@@ -155,9 +155,7 @@ object JavaTimeColumnSpec extends Specification {
 }
 
 object JavaTimeParameterMetaDataSpec extends Specification {
-
   "Metadata" should {
-
     "be provided for parameter" >> {
       s"of type Instant" in {
         Option(implicitly[ParameterMetaData[Instant]].sqlType).

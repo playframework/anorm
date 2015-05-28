@@ -918,7 +918,7 @@ Timestamp                     | Yes              | Yes                  | Yes
 Timestamp wrapper<sup>5</sup> | Yes              | Yes                  | Yes
 
 - 1. Type `java.util.Date`.
-- 2. Types `org.joda.time.DateTime`, `java.time.LocalDateTime` and `java.time.ZonedDateTime`.
+- 2. Types `org.joda.time.DateTime`, `org.joda.time.LocalDateTime`, `java.time.LocalDateTime` and `java.time.ZonedDateTime`.
 - 3. Type `org.joda.time.Instant` and `java.time.Instant` (see Java 8).
 - 5. Any type with a getter `getTimestamp` returning a `java.sql.Timestamp`.
 
@@ -1012,8 +1012,8 @@ ZonedDateTime<sup>4</sup> | Timestamp
 
 - 1. Type `org.joda.time.DateTime`.
 - 2. Type `org.joda.time.Instant` and `java.time.Instant`.
-- 3. Type `org.joda.time.LocalDateTime`.
-- 4. Type `org.joda.time.ZonedDateTime`
+- 3. Type `org.joda.time.LocalDateTime` and `java.time.LocalDateTime`.
+- 4. Type `java.time.ZonedDateTime`
 
 Custom or specific DB conversion for parameter can also be provided:
 

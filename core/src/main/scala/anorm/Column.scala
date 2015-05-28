@@ -7,6 +7,7 @@ import java.io.{ ByteArrayInputStream, InputStream }
 import java.math.{ BigDecimal => JBigDec, BigInteger }
 import java.util.{ Date, UUID }
 
+import scala.language.reflectiveCalls
 import scala.util.{ Failure, Success => TrySuccess, Try }
 
 import resource.managed
@@ -442,8 +443,35 @@ object Column extends JodaColumn with JavaTimeColumn {
 }
 
 sealed trait JodaColumn {
+  import org.joda.time.{ DateTime, LocalDateTime, Instant }
 
-  import org.joda.time.{ DateTime, Instant }
+  /**
+   * Parses column as Joda local date/time.
+   * Time zone is the one of default JVM time zone
+   * (see [[org.joda.time.DateTimeZone#getDefault DateTimeZone.getDefault]]).
+   *
+   * {{{
+   * import org.joda.time.LocalDateTime
+   *
+   * val i: LocalDateTime = SQL("SELECT last_mod FROM tbl").
+   *   as(scalar[LocalDateTime].single)
+   * }}}
+   */
+  implicit val columnToJodaLocalDateTime: Column[LocalDateTime] = {
+    Column.nonNull1 { (value, meta) =>
+      val MetaDataItem(qualified, nullable, clazz) = meta
+
+      value match {
+        case date: java.util.Date => Right(new LocalDateTime(date.getTime))
+        case time: Long => Right(new LocalDateTime(time))
+        case tsw: TimestampWrapper1 => Option(tsw.getTimestamp).
+          fold(Right(null.asInstanceOf[LocalDateTime]))(t =>
+            Right(new LocalDateTime(t.getTime)))
+
+        case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${value.asInstanceOf[AnyRef].getClass} to Joda LocalDateTime for column $qualified"))
+      }
+    }
+  }
 
   /**
    * Parses column as joda DateTime
@@ -460,6 +488,10 @@ sealed trait JodaColumn {
       value match {
         case date: Date => Right(new DateTime(date.getTime))
         case time: Long => Right(new DateTime(time))
+        case tsw: TimestampWrapper1 => Option(tsw.getTimestamp).
+          fold(Right(null.asInstanceOf[DateTime]))(t =>
+            Right(new DateTime(t.getTime)))
+
         case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${value.asInstanceOf[AnyRef].getClass} to DateTime for column $qualified"))
       }
   }
@@ -479,6 +511,10 @@ sealed trait JodaColumn {
       value match {
         case date: Date => Right(new Instant(date.getTime))
         case time: Long => Right(new Instant(time))
+        case tsw: TimestampWrapper1 => Option(tsw.getTimestamp).
+          fold(Right(null.asInstanceOf[Instant]))(t =>
+            Right(new Instant(t.getTime)))
+
         case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${value.asInstanceOf[AnyRef].getClass} to Instant for column $qualified"))
       }
   }
