@@ -29,3 +29,16 @@ In this case at your own risk, `setObject` will be used on statement.
 val anyVal: Any = myVal
 SQL"UPDATE t SET v = ${anorm.Object(anyVal)}"
 ```
+
+## Macros
+
+The macros `namedParser[T]` or `indexedParser[T]` (or `parser[T](names)`) can be used to create a `RowParser[T]` at compile-time, for any case class `T`.
+
+```scala
+import anorm.{ Macro, RowParser }
+
+case class Info(name: String, year: Option[Int])
+
+val parser: RowParser[Info] = Macro.namedParser[Info]
+val result: List[Info] = SQL"SELECT * FROM list".as(parser.*)
+```
