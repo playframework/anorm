@@ -11,12 +11,13 @@ import scala.util.{ Failure, Success => TrySuccess, Try }
 
 import resource.managed
 
+import scala.language.reflectiveCalls
+
 /** Column mapping */
 trait Column[A] extends ((Any, MetaDataItem) => MayErr[SqlRequestError, A])
 
 /** Column companion, providing default conversions. */
 object Column extends JodaColumn with JavaTimeColumn {
-
   def apply[A](transformer: ((Any, MetaDataItem) => MayErr[SqlRequestError, A])): Column[A] = new Column[A] {
 
     def apply(value: Any, meta: MetaDataItem): MayErr[SqlRequestError, A] =

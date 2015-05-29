@@ -212,6 +212,61 @@ SQL"""#$cmd * FROM #$table WHERE id = ${"id1"} AND code IN (${Seq(2, 5)})"""
 // SELECT * FROM Test WHERE id = ? AND code IN (?, ?)
 ```
 
+## Generated parsers
+
+The macro `namedParser[T]` can be used to create a `RowParser[T]` at compile-time, for any case class `T`.
+
+```scala
+import anorm.{ Macro, RowParser }
+
+case class Info(name: String, year: Option[Int])
+
+val parser: RowParser[Info] = Macro.namedParser[Info]
+/* Generated as:
+get[String]("name") ~ get[Option[Int]]("year") map {
+  case name ~ year => Info(name, year)
+}
+*/
+
+val result: List[Info] = SQL"SELECT * FROM list".as(parser.*)
+```
+
+A similar macro `indexedParser[T]` is available to get column values by positions instead of names.
+
+```scala
+import anorm.{ Macro, RowParser }
+
+case class Info(name: String, year: Option[Int])
+
+val parser: RowParser[Info] = Macro.indexedParser[Info]
+/* Generated as:
+get[String](1) ~ get[Option[Int]](2) map {
+  case name ~ year => Info(name, year)
+}
+*/
+
+val result: List[Info] = SQL"SELECT * FROM list".as(parser.*)
+```
+
+To indicate custom names for the columns to be parsed, the macro `parser[T](names)` can be used.
+
+```scala
+import anorm.{ Macro, RowParser }
+
+case class Info(name: String, year: Option[Int])
+
+val parser: RowParser[Info] = Macro.parser[Info]("a_name", "creation")
+/* Generated as:
+get[String]("a_name") ~ get[Option[Int]]("creation") map {
+  case name ~ year => Info(name, year)
+}
+*/
+
+val result: List[Info] = SQL"SELECT * FROM list".as(parser.*)
+```
+
+> The `anorm.macro.debug` system property can be set to `true` (e.g. `sbt -Danorm.macro.debug=true ...`) to debug the generated parsers.
+
 ## Streaming results
 
 Query results can be processed row per row, not having all loaded in memory.

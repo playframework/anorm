@@ -16,7 +16,6 @@ import acolyte.jdbc.{
 }
 import acolyte.jdbc.RowLists
 import RowLists.{ stringList, longList, rowList1, rowList2, rowList3 }
-import acolyte.jdbc.Rows.{ row1, row2, row3 }
 import acolyte.jdbc.Implicits._
 
 import SqlParser.scalar
