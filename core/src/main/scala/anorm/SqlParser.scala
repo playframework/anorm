@@ -407,14 +407,6 @@ object SqlParser extends FunctionAdapter {
   def date(columnPosition: Int)(implicit c: Column[Date]): RowParser[Date] =
     get[Date](columnPosition)(c)
 
-  @deprecated(message = "Use [[get]] with alias", since = "2.3.3")
-  def getAliased[T](aliasName: String)(implicit extractor: Column[T]): RowParser[T] = RowParser { row =>
-    (for {
-      col <- row.getAliased(aliasName)
-      res <- extractor.tupled(col)
-    } yield res).fold(Error(_), Success(_))
-  }
-
   /**
    * Returns row parser for column with given `name`.
    * @param name Column name
@@ -456,33 +448,6 @@ object SqlParser extends FunctionAdapter {
         result <- extractor.tupled(col)
       } yield result).fold(e => Error(e), a => Success(a))
     }
-
-  /**
-   * Returns row parser which throws exception if specified `column` is either
-   * missing or not matching expected `value`.
-   * If row contains described column, do nothing (Unit).
-   *
-   * {{{
-   * import anorm.SQL
-   * import anorm.SqlParser.{ contains, str }
-   *
-   * val parser = contains("a", true) ~ str("b") map {
-   *   case () ~ str => str
-   * }
-   *
-   * SQL("SELECT * FROM table").as(parser.+)
-   * // Throws exception if there no |a| column or if |a| is not true,
-   * // otherwise parses as non-empty list of |b| strings.
-   * }}}
-   */
-  @throws[RuntimeException](
-    "SqlMappingError(Row doesn't contain a column: f with value 2.34)")
-  @deprecated(message = "Use [[matches]]", since = "2.3.0")
-  def contains[TT: Column, T <: TT](column: String, value: T): RowParser[Unit] =
-    get[TT](column)(implicitly[Column[TT]]).
-      collect(s"Row doesn't contain a column: $column with value $value") {
-        case a if a == value => Unit
-      }
 
   /**
    * Returns row parser which true if specified `column` is found

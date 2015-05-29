@@ -61,8 +61,4 @@ final case class SqlQueryResult(
     since = "2.3.5")
   def singleOpt[A](rowParser: RowParser[A])(implicit connection: Connection): Option[A] = as(ResultSetParser.singleOpt(rowParser))
 
-  @deprecated(message = "Use [[as]]", since = "2.3.2")
-  def parse[T](parser: ResultSetParser[T])(implicit connection: Connection): T =
-    as(parser)
-
 }

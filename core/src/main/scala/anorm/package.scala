@@ -126,50 +126,5 @@ package object anorm {
   }
 
   /** Activable features */
-  object features {
-
-    /**
-     * Conversion for parameter with untyped named.
-     *
-     * {{{
-     * // For backward compatibility
-     * import anorm.features.parameterWithUntypedName
-     *
-     * val untyped: Any = "name"
-     * SQL("SELECT * FROM Country WHERE {p}").on(untyped -> "val")
-     * }}}
-     */
-    @deprecated(
-      message = "Use typed name for parameter, either string or symbol",
-      since = "2.3.0")
-    implicit def parameterWithUntypedName[V](t: (Any, V))(implicit c: V => ParameterValue): NamedParameter = NamedParameter(t._1.toString, c(t._2))
-
-    /**
-     * Unsafe conversion from untyped value to statement parameter.
-     * Value will be passed using setObject.
-     *
-     * It's not recommanded to use it as it can hide conversion issue.
-     *
-     * {{{
-     * // For backward compatibility
-     * import anorm.features.anyToStatement
-     *
-     * val d = new java.util.Date()
-     * val params: Seq[NamedParameter] = Seq("mod" -> d, "id" -> "idv")
-     * // Values as Any as heterogenous
-     *
-     * SQL("UPDATE item SET last_modified = {mod} WHERE id = {id}").
-     *   on(params:_*)
-     * // date and string passed with setObject, rather than
-     * // setDate and setString.
-     * }}}
-     */
-    @deprecated(
-      message = "Do not passed parameter as untyped/Any value",
-      since = "2.3.0")
-    implicit def anyToStatement[T] = new ToStatement[T] {
-      def set(s: java.sql.PreparedStatement, i: Int, any: T): Unit =
-        s.setObject(i, any)
-    }
-  }
+  object features {}
 }

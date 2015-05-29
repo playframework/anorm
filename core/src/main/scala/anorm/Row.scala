@@ -130,16 +130,6 @@ trait Row {
 
   } yield (data, m)
 
-  @deprecated(message = "Use [[get]] with alias", since = "2.3.3")
-  private[anorm] def getAliased(a: String): MayErr[SqlRequestError, (Any, MetaDataItem)] = for {
-    m <- MayErr(metaData.getAliased(a).toRight(ColumnNotFound(a, this)))
-    data <- MayErr(m.column.alias.flatMap(
-      l => aliasesDictionary.get(l.toUpperCase())).
-      toRight(ColumnNotFound(m.column.alias.getOrElse(a),
-        metaData.availableColumns)))
-
-  } yield (data, m)
-
   /** Try to get data matching index. */
   private[anorm] def getIndexed(i: Int): MayErr[SqlRequestError, (Any, MetaDataItem)] =
     for {

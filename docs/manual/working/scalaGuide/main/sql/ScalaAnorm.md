@@ -431,15 +431,6 @@ val res: Array[Int] = batch.execute() // array of update count
 
 ### Edge cases
 
-Passing anything different from string or symbol as parameter name is now deprecated. For backward compatibility, you can activate `anorm.features.parameterWithUntypedName`.
-
-```scala
-import anorm.features.parameterWithUntypedName // activate
-
-val untyped: Any = "name" // deprecated
-SQL("SELECT * FROM Country WHERE {p}").on(untyped -> "val")
-```
-
 Type of parameter value should be visible, to be properly set on SQL statement.
 Using value as `Any`, explicitly or due to erasure, leads to compilation error `No implicit view available from Any => anorm.ParameterValue`.
 
@@ -482,22 +473,6 @@ val nps = Seq[NamedParameter]( // Tuples as NamedParameter before Any
 SQL("SELECT * FROM test WHERE (a={a} AND b={b}) OR c={c}").
   on(nps: _*) // Fail - no conversion (String,Any) => NamedParameter
 ```
-
-For backward compatibility, you can activate such unsafe parameter conversion, 
-accepting untyped `Any` value, with `anorm.features.anyToStatement`.
-
-```scala
-import anorm.features.anyToStatement
-
-val d = new java.util.Date()
-val params: Seq[NamedParameter] = Seq("mod" -> d, "id" -> "idv")
-// Values as Any as heterogenous
-
-SQL("UPDATE item SET last_modified = {mod} WHERE id = {id}").on(params:_*)
-```
-
-It's not recommanded because moreover hiding implicit resolution issues, as untyped it could lead to runtime conversion error, with values are passed on statement using `setObject`.
-In previous example, `java.util.Date` is accepted as parameter but would with most databases raise error (as it's not valid JDBC type).
 
 In some cases, some JDBC drivers returns a result set positioned on the first row rather than [before this first row](http://docs.oracle.com/javase/7/docs/api/java/sql/ResultSet.html) (e.g. stored procedured with Oracle JDBC driver).
 To handle such edge-case, `.withResultSetOnFirstRow(true)` can be used as following.
