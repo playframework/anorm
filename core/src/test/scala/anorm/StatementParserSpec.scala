@@ -15,11 +15,11 @@ object StatementParserSpec extends org.specs2.mutable.Specification {
   "Statement" should {
     "be parsed with 'name' and 'cat' parameters and support multiple lines" in {
       SqlStatementParser.parse("""
-        SELECT * FROM schema.table 
+        SELECT * FROM schema.table
         -- comment
         WHERE (name = {name} AND category = {cat}) OR id = ?
       """) aka "updated statement and parameters" must beSuccessfulTry(
-        TokenizedStatement(List(TokenGroup(List(StringToken("""SELECT * FROM schema.table 
+        TokenizedStatement(List(TokenGroup(List(StringToken("""SELECT * FROM schema.table
         -- comment
         WHERE (name = """)), Some("name")), TokenGroup(List(StringToken(" AND category = ")), Some("cat")), TokenGroup(List(StringToken(""") OR id = ?
       """)), None)), List("name", "cat")))
@@ -103,6 +103,7 @@ object StatementParserSpec extends org.specs2.mutable.Specification {
   "String interpolation" should {
     "handle values as '#' escaped part in statement or SQL parameters" in {
       val cmd = "SELECT"
+      val clause = "FROM"
       val table = "Test"
       implicit val con = connection(handleQuery {
         case QueryExecution(
@@ -113,7 +114,9 @@ object StatementParserSpec extends org.specs2.mutable.Specification {
         case QueryExecution(s, p) => stringList :+ "ko"
       })
 
-      SQL"""#$cmd * FROM #$table WHERE id = ${"id1"} AND code IN (${Seq(2, 5)})""".as(SqlParser.scalar[String].single) must_== "ok"
+      lazy val query = SQL"""#$cmd * #$clause #$table WHERE id = ${"id1"} AND code IN (${Seq(2, 5)})"""
+
+      query.sql.stmt aka "tokenized statement" must_== TokenizedStatement(List(TokenGroup(List(StringToken("SELECT"), StringToken(" * "), StringToken("FROM"), StringToken(" "), StringToken("Test"), StringToken(" WHERE id = ")), Some("_0")), TokenGroup(List(StringToken(" AND code IN (")), Some("_1")), TokenGroup(List(StringToken(")")), None)), List("_0", "_1")) and (query.as(SqlParser.scalar[String].single) must_== "ok")
     }
   }
 }
