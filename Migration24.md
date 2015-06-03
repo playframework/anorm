@@ -235,6 +235,8 @@ ZonedDateTime<sup>4</sup> | Timestamp
 - 3. Type `org.joda.time.LocalDateTime`.
 - 4. Type `org.joda.time.ZonedDateTime`.
 
+To enable Joda types as parameter, the `import anorm.JodaParameterMetaData._` must be used.
+
 These types are also supported in column mappings.
 
 Column (JDBC type)    | (as) JVM/Scala type
