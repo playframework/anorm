@@ -54,8 +54,8 @@ private[anorm] object TokenizedStatement {
             case TokenGroup(StringToken(str) :: gts, pl) if (
               str endsWith "#" /* escaped part */ ) =>
 
-              val before = if (str == "#") gts.reverse else {
-                StringToken(str dropRight 1) :: gts.reverse
+              val before = if (str == "#") gts else {
+                StringToken(str dropRight 1) :: gts
               }
               val ng = TokenGroup((tks ::: StringToken(v.show) ::
                 before), pl)
