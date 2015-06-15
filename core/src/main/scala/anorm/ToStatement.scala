@@ -32,6 +32,7 @@ trait ToStatement[A] {
 sealed trait ToStatementPriority0 {
   import scala.collection.immutable.SortedSet
   import java.io.{ InputStream, Reader }
+  import scala.language.reflectiveCalls
 
   /**
    * Sets a binary stream as parameter on statement.
@@ -587,26 +588,30 @@ sealed trait ToStatementPriority0 {
 
 /** Meta data for Joda parameters */
 object JodaParameterMetaData {
-  import org.joda.time.{ DateTime, Instant }
+  import org.joda.time.{ DateTime, LocalDateTime, Instant }
 
   import java.sql.Types
 
-  /** Date/time parameter meta data */
-  implicit object JodaDateTimeMetaData extends ParameterMetaData[DateTime] {
+  sealed trait JodaTimeMetaData {
     val sqlType = "TIMESTAMP"
     val jdbcType = Types.TIMESTAMP
   }
 
+  /** Date/time parameter meta data */
+  implicit object JodaDateTimeMetaData
+    extends ParameterMetaData[DateTime] with JodaTimeMetaData
+
+  /** Local date/time parameter meta data */
+  implicit object JodaLocalDateTimeMetaData
+    extends ParameterMetaData[LocalDateTime] with JodaTimeMetaData
+
   /** Instant parameter meta data */
-  implicit object JodaInstantMetaData extends ParameterMetaData[Instant] {
-    val sqlType = "TIMESTAMP"
-    val jdbcType = Types.TIMESTAMP
-  }
+  implicit object JodaInstantMetaData
+    extends ParameterMetaData[Instant] with JodaTimeMetaData
 }
 
 sealed trait JodaToStatement {
-
-  import org.joda.time.{ DateTime, Instant }
+  import org.joda.time.{ DateTime, LocalDateTime, Instant }
 
   /**
    * Sets joda-time DateTime as statement parameter.
@@ -622,6 +627,21 @@ sealed trait JodaToStatement {
     def set(s: PreparedStatement, index: Int, date: DateTime): Unit =
       if (date != null) s.setTimestamp(index, new Timestamp(date.getMillis()))
       else s.setNull(index, meta.jdbcType)
+  }
+
+  /**
+   * Sets a local date/time on statement.
+   *
+   * {{{
+   * import org.joda.time.LocalDateTime
+   *
+   * SQL("SELECT * FROM Test WHERE time < {b}").on('b -> LocalDateTime.now)
+   * }}}
+   */
+  implicit def jodaLocalDateTimeToStatement(implicit meta: ParameterMetaData[LocalDateTime]): ToStatement[LocalDateTime] = new ToStatement[LocalDateTime] {
+    def set(s: PreparedStatement, i: Int, t: LocalDateTime): Unit =
+      if (t == null) s.setNull(i, meta.jdbcType)
+      else s.setTimestamp(i, new Timestamp(t.toDateTime.getMillis))
   }
 
   /**
@@ -643,7 +663,6 @@ sealed trait JodaToStatement {
 }
 
 sealed trait JavaTimeToStatement {
-
   import java.time.{ Instant, LocalDateTime, ZonedDateTime }
 
   /**

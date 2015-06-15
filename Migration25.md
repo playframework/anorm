@@ -29,3 +29,7 @@ In this case at your own risk, `setObject` will be used on statement.
 val anyVal: Any = myVal
 SQL"UPDATE t SET v = ${anorm.Object(anyVal)}"
 ```
+
+## Joda
+
+[Joda](http://www.joda.org) `LocalDateTime` and `LocalDate` are supported as parameter, passed as `Timestamp`. The following JDBC column types can also be parsed as `LocalDateTime` or `LocalDate`: `Date`, `Long`, `Timestamp` or *Wrapper* (any type providing `.getTimestamp`).
