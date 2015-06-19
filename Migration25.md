@@ -33,3 +33,16 @@ SQL"UPDATE t SET v = ${anorm.Object(anyVal)}"
 ## Joda
 
 [Joda](http://www.joda.org) `LocalDateTime` and `LocalDate` are supported as parameter, passed as `Timestamp`. The following JDBC column types can also be parsed as `LocalDateTime` or `LocalDate`: `Date`, `Long`, `Timestamp` or *Wrapper* (any type providing `.getTimestamp`).
+
+## Macros
+
+The macros `namedParser[T]` or `indexedParser[T]` (or `parser[T](names)`) can be used to create a `RowParser[T]` at compile-time, for any case class `T`.
+
+```scala
+import anorm.{ Macro, RowParser }
+
+case class Info(name: String, year: Option[Int])
+
+val parser: RowParser[Info] = Macro.namedParser[Info]
+val result: List[Info] = SQL"SELECT * FROM list".as(parser.*)
+```

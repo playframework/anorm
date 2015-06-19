@@ -45,19 +45,6 @@ SQL"""#$cmd * FROM #$table WHERE id = ${"id1"} AND code IN (${Seq(2, 5)})"""
 
 The preparation of statement was also improved, for better performance.
 
-## Macros
-
-The macros `namedParser[T]` or `indexedParser[T]` (or `parser[T](names)`) can be used to create a `RowParser[T]` at compile-time, for any case class `T`.
-
-```scala
-import anorm.{ Macro, RowParser }
-
-case class Info(name: String, year: Option[Int])
-
-val parser: RowParser[Info] = Macro.namedParser[Info]
-val result: List[Info] = SQL"SELECT * FROM list".as(parser.*)
-```
-
 ## Parsing
 
 It's now possible to get a value from `Row` using a column index.
