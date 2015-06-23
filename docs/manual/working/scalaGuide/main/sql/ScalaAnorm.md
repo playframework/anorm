@@ -480,6 +480,11 @@ To handle such edge-case, `.withResultSetOnFirstRow(true)` can be used as follow
 ```scala
 SQL("EXEC stored_proc {arg}").on("arg" -> "val").withResultSetOnFirstRow(true)
 SQL"""EXEC stored_proc ${"val"}""".withResultSetOnFirstRow(true)
+
+SQL"INSERT INTO dict(term, definition) VALUES ($term, $definition)".
+  withResultSetOnFirstRow(true).executeInsert()
+// Also needed on executeInsert for such driver, 
+// as a ResultSet is returned in this case for the generated keys
 ```
 
 ## Using Pattern Matching
