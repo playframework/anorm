@@ -188,6 +188,14 @@ object AnormSpec extends Specification with H2Database with AnormTest {
 
       }
     }
+
+    "fold row" in withQueryResult(rows2) { implicit c =>
+      SQL("SELECT * FROM test").as(
+        SqlParser.folder(List.empty[(Any, String, String)])({ (ls, v, m) =>
+          Right((v, m.column.qualified, m.clazz) :: ls)
+        }).singleOpt) must beSome(
+          ("str", ".val", "java.lang.String") :: (2, ".id", "int") :: Nil)
+    }
   }
 
   "Instance of case class" should {

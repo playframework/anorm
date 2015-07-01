@@ -54,8 +54,18 @@ case class TypeDoesNotMatch(reason: String) extends SqlRequestError {
  */
 case class Object(value: Any)
 
-case class MetaDataItem(column: ColumnName, nullable: Boolean, clazz: String)
+/**
+ * @param qualified the qualified column name
+ * @param alias the column alias
+ */
 case class ColumnName(qualified: String, alias: Option[String])
+
+/**
+ * @param column the name of the column
+ * @param nullable true if the column is nullable
+ * @param clazz the class of the JDBC column value
+ */
+case class MetaDataItem(column: ColumnName, nullable: Boolean, clazz: String)
 
 private[anorm] case class MetaData(ms: List[MetaDataItem]) {
   /** Returns meta data for specified column. */
