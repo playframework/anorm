@@ -26,7 +26,7 @@ object SqlStatementParser extends JavaTokenParsers {
   def parse(sql: String): Try[TokenizedStatement] = Try(parse(instr, sql).get)
 
   private val simpleLiteral: Parser[StringToken] =
-    "[^'^{]+".r ^^ { StringToken(_) }
+    "[^%^{]+".r ^^ { StringToken(_) }
 
   private val instr: Parser[TokenizedStatement] = {
     @inline def normalize(t: StatementToken): Option[TokenGroup] = t match {
@@ -38,7 +38,8 @@ object SqlStatementParser extends JavaTokenParsers {
     }
 
     "[ \r\n\t]*".r ~> rep(simpleLiteral.map(normalize) |
-      quotedLiteral.map(Some(_)) | variable.map(Some(_))) ^^ {
+      reserved.map(tok => Some(TokenGroup(List(tok), None))) |
+      variable.map(Some(_))) ^^ {
       _.foldLeft(List.empty[TokenGroup] -> List.empty[String]) {
         case ((TokenGroup(ts, None) :: groups, ns),
           Some(TokenGroup(Nil, Some(n)))) =>
@@ -70,17 +71,6 @@ object SqlStatementParser extends JavaTokenParsers {
 
   private val reserved: Parser[PercentToken.type] =
     "%".r ^^ { _ => PercentToken }
-
-  private lazy val quotedLiteral: Parser[TokenGroup] = {
-    val simpleQuoted: Parser[StringToken] = "([^'^%])+".r ^^ { StringToken(_) }
-
-    "'" ~> rep(reserved | simpleQuoted) <~ "'" ^^ { ts =>
-      TokenGroup(StringToken("'") :: (ts :+ StringToken("'")), None)
-    }
-  }
-
-  private val skipped: Parser[StringToken] =
-    """[\r\n]""".r ^^ { _ => StringToken("") }
 
   override def skipWhitespace = false
 }
