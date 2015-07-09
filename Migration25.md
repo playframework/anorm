@@ -30,6 +30,25 @@ val anyVal: Any = myVal
 SQL"UPDATE t SET v = ${anorm.Object(anyVal)}"
 ```
 
+## Type mappings
+
+More conversions are available.
+
+**Numeric types**
+
+Column conversions for numeric types have been improved.
+
+There are new conversions extending column support.
+
+Column (JDBC type) | (as) JVM/Scala type
+-------------------|---------------------
+Short              | BigInteger
+Short              | Long
+Short              | Int
+Byte               | BigInteger
+Byte               | Long
+Byte               | Int
+
 ## Joda
 
 [Joda](http://www.joda.org) `LocalDateTime` and `LocalDate` are supported as parameter, passed as `Timestamp`. The following JDBC column types can also be parsed as `LocalDateTime` or `LocalDate`: `Date`, `Long`, `Timestamp` or *Wrapper* (any type providing `.getTimestamp`).

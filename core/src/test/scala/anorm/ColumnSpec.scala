@@ -156,6 +156,18 @@ object ColumnSpec
       SQL("SELECT i").as(scalar[Long].single) aka "parsed long" must_== 4l
     }
 
+    "be parsed from short" in withQueryResult(shortList :+ 3.toShort) {
+      implicit con =>
+        SQL("SELECT s").as(scalar[Long].single).
+          aka("parsed short") must_== 3L
+    }
+
+    "be parsed from byte" in withQueryResult(byteList :+ 4.toByte) {
+      implicit con =>
+        SQL("SELECT b").as(scalar[Long].single).
+          aka("parsed byte") must_== 4L
+    }
+
     "be parsed from false as 0" in withQueryResult(booleanList :+ false) {
       implicit con =>
         SQL("SELECT b").as(scalar[Short].single) aka "parsed short" must_== 0l
@@ -192,6 +204,18 @@ object ColumnSpec
 
     "be parsed from integer" in withQueryResult(intList :+ 4) { implicit con =>
       SQL("SELECT i").as(scalar[Int].single) aka "parsed integer" must_== 4
+    }
+
+    "be parsed from short" in withQueryResult(shortList :+ 3.toShort) {
+      implicit con =>
+        SQL("SELECT s").as(scalar[Int].single).
+          aka("parsed short") must_== 3
+    }
+
+    "be parsed from byte" in withQueryResult(byteList :+ 4.toByte) {
+      implicit con =>
+        SQL("SELECT b").as(scalar[Int].single).
+          aka("parsed byte") must_== 4
     }
 
     "be parsed from false as 0" in withQueryResult(booleanList :+ false) {
@@ -408,7 +432,6 @@ object ColumnSpec
       implicit con =>
         SQL("SELECT s").as(scalar[java.math.BigDecimal].single).
           aka("parsed big decimal") must_== java.math.BigDecimal.valueOf(7)
-
     }
 
     "be parsed from byte" in withQueryResult(byteList :+ 8.toByte) {
@@ -486,6 +509,18 @@ object ColumnSpec
           aka("parsed int") must_== java.math.BigInteger.valueOf(2)
 
     }
+
+    "be parsed from short" in withQueryResult(shortList :+ 3.toShort) {
+      implicit con =>
+        SQL("SELECT bi").as(scalar[java.math.BigInteger].single).
+          aka("parsed short") must_== java.math.BigInteger.valueOf(3)
+    }
+
+    "be parsed from byte" in withQueryResult(byteList :+ 4.toByte) {
+      implicit con =>
+        SQL("SELECT bi").as(scalar[java.math.BigInteger].single).
+          aka("parsed byte") must_== java.math.BigInteger.valueOf(4)
+    }
   }
 
   "Column mapped as Scala big integer" should {
@@ -517,6 +552,18 @@ object ColumnSpec
         SQL("SELECT bi").as(scalar[BigInt].single).
           aka("parsed int") must_== BigInt(2)
 
+    }
+
+    "be parsed from short" in withQueryResult(shortList :+ 3.toShort) {
+      implicit con =>
+        SQL("SELECT bi").as(scalar[BigInt].single).
+          aka("parsed short") must_== BigInt(3)
+    }
+
+    "be parsed from byte" in withQueryResult(byteList :+ 4.toByte) {
+      implicit con =>
+        SQL("SELECT bi").as(scalar[BigInt].single).
+          aka("parsed byte") must_== BigInt(4)
     }
   }
 
