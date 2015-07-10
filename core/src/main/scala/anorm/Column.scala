@@ -108,6 +108,8 @@ object Column extends JodaColumn with JavaTimeColumn {
       case bd: JBigDec => Right(bd.intValue)
       case l: Long => Right(l.toInt)
       case i: Int => Right(i)
+      case s: Short => Right(s.toInt)
+      case b: Byte => Right(b.toInt)
       case bool: Boolean => Right(if (!bool) 0 else 1)
       case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${value.asInstanceOf[AnyRef].getClass} to Int for column $qualified"))
     }
@@ -197,6 +199,8 @@ object Column extends JodaColumn with JavaTimeColumn {
       case bd: JBigDec => Right(bd.longValue)
       case int: Int => Right(int: Long)
       case long: Long => Right(long)
+      case s: Short => Right(s.toLong)
+      case b: Byte => Right(b.toLong)
       case bool: Boolean => Right(if (!bool) 0l else 1l)
       case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${value.asInstanceOf[AnyRef].getClass} to Long for column $qualified"))
     }
@@ -210,6 +214,8 @@ object Column extends JodaColumn with JavaTimeColumn {
       case bd: JBigDec => Right(bd.toBigInteger)
       case long: Long => Right(BigInteger.valueOf(long))
       case int: Int => Right(BigInteger.valueOf(int))
+      case s: Short => Right(BigInteger.valueOf(s))
+      case b: Byte => Right(BigInteger.valueOf(b))
       case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${value.asInstanceOf[AnyRef].getClass} to BigInteger for column $qualified"))
     }
   }
