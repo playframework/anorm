@@ -1,6 +1,7 @@
 package anorm
 
 /** Set value as prepared SQL statement fragment. */
+@annotation.implicitNotFound("No SQL renderer found for parameter of type ${A}: `anorm.ToSql[${A}]` required")
 trait ToSql[A] {
 
   /**

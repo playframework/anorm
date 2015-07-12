@@ -15,6 +15,8 @@ import resource.managed
 import scala.language.reflectiveCalls
 
 /** Column mapping */
+@annotation.implicitNotFound(
+  "No column extractor found for the type ${A}: `anorm.Column[${A}]` required; See https://github.com/playframework/anorm/blob/master/docs/manual/working/scalaGuide/main/sql/ScalaAnorm.md#column-parsers")
 trait Column[A] extends ((Any, MetaDataItem) => MayErr[SqlRequestError, A])
 
 /** Column companion, providing default conversions. */
