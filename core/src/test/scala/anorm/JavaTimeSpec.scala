@@ -1,6 +1,6 @@
 package anorm
 
-import java.time.{ ZonedDateTime, ZoneId, LocalDateTime, Instant }
+import java.time.{ ZonedDateTime, ZoneId, LocalDate, LocalDateTime, Instant }
 
 import acolyte.jdbc.AcolyteDSL._
 import acolyte.jdbc.RowLists._
@@ -102,6 +102,52 @@ object JavaTimeColumnSpec extends Specification {
     }
   }
 
+  "Column mapped as Java8 local date" should {
+    val instant = Instant.now
+    val date = LocalDate.now()
+    val time = instant.toEpochMilli
+
+    "be parsed from date" in withQueryResult(
+      dateList :+ new java.sql.Date(time)) { implicit con =>
+        SQL("SELECT d").as(scalar[LocalDate].single).
+          aka("parsed local date/time") must_== date
+      }
+
+    "be parsed from time" in withQueryResult(
+      timeList :+ new java.sql.Time(time)) { implicit con =>
+        SQL("SELECT ts").as(scalar[LocalDate].single).
+          aka("parsed local date/time") must_== date
+      }
+
+    "be parsed from timestamp" in withQueryResult(
+      timestampList :+ new java.sql.Timestamp(time)) { implicit con =>
+        SQL("SELECT ts").as(scalar[LocalDate].single).
+          aka("parsed local date/time") must_== date
+      }
+
+    "be parsed from numeric time" in withQueryResult(longList :+ time) {
+      implicit con =>
+        SQL("SELECT time").as(scalar[LocalDate].single).
+          aka("parsed local date/time") must_== date
+
+    }
+
+    "be parsed from timestamp wrapper" >> {
+      "with not null value" in withQueryResult(
+        rowList1(classOf[TWrapper]) :+ tsw1(time)) { implicit con =>
+          SQL("SELECT ts").as(scalar[LocalDate].single).
+            aka("parsed local date/time") must_== date
+        }
+
+      "with null value" in withQueryResult(
+        rowList1(classOf[TWrapper]) :+ null.asInstanceOf[TWrapper]) {
+          implicit con =>
+            SQL("SELECT ts").as(scalar[LocalDate].singleOpt).
+              aka("parsed local date/time") must beNone
+        }
+    }
+  }
+
   "Column mapped as Java8 zoned date/time" should {
     val instant = Instant.now
     val date = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault)
@@ -164,6 +210,11 @@ object JavaTimeParameterMetaDataSpec extends Specification {
 
       s"of type LocalDateTime" in {
         Option(implicitly[ParameterMetaData[LocalDateTime]].sqlType).
+          aka("SQL type") must beSome
+      }
+
+      s"of type LocalDate" in {
+        Option(implicitly[ParameterMetaData[LocalDate]].sqlType).
           aka("SQL type") must beSome
       }
 

@@ -38,6 +38,18 @@ object ParameterSpec
   val Sbd1 = BigDecimal(Jbd1)
   val sbi1 = BigInt(jbi1)
   val Date1 = new Date()
+  val LocalDate1 = {
+    import java.util._
+    val cal = Calendar.getInstance()
+
+    cal.setTime(Date1)
+    cal.set(Calendar.HOUR_OF_DAY, 0)
+    cal.set(Calendar.MINUTE, 0)
+    cal.set(Calendar.SECOND, 0)
+    cal.set(Calendar.MILLISECOND, 0)
+
+    cal.getTime()
+  }
   val Timestamp1 = { val ts = new Timestamp(123l); ts.setNanos(123456789); ts }
   val TsWrapper1 = new { val getTimestamp = Timestamp1 }
   val uuid1 = java.util.UUID.randomUUID; val Uuid1str = uuid1.toString
@@ -115,6 +127,8 @@ object ParameterSpec
       DParam(null, _) :: Nil) => 1 /* case ok */
     case UpdateExecution("set-date ?",
       DParam(Date1, SqlTimestamp) :: Nil) => 1 /* case ok */
+    case UpdateExecution("set-local-date ?",
+      DParam(LocalDate1, SqlTimestamp) :: Nil) => 1 /* case ok */
     case UpdateExecution("set-null-date ?",
       DParam(null, SqlTimestamp) :: Nil) => 1 /* case ok */
     case UpdateExecution("set-timestamp ?",

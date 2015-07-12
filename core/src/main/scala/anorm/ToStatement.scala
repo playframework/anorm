@@ -588,7 +588,7 @@ sealed trait ToStatementPriority0 {
 
 /** Meta data for Joda parameters */
 object JodaParameterMetaData {
-  import org.joda.time.{ DateTime, LocalDateTime, Instant }
+  import org.joda.time.{ DateTime, LocalDate, LocalDateTime, Instant }
 
   import java.sql.Types
 
@@ -608,10 +608,14 @@ object JodaParameterMetaData {
   /** Instant parameter meta data */
   implicit object JodaInstantMetaData
     extends ParameterMetaData[Instant] with JodaTimeMetaData
+
+  /** Local date parameter meta data */
+  implicit object JodaLocalDateMetaData
+    extends ParameterMetaData[LocalDate] with JodaTimeMetaData
 }
 
 sealed trait JodaToStatement {
-  import org.joda.time.{ DateTime, LocalDateTime, Instant }
+  import org.joda.time.{ DateTime, LocalDate, LocalDateTime, Instant }
 
   /**
    * Sets joda-time DateTime as statement parameter.
@@ -642,6 +646,21 @@ sealed trait JodaToStatement {
     def set(s: PreparedStatement, i: Int, t: LocalDateTime): Unit =
       if (t == null) s.setNull(i, meta.jdbcType)
       else s.setTimestamp(i, new Timestamp(t.toDateTime.getMillis))
+  }
+
+  /**
+   * Sets a local date on statement.
+   *
+   * {{{
+   * import org.joda.time.LocalDate
+   *
+   * SQL("SELECT * FROM Test WHERE time < {b}").on('b -> LocalDate.now)
+   * }}}
+   */
+  implicit def jodaLocalDateToStatement(implicit meta: ParameterMetaData[LocalDate]): ToStatement[LocalDate] = new ToStatement[LocalDate] {
+    def set(s: PreparedStatement, i: Int, t: LocalDate): Unit =
+      if (t == null) s.setNull(i, meta.jdbcType)
+      else s.setTimestamp(i, new Timestamp(t.toDate.getTime))
   }
 
   /**

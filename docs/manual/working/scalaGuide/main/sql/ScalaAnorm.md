@@ -922,7 +922,7 @@ Long                          | Yes              | Yes                  | Yes
 Timestamp                     | Yes              | Yes                  | Yes
 Timestamp wrapper<sup>5</sup> | Yes              | Yes                  | Yes
 
-- 1. Type `java.util.Date`.
+- 1. Types `java.util.Date`, `org.joda.time.LocalDate` and `java.time.LocalDate`.
 - 2. Types `org.joda.time.DateTime`, `org.joda.time.LocalDateTime`, `java.time.LocalDateTime` and `java.time.ZonedDateTime`.
 - 3. Type `org.joda.time.Instant` and `java.time.Instant` (see Java 8).
 - 5. Any type with a getter `getTimestamp` returning a `java.sql.Timestamp`.
@@ -1012,17 +1012,19 @@ JVM                       | JDBC
 --------------------------|-----------
 DateTime<sup>1</sup>      | Timestamp
 Instant<sup>2</sup>       | Timestamp
-LocalDateTime<sup>3</sup> | Timestamp
-ZonedDateTime<sup>4</sup> | Timestamp
+LocalDate<sup>3</sup>     | Timestamp
+LocalDateTime<sup>4</sup> | Timestamp
+ZonedDateTime<sup>5</sup> | Timestamp
 
 - 1. Type `org.joda.time.DateTime`.
-- 2. Type `org.joda.time.Instant` and `java.time.Instant`.
-- 3. Type `org.joda.time.LocalDateTime` and `java.time.LocalDateTime`.
-- 4. Type `java.time.ZonedDateTime`
+- 2. Types `org.joda.time.Instant` and `java.time.Instant`.
+- 3. Types `org.joda.time.LocalDate` and `java.time.LocalDate`.
+- 4. Types `org.joda.time.LocalDateTime`, `org.joda.time.LocalDate` and `java.time.LocalDateTime`.
+- 5. Type `java.time.ZonedDateTime`
 
 To enable Joda types as parameter, the `import anorm.JodaParameterMetaData._` must be used.
 
-Custom or specific DB conversion for parameter can also be provided:
+Custom or specific database conversion for parameter can also be provided:
 
 ```
 import java.sql.PreparedStatement

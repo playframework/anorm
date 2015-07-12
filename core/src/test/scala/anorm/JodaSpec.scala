@@ -2,7 +2,7 @@ package anorm
 
 import java.sql.{ Date, Timestamp }
 
-import org.joda.time.{ DateTime, LocalDateTime, Instant }
+import org.joda.time.{ DateTime, LocalDate, LocalDateTime, Instant }
 
 import org.specs2.mutable.Specification
 
@@ -148,6 +148,51 @@ trait JodaColumnSpec { specs: Specification =>
     }
   }
 
+  "Column mapped as Joda local date" should {
+    val time = System.currentTimeMillis
+    val date = new LocalDate(time)
+
+    "be parsed from date" in withQueryResult(
+      dateList :+ new java.sql.Date(time)) { implicit con =>
+        SQL("SELECT d").as(scalar[LocalDate].single).
+          aka("parsed local date/time") must_== date
+      }
+
+    "be parsed from time" in withQueryResult(
+      timeList :+ new java.sql.Time(time)) { implicit con =>
+        SQL("SELECT ts").as(scalar[LocalDate].single).
+          aka("parsed local date/time") must_== date
+      }
+
+    "be parsed from timestamp" in withQueryResult(
+      timestampList :+ new java.sql.Timestamp(time)) { implicit con =>
+        SQL("SELECT ts").as(scalar[LocalDate].single).
+          aka("parsed local date/time") must_== date
+      }
+
+    "be parsed from numeric time" in withQueryResult(longList :+ time) {
+      implicit con =>
+        SQL("SELECT time").as(scalar[LocalDate].single).
+          aka("parsed local date/time") must_== date
+
+    }
+
+    "be parsed from timestamp wrapper" >> {
+      "with not null value" in withQueryResult(
+        rowList1(classOf[TWrapper]) :+ tsw1(time)) { implicit con =>
+          SQL("SELECT ts").as(scalar[LocalDate].single).
+            aka("parsed local date/time") must_== date
+        }
+
+      "with null value" in withQueryResult(
+        rowList1(classOf[TWrapper]) :+ null.asInstanceOf[TWrapper]) {
+          implicit con =>
+            SQL("SELECT ts").as(scalar[LocalDate].singleOpt).
+              aka("parsed local date/time") must beNone
+        }
+    }
+  }
+
   trait TWrapper { def getTimestamp: java.sql.Timestamp }
   def tsw1(time: Long) = new TWrapper {
     lazy val getTimestamp = new java.sql.Timestamp(time)
@@ -159,6 +204,7 @@ trait JodaParameterSpec { specs: ParameterSpec.type =>
 
   lazy val dateTime1 = new DateTime(Date1.getTime)
   lazy val localDateTime1 = new LocalDateTime(Date1.getTime)
+  lazy val localDate1 = new LocalDate(Date1.getTime)
   lazy val instant1 = new Instant(Date1.getTime)
 
   "Named parameters" should {
@@ -188,6 +234,20 @@ trait JodaParameterSpec { specs: ParameterSpec.type =>
     "be undefined Joda local date/time" in withConnection() { implicit c =>
       SQL("set-null-date {p}").
         on("p" -> (None: Option[LocalDateTime])).execute() must beFalse
+    }
+
+    "be Joda local date" in withConnection() { implicit c =>
+      SQL("set-local-date {p}").on("p" -> localDate1).execute() must beFalse
+    }
+
+    "be null Joda local date" in withConnection() { implicit c =>
+      SQL("set-null-date {p}").
+        on("p" -> null.asInstanceOf[LocalDate]).execute() must beFalse
+    }
+
+    "be undefined Joda local date" in withConnection() { implicit c =>
+      SQL("set-null-date {p}").
+        on("p" -> (None: Option[LocalDate])).execute() must beFalse
     }
 
     "be Joda instant" in withConnection() { implicit c =>

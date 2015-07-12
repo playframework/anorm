@@ -449,7 +449,35 @@ object Column extends JodaColumn with JavaTimeColumn {
 }
 
 sealed trait JodaColumn {
-  import org.joda.time.{ DateTime, LocalDateTime, Instant }
+  import org.joda.time.{ DateTime, LocalDate, LocalDateTime, Instant }
+
+  /**
+   * Parses column as Joda local date.
+   * Time zone is the one of default JVM time zone
+   * (see [[org.joda.time.DateTimeZone#getDefault DateTimeZone.getDefault]]).
+   *
+   * {{{
+   * import org.joda.time.LocalDate
+   *
+   * val i: LocalDate = SQL("SELECT last_mod FROM tbl").
+   *   as(scalar[LocalDate].single)
+   * }}}
+   */
+  implicit val columnToJodaLocalDate: Column[LocalDate] = {
+    Column.nonNull1 { (value, meta) =>
+      val MetaDataItem(qualified, nullable, clazz) = meta
+
+      value match {
+        case date: java.util.Date => Right(new LocalDate(date.getTime))
+        case time: Long => Right(new LocalDate(time))
+        case tsw: TimestampWrapper1 => Option(tsw.getTimestamp).
+          fold(Right(null.asInstanceOf[LocalDate]))(t =>
+            Right(new LocalDate(t.getTime)))
+
+        case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${value.asInstanceOf[AnyRef].getClass} to Joda LocalDate for column $qualified"))
+      }
+    }
+  }
 
   /**
    * Parses column as Joda local date/time.
@@ -527,8 +555,7 @@ sealed trait JodaColumn {
 }
 
 sealed trait JavaTimeColumn {
-
-  import java.time.{ ZonedDateTime, ZoneId, LocalDateTime, Instant }
+  import java.time.{ ZonedDateTime, ZoneId, LocalDate, LocalDateTime, Instant }
 
   /**
    * Parses column as Java8 instant.
@@ -581,6 +608,36 @@ sealed trait JavaTimeColumn {
           fold(Right(null.asInstanceOf[LocalDateTime]))(t =>
             Right(dateTime(t.getTime)))
         case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${value.asInstanceOf[AnyRef].getClass} to Java8 LocalDateTime for column $qualified"))
+      }
+    }
+  }
+
+  /**
+   * Parses column as Java8 local date.
+   * Time zone offset is the one of default JVM time zone
+   * (see [[java.time.ZoneId#systemDefault ZoneId.systemDefault]]).
+   *
+   * {{{
+   * import java.time.LocalDateTime
+   * import anorm.Java8._
+   *
+   * val i: LocalDateTime = SQL("SELECT last_mod FROM tbl").
+   *   as(scalar[LocalDateTime].single)
+   * }}}
+   */
+  implicit val columnToLocalDate: Column[LocalDate] = {
+    @inline def localDate(ts: Long) = LocalDateTime.ofInstant(
+      Instant.ofEpochMilli(ts), ZoneId.systemDefault).toLocalDate
+
+    Column.nonNull1 { (value, meta) =>
+      val MetaDataItem(qualified, nullable, clazz) = meta
+      value match {
+        case date: java.util.Date => Right(localDate(date.getTime))
+        case time: Long => Right(localDate(time))
+        case tsw: TimestampWrapper1 => Option(tsw.getTimestamp).
+          fold(Right(null.asInstanceOf[LocalDate]))(t =>
+            Right(localDate(t.getTime)))
+        case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${value.asInstanceOf[AnyRef].getClass} to Java8 LocalDate for column $qualified"))
       }
     }
   }
