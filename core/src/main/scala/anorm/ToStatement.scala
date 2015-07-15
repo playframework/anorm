@@ -16,6 +16,7 @@ import java.math.{ BigDecimal => JBigDec, BigInteger }
 import java.sql.{ PreparedStatement, Timestamp }
 
 /** Sets value as statement parameter. */
+@annotation.implicitNotFound("Cannot set value of type ${A} as parameter on statement: `anorm.ToStatement[${A}] required`")
 trait ToStatement[A] {
 
   /**

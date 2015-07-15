@@ -3,6 +3,8 @@ package anorm
 import java.sql.PreparedStatement
 
 /** Prepared parameter value. */
+@annotation.implicitNotFound(
+  "Wrapper not found for the parameter value")
 sealed trait ParameterValue extends Show {
 
   /**
