@@ -49,6 +49,20 @@ Byte               | BigInteger
 Byte               | Long
 Byte               | Int
 
+**Temporal types**
+
+Column conversions are provided for the following temporal types.
+
+Column (JDBC type)            | (as) JVM/Scala type
+------------------------------|---------------------
+Date                          | LocalDate<sup>1</sup>
+Long                          | LocalDate
+Timestamp                     | LocalDate
+Timestamp wrapper<sup>2</sup> | LocalDate
+
+- 1. Types `org.joda.time.LocalDate` and `java.time.LocalDate`.
+- 2. Any type having the getter `getTimestamp: java.sql.Timestamp`.
+
 ## Joda
 
 [Joda](http://www.joda.org) `LocalDateTime` and `LocalDate` are supported as parameter, passed as `Timestamp`. The following JDBC column types can also be parsed as `LocalDateTime` or `LocalDate`: `Date`, `Long`, `Timestamp` or *Wrapper* (any type providing `.getTimestamp`).

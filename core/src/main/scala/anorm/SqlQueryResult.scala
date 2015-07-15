@@ -42,23 +42,4 @@ final case class SqlQueryResult(
     statement.acquireFor(_.getWarnings).fold[Option[SQLWarning]](
       _.headOption.map(new SQLWarning(_)), Option(_))
 
-  /** Applies current parser with optionnal list of rows (0..n). */
-  @deprecated(
-    message = """Use `SQL("...").executeQuery().as(parser.*)`""",
-    since = "2.3.5")
-  def list[A](rowParser: RowParser[A])(implicit connection: Connection): Seq[A] = as(rowParser.*)
-
-  /** Applies current parser to exactly on row. */
-  @deprecated(
-    message = """Use `SQL("...").executeQuery().as(parser.single)`""",
-    since = "2.3.5")
-  def single[A](rowParser: RowParser[A])(implicit connection: Connection): A =
-    as(ResultSetParser.single(rowParser))
-
-  /** Applies current parser to one optional row. */
-  @deprecated(
-    message = """Use `SQL("...").executeQuery().as(parser.singleOpt)`""",
-    since = "2.3.5")
-  def singleOpt[A](rowParser: RowParser[A])(implicit connection: Connection): Option[A] = as(ResultSetParser.singleOpt(rowParser))
-
 }
