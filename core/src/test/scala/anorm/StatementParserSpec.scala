@@ -16,11 +16,11 @@ object StatementParserSpec extends org.specs2.mutable.Specification {
     "be parsed with 'name' and 'cat' parameters and support multiple lines" in {
       SqlStatementParser.parse("""
         SELECT * FROM schema.table
-        -- comment
+        -- Foo's comment
         WHERE (name = {name} AND category = {cat}) OR id = ?
       """) aka "updated statement and parameters" must beSuccessfulTry(
         TokenizedStatement(List(TokenGroup(List(StringToken("""SELECT * FROM schema.table
-        -- comment
+        -- Foo's comment
         WHERE (name = """)), Some("name")), TokenGroup(List(StringToken(" AND category = ")), Some("cat")), TokenGroup(List(StringToken(""") OR id = ?
       """)), None)), List("name", "cat")))
 
@@ -35,8 +35,8 @@ object StatementParserSpec extends org.specs2.mutable.Specification {
     "reserved '%' character must be preserved as special token" in {
       SqlStatementParser.parse(
         "SELECT * FROM Test WHERE id = {id} AND n LIKE '%strange%s fruit%s'").
-        aka("statement") must beSuccessfulTry(TokenizedStatement(
-          List(TokenGroup(List(StringToken("SELECT * FROM Test WHERE id = ")), Some("id")), TokenGroup(List(StringToken(" AND n LIKE "), StringToken("'"), PercentToken, StringToken("strange"), PercentToken, StringToken("s fruit"), PercentToken, StringToken("s"), StringToken("'")), None)), List("id")))
+        aka("statement") must beSuccessfulTry(TokenizedStatement(List(TokenGroup(List(StringToken("SELECT * FROM Test WHERE id = ")), Some("id")), TokenGroup(List(StringToken(" AND n LIKE '"), PercentToken, StringToken("strange"), PercentToken, StringToken("s fruit"), PercentToken, StringToken("s'")), None)), List("id")))
+
     }
   }
 
