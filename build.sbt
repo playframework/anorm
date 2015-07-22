@@ -43,7 +43,8 @@ lazy val anorm = project
     }) ++ Seq(
       "specs2-core",
       "specs2-junit"
-    ).map("org.specs2" %% _ % "2.4.9" % Test)
+    ).map("org.specs2" %% _ % "2.4.9" % Test) ++ Seq(
+      "com.typesafe.play" %% "play-iteratees" % "2.4.0" % Test)
   }).dependsOn(`anorm-tokenizer`)
 
 lazy val `anorm-parent` = (project in file("."))

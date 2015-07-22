@@ -1,7 +1,7 @@
 package anorm
 
 import acolyte.jdbc.QueryResult
-import acolyte.jdbc.AcolyteDSL.{ connection, handleQuery }
+import acolyte.jdbc.AcolyteDSL.{ connection, handleQuery, withQueryResult }
 import acolyte.jdbc.RowLists.{ rowList1, rowList2, stringList }
 import acolyte.jdbc.Implicits._
 
@@ -9,16 +9,14 @@ object SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
   "SQL result" title
 
   "For-comprehension over result" should {
-    "fail when there is no data" in {
-      withQueryResult("scalar") { implicit c =>
-        lazy val parser = for {
-          a <- SqlParser.str("col1")
-          b <- SqlParser.int("col2")
-        } yield (a -> b)
+    "fail when there is no data" in withQueryResult("scalar") { implicit c =>
+      lazy val parser = for {
+        a <- SqlParser.str("col1")
+        b <- SqlParser.int("col2")
+      } yield (a -> b)
 
-        SQL("SELECT * FROM test") as parser.single must throwA[Exception](
-          message = "col1 not found")
-      }
+      SQL("SELECT * FROM test") as parser.single must throwA[Exception](
+        message = "col1 not found")
     }
 
     "return expected mandatory single result" in withQueryResult(
@@ -162,7 +160,7 @@ object SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
 
       }
 
-    "release resources (with degraded result set)" in withQueryResult(
+    "release resources (with degraded result set)" in queryResultAndOptions(
       (stringList :+ "A" :+ "B" :+ "C"), List(
         "acolyte.resultSet.initOnFirstRow" -> "true")) { implicit c =>
 
@@ -261,7 +259,7 @@ object SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
       }
 
     "release resources on exception (with degraded result set)" in {
-      withQueryResult((stringList :+ "A" :+ "B" :+ "C"), List(
+      queryResultAndOptions((stringList :+ "A" :+ "B" :+ "C"), List(
         "acolyte.resultSet.initOnFirstRow" -> "true")) { implicit c =>
 
         val res: SqlQueryResult =
@@ -433,6 +431,6 @@ object SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
       }
   }
 
-  def withQueryResult[A](r: QueryResult, ps: List[(String, String)] = List.empty)(f: java.sql.Connection => A): A = f(connection(handleQuery { _ => r }, ps: _*))
+  def queryResultAndOptions[A](r: QueryResult, ps: List[(String, String)] = List.empty)(f: java.sql.Connection => A): A = f(connection(handleQuery { _ => r }, ps: _*))
 
 }
