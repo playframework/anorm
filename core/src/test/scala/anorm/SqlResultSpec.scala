@@ -17,7 +17,7 @@ object SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
         } yield (a -> b)
 
         SQL("SELECT * FROM test") as parser.single must throwA[Exception](
-          message = "col1 not found")
+          message = "'col1' not found")
       }
     }
 
@@ -45,7 +45,7 @@ object SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
         } yield Tuple3(a, bc._1, bc._2)
 
         SQL("SELECT * FROM test") as parser.single must throwA[Exception](
-          message = "col1 not found")
+          message = "'col1' not found")
       }
     }
 
@@ -62,7 +62,7 @@ object SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
         } yield Tuple3(a, bc._1, bc._2)
 
         SQL("SELECT * FROM test") as parser.single must throwA[Exception](
-          message = "col2 not found")
+          message = "'col2' not found")
       }
 
     "return None from optional sub-parser" in withQueryResult(
