@@ -499,6 +499,11 @@ object RowParser {
   def apply[A](f: Row => SqlResult[A]): RowParser[A] = new RowParser[A] {
     def apply(row: Row): SqlResult[A] = f(row)
   }
+
+  /** Row parser that result in successfully unchanged row. */
+  object successful extends RowParser[Row] {
+    def apply(row: Row): SqlResult[Row] = Success(row)
+  }
 }
 
 trait RowParser[+A] extends (Row => SqlResult[A]) { parent =>

@@ -43,13 +43,25 @@ lazy val anorm = project
     }) ++ Seq(
       "specs2-core",
       "specs2-junit"
-    ).map("org.specs2" %% _ % "2.4.9" % Test) ++ Seq(
-      "com.typesafe.play" %% "play-iteratees" % "2.4.0" % Test)
+    ).map("org.specs2" %% _ % "2.4.9" % Test)
   }).dependsOn(`anorm-tokenizer`)
+
+lazy val `anorm-iteratee` = (project in file("iteratee"))
+  .enablePlugins(PlayLibrary)
+  .settings(scalariformSettings: _*)
+  .settings(
+    libraryDependencies ++= Seq(
+      "com.typesafe.play" %% "play-iteratees" % "2.4.2" % "provided",
+      "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test      
+    ) ++ Seq(
+      "specs2-core",
+      "specs2-junit"
+    ).map("org.specs2" %% _ % "2.4.9" % Test)
+  ).dependsOn(anorm)
 
 lazy val `anorm-parent` = (project in file("."))
   .enablePlugins(PlayRootProject)
-  .aggregate(`anorm-tokenizer`, anorm)
+  .aggregate(`anorm-tokenizer`, anorm, `anorm-iteratee`)
 
 lazy val docs = project
   .in(file("docs"))

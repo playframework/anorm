@@ -13,3 +13,29 @@ The deprecated operations `.list()`, `.single()` and `.singleOpt()` on SQL resul
 The `.getFilledStatement` has been removed.
 
 The former streaming operation `.apply()` is now removed, and must be replaced by either `.fold`, `.foldWhile` or `.withResult`.
+
+## Iteratees module
+
+A new Anorm is available to ease the integration with [Play Iteratees](https://www.playframework.com/documentation/latest/Iteratees).
+
+It can be added to your project using the following dependencies.
+
+```
+libraryDependencies ++= Seq(
+  "com.typesafe.play" %% "anorm-iteratee" % "ANORM_VERSION",
+  "com.typesafe.play" %% "play-iteratees" % "ITERATEES_VERSION")
+```
+
+> For a Play application, as `play-iteratees` is provided there is no need to add this dependency.
+
+Then the parsed results from Anorm can be turned into [`Enumerator`](https://www.playframework.com/documentation/latest/api/scala/index.html#play.api.libs.iteratee.Enumerator).
+
+```scala
+import java.sql.Connection
+import scala.concurrent.ExecutionContext.Implicits.global
+import anorm._
+import play.api.libs.iteratee._
+
+def resultAsEnumerator(implicit con: Connection): Enumerator[String] =
+  Iteratees.from(SQL"SELECT * FROM Test", SqlParser.scalar[String])
+```

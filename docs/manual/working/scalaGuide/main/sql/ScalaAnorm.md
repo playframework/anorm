@@ -368,7 +368,31 @@ books match {
 }
 ```
 
-### Multi-value support
+### Iteratee
+
+It's possible to use Anorm along with [Play Iteratees](https://www.playframework.com/documentation/latest/Iteratees), using the following dependencies.
+
+```
+libraryDependencies ++= Seq(
+  "com.typesafe.play" %% "anorm-iteratee" % "ANORM_VERSION",
+  "com.typesafe.play" %% "play-iteratees" % "ITERATEES_VERSION")
+```
+
+> For a Play application, as `play-iteratees` is provided there is no need to add this dependency.
+
+Then the parsed results from Anorm can be turned into [`Enumerator`](https://www.playframework.com/documentation/latest/api/scala/index.html#play.api.libs.iteratee.Enumerator).
+
+```scala
+import java.sql.Connection
+import scala.concurrent.ExecutionContext.Implicits.global
+import anorm._
+import play.api.libs.iteratee._
+
+def resultAsEnumerator(implicit con: Connection): Enumerator[String] =
+  Iteratees.from(SQL"SELECT * FROM Test", SqlParser.scalar[String])
+```
+
+## Multi-value support
 
 Anorm parameter can be multi-value, like a sequence of string.
 In such case, values will be prepared to be passed to JDBC.
