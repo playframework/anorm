@@ -494,16 +494,24 @@ You can also use Pattern Matching to match and extract the `Row` content. In thi
 The following example transforms each row to the correct Scala type:
 
 ```scala
-case class SmallCountry(name:String) 
-case class BigCountry(name:String) 
-case class France
- 
-val countries = SQL("SELECT name,population FROM Country WHERE id = {i}").
-  on("i" -> "id").map({
-    case Row("France", _) => France()
-    case Row(name:String, pop:Int) if(pop > 1000000) => BigCountry(name)
-    case Row(name:String, _) => SmallCountry(name)      
-  }).list
+import java.sql.Connection
+import anorm._
+
+trait Country
+case class SmallCountry(name:String) extends Country
+case class BigCountry(name:String) extends Country
+case object France extends Country
+
+val patternParser = RowParser[Country] {
+  case Row("France", _) => Success(France)
+  case Row(name:String, pop:Int) if (pop > 1000000) => Success(BigCountry(name))
+  case Row(name:String, _) => Success(SmallCountry(name))
+  case row => Error(TypeDoesNotMatch(s"unexpected: $row"))
+}
+
+def countries(implicit con: Connection): List[Country] =
+  SQL("SELECT name,population FROM Country WHERE id = {i}").
+    on("i" -> "id").as(patternParser.*)
 ```
 
 ## Using for-comprehension
