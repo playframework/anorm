@@ -12,39 +12,6 @@ import scala.util.Failure
 
 import resource.{ managed, ManagedResource }
 
-/** Error from processing SQL */
-sealed trait SqlRequestError {
-  def message: String
-
-  /** Returns error as a failure. */
-  def toFailure = Failure(sys.error(message))
-}
-
-case class ColumnNotFound(
-    column: String, possibilities: List[String]) extends SqlRequestError {
-
-  lazy val message = s"$column not found, available columns : " +
-    possibilities.map(_.dropWhile(_ == '.')).mkString(", ")
-
-  override lazy val toString = message
-}
-
-object ColumnNotFound {
-  def apply(column: String, row: Row): ColumnNotFound =
-    ColumnNotFound(column, row.metaData.availableColumns)
-}
-
-case class UnexpectedNullableFound(message: String) extends SqlRequestError
-case class SqlMappingError(reason: String) extends SqlRequestError {
-  lazy val message = s"SqlMappingError($reason)"
-  override lazy val toString = message
-}
-
-case class TypeDoesNotMatch(reason: String) extends SqlRequestError {
-  lazy val message = s"TypeDoesNotMatch($reason)"
-  override lazy val toString = message
-}
-
 /**
  * Untyped value wrapper.
  *
