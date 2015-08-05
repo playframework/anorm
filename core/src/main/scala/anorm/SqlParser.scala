@@ -11,7 +11,7 @@ object SqlParser extends FunctionAdapter {
   private val NoColumnsInReturnedResult = SqlMappingError("No column in result")
 
   /**
-   * Returns parser for a scalar not-null value.
+   * Returns a parser for a scalar not-null value.
    *
    * {{{
    * val count = SQL("select count(*) from Country").as(scalar[Long].single)
@@ -27,6 +27,30 @@ object SqlParser extends FunctionAdapter {
           flatMap(transformer.tupled).fold(Error(_), Success(_))
       }
     }
+
+  /**
+   * Returns a parser that fold over the row.
+   *
+   * {{{
+   * val p: RowParser[List[(Any, String)]] =
+   *   SqlParser.folder(List.empty[(Any, String)]) { (ls, v, m) =>
+   *     Right((v, m.clazz) :: ls)
+   *   }
+   * }}}
+   */
+  def folder[T](z: T)(f: (T, Any, MetaDataItem) => Either[SqlRequestError, T]): RowParser[T] = {
+    @annotation.tailrec
+    def go(data: List[Any], meta: List[MetaDataItem], out: T): SqlResult[T] =
+      (data.headOption, meta.headOption) match {
+        case (Some(d), Some(m)) => f(out, d, m) match {
+          case Left(err) => Error(err)
+          case Right(res) => go(data.tail, meta.tail, res)
+        }
+        case _ => Success(out)
+      }
+
+    RowParser[T] { row => go(row.data, row.metaData.ms, z) }
+  }
 
   /**
    * Flatten columns tuple-like.

@@ -101,19 +101,16 @@ object SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
   "Column" should {
     "be matching in result" in withQueryResult(
       rowList1(classOf[Float] -> "f") :+ 1.2f) { implicit c =>
-
         SQL("SELECT f") as SqlParser.matches("f", 1.2f).single must beTrue
       }
 
     "not be found in result when value not matching" in withQueryResult(
       rowList1(classOf[Float] -> "f") :+ 1.2f) { implicit c =>
-
         SQL("SELECT f") as SqlParser.matches("f", 2.34f).single must beFalse
       }
 
     "not be found in result when column missing" in withQueryResult(
       rowList1(classOf[Float] -> "f") :+ 1.2f) { implicit c =>
-
         SQL("SELECT f") as SqlParser.matches("x", 1.2f).single must beFalse
       }
   }

@@ -172,6 +172,19 @@ val product: (String, Float) = SQL("SELECT * FROM prod WHERE id = {id}").
 
 `java.util.UUID` can be used as parameter, in which case its string value is passed to statement.
 
+If the columns are not strictly defined (e.g. with types that can vary), the `SqlParser.folder` can be used to fold each row in a custom way.
+
+```scala
+import anorm.{ RowParser, SqlParser }
+
+val parser: RowParser[Map[String, Any]] = 
+  SqlParser.folder(Map.empty[String, Any]) { (map, value, meta) => 
+    Right(map + (meta.column.qualified -> value))
+  }
+
+val result: List[Map[String, Any]] = SQL"SELECT * FROM dyn_table".as(parser.*)
+```
+
 ### SQL queries using String Interpolation
 
 Since Scala 2.10 supports custom String Interpolation there is also a 1-step alternative to `SQL(queryString).on(params)` seen before. You can abbreviate the code as: 

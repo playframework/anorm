@@ -79,3 +79,18 @@ case class Info(name: String, year: Option[Int])
 val parser: RowParser[Info] = Macro.namedParser[Info]
 val result: List[Info] = SQL"SELECT * FROM list".as(parser.*)
 ```
+
+## Parsing
+
+The new `SqlParser.folder` make it possible to handle columns that are not strictly defined (e.g. with types that can vary).
+
+```scala
+import anorm.{ RowParser, SqlParser }
+
+val parser: RowParser[Map[String, Any]] =
+  SqlParser.folder(Map.empty[String, Any]) { (map, value, meta) =>
+    Right(map + (meta.column.qualified -> value))
+  }
+
+val result: List[Map[String, Any]] = SQL"SELECT * FROM dyn_table".as(parser.*)
+```
