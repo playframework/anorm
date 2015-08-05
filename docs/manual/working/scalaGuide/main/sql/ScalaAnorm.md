@@ -170,7 +170,18 @@ val product: (String, Float) = SQL("SELECT * FROM prod WHERE id = {id}").
   on('id -> "p").as(parser.single)
 ```
 
-`java.util.UUID` can be used as parameter, in which case its string value is passed to statement.
+If the columns are not strictly defined (e.g. with types that can vary), the `SqlParser.folder` can be used to fold each row in a custom way.
+
+```scala
+import anorm.{ RowParser, SqlParser }
+
+val parser: RowParser[Map[String, Any]] = 
+  SqlParser.folder(Map.empty[String, Any]) { (map, value, meta) => 
+    Right(map + (meta.column.qualified -> value))
+  }
+
+val result: List[Map[String, Any]] = SQL"SELECT * FROM dyn_table".as(parser.*)
+```
 
 If the columns are not strictly defined (e.g. with types that can vary), the `SqlParser.folder` can be used to fold each row in a custom way.
 
@@ -873,6 +884,8 @@ UUID                 | No                   | No   | No               | No     |
 - 4. Type `java.util.UUID`.
 - 5. Type `java.sql.Array`.
 - 6. Type `java.lang.Iterable[_]`.
+
+> When an instance of `java.util.UUID` is used as a parameter, its string value is passed to statement. If the underlying database offers a specific SQL datatype for ID, it's possible to cast the stringified value; e.g. Working with PostgreSQL `uuid` type: `SQL"SELECT * FROM table WHERE anPostgreSQLuuid = ${aJavaUUID}::uuid"`
 
 Optional column can be parsed as `Option[T]`, as soon as `T` is supported.
 
