@@ -126,9 +126,6 @@ object NamedParameter {
 }
 
 private[anorm] trait Sql extends WithResult {
-  @deprecated(message = "Use [[preparedStatement]]", since = "2.3.6")
-  def getFilledStatement(connection: Connection, getGeneratedKeys: Boolean = false): PreparedStatement
-
   def preparedStatement(connection: Connection, getGeneratedKeys: Boolean = false): ManagedResource[PreparedStatement]
 
   /**

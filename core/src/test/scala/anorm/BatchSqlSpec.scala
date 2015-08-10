@@ -37,18 +37,21 @@ object BatchSqlSpec
 
   "Appending list of parameter values" should {
     "be successful with first parameter map" in {
-      val b1 = BatchSql("SELECT * FROM tbl WHERE a = {a}, b = {b}")
-      lazy val b2 = b1.addBatchParams(0, 1)
-      lazy val expectedMaps =
-        Seq(Map[String, ParameterValue]("a" -> 0, "b" -> 1))
+      val b1 = BatchSql("SELECT * FROM tbl WHERE a = {a}, b = {b}",
+        Seq[NamedParameter]("a" -> 0, "b" -> 1), Nil)
+      lazy val b2 = b1.addBatchParams(2, 3)
+      lazy val expectedMaps = Seq(
+        Map[String, ParameterValue]("a" -> 0, "b" -> 1),
+        Map.empty[String, ParameterValue],
+        Map[String, ParameterValue]("a" -> 2, "b" -> 3))
 
       (b2 aka "append" must not(throwA[Throwable])).
         and(b2.params aka "parameters" must_== expectedMaps)
     }
 
     "fail with missing argument" in {
-      val b1 = BatchSql("SELECT * FROM tbl WHERE a = {a}, b = {b}").
-        addBatchParams(0, 1)
+      val b1 = BatchSql("SELECT * FROM tbl WHERE a = {a}, b = {b}",
+        Seq[NamedParameter]("a" -> 0, "b" -> 1), Nil)
 
       lazy val b2 = b1.addBatchParams(2)
 
@@ -57,11 +60,13 @@ object BatchSqlSpec
     }
 
     "be successful" in {
-      val b1 = BatchSql("SELECT * FROM tbl WHERE a = {a}, b = {b}")
+      val b1 = BatchSql("SELECT * FROM tbl WHERE a = {a}, b = {b}",
+        Seq[NamedParameter]("a" -> 0, "b" -> 1), Nil)
 
-      lazy val b2 = b1.addBatchParams(0, 1).addBatchParams(2, 3)
+      lazy val b2 = b1.addBatchParams(2, 3)
       lazy val expectedMaps = Seq(
         Map[String, ParameterValue]("a" -> 0, "b" -> 1),
+        Map.empty[String, ParameterValue],
         Map[String, ParameterValue]("a" -> 2, "b" -> 3))
 
       (b2 aka "append" must not(throwA[Throwable])).
@@ -71,11 +76,13 @@ object BatchSqlSpec
 
   "Appending list of list of parameter values" should {
     "be successful with first parameter map" in {
-      val b1 = BatchSql("SELECT * FROM tbl WHERE a = {a}, b = {b}")
+      val b1 = BatchSql("SELECT * FROM tbl WHERE a = {a}, b = {b}",
+        Seq[NamedParameter]("a" -> 0, "b" -> 1), Nil)
 
-      lazy val b2 = b1.addBatchParamsList(Seq(Seq(0, 1), Seq(2, 3)))
+      lazy val b2 = b1.addBatchParamsList(Seq(Seq(2, 3)))
       lazy val expectedMaps = Seq(
         Map[String, ParameterValue]("a" -> 0, "b" -> 1),
+        Map.empty[String, ParameterValue],
         Map[String, ParameterValue]("a" -> 2, "b" -> 3))
 
       (b2 aka "append" must not(throwA[Throwable])).
@@ -83,8 +90,8 @@ object BatchSqlSpec
     }
 
     "fail with missing argument" in {
-      val b1 = BatchSql(
-        "SELECT * FROM tbl WHERE a = {a}, b = {b}").addBatchParams(0, 1)
+      val b1 = BatchSql("SELECT * FROM tbl WHERE a = {a}, b = {b}",
+        Seq[NamedParameter]("a" -> 0, "b" -> 1), Nil)
 
       lazy val b2 = b1.addBatchParamsList(Seq(Seq(2)))
 
@@ -93,13 +100,14 @@ object BatchSqlSpec
     }
 
     "be successful" in {
-      val b1 = BatchSql("SELECT * FROM tbl WHERE a = {a}, b = {b}")
+      val b1 = BatchSql("SELECT * FROM tbl WHERE a = {a}, b = {b}",
+        Seq[NamedParameter]("a" -> 0, "b" -> 1), Nil)
 
-      lazy val b2 = b1.addBatchParamsList(Seq(Seq(0, 1))).
-        addBatchParamsList(Seq(Seq(2, 3), Seq(4, 5)))
+      lazy val b2 = b1.addBatchParamsList(Seq(Seq(2, 3), Seq(4, 5)))
 
       lazy val expectedMaps = Seq(
         Map[String, ParameterValue]("a" -> 0, "b" -> 1),
+        Map.empty[String, ParameterValue],
         Map[String, ParameterValue]("a" -> 2, "b" -> 3),
         Map[String, ParameterValue]("a" -> 4, "b" -> 5))
 
@@ -121,17 +129,6 @@ object BatchSqlSpec
 
       batch.sql.stmt aka "parsed statement" mustEqual stmt and (
         batch.execute() aka "batch result" mustEqual Array(1, 1))
-    }
-
-    "not fail when there is no parameter" in {
-      var x: Boolean = false
-      implicit val con = AcolyteDSL.connection(
-        AcolyteDSL.handleStatement.withUpdateHandler {
-          case _ => x = true; 1
-        })
-
-      BatchSql("EXEC batch", Seq.empty[Seq[NamedParameter]]).execute().toList.
-        aka("batch result") must beEmpty and (x aka "executed" must beFalse)
     }
   }
 }

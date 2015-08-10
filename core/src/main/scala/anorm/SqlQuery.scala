@@ -28,9 +28,6 @@ sealed trait SqlQuery {
   /** Execution timeout */
   def timeout: Option[Int]
 
-  @deprecated(message = "Use [[Sql.preparedStatement]]", since = "2.3.6")
-  def getFilledStatement(connection: Connection, getGeneratedKeys: Boolean = false): PreparedStatement = asSimple.getFilledStatement(connection, getGeneratedKeys)
-
   /** Returns this query with timeout updated to `seconds` delay. */
   def withQueryTimeout(seconds: Option[Int]): SqlQuery =
     SqlQuery.prepare(stmt, paramsInitialOrder, seconds)

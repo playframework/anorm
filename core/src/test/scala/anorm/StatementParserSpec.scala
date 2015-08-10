@@ -28,7 +28,7 @@ object StatementParserSpec extends org.specs2.mutable.Specification {
 
     "detect missing query parameter" in withQueryResult(stringList :+ "test") {
       implicit con =>
-        SQL("SELECT name FROM t WHERE id = {id}").apply().
+        SQL("SELECT name FROM t WHERE id = {id}").execute().
           aka("query") must throwA[java.util.NoSuchElementException]
     }
 
