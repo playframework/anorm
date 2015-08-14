@@ -35,8 +35,9 @@ object AnormSpec extends Specification with H2Database with AnormTest {
 
       ex aka "update executed" must beFalse /*not query*/ and {
         SQL("select * from test1 where id = {id}").on('id -> 10L)
-          .map(row => row[String]("foo") -> row[Int]("bar"))
-          .single must_== ("Hello" -> 20)
+          .as(RowParser({ row =>
+            Success(row[String]("foo") -> row[Int]("bar"))
+          }).single) must_== ("Hello" -> 20)
       }
     }
 
@@ -53,8 +54,7 @@ object AnormSpec extends Specification with H2Database with AnormTest {
       "return single value" in withQueryResult(20) { implicit c =>
         (SQL("SELECT * FROM test").as(scalar[Int].single).
           aka("single value #1") must_== 20).
-          and(SQL("SELECT * FROM test").using(scalar[Int]).
-            single aka "single value #2" must_== 20)
+          and(SQL("SELECT * FROM test").as(scalar[Int].single) must_== 20)
 
       }
 
@@ -281,9 +281,9 @@ object AnormSpec extends Specification with H2Database with AnormTest {
       rowList2(classOf[String] -> "foo", classOf[Int] -> "bar").
         append("row1", 100) :+ ("row2", 200)) { implicit c =>
 
-        SQL("SELECT * FROM test").map(row =>
-          row[String]("foo") -> row[Int]("bar")
-        ).list aka "tuple list" must_== List("row1" -> 100, "row2" -> 200)
+        SQL("SELECT * FROM test").as(RowParser({ row =>
+          Success(row[String]("foo") -> row[Int]("bar"))
+        }).*) aka "tuple list" must_== List("row1" -> 100, "row2" -> 200)
       }
 
     "be parsed from class mapping" in withQueryResult(
@@ -316,54 +316,6 @@ object AnormSpec extends Specification with H2Database with AnormTest {
 
         (q.as(scalar[String].*) aka "list" must_== exp).
           and(q.as(scalar[String].+) aka "non-empty list" must_== exp)
-      }
-  }
-
-  "Stream" should {
-    "be empty when there is no result" in withQueryResult(QueryResult.Nil) {
-      implicit c => SQL("EXEC test").apply().headOption must beNone
-    }
-
-    "be parsed from mapped result" in withQueryResult(
-      rowList2(classOf[String] -> "foo", classOf[Int] -> "bar").
-        append("row1", 100) :+ ("row2", 200)) { implicit c =>
-
-        SQL("SELECT * FROM test").apply()
-          .map(row => row[String]("foo") -> row[Int]("bar"))
-          .aka("tuple stream") mustEqual {
-            List("row1" -> 100, "row2" -> 200).toStream
-          }
-      }
-
-    "be parsed from class mapping" in withQueryResult(
-      fooBarTable :+ (12L, "World", 101) :+ (14L, "Mondo", 3210)) {
-        implicit c =>
-          SQL("SELECT * FROM test").apply().map(fooBarParser1).
-            aka("parsed stream") must_== List(
-              Success(TestTable(12L, "World", 101)),
-              Success(TestTable(14L, "Mondo", 3210))).toStream
-
-      }
-
-    "be parsed from mapping with optional column" in withQueryResult(rowList2(
-      classOf[Int] -> "id", classOf[String] -> "val").
-      append(9, null.asInstanceOf[String]) :+ (2, "str")) { implicit c =>
-
-      lazy val parser = SqlParser.int("id") ~ SqlParser.str("val").? map {
-        case id ~ v => (id -> v)
-      }
-
-      SQL("SELECT * FROM test").apply().map(parser).
-        aka("parsed stream") must_== List(
-          Success(9 -> None), Success(2 -> Some("str"))).toStream
-    }
-
-    "include scalar values" in withQueryResult(
-      stringList :+ "A" :+ "B" :+ "C" :+ "D") { implicit c =>
-
-        SQL("SELECT c FROM letters").apply().map(scalar[String]).
-          aka("string stream") must_== List(
-            Success("A"), Success("B"), Success("C"), Success("D"))
       }
   }
 

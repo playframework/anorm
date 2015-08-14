@@ -3,8 +3,9 @@
  */
 package anorm
 
-@deprecated("For internal use, will be made private", "2.3.6")
-case class MayErr[+E, +A](toEither: Either[E, A]) {
+// TODO: Remove
+
+private[anorm] case class MayErr[+E, +A](toEither: Either[E, A]) {
 
   def flatMap[B, EE >: E](f: A => MayErr[EE, B]): MayErr[EE, B] =
     MayErr(toEither.right.flatMap(a => f(a).toEither))
@@ -28,9 +29,8 @@ case class MayErr[+E, +A](toEither: Either[E, A]) {
 
 }
 
-object MayErr {
+private[anorm] object MayErr {
   import scala.language.implicitConversions
 
-  @deprecated("Use [[MayErr]] constructor explicitly.", "2.3.6")
   implicit def eitherToError[E, EE >: E, A, AA >: A](e: Either[E, A]): MayErr[EE, AA] = MayErr[E, A](e)
 }

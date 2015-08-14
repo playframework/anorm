@@ -36,38 +36,19 @@ case class SimpleSql[T](sql: SqlQuery, params: Map[String, ParameterValue], defa
     copy(params = this.params ++ Sql.zipParams(
       sql.paramsInitialOrder, args, Map.empty))
 
-  /** Applies current parser with optionnal list of rows (0..n). */
-  @deprecated(
-    message = """Use `SQL("...").as(parser.*)`""", since = "2.3.5")
-  def list()(implicit connection: Connection): List[T] = as(defaultParser.*)
-
-  /** Applies current parser to exactly on row. */
-  @deprecated(
-    message = """Use `SQL("...").as(parser.single)`""", since = "2.3.5")
-  def single()(implicit connection: Connection): T = as(defaultParser.single)
-
-  /** Applies current parser to one optional row. */
-  @deprecated(
-    message = """Use `SQL("...").as(parser.singleOpt)`""", since = "2.3.5")
-  def singleOpt()(implicit connection: Connection): Option[T] =
-    as(defaultParser.singleOpt)
-
-  @deprecated(message = "Use [[preparedStatement]]", since = "2.3.6")
-  def getFilledStatement(connection: Connection, getGeneratedKeys: Boolean = false) = {
-    val (psql, vs): (String, Seq[(Int, ParameterValue)]) = Sql.prepareQuery(sql.stmt.tokens, sql.paramsInitialOrder, params, 0, new StringBuilder(), List.empty[(Int, ParameterValue)]).get
-
-    val stmt = if (getGeneratedKeys) connection.prepareStatement(psql, java.sql.Statement.RETURN_GENERATED_KEYS) else connection.prepareStatement(psql)
-
-    sql.timeout.foreach(stmt.setQueryTimeout(_))
-
-    vs foreach { case (i, v) => v.set(stmt, i + 1) }
-
-    stmt
-  }
-
   def preparedStatement(connection: Connection, getGeneratedKeys: Boolean = false) = {
     implicit val res = StatementResource
-    resource.managed(getFilledStatement(connection, getGeneratedKeys))
+    resource.managed {
+      val (psql, vs): (String, Seq[(Int, ParameterValue)]) = Sql.prepareQuery(sql.stmt.tokens, sql.paramsInitialOrder, params, 0, new StringBuilder(), List.empty[(Int, ParameterValue)]).get
+
+      val stmt = if (getGeneratedKeys) connection.prepareStatement(psql, java.sql.Statement.RETURN_GENERATED_KEYS) else connection.prepareStatement(psql)
+
+      sql.timeout.foreach(stmt.setQueryTimeout(_))
+
+      vs foreach { case (i, v) => v.set(stmt, i + 1) }
+
+      stmt
+    }
   }
 
   /**
@@ -80,8 +61,8 @@ case class SimpleSql[T](sql: SqlQuery, params: Map[String, ParameterValue], defa
    * // Equivalent to: SQL("SELECT 1").as(SqlParser.scalar[Int].single)
    * }}}
    */
+  @deprecated(message = "Use [[as]]", since = "2.5.1")
   def using[U](p: RowParser[U]): SimpleSql[U] = copy(sql, params, p)
-  // Deprecates with .as ?
 
   def map[A](f: T => A): SimpleSql[A] =
     copy(defaultParser = defaultParser.map(f))

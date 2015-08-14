@@ -13,27 +13,27 @@ object RowSpec extends org.specs2.mutable.Specification {
     "be expected one" in withQueryResult(rowList2(
       classOf[String] -> "foo", classOf[Int] -> "bar") :+ ("row1", 100)) {
       implicit c =>
-        SQL("SELECT * FROM test").map(_.asList).single.
+        SQL("SELECT * FROM test").as(RowParser(r => Success(r.asList)).single).
           aka("column list") must_== List("row1", 100)
     }
 
     "keep null if not nullable" in withQueryResult(stringList :+ null) {
       implicit c =>
-        SQL("SELECT 1").map(_.asList).single.
+        SQL("SELECT 1").as(RowParser(r => Success(r.asList)).single).
           aka("column list") must_== List(null)
 
     }
 
     "turn null into None if nullable" in withQueryResult(
       stringList.withNullable(1, true) :+ null) { implicit c =>
-        SQL("SELECT 1").map(_.asList).single.
+        SQL("SELECT 1").as(RowParser(r => Success(r.asList)).single).
           aka("column list") must_== List(None)
 
       }
 
     "turn value into Some(X) if nullable" in withQueryResult(
       stringList.withNullable(1, true) :+ "str") { implicit c =>
-        SQL("SELECT 1").map(_.asList).single.
+        SQL("SELECT 1").as(RowParser(r => Success(r.asList)).single).
           aka("column list") must_== List(Some("str"))
 
       }
@@ -43,14 +43,14 @@ object RowSpec extends org.specs2.mutable.Specification {
     "be expected one" in withQueryResult(rowList2(
       classOf[String] -> "foo", classOf[Int] -> "bar") :+ ("row1", 100)) {
       implicit c =>
-        SQL("SELECT * FROM test").map(_.asMap).single.
+        SQL("SELECT * FROM test").as(RowParser(r => Success(r.asMap)).single).
           aka("column map") must_== Map(".foo" -> "row1", ".bar" -> 100)
 
     }
 
     "keep null if not nullable" in withQueryResult(
       rowList1(classOf[String] -> "foo") :+ null) { implicit c =>
-        SQL("SELECT 1").map(_.asMap).single.
+        SQL("SELECT 1").as(RowParser(r => Success(r.asMap)).single).
           aka("column map") must_== Map(".foo" -> null)
 
       }
@@ -58,7 +58,7 @@ object RowSpec extends org.specs2.mutable.Specification {
     "turn null into None if nullable" in withQueryResult(
       rowList1(classOf[String] -> "foo").withNullable(1, true) :+ null) {
         implicit c =>
-          SQL("SELECT 1").map(_.asMap).single.
+          SQL("SELECT 1").as(RowParser(r => Success(r.asMap)).single).
             aka("column map") must_== Map(".foo" -> None)
 
       }
@@ -66,7 +66,7 @@ object RowSpec extends org.specs2.mutable.Specification {
     "turn value into Some(X) if nullable" in withQueryResult(
       rowList1(classOf[String] -> "foo").withNullable(1, true) :+ "str") {
         implicit c =>
-          SQL("SELECT 1").map(_.asMap).single.
+          SQL("SELECT 1").as(RowParser(r => Success(r.asMap)).single).
             aka("column map") must_== Map(".foo" -> Some("str"))
 
       }
@@ -75,13 +75,13 @@ object RowSpec extends org.specs2.mutable.Specification {
   "Column" should {
     "be extracted by name" in withQueryResult(
       rowList1(classOf[String] -> "foo") :+ "byName") { implicit c =>
-        SQL("SELECT *").map(_.apply[String]("foo")).single.
+        SQL("SELECT *").as(RowParser(r => Success(r[String]("foo"))).single).
           aka("column by name") must_== "byName"
       }
 
     "be extracted by position" in withQueryResult(stringList :+ "byPos") {
       implicit c =>
-        SQL("SELECT *").map(_.apply[String](1)).single.
+        SQL("SELECT *").as(RowParser(r => Success(r[String](1))).single).
           aka("column by name") must_== "byPos"
     }
   }

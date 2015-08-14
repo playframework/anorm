@@ -260,7 +260,7 @@ object ParameterSpec
     }
 
     "be undefined string" in withConnection() { implicit c =>
-      SQL("set-null-str {p}").on("p" -> (None: Option[String])).
+      SQL("set-null-str {p}").on("p" -> Option.empty[String]).
         execute() must beFalse
     }
 
@@ -311,7 +311,7 @@ object ParameterSpec
     }
 
     "be undefined character" in withConnection() { implicit c =>
-      SQL("set-null-char {p}").on("p" -> (None: Option[Char])).
+      SQL("set-null-char {p}").on("p" -> Option.empty[Char]).
         execute() must beFalse
     }
 
@@ -331,7 +331,7 @@ object ParameterSpec
     }
 
     "be undefined boolean" in withConnection() { implicit c =>
-      SQL("set-null-bool {p}").on('p -> (None: Option[Boolean])).execute().
+      SQL("set-null-bool {p}").on('p -> Option.empty[Boolean]).execute().
         aka("execution") must beFalse
     }
 
@@ -346,7 +346,7 @@ object ParameterSpec
     }
 
     "be undefined int" in withConnection() { implicit c =>
-      SQL("set-null-int {p}").on("p" -> (None: Option[Int])).
+      SQL("set-null-int {p}").on("p" -> Option.empty[Int]).
         execute() must beFalse
     }
 
@@ -363,7 +363,7 @@ object ParameterSpec
 
     "be undefined short" in withConnection() { implicit c =>
       SQL("set-null-short {p}").on(
-        "p" -> (None: Option[Short])).execute() must beFalse
+        "p" -> Option.empty[Short]).execute() must beFalse
     }
 
     "be byte" in withConnection() { implicit c =>
@@ -378,7 +378,7 @@ object ParameterSpec
     }
 
     "be undefined byte" in withConnection() { implicit c =>
-      SQL("set-null-byte {p}").on("p" -> (None: Option[Byte])).
+      SQL("set-null-byte {p}").on("p" -> Option.empty[Byte]).
         execute() must beFalse
     }
 
@@ -394,7 +394,7 @@ object ParameterSpec
     }
 
     "be undefined long" in withConnection() { implicit c =>
-      SQL("set-null-long {p}").on("p" -> (None: Option[Long])).
+      SQL("set-null-long {p}").on("p" -> Option.empty[Long]).
         execute() must beFalse
     }
 
@@ -410,7 +410,7 @@ object ParameterSpec
     }
 
     "be undefined float" in withConnection() { implicit c =>
-      SQL("set-null-float {p}").on("p" -> (None: Option[Float])).
+      SQL("set-null-float {p}").on("p" -> Option.empty[Float]).
         execute() must beFalse
     }
 
@@ -427,7 +427,7 @@ object ParameterSpec
 
     "be undefined double" in withConnection() { implicit c =>
       SQL("set-null-double {p}").on(
-        "p" -> (None: Option[Double])).execute() must beFalse
+        "p" -> Option.empty[Double]).execute() must beFalse
     }
 
     "be Java big integer" in withConnection() { implicit c =>
@@ -449,7 +449,7 @@ object ParameterSpec
     }
 
     "be undefined Scala big integer" in withConnection() { implicit c =>
-      SQL("set-null-sbi {p}").on("p" -> (None: Option[BigInt])).
+      SQL("set-null-sbi {p}").on("p" -> Option.empty[BigInt]).
         execute() must beFalse
     }
 
@@ -473,7 +473,7 @@ object ParameterSpec
 
     "be undefined Scala big decimal" in withConnection() { implicit c =>
       SQL("set-null-sbd {p}").
-        on("p" -> (None: Option[BigDecimal])).execute() must beFalse
+        on("p" -> Option.empty[BigDecimal]).execute() must beFalse
     }
 
     "be date" in withConnection() { implicit c =>
@@ -487,7 +487,7 @@ object ParameterSpec
 
     "be undefined date" in withConnection() { implicit c =>
       SQL("set-null-date {p}").
-        on("p" -> (None: Option[Date])).execute() must beFalse
+        on("p" -> Option.empty[Date]).execute() must beFalse
     }
 
     "be not null timestamp" >> {
@@ -516,12 +516,12 @@ object ParameterSpec
     "be undefined timestamp" >> {
       "directly" in withConnection() { implicit c =>
         SQL("set-null-ts {p}").
-          on("p" -> (None: Option[Timestamp])).execute() must beFalse
+          on("p" -> Option.empty[Timestamp]).execute() must beFalse
       }
 
       "wrapped" in withConnection() { implicit c =>
         SQL("set-null-ts {p}").
-          on("p" -> (None: Option[TimestampWrapper1])).execute() must beFalse
+          on("p" -> Option.empty[TimestampWrapper1]).execute() must beFalse
       }
     }
 
@@ -536,7 +536,7 @@ object ParameterSpec
 
     "be undefined UUID" in withConnection() { implicit c =>
       SQL("set-null-uuid {p}").
-        on("p" -> (None: Option[java.util.UUID])).execute() must beFalse
+        on("p" -> Option.empty[java.util.UUID]).execute() must beFalse
     }
 
     "be multiple (string, Java big decimal)" in withConnection() {
@@ -643,8 +643,7 @@ object ParameterSpec
 
     "set null parameter from empty option" in withConnection(
       "acolyte.parameter.untypedNull" -> "true") { implicit c =>
-        val empty: Option[String] = None
-        SQL("set-empty-opt {p}").on("p" -> empty).
+        SQL("set-empty-opt {p}").on("p" -> Option.empty[String]).
           execute() aka "execution" must beFalse
       }
 
@@ -971,8 +970,7 @@ object ParameterSpec
 
     "set null parameter from empty option" in withConnection(
       "acolyte.parameter.untypedNull" -> "true") { implicit c =>
-        val empty: Option[String] = None
-        SQL("set-empty-opt {p}").onParams(pv(empty)).
+        SQL("set-empty-opt {p}").onParams(pv(Option.empty[String])).
           execute() aka "execution" must beFalse
       }
 

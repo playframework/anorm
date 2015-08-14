@@ -40,22 +40,6 @@ private[anorm] trait WithResult {
   protected def resultSet(connection: Connection): resource.ManagedResource[java.sql.ResultSet]
 
   /**
-   * Executes this SQL statement as query, returns result as Row stream.
-   */
-  @deprecated(
-    "Use [[fold]], [[foldWhile]] or [[withResult]] instead, which manages resources and memory", "2.4")
-  def apply()(implicit connection: Connection): Stream[Row] = {
-    @annotation.tailrec
-    def go(c: Option[Cursor], s: Stream[Row]): Stream[Row] = c match {
-      case Some(cursor) => go(cursor.next, s :+ cursor.row)
-      case _ => s
-    }
-
-    Sql.withResult(resultSet(connection), resultSetOnFirstRow)(
-      go(_, Stream.empty[Row])).acquireAndGet(identity)
-  }
-
-  /**
    * Aggregates over all rows using the specified operator.
    *
    * @param z the start value
