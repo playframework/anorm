@@ -38,8 +38,8 @@ private[anorm] case class MetaData(ms: List[MetaDataItem]) {
   /** Returns meta data for specified column. */
   def get(columnName: String): Option[MetaDataItem] = {
     val key = columnName.toUpperCase
-    dictionary2.get(key).orElse(dictionary.get(key)).
-      orElse(aliasedDictionary.get(key))
+    aliasedDictionary.get(key).
+      orElse(dictionary2 get key).orElse(dictionary get key)
   }
 
   private lazy val dictionary: Map[String, MetaDataItem] =
@@ -51,11 +51,10 @@ private[anorm] case class MetaData(ms: List[MetaDataItem]) {
       column.toUpperCase() -> m
     }).toMap
 
-  private lazy val aliasedDictionary: Map[String, MetaDataItem] = {
-    ms.flatMap(m => {
+  private lazy val aliasedDictionary: Map[String, MetaDataItem] =
+    ms.flatMap(m =>
       m.column.alias.map(a => Map(a.toUpperCase() -> m)).getOrElse(Map.empty)
-    }).toMap
-  }
+    ).toMap
 
   lazy val columnCount = ms.size
 
