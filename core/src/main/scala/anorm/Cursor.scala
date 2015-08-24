@@ -9,6 +9,8 @@ sealed trait Cursor {
 
   /** Cursor to next row */
   def next: Option[Cursor]
+
+  override lazy val toString = s"Cursor($row)"
 }
 
 /** Cursor companion */
@@ -28,8 +30,11 @@ object Cursor {
       val columns: List[Int] = List.range(1, meta.columnCount + 1)
       val row = ResultRow(meta, columns.map(rs.getObject(_)))
 
-      def next = apply(rs, meta, columns)
+      lazy val next = apply(rs, meta, columns)
     })
+
+  def unapply(cursor: Cursor): Option[(Row, Option[Cursor])] =
+    Some(cursor.row -> cursor.next)
 
   /**
    * Returns a cursor for a result set initialized on the first row.
