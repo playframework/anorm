@@ -39,3 +39,7 @@ import play.api.libs.iteratee._
 def resultAsEnumerator(implicit con: Connection): Enumerator[String] =
   Iteratees.from(SQL"SELECT * FROM Test", SqlParser.scalar[String])
 ```
+
+## Column conversions
+
+- A date/timestamp column can now be read as a `Long`, representing the [epoch](https://en.wikipedia.org/wiki/Unix_time) milliseconds.

@@ -6,6 +6,7 @@ package anorm
 import java.io.{ ByteArrayInputStream, InputStream }
 import java.math.{ BigDecimal => JBigDec, BigInteger }
 import java.util.{ Date, UUID }
+import java.sql.Timestamp
 
 import scala.language.reflectiveCalls
 import scala.util.{ Failure, Success => TrySuccess, Try }
@@ -188,6 +189,8 @@ object Column extends JodaColumn with JavaTimeColumn {
     }
   }
 
+  private[anorm] def timestamp[T](ts: Timestamp)(f: Timestamp => T): Either[SqlRequestError, T] = Right(if (ts == null) null.asInstanceOf[T] else f(ts))
+
   implicit val columnToLong: Column[Long] = nonNull { (value, meta) =>
     val MetaDataItem(qualified, nullable, clazz) = meta
     value match {
@@ -197,7 +200,9 @@ object Column extends JodaColumn with JavaTimeColumn {
       case long: Long => Right(long)
       case s: Short => Right(s.toLong)
       case b: Byte => Right(b.toLong)
-      case bool: Boolean => Right(if (!bool) 0l else 1l)
+      case bool: Boolean => Right(if (!bool) 0L else 1L)
+      case date: Date => Right(date.getTime)
+      case TimestampWrapper1(ts) => timestamp(ts)(_.getTime)
       case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${value.asInstanceOf[AnyRef].getClass} to Long for column $qualified"))
     }
   }
@@ -317,9 +322,7 @@ object Column extends JodaColumn with JavaTimeColumn {
     value match {
       case date: Date => Right(date)
       case time: Long => Right(new Date(time))
-      case tsw: TimestampWrapper1 =>
-        Option(tsw.getTimestamp).fold(Right(null.asInstanceOf[Date]))(
-          ts => Right(new Date(ts.getTime)))
+      case TimestampWrapper1(ts) => timestamp(ts)(t => new Date(t.getTime))
       case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${value.asInstanceOf[AnyRef].getClass} to Date for column $qualified"))
     }
   }
@@ -445,6 +448,7 @@ object Column extends JodaColumn with JavaTimeColumn {
 
 sealed trait JodaColumn {
   import org.joda.time.{ DateTime, LocalDate, LocalDateTime, Instant }
+  import Column.{ nonNull, timestamp => Ts }
 
   /**
    * Parses column as Joda local date.
@@ -459,16 +463,13 @@ sealed trait JodaColumn {
    * }}}
    */
   implicit val columnToJodaLocalDate: Column[LocalDate] =
-    Column.nonNull { (value, meta) =>
+    nonNull { (value, meta) =>
       val MetaDataItem(qualified, nullable, clazz) = meta
 
       value match {
         case date: java.util.Date => Right(new LocalDate(date.getTime))
         case time: Long => Right(new LocalDate(time))
-        case tsw: TimestampWrapper1 => Option(tsw.getTimestamp).
-          fold(Right(null.asInstanceOf[LocalDate]))(t =>
-            Right(new LocalDate(t.getTime)))
-
+        case TimestampWrapper1(ts) => Ts(ts)(t => new LocalDate(t.getTime))
         case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${value.asInstanceOf[AnyRef].getClass} to Joda LocalDate for column $qualified"))
       }
     }
@@ -486,16 +487,13 @@ sealed trait JodaColumn {
    * }}}
    */
   implicit val columnToJodaLocalDateTime: Column[LocalDateTime] =
-    Column.nonNull { (value, meta) =>
+    nonNull { (value, meta) =>
       val MetaDataItem(qualified, nullable, clazz) = meta
 
       value match {
         case date: java.util.Date => Right(new LocalDateTime(date.getTime))
         case time: Long => Right(new LocalDateTime(time))
-        case tsw: TimestampWrapper1 => Option(tsw.getTimestamp).
-          fold(Right(null.asInstanceOf[LocalDateTime]))(t =>
-            Right(new LocalDateTime(t.getTime)))
-
+        case TimestampWrapper1(ts) => Ts(ts)(t => new LocalDateTime(t.getTime))
         case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${value.asInstanceOf[AnyRef].getClass} to Joda LocalDateTime for column $qualified"))
       }
     }
@@ -509,19 +507,19 @@ sealed trait JodaColumn {
    * val d: Date = SQL("SELECT last_mod FROM tbl").as(scalar[DateTime].single)
    * }}}
    */
-  implicit val columnToJodaDateTime: Column[DateTime] = Column.nonNull {
-    (value, meta) =>
+  implicit val columnToJodaDateTime: Column[DateTime] =
+    nonNull { (value, meta) =>
       val MetaDataItem(qualified, nullable, clazz) = meta
       value match {
         case date: Date => Right(new DateTime(date.getTime))
         case time: Long => Right(new DateTime(time))
-        case tsw: TimestampWrapper1 => Option(tsw.getTimestamp).
-          fold(Right(null.asInstanceOf[DateTime]))(t =>
+        case TimestampWrapper1(ts) =>
+          Option(ts).fold(Right(null.asInstanceOf[DateTime]))(t =>
             Right(new DateTime(t.getTime)))
 
         case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${value.asInstanceOf[AnyRef].getClass} to DateTime for column $qualified"))
       }
-  }
+    }
 
   /**
    * Parses column as joda Instant
@@ -532,23 +530,21 @@ sealed trait JodaColumn {
    * val d: Date = SQL("SELECT last_mod FROM tbl").as(scalar[Instant].single)
    * }}}
    */
-  implicit val columnToJodaInstant: Column[Instant] = Column.nonNull {
-    (value, meta) =>
+  implicit val columnToJodaInstant: Column[Instant] =
+    nonNull { (value, meta) =>
       val MetaDataItem(qualified, nullable, clazz) = meta
       value match {
         case date: Date => Right(new Instant(date.getTime))
         case time: Long => Right(new Instant(time))
-        case tsw: TimestampWrapper1 => Option(tsw.getTimestamp).
-          fold(Right(null.asInstanceOf[Instant]))(t =>
-            Right(new Instant(t.getTime)))
-
+        case TimestampWrapper1(ts) => Ts(ts)(t => new Instant(t.getTime))
         case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${value.asInstanceOf[AnyRef].getClass} to Instant for column $qualified"))
       }
-  }
+    }
 }
 
 sealed trait JavaTimeColumn {
   import java.time.{ ZonedDateTime, ZoneId, LocalDate, LocalDateTime, Instant }
+  import Column.{ nonNull, timestamp => Ts }
 
   /**
    * Parses column as Java8 instant.
@@ -562,18 +558,15 @@ sealed trait JavaTimeColumn {
    * val i: Instant = SQL("SELECT last_mod FROM tbl").as(scalar[Instant].single)
    * }}}
    */
-  implicit val columnToInstant: Column[Instant] =
-    Column.nonNull { (value, meta) =>
-      val MetaDataItem(qualified, nullable, clazz) = meta
-      value match {
-        case date: java.util.Date => Right(Instant ofEpochMilli date.getTime)
-        case time: Long => Right(Instant ofEpochMilli time)
-        case tsw: TimestampWrapper1 =>
-          Option(tsw.getTimestamp).fold(Right(null.asInstanceOf[Instant]))(t =>
-            Right(Instant ofEpochMilli t.getTime))
-        case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${value.asInstanceOf[AnyRef].getClass} to Java8 Instant for column $qualified"))
-      }
+  implicit val columnToInstant: Column[Instant] = nonNull { (value, meta) =>
+    val MetaDataItem(qualified, nullable, clazz) = meta
+    value match {
+      case date: java.util.Date => Right(Instant ofEpochMilli date.getTime)
+      case time: Long => Right(Instant ofEpochMilli time)
+      case TimestampWrapper1(ts) => Ts(ts)(Instant ofEpochMilli _.getTime)
+      case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${value.asInstanceOf[AnyRef].getClass} to Java8 Instant for column $qualified"))
     }
+  }
 
   /**
    * Parses column as Java8 local date/time.
@@ -592,14 +585,13 @@ sealed trait JavaTimeColumn {
     @inline def dateTime(ts: Long) = LocalDateTime.ofInstant(
       Instant.ofEpochMilli(ts), ZoneId.systemDefault)
 
-    Column.nonNull { (value, meta) =>
+    nonNull { (value, meta) =>
       val MetaDataItem(qualified, nullable, clazz) = meta
       value match {
         case date: java.util.Date => Right(dateTime(date.getTime))
         case time: Long => Right(dateTime(time))
-        case tsw: TimestampWrapper1 => Option(tsw.getTimestamp).
-          fold(Right(null.asInstanceOf[LocalDateTime]))(t =>
-            Right(dateTime(t.getTime)))
+        case TimestampWrapper1(ts) => Ts(ts)(t => dateTime(t.getTime))
+
         case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${value.asInstanceOf[AnyRef].getClass} to Java8 LocalDateTime for column $qualified"))
       }
     }
@@ -622,14 +614,12 @@ sealed trait JavaTimeColumn {
     @inline def localDate(ts: Long) = LocalDateTime.ofInstant(
       Instant.ofEpochMilli(ts), ZoneId.systemDefault).toLocalDate
 
-    Column.nonNull { (value, meta) =>
+    nonNull { (value, meta) =>
       val MetaDataItem(qualified, nullable, clazz) = meta
       value match {
         case date: java.util.Date => Right(localDate(date.getTime))
         case time: Long => Right(localDate(time))
-        case tsw: TimestampWrapper1 => Option(tsw.getTimestamp).
-          fold(Right(null.asInstanceOf[LocalDate]))(t =>
-            Right(localDate(t.getTime)))
+        case TimestampWrapper1(ts) => Ts(ts)(t => localDate(t.getTime))
         case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${value.asInstanceOf[AnyRef].getClass} to Java8 LocalDate for column $qualified"))
       }
     }
@@ -652,14 +642,12 @@ sealed trait JavaTimeColumn {
     @inline def dateTime(ts: Long) = ZonedDateTime.ofInstant(
       Instant.ofEpochMilli(ts), ZoneId.systemDefault)
 
-    Column.nonNull { (value, meta) =>
+    nonNull { (value, meta) =>
       val MetaDataItem(qualified, nullable, clazz) = meta
       value match {
         case date: java.util.Date => Right(dateTime(date.getTime))
         case time: Long => Right(dateTime(time))
-        case tsw: TimestampWrapper1 => Option(tsw.getTimestamp).
-          fold(Right(null.asInstanceOf[ZonedDateTime]))(t =>
-            Right(dateTime(t.getTime)))
+        case TimestampWrapper1(ts) => Ts(ts)(t => dateTime(t.getTime))
         case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${value.asInstanceOf[AnyRef].getClass} to Java8 ZonedDateTime for column $qualified"))
       }
     }

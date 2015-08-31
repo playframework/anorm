@@ -346,11 +346,11 @@ object SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
       withH2Database { implicit c =>
         createTest1Table()
 
-        val id1 = System.identityHashCode().toLong
+        val id1 = System.identityHashCode(c).toLong
         SQL"insert into test1(id, foo, bar) values ($id1, ${"Lorem"}, ${100})".
           execute()
 
-        val id2 = System.identityHashCode().toLong
+        val id2 = System.identityHashCode(id1).toLong
         SQL"insert into test1(id, foo, bar) values ($id2, ${"Ipsum"}, ${101})".
           execute()
 
