@@ -329,17 +329,36 @@ object SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
     val foo = s"alias-${System.identityHashCode(this)}"
     val (v1, v2) = (s"1-$foo", s"2-$foo")
 
-    "be found either by name" in withTestDB(v1) { implicit c =>
+    "be found by name" in withTestDB(v1) { implicit c =>
       SQL"SELECT foo AS AL, bar FROM test1".as(SqlParser.str("foo").single).
         aka("by name") must_== v1
 
     }
 
-    "not be found without alias parser" in withTestDB(v2) { implicit c =>
+    "be found by alias" in withTestDB(v2) { implicit c =>
       SQL"SELECT foo AS AL, bar FROM test1".as(SqlParser.str("foo").single).
         aka("by name") must_== v2 and (SQL"SELECT foo AS AL, bar FROM test1".
           as(SqlParser.str("AL").single).aka("by alias") must_== v2)
 
+    }
+
+    "be found by alias when column name is duplicated" in {
+      withH2Database { implicit c =>
+        createTest1Table()
+
+        val id1 = System.identityHashCode().toLong
+        SQL"insert into test1(id, foo, bar) values ($id1, ${"Lorem"}, ${100})".
+          execute()
+
+        val id2 = System.identityHashCode().toLong
+        SQL"insert into test1(id, foo, bar) values ($id2, ${"Ipsum"}, ${101})".
+          execute()
+
+        SQL"""SELECT a.foo AS ali, b.foo, b.foo AS ias FROM test1 a
+              JOIN test1 b ON a.bar <> b.bar WHERE a.id = $id1 LIMIT 1""".as(
+          (SqlParser.str("ali") ~ SqlParser.str("foo") ~ SqlParser.str("ias")).
+            map(SqlParser.flatten).single) must_== ("Lorem", "Ipsum", "Ipsum")
+      }
     }
 
     def withTestDB[T](foo: String)(f: java.sql.Connection => T): T =

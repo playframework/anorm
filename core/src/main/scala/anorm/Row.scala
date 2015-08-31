@@ -125,9 +125,9 @@ trait Row {
    */
   private[anorm] def get(a: String): MayErr[SqlRequestError, (Any, MetaDataItem)] = for {
     m <- MayErr(metaData.get(a).toRight(ColumnNotFound(a, this)))
-    data <- MayErr(columnsDictionary.get(m.column.qualified.toUpperCase()).
+    data <- MayErr(m.column.alias.flatMap(aliasesDictionary.get(_)).
+      orElse(columnsDictionary.get(m.column.qualified.toUpperCase())).
       toRight(ColumnNotFound(m.column.qualified, metaData.availableColumns)))
-
   } yield (data, m)
 
   /** Try to get data matching index. */
