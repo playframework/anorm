@@ -3,7 +3,7 @@ package anorm
 import java.sql.Connection
 
 /** Simple/plain SQL. */
-case class SimpleSql[T](sql: SqlQuery, params: Map[String, ParameterValue], defaultParser: RowParser[T], resultSetOnFirstRow: Boolean = false) extends Sql {
+case class SimpleSql[T](sql: SqlQuery, params: Map[String, ParameterValue], defaultParser: RowParser[T], resultSetOnFirstRow: Boolean = false, extractedColumns: Option[Array[String]] = None) extends Sql {
 
   /**
    * Returns query prepared with named parameters.
@@ -41,7 +41,14 @@ case class SimpleSql[T](sql: SqlQuery, params: Map[String, ParameterValue], defa
     resource.managed {
       val (psql, vs): (String, Seq[(Int, ParameterValue)]) = Sql.prepareQuery(sql.stmt.tokens, sql.paramsInitialOrder, params, 0, new StringBuilder(), List.empty[(Int, ParameterValue)]).get
 
-      val stmt = if (getGeneratedKeys) connection.prepareStatement(psql, java.sql.Statement.RETURN_GENERATED_KEYS) else connection.prepareStatement(psql)
+      val stmt = if (getGeneratedKeys) {
+        extractedColumns match {
+          case Some(columns) => connection.prepareStatement(psql, columns)
+          case None => connection.prepareStatement(psql, java.sql.Statement.RETURN_GENERATED_KEYS)
+        }
+      } else {
+        connection.prepareStatement(psql)
+      }
 
       sql.timeout.foreach(stmt.setQueryTimeout(_))
 
@@ -74,4 +81,8 @@ case class SimpleSql[T](sql: SqlQuery, params: Map[String, ParameterValue], defa
   /** Returns a copy with updated flag. */
   def withResultSetOnFirstRow(onFirst: Boolean): SimpleSql[T] =
     copy(resultSetOnFirstRow = onFirst)
+
+  /** Returns a copy with updated names of columns to extract. */
+  def withExtractedColumns(columns: Array[String]): SimpleSql[T] =
+    copy(extractedColumns = Some(columns))
 }
