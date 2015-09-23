@@ -1082,16 +1082,24 @@ ZonedDateTime<sup>5</sup> | Timestamp
 
 To enable Joda types as parameter, the `import anorm.JodaParameterMetaData._` must be used.
 
-Custom or specific database conversion for parameter can also be provided:
+#### Custom parameter conversions
+
+Custom or database specific conversion for parameter can also be provided:
 
 ```
 import java.sql.PreparedStatement
-import anorm.ToStatement
+import anorm.{ ParameterMetaData, ToStatement }
 
 // Custom conversion to statement for type T
 implicit def customToStatement: ToStatement[T] = new ToStatement[T] {
   def set(statement: PreparedStatement, i: Int, value: T): Unit =
     ??? // Sets |value| on |statement|
+}
+
+// Metadata about the custom parameter type
+implicit def customParamMeta: ParameterMetaData[T] = new ParameterMetaData[T] {
+  val sqlType = "VARCHAR"
+  def jdbcType = java.sql.Types.VARCHAR
 }
 ```
 
@@ -1104,3 +1112,14 @@ In this case at your own risk, `setObject` will be used on statement.
 val anyVal: Any = myVal
 SQL("UPDATE t SET v = {opaque}").on('opaque -> anorm.Object(anyVal))
 ```
+
+## Troubleshooting
+
+This section gathers some errors/warnings you can encounter when using Anorm.
+
+`value SQL is not a member of StringContext`; This compilation error is raised when using the [Anorm interpolation](#SQL-queries-using-String-Interpolation) without the appropriate import.
+It can be fixed by adding the package import: `import anorm._`
+
+`type mismatch; found    : T; required : anorm.ParameterValue`; This compilation error occurs when a value of type `T` is passed as parameter, whereas this `T` type is not supported. You need to ensure that a `anorm.ToStatement[T]` and a `anorm.ParameterMetaData[T]` can be found in the implicit scope (see [parameter conversions](#Custom parameter conversions)).
+
+On `.executeInsert()`, you can get the error `TypeDoesNotMatch(Cannot convert <value>: class <T> to Long for column ColumnName(<C>)`. This occurs when the [key returned by the database on insertion](http://docs.oracle.com/javase/8/docs/api/java/sql/Statement.html#getGeneratedKeys--) is not compatible with `Long` (the default key parser). It can be fixed by providing the appropriate key parser; e.g. if the database returns a text key: `SQL"...".executeInsert(scalar[String].singleOpt)` (get an `Option[String]` as insertion key).
