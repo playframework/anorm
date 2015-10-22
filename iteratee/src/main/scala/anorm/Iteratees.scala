@@ -19,13 +19,13 @@ object Iteratees {
    * @param parser the result (row) parser
    * @param ec the execution context
    * @param connection the JDBC connection, which must not be closed until the returned enumerator is [[https://www.playframework.com/documentation/2.4.0/api/scala/index.html#play.api.libs.iteratee.Enumerator@onDoneEnumerating%28callback:=%3EUnit%29%28implicitec:scala.concurrent.ExecutionContext%29:play.api.libs.iteratee.Enumerator[E] done]].
-   * 
+   *
    * {{{
    * import java.sql.Connection
    * import scala.concurrent.ExecutionContext.Implicits.global
    * import anorm._
    * import play.api.libs.iteratee._
-   * 
+   *
    * def resultAsEnumerator(implicit con: Connection): Enumerator[String] =
    *   Iteratees.from(SQL"SELECT * FROM Test", SqlParser.scalar[String])
    * }}}
