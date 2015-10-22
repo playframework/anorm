@@ -1,5 +1,7 @@
 import AnormGeneration.{ generateFunctionAdapter => GFA }
 
+val PlayVersion = playVersion(sys.props.getOrElse("play.version", "2.5.0-M1"))
+
 lazy val acolyteVersion = "1.0.33-j7p"
 
 lazy val `anorm-tokenizer` = project
@@ -26,21 +28,11 @@ lazy val anorm = project
       "com.jsuereth" %% "scala-arm" % "1.4",
       "joda-time" % "joda-time" % "2.6",
       "org.joda" % "joda-convert" % "1.7",
-
+      "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.1",
       "com.h2database" % "h2" % "1.4.182" % Test,
       "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test,
-      "com.chuusai" % "shapeless" % "2.0.0" % Test cross CrossVersion.
-        binaryMapped {
-          case "2.10" => "2.10.4"
-          case x => x
-        }
-    ) ++ (CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((2, scalaMajor)) if scalaMajor >= 11 =>
-        Seq("org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.1")
-      case _ => Seq(
-        compilerPlugin("org.scalamacros" % "paradise" % "2.1.0-M5" cross CrossVersion.full),
-        "org.scalamacros" %% "quasiquotes" % "2.1.0-M5" cross CrossVersion.binary)        
-    }) ++ Seq(
+      "com.chuusai" %% "shapeless" % "2.0.0" % Test
+    ) ++ Seq(
       "specs2-core",
       "specs2-junit"
     ).map("org.specs2" %% _ % "2.4.9" % Test)
@@ -51,7 +43,7 @@ lazy val `anorm-iteratee` = (project in file("iteratee"))
   .settings(scalariformSettings: _*)
   .settings(
     libraryDependencies ++= Seq(
-      "com.typesafe.play" %% "play-iteratees" % "2.4.2" % "provided",
+      "com.typesafe.play" %% "play-iteratees" % PlayVersion % "provided",
       "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test      
     ) ++ Seq(
       "specs2-core",
@@ -62,6 +54,7 @@ lazy val `anorm-iteratee` = (project in file("iteratee"))
 lazy val `anorm-parent` = (project in file("."))
   .enablePlugins(PlayRootProject)
   .aggregate(`anorm-tokenizer`, anorm, `anorm-iteratee`)
+  .settings(scalaVersion := "2.11.7")
 
 lazy val docs = project
   .in(file("docs"))
