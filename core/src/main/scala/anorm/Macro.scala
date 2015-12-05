@@ -32,10 +32,18 @@ object Macro {
     }
   }
 
+  def offsetParserImpl[T: c.WeakTypeTag](c: Context)(offset: c.Expr[Int]): c.Expr[Any] = {
+    import c.universe._
+
+    parserImpl[T](c) { (t, _, i) =>
+      q"anorm.SqlParser.get[$t]($offset + ${i + 1})"
+    }
+  }
+
   def indexedParserImpl[T: c.WeakTypeTag](c: Context): c.Expr[Any] = {
     import c.universe._
 
-    parserImpl[T](c) { (t, _, i) => q"anorm.SqlParser.get[$t](${i + 1})" }
+    offsetParserImpl[T](c)(reify(0))
   }
 
   private def parserImpl[T: c.WeakTypeTag](c: Context)(genGet: (c.universe.Type, String, Int) => c.universe.Tree): c.Expr[Any] = {
@@ -168,6 +176,21 @@ object Macro {
    * }}}
    */
   def indexedParser[T] = macro indexedParserImpl[T]
+
+  /**
+   * Returns a row parser generated for a case class `T`,
+   * getting column values by position, with an offset.
+   *
+   * @tparam T the type of case class
+   * @param offset the offset of column to be considered by the parser
+   *
+   * {{{
+   * import anorm.{ Macros, RowParser }
+   *
+   * val p: RowParser[YourCaseClass] = Macros.offsetParser[YourCaseClass](2)
+   * }}}
+   */
+  def offsetParser[T](offset: Int) = macro offsetParserImpl[T]
 
   private lazy val debugEnabled =
     Option(System.getProperty("anorm.macro.debug")).
