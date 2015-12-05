@@ -69,9 +69,6 @@ sealed trait BatchSql {
   def execute()(implicit connection: Connection): Array[Int] =
     getFilledStatement(connection).executeBatch()
 
-  def withQueryTimeout(seconds: Option[Int]): BatchSql =
-    copy(sql = sql.withQueryTimeout(seconds))
-
   /** Add batch parameters to given statement. */
   private def addBatchParams(stmt: PreparedStatement, ps: Seq[(Int, ParameterValue)]): PreparedStatement = {
     ps foreach { case (i, v) => v.set(stmt, i + 1) }
@@ -88,6 +85,7 @@ sealed trait BatchSql {
 
       val stmt = if (getGeneratedKeys) con.prepareStatement(psql, java.sql.Statement.RETURN_GENERATED_KEYS) else con.prepareStatement(psql)
 
+      sql.fetchSize.foreach(stmt.setFetchSize(_))
       sql.timeout.foreach(stmt.setQueryTimeout(_))
 
       fill(con, addBatchParams(stmt, vs), getGeneratedKeys, pm.tail)
@@ -127,6 +125,20 @@ sealed trait BatchSql {
 
     ps
   }
+
+  /**
+   * Returns this query with the timeout updated to `seconds` delay.
+   * @see [[SqlQuery.timeout]]
+   */
+  def withQueryTimeout(seconds: Option[Int]): BatchSql =
+    copy(sql.withQueryTimeout(seconds))
+
+  /**
+   * Returns this query with the fetch suze updated to the row `count`.
+   * @see [[SqlQuery.fetchSize]]
+   */
+  def withFetchSize(count: Option[Int]): BatchSql =
+    copy(sql.withFetchSize(count))
 
   private def copy(sql: SqlQuery = this.sql, names: Set[String] = this.names, params: Seq[Map[String, ParameterValue]] = this.params) = BatchSql.Copy(sql, names, params)
 }

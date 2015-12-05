@@ -43,9 +43,10 @@ case class SimpleSql[T](sql: SqlQuery, params: Map[String, ParameterValue], defa
 
       val stmt = if (getGeneratedKeys) connection.prepareStatement(psql, java.sql.Statement.RETURN_GENERATED_KEYS) else connection.prepareStatement(psql)
 
+      sql.fetchSize.foreach(stmt.setFetchSize(_))
       sql.timeout.foreach(stmt.setQueryTimeout(_))
 
-      vs foreach { case (i, v) => v.set(stmt, i + 1) }
+      vs.foreach { case (i, v) => v.set(stmt, i + 1) }
 
       stmt
     }
@@ -74,4 +75,15 @@ case class SimpleSql[T](sql: SqlQuery, params: Map[String, ParameterValue], defa
   /** Returns a copy with updated flag. */
   def withResultSetOnFirstRow(onFirst: Boolean): SimpleSql[T] =
     copy(resultSetOnFirstRow = onFirst)
+
+  /** Fetch size */
+  def fetchSize: Option[Int] = sql.fetchSize
+
+  /**
+   * Returns this query with the fetch suze updated to the row `count`.
+   * @see [[SqlQuery.fetchSize]]
+   */
+  def withFetchSize(count: Option[Int]): SimpleSql[T] =
+    copy(sql.withFetchSize(count))
+
 }

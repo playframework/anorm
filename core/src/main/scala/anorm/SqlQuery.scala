@@ -28,9 +28,16 @@ sealed trait SqlQuery {
   /** Execution timeout */
   def timeout: Option[Int]
 
-  /** Returns this query with timeout updated to `seconds` delay. */
+  /** Returns this query with the timeout updated to `seconds` delay. */
   def withQueryTimeout(seconds: Option[Int]): SqlQuery =
-    SqlQuery.prepare(stmt, paramsInitialOrder, seconds)
+    SqlQuery.prepare(stmt, paramsInitialOrder, seconds, fetchSize)
+
+  /** Fetch size */
+  def fetchSize: Option[Int]
+
+  /** Returns this query with the fetch suze updated to the row `count`. */
+  def withFetchSize(count: Option[Int]): SqlQuery =
+    SqlQuery.prepare(stmt, paramsInitialOrder, timeout, count)
 
   private[anorm] def asSimple: SimpleSql[Row] = asSimple(defaultParser)
 
@@ -49,7 +56,7 @@ sealed trait SqlQuery {
 
   private def defaultParser: RowParser[Row] = RowParser(Success(_))
 
-  private[anorm] def copy(statement: TokenizedStatement = this.stmt, paramsInitialOrder: List[String] = this.paramsInitialOrder, timeout: Option[Int] = this.timeout) = SqlQuery.prepare(statement, paramsInitialOrder, timeout)
+  private[anorm] def copy(statement: TokenizedStatement = this.stmt, paramsInitialOrder: List[String] = this.paramsInitialOrder, timeout: Option[Int] = this.timeout, fetchSize: Option[Int] = this.fetchSize) = SqlQuery.prepare(statement, paramsInitialOrder, timeout, fetchSize)
 
 }
 
@@ -64,10 +71,11 @@ object SqlQuery {
    * @param params Parameter names in initial order (see [[SqlQuery.paramsInitialOrder]])
    * @param tmout Query execution timeout (see [[SqlQuery.timeout]])
    */
-  private[anorm] def prepare(st: TokenizedStatement, params: List[String] = List.empty, tmout: Option[Int] = None): SqlQuery = new SqlQuery {
+  private[anorm] def prepare(st: TokenizedStatement, params: List[String] = List.empty, tmout: Option[Int] = None, fetchSz: Option[Int] = None): SqlQuery = new SqlQuery {
     val stmt = st
     val paramsInitialOrder = params
     val timeout = tmout
+    val fetchSize = fetchSz
   }
 
   /** Extractor for pattern matching */

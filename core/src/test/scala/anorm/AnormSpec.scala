@@ -60,8 +60,8 @@ object AnormSpec extends Specification with H2Database with AnormTest {
 
       "return None for missing optional value" in withQueryResult(
         null.asInstanceOf[String]) { implicit c =>
-          SQL("SELECT * FROM test").as(scalar[String].singleOpt).
-            aka("single value") must beNone
+          SQL"SELECT * FROM test".withFetchSize(Some(1)).
+            as(scalar[String].singleOpt) must beNone
         }
 
       "return 0 for missing optional numeric" in withQueryResult(
