@@ -973,12 +973,12 @@ String                  | str
 
 The [Joda](http://www.joda.org) and [Java 8](#Java_8) temporal types are also supported.
 
-↓JDBC / JVM➞                  | Date<sup>1</sup> | DateTime<sup>2</sup> | Instant<sup>3</sup>
+↓JDBC / JVM➞                  | Date<sup>1</sup> | DateTime<sup>2</sup> | Instant<sup>3</sup> | Long
 ----------------------------- | ---------------- | -------------------- | -------------------
-Date                          | Yes              | Yes                  | Yes
-Long                          | Yes              | Yes                  | Yes
-Timestamp                     | Yes              | Yes                  | Yes
-Timestamp wrapper<sup>5</sup> | Yes              | Yes                  | Yes
+Date                          | Yes              | Yes                  | Yes                 | Yes
+Long                          | Yes              | Yes                  | Yes                 | Yes
+Timestamp                     | Yes              | Yes                  | Yes                 | Yes
+Timestamp wrapper<sup>5</sup> | Yes              | Yes                  | Yes                 | Yes
 
 - 1. Types `java.util.Date`, `org.joda.time.LocalDate` and `java.time.LocalDate`.
 - 2. Types `org.joda.time.DateTime`, `org.joda.time.LocalDateTime`, `java.time.LocalDateTime` and `java.time.ZonedDateTime`.

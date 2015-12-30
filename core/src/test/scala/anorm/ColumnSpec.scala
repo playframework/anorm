@@ -139,21 +139,21 @@ object ColumnSpec
   "Column mapped as long" should {
     "be parsed from big decimal" in withQueryResult(bigDecimalList :+ bd) {
       implicit con =>
-        SQL("SELECT bd").as(scalar[Long].single).aka("parsed long") must_== 34l
+        SQL("SELECT bd").as(scalar[Long].single).aka("parsed long") must_== 34L
     }
 
     "be parsed from big integer" in withQueryResult(
       rowList1(classOf[java.math.BigInteger]) :+ bi) { implicit con =>
         SQL("SELECT bd").as(scalar[Long].single).
-          aka("parsed long") must_== 1234l
+          aka("parsed long") must_== 1234L
       }
 
-    "be parsed from long" in withQueryResult(longList :+ 23l) { implicit con =>
-      SQL("SELECT l").as(scalar[Long].single) aka "parsed long" must_== 23l
+    "be parsed from long" in withQueryResult(longList :+ 23L) { implicit con =>
+      SQL("SELECT l").as(scalar[Long].single) aka "parsed long" must_== 23L
     }
 
     "be parsed from integer" in withQueryResult(intList :+ 4) { implicit con =>
-      SQL("SELECT i").as(scalar[Long].single) aka "parsed long" must_== 4l
+      SQL("SELECT i").as(scalar[Long].single) aka "parsed long" must_== 4L
     }
 
     "be parsed from short" in withQueryResult(shortList :+ 3.toShort) {
@@ -170,18 +170,38 @@ object ColumnSpec
 
     "be parsed from false as 0" in withQueryResult(booleanList :+ false) {
       implicit con =>
-        SQL("SELECT b").as(scalar[Short].single) aka "parsed short" must_== 0l
+        SQL("SELECT b").as(scalar[Long].single) aka "parsed long" must_== 0L
     }
 
     "be parsed from false as 1" in withQueryResult(booleanList :+ true) {
       implicit con =>
-        SQL("SELECT b").as(scalar[Short].single) aka "parsed short" must_== 1l
+        SQL("SELECT b").as(scalar[Long].single) aka "parsed long" must_== 1L
     }
 
-    "have convinence mapping function" in withQueryResult(
-      longList.withLabel(1, "l") :+ 7l) { implicit con =>
+    val time = System.currentTimeMillis()
+    val now = new java.sql.Date(time)
+    trait TWrapper { def getTimestamp: java.sql.Timestamp }
+    val tsw1 = new TWrapper {
+      lazy val getTimestamp = new java.sql.Timestamp(time)
+    }
+    val tsNoRow = rowList1(classOf[TWrapper])
 
-        SQL("SELECT l").as(long("l").single) aka "parsed long" must_== 7l
+    "be parsed from date" in withQueryResult(dateList :+ now) { implicit con =>
+      SQL"SELECT d".as(scalar[Long].single).
+        aka("parsed long") must_== now.getTime
+    }
+
+    "be parsed from a timestamp wrapper" in withQueryResult(
+      tsNoRow :+ tsw1) { implicit con =>
+        SQL"SELECT d".as(scalar[Long].single).
+          aka("parsed long") must_== now.getTime
+
+      }
+
+    "have convinence mapping function" in withQueryResult(
+      longList.withLabel(1, "l") :+ 7L) { implicit con =>
+
+        SQL("SELECT l").as(long("l").single) aka "parsed long" must_== 7L
       }
   }
 
@@ -189,16 +209,16 @@ object ColumnSpec
     "be parsed from big decimal" in withQueryResult(bigDecimalList :+ bd) {
       implicit con =>
         SQL("SELECT bd").as(scalar[Int].single).
-          aka("parsed integer") must_== 34l
+          aka("parsed integer") must_== 34L
     }
 
     "be parsed from big integer" in withQueryResult(
       rowList1(classOf[java.math.BigInteger]) :+ bi) { implicit con =>
         SQL("SELECT bd").as(scalar[Int].single).
-          aka("parsed integer") must_== 1234l
+          aka("parsed integer") must_== 1234L
       }
 
-    "be parsed from long" in withQueryResult(longList :+ 23l) { implicit con =>
+    "be parsed from long" in withQueryResult(longList :+ 23L) { implicit con =>
       SQL("SELECT l").as(scalar[Int].single) aka "parsed integer" must_== 23
     }
 
@@ -220,12 +240,12 @@ object ColumnSpec
 
     "be parsed from false as 0" in withQueryResult(booleanList :+ false) {
       implicit con =>
-        SQL("SELECT b").as(scalar[Int].single) aka "parsed integer" must_== 0l
+        SQL("SELECT b").as(scalar[Int].single) aka "parsed integer" must_== 0L
     }
 
     "be parsed from false as 1" in withQueryResult(booleanList :+ true) {
       implicit con =>
-        SQL("SELECT b").as(scalar[Int].single) aka "parsed integer" must_== 1l
+        SQL("SELECT b").as(scalar[Int].single) aka "parsed integer" must_== 1L
     }
 
     "have convinence mapping function" in withQueryResult(
@@ -414,10 +434,10 @@ object ColumnSpec
 
     }
 
-    "be parsed from long" in withQueryResult(longList :+ 5l) {
+    "be parsed from long" in withQueryResult(longList :+ 5L) {
       implicit con =>
         SQL("SELECT l").as(scalar[java.math.BigDecimal].single).
-          aka("parsed big decimal") must_== java.math.BigDecimal.valueOf(5l)
+          aka("parsed big decimal") must_== java.math.BigDecimal.valueOf(5L)
 
     }
 
@@ -460,14 +480,14 @@ object ColumnSpec
     "be parsed from float" in withQueryResult(floatList :+ 1.35f) {
       implicit con =>
         SQL("SELECT f").as(scalar[BigDecimal].single).
-          aka("parsed big decimal") must_== BigDecimal(1.35f)
+          aka("parsed big decimal") must_== BigDecimal(1.35f.toDouble)
 
     }
 
-    "be parsed from long" in withQueryResult(longList :+ 5l) {
+    "be parsed from long" in withQueryResult(longList :+ 5L) {
       implicit con =>
         SQL("SELECT l").as(scalar[BigDecimal].single).
-          aka("parsed big decimal") must_== BigDecimal(5l)
+          aka("parsed big decimal") must_== BigDecimal(5L)
 
     }
 
@@ -496,10 +516,10 @@ object ColumnSpec
           aka("parsed big integer") must_== bi
       }
 
-    "be parsed from long" in withQueryResult(longList :+ 5l) {
+    "be parsed from long" in withQueryResult(longList :+ 5L) {
       implicit con =>
         SQL("SELECT bi").as(scalar[java.math.BigInteger].single).
-          aka("parsed long") must_== java.math.BigInteger.valueOf(5l)
+          aka("parsed long") must_== java.math.BigInteger.valueOf(5L)
 
     }
 
@@ -540,10 +560,10 @@ object ColumnSpec
           aka("parsed big integer") must_== BigInt(bi)
       }
 
-    "be parsed from long" in withQueryResult(longList :+ 5l) {
+    "be parsed from long" in withQueryResult(longList :+ 5L) {
       implicit con =>
         SQL("SELECT bi").as(scalar[BigInt].single).
-          aka("parsed long") must_== BigInt(5l)
+          aka("parsed long") must_== BigInt(5L)
 
     }
 
@@ -685,8 +705,8 @@ object ColumnSpec
 
     "not be parsed from array with invalid component type" in withQueryResult(
       rowList1(classOf[SqlArray]) :+ acolyte.jdbc.ImmutableArray.getInstance(
-        classOf[java.sql.Date], Array(new java.sql.Date(1l),
-          new java.sql.Date(2l)))) { implicit con =>
+        classOf[java.sql.Date], Array(new java.sql.Date(1L),
+          new java.sql.Date(2L)))) { implicit con =>
 
         SQL"SELECT a".as(scalar[Array[String]].single).
           aka("parsing") must throwA[Exception](message =
@@ -749,8 +769,8 @@ object ColumnSpec
 
     "not be parsed from SQL array with invalid component type" in withQueryResult(
       rowList1(classOf[SqlArray]) :+ acolyte.jdbc.ImmutableArray.getInstance(
-        classOf[java.sql.Date], Array(new java.sql.Date(1l),
-          new java.sql.Date(2l)))) { implicit con =>
+        classOf[java.sql.Date], Array(new java.sql.Date(1L),
+          new java.sql.Date(2L)))) { implicit con =>
 
         SQL"SELECT a".as(scalar[List[String]].single).
           aka("parsing") must throwA[Exception](message =

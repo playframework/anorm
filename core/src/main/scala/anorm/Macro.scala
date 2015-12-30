@@ -14,8 +14,8 @@ object Macro {
     import c.universe._
 
     val tpe = c.weakTypeTag[T].tpe
-    val ctor = tpe.declaration(nme.CONSTRUCTOR).asMethod
-    val params = ctor.paramss.flatten
+    val ctor = tpe.decl(termNames.CONSTRUCTOR).asMethod
+    val params = ctor.paramLists.flatten
 
     if (names.size < params.size) {
       c.abort(c.enclosingPosition,
@@ -49,16 +49,16 @@ object Macro {
     }
 
     val colTpe = c.weakTypeTag[Column[_]].tpe
-    val ctor = tpe.declaration(nme.CONSTRUCTOR).asMethod
+    val ctor = tpe.decl(termNames.CONSTRUCTOR).asMethod
 
-    if (ctor.paramss.isEmpty) {
+    if (ctor.paramLists.isEmpty) {
       abort(s"parsed data cannot be passed as parameter: $ctor")
     }
 
     val TypeRef(_, _, tpeArgs) = tpe
 
-    val companion = tpe.typeSymbol.companionSymbol.typeSignature
-    val apply = companion.declaration(newTermName("apply")).asMethod
+    val companion = tpe.typeSymbol.companion.typeSignature
+    val apply = companion.decl(TermName("apply")).asMethod
 
     val boundTypes = apply.typeParams.zip(tpeArgs).map {
       case (sym, ty) => sym.fullName -> ty
@@ -68,7 +68,7 @@ object Macro {
 
     // ---
 
-    val (x, m, body, _) = ctor.paramss.
+    val (x, m, body, _) = ctor.paramLists.
       foldLeft[(Tree, Tree, Tree, Int)]((EmptyTree, EmptyTree, EmptyTree, 0)) {
         case ((xa, ma, bs, ia), pss) =>
           val (xb, mb, vs, ib) =
@@ -123,7 +123,7 @@ object Macro {
       c.echo(c.enclosingPosition, s"row parser generated for $tpe: $generated")
     }
 
-    c.Expr(c.typeCheck(parser))
+    c.Expr(c.typecheck(parser))
   }
 
   /**

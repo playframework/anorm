@@ -499,6 +499,35 @@ object AnormSpec extends Specification with H2Database with AnormTest {
             SQL("SELECT 1").execute() aka "executed" must beTrue)
       }
   }
+
+  "Timestamp wrapper" should {
+    "not match with invalid instance" in {
+      ("Foo" match {
+        case TimestampWrapper1(ts) => true
+        case _ => false
+      }) aka "matching" must beFalse
+    }
+
+    "fail when error raised from .getTimestamp" in {
+      ((new {
+        def getTimestamp: java.sql.Timestamp = sys.error("Foo")
+      }) match {
+        case TimestampWrapper1(ts) => true
+        case _ => false
+      }) aka "matching" must throwA[Exception]("Foo")
+    }
+
+    "successfully match" in {
+      val ts = new java.sql.Timestamp(System.identityHashCode(this).toLong)
+
+      ((new {
+        val getTimestamp = ts
+      }) match {
+        case TimestampWrapper1(v) => Some(v)
+        case _ => Option.empty[Long]
+      }) aka "timestamp" must beSome(ts)
+    }
+  }
 }
 
 sealed trait AnormTest { db: H2Database =>

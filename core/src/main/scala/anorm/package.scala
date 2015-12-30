@@ -22,6 +22,16 @@ package object anorm {
   /** Structural type for timestamp wrapper. */
   type TimestampWrapper1 = { def getTimestamp: java.sql.Timestamp }
 
+  object TimestampWrapper1 {
+    import scala.language.reflectiveCalls
+
+    def unapply(that: Any): Option[java.sql.Timestamp] = try {
+      Some(that.asInstanceOf[TimestampWrapper1].getTimestamp)
+    } catch {
+      case _: NoSuchMethodException => None
+    }
+  }
+
   // TODO: Review implicit usage there 
   // (add explicit functions on SqlQuery?)
   implicit def sqlToSimple(sql: SqlQuery): SimpleSql[Row] = sql.asSimple
