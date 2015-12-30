@@ -255,21 +255,31 @@ get[String]("name") ~ get[Option[Int]]("year") map {
 val result: List[Info] = SQL"SELECT * FROM list".as(parser.*)
 ```
 
-A similar macro `indexedParser[T]` is available to get column values by positions instead of names.
+The similar macros `indexedParser[T]` and `offsetParser[T]` are available to get column values by positions instead of names.
 
 ```scala
 import anorm.{ Macro, RowParser }
 
 case class Info(name: String, year: Option[Int])
 
-val parser: RowParser[Info] = Macro.indexedParser[Info]
+val parser1: RowParser[Info] = Macro.indexedParser[Info]
 /* Generated as:
 get[String](1) ~ get[Option[Int]](2) map {
   case name ~ year => Info(name, year)
 }
 */
 
-val result: List[Info] = SQL"SELECT * FROM list".as(parser.*)
+val result1: List[Info] = SQL"SELECT * FROM list".as(parser1.*)
+
+// With offset
+val parser2: RowParser[Info] = Macro.offsetParser[Info](2)
+/* Generated as:
+get[String](2 + 1) ~ get[Option[Int]](2 + 2) map {
+  case name ~ year => Info(name, year)
+}
+*/
+
+val result2: List[Info] = SQL"SELECT * FROM list".as(parser2.*)
 ```
 
 To indicate custom names for the columns to be parsed, the macro `parser[T](names)` can be used.
