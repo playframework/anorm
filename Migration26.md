@@ -29,7 +29,7 @@ The former streaming operation `.apply()` is now removed, and must be replaced b
 
 ## Iteratees module
 
-A new Anorm is available to ease the integration with [Play Iteratees](https://www.playframework.com/documentation/latest/Iteratees).
+A new Anorm module is available to ease the integration with [Play Iteratees](https://www.playframework.com/documentation/latest/Iteratees).
 
 It can be added to your project using the following dependencies.
 
@@ -56,3 +56,18 @@ def resultAsEnumerator(implicit con: Connection): Enumerator[String] =
 ## Column conversions
 
 - A date/timestamp column can now be read as a `Long`, representing the [epoch](https://en.wikipedia.org/wiki/Unix_time) milliseconds.
+
+## Macros
+
+The `offsetParser[T]` macro is added.
+
+```scala
+case class Foo(name: String, age: Int)
+
+import anorm._
+
+val findAll = SQL"SELECT uninteresting_col, skip_col, name, age FROM foo"
+
+val fooParser = Macro.offsetParser[Foo](2)
+// ignore uninteresting_col & skip_col
+```

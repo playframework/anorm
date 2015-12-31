@@ -4,3 +4,4 @@ This page highlights the new features of Anorm 2.6. If you want learn about the 
 
 - Iteratees module
 - The new operation `.executeInsert1` allows to select columns among the generated keys.
+- New macro `offsetParser[T](offset: Int)`
