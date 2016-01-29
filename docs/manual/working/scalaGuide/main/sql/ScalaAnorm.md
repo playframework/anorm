@@ -282,6 +282,18 @@ get[String](2 + 1) ~ get[Option[Int]](2 + 2) map {
 val result2: List[Info] = SQL"SELECT * FROM list".as(parser2.*)
 ```
 
+The `offsetParser[T]` could also be used for merges.
+
+```
+import anorm.{ Macro, RowParser }
+
+case class Info(name: String, year: Option[Int])
+
+def parser(pr: Int) = Macro.offsetParser[Info](pr)
+
+val result: List[(Info, Info)] = SQL"SELECT * FROM list l1 INNER JOIN list l2 ON l1.name = l2.name;".as((parser(0) ~ parser(2)).*)
+```
+
 To indicate custom names for the columns to be parsed, the macro `parser[T](names)` can be used.
 
 ```scala
