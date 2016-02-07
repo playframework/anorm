@@ -1,6 +1,6 @@
 package anorm
 
-import java.sql.Connection
+import java.sql.{ Connection, PreparedStatement }
 
 /** Simple/plain SQL. */
 case class SimpleSql[T](sql: SqlQuery, params: Map[String, ParameterValue], defaultParser: RowParser[T], resultSetOnFirstRow: Boolean = false) extends Sql {
@@ -36,12 +36,31 @@ case class SimpleSql[T](sql: SqlQuery, params: Map[String, ParameterValue], defa
     copy(params = this.params ++ Sql.zipParams(
       sql.paramsInitialOrder, args, Map.empty))
 
+  private val prepareNoGeneratedKeys = { (con: Connection, sql: String) =>
+    con.prepareStatement(sql)
+  }
+
+  private val prepareGeneratedKeys = { (con: Connection, sql: String) =>
+    con.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS)
+  }
+
+  private def prepareGeneratedCols(columns: Array[String]) = {
+    (con: Connection, sql: String) => con.prepareStatement(sql, columns)
+  }
+
   def preparedStatement(connection: Connection, getGeneratedKeys: Boolean = false) = {
+    if (getGeneratedKeys) prepareStatement(connection, prepareGeneratedKeys)
+    else prepareStatement(connection, prepareNoGeneratedKeys)
+  }
+
+  def preparedStatement(connection: Connection, generatedColumn: String, generatedColumns: Seq[String]) = prepareStatement(connection, prepareGeneratedCols((generatedColumn +: generatedColumns).toArray))
+
+  private def prepareStatement(connection: Connection, prep: (Connection, String) => PreparedStatement): resource.ManagedResource[PreparedStatement] = {
     implicit val res = StatementResource
     resource.managed {
       val (psql, vs): (String, Seq[(Int, ParameterValue)]) = Sql.prepareQuery(sql.stmt.tokens, sql.paramsInitialOrder, params, 0, new StringBuilder(), List.empty[(Int, ParameterValue)]).get
 
-      val stmt = if (getGeneratedKeys) connection.prepareStatement(psql, java.sql.Statement.RETURN_GENERATED_KEYS) else connection.prepareStatement(psql)
+      val stmt = prep(connection, psql)
 
       sql.fetchSize.foreach(stmt.setFetchSize(_))
       sql.timeout.foreach(stmt.setQueryTimeout(_))

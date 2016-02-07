@@ -2,6 +2,19 @@
 
 This is a guide for migrating from Anorm 2.5 to Anorm 2.6. If you need to migrate from an earlier version of Anorm then you must first follow the [Anorm 2.5 Migration Guide](https://github.com/playframework/anorm/blob/master/Migration25.md#anorm-25-migration-guide).
 
+## Operations
+
+The new operation `.executeInsert1` allows to select columns among the generated keys.
+
+```scala
+// Choose 'generatedCol' and 'colB' from the generatedKeys
+val keys1 = SQL("INSERT INTO Test(x) VALUES ({x})").
+  on("x" -> "y").executeInsert1("generatedCol", "colB")()
+
+val keys2 = SQL("INSERT INTO Test(x) VALUES ({x})").
+  on("x" -> "y").executeInsert1("generatedCol")(scalar[String].singleOpt)
+```
+
 ## Deprecation
 
 The deprecated type `MayErr` is no longer part of the API.
