@@ -1,4 +1,8 @@
 import AnormGeneration.{ generateFunctionAdapter => GFA }
+import Common._
+import com.typesafe.tools.mima.plugin.MimaKeys.{
+  binaryIssueFilters, previousArtifacts
+}
 
 val PlayVersion = playVersion(sys.props.getOrElse("play.version", "2.5.0-M1"))
 
@@ -22,7 +26,24 @@ lazy val anorm = project
     sourceGenerators in Compile <+= (
       sourceManaged in Compile).map(m => Seq(GFA(m / "anorm")))
   })
-  .settings(scalacOptions += "-Xlog-free-terms")
+  .settings(
+  scalacOptions += "-Xlog-free-terms",
+    binaryIssueFilters ++= Seq(
+      missMeth("anorm.SqlQuery.getFilledStatement"/* deprecated 2.3.6 */),
+      missMeth("anorm.SqlQuery.fetchSize"/* new field */),
+      missMeth("anorm.SqlQuery.withFetchSize"/* new function */),
+      missMeth("anorm.SqlQuery.prepare"/* private */),
+      missMeth("anorm.SqlQuery.copy"/* private */),
+      missMeth("anorm.SqlQuery.copy$default$4"/* private */),
+      missMeth("anorm.Sql.getFilledStatement"/* deprecated 2.3.6 */),
+      missMeth("anorm.BatchSql.withFetchSize"/* new function */),
+      missMeth("anorm.SqlQueryResult.apply"/* deprecated 2.4 */),
+      missMeth("anorm.SimpleSql.getFilledStatement"/* deprecated 2.3.6 */),
+      missMeth("anorm.SimpleSql.list"/* deprecated 2.3.5 */),
+      missMeth("anorm.SimpleSql.single"/* deprecated 2.3.5 */),
+      missMeth("anorm.SimpleSql.singleOpt"/* deprecated 2.3.5 */),
+      missMeth("anorm.SimpleSql.apply"/* deprecated 2.4 */),
+      missMeth("anorm.WithResult.apply"/* deprecated 2.4 */)))
   .settings({
     libraryDependencies ++= Seq(
       "com.jsuereth" %% "scala-arm" % "1.4",
@@ -42,6 +63,7 @@ lazy val `anorm-iteratee` = (project in file("iteratee"))
   .enablePlugins(PlayLibrary)
   .settings(scalariformSettings: _*)
   .settings(
+  previousArtifacts := Set.empty,
     libraryDependencies ++= Seq(
       "com.typesafe.play" %% "play-iteratees" % PlayVersion % "provided",
       "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test      
@@ -54,7 +76,9 @@ lazy val `anorm-iteratee` = (project in file("iteratee"))
 lazy val `anorm-parent` = (project in file("."))
   .enablePlugins(PlayRootProject)
   .aggregate(`anorm-tokenizer`, anorm, `anorm-iteratee`)
-  .settings(scalaVersion := "2.11.7")
+  .settings(
+  scalaVersion := "2.11.7",
+    previousArtifacts := Set.empty)
 
 lazy val docs = project
   .in(file("docs"))
