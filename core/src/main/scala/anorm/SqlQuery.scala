@@ -57,7 +57,6 @@ sealed trait SqlQuery {
   private def defaultParser: RowParser[Row] = RowParser(Success(_))
 
   private[anorm] def copy(statement: TokenizedStatement = this.stmt, paramsInitialOrder: List[String] = this.paramsInitialOrder, timeout: Option[Int] = this.timeout, fetchSize: Option[Int] = this.fetchSize) = SqlQuery.prepare(statement, paramsInitialOrder, timeout, fetchSize)
-
 }
 
 /* TODO: Make it private[anorm] to prevent SqlQuery from being created with
