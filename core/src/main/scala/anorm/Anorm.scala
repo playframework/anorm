@@ -8,7 +8,7 @@ import java.sql.{ Connection, PreparedStatement, ResultSet }
 
 import scala.language.postfixOps
 import scala.collection.TraversableOnce
-import scala.util.Failure
+import scala.util.{ Failure, Try }
 
 import resource.{ managed, ManagedResource }
 
@@ -127,6 +127,8 @@ object NamedParameter {
 private[anorm] trait Sql extends WithResult {
   def preparedStatement(connection: Connection, getGeneratedKeys: Boolean = false): ManagedResource[PreparedStatement]
 
+  def preparedStatement(connection: Connection, generatedColumn: String, generatedColumns: Seq[String]): ManagedResource[PreparedStatement]
+
   /**
    * Executes this statement as query (see [[executeQuery]]) and returns result.
    */
@@ -176,12 +178,33 @@ private[anorm] trait Sql extends WithResult {
    * // ... generated string key
    * }}}
    */
-  def executeInsert[A](generatedKeysParser: ResultSetParser[A] = SqlParser.scalar[Long].singleOpt)(implicit connection: Connection): A =
-    Sql.asTry(generatedKeysParser, preparedStatement(connection, true).
-      flatMap { stmt =>
-        stmt.executeUpdate()
-        managed(stmt.getGeneratedKeys)
-      }, resultSetOnFirstRow).get // TODO: Safe alternative
+  def executeInsert[A](generatedKeysParser: ResultSetParser[A] = SqlParser.scalar[Long].singleOpt)(implicit connection: Connection): A = execInsert[A](preparedStatement(_, true), generatedKeysParser).get
+
+  /**
+   * Executes this SQL as an insert statement.
+   *
+   * @param generatedColumn the first (mandatory) column name to consider from the generated keys
+   * @param otherColumns the other (possibly none) column name(s) from the generated keys
+   * @param generatedKeysParser the parser for generated key (default: scalar long)
+   * @return Parsed generated keys
+   *
+   * {{{
+   * import anorm.SqlParser.scalar
+   *
+   * val keys1 = SQL("INSERT INTO Test(x) VALUES ({x})").
+   *   on("x" -> "y").executeInsert1("generatedCol", "colB")()
+   *
+   * val keys2 = SQL("INSERT INTO Test(x) VALUES ({x})").
+   *   on("x" -> "y").executeInsert1("generatedCol")(scalar[String].singleOpt)
+   * // ... generated string key
+   * }}}
+   */
+  def executeInsert1[A](generatedColumn: String, otherColumns: String*)(generatedKeysParser: ResultSetParser[A] = SqlParser.scalar[Long].singleOpt)(implicit connection: Connection): Try[A] = execInsert[A](preparedStatement(_, generatedColumn, otherColumns), generatedKeysParser)
+
+  private def execInsert[A](prep: Connection => ManagedResource[PreparedStatement], generatedKeysParser: ResultSetParser[A])(implicit connection: Connection): Try[A] = Sql.asTry(generatedKeysParser, prep(connection).flatMap { stmt =>
+    stmt.executeUpdate()
+    managed(stmt.getGeneratedKeys)
+  }, resultSetOnFirstRow)
 
   /**
    * Executes this SQL query, and returns its result.

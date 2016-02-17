@@ -30,8 +30,8 @@ object AnormSpec extends Specification with H2Database with AnormTest {
     "return newly inserted data" in withH2Database { implicit c =>
       createTest1Table()
       val ex: Boolean =
-        SQL("insert into test1(id, foo, bar) values ({id}, {foo}, {bar})")
-          .on('id -> 10L, 'foo -> "Hello", 'bar -> 20).execute()
+        SQL"""insert into test1(id, foo, bar) 
+              values (${10L}, ${"Hello"}, ${20})""".execute()
 
       ex aka "update executed" must beFalse /*not query*/ and {
         SQL("select * from test1 where id = {id}").on('id -> 10L)
@@ -461,7 +461,7 @@ object AnormSpec extends Specification with H2Database with AnormTest {
   }
 
   "Insertion" should {
-    lazy implicit val con = connection(handleStatement withUpdateHandler {
+    def con = connection(handleStatement withUpdateHandler {
       case UpdateExecution("INSERT ?", ExecutedParameter(1) :: Nil) => 1
       case UpdateExecution("INSERT ?", ExecutedParameter(2) :: Nil) =>
         updateResult(2, longList :+ 3L)
@@ -471,21 +471,43 @@ object AnormSpec extends Specification with H2Database with AnormTest {
     })
 
     "return no generated key" in {
+      implicit val c = con
       SQL"INSERT ${1}".executeInsert() aka "insertion" must beNone
     }
 
     "return numeric key (default)" in {
+      implicit val c = con
       SQL"INSERT ${2}".executeInsert() aka "insertion" must beSome(3L)
     }
 
     "fail to return unsupported generated key" in {
+      implicit val c = con
       SQL"INSERT ${3}".executeInsert().
         aka("insertion") must throwA[Exception]("TypeDoesNotMatch")
     }
 
-    "return generated string key" in {
-      SQL"INSERT ${3}".executeInsert(scalar[String].singleOpt).
-        aka("insertion") must beSome("generated")
+    "return generated keys" >> {
+      "as string" in {
+        implicit val c = con
+        SQL"INSERT ${3}".executeInsert(scalar[String].singleOpt).
+          aka("insertion") must beSome("generated")
+      }
+
+      "as long with column selection" in withH2Database { implicit c =>
+        val tableName = s"foo${System identityHashCode c}"
+
+        createTable(tableName, "id bigint auto_increment", "name varchar")
+
+        @inline def insert(n: String, ns: String*) =
+          SQL"insert into #${tableName}(name) values(${c.toString})".
+            executeInsert1(n, ns: _*)()
+
+        insert("id") must beSuccessfulTry(Some(1L)) and (
+          insert("id") must beSuccessfulTry(Some(2L))) and (
+            insert("value") aka "ignore invalid key" must beSuccessfulTry(
+              Some(3L)))
+
+      }
     }
   }
 

@@ -24,6 +24,6 @@ trait H2Database {
   /** Create a simple 'test2' table for testing with. */
   def createTest2Table()(implicit conn: Connection): Unit = createTable("test2", "id bigint", "foo varchar")
 
-  private def createTable(name: String, columns: String*)(implicit conn: Connection): Unit = conn.createStatement().execute("create table " + name + " ( " + columns.mkString(", ") + ");")
+  protected def createTable(name: String, columns: String*)(implicit conn: Connection): Unit = conn.createStatement().execute(s"""create table $name (${columns mkString ", "});""")
 
 }
