@@ -30,8 +30,8 @@ object SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
           SQL("SELECT * FROM test") as parser.single must_== ("str" -> 2)
       }
 
-    "fail with sub-parser when there is no data" in {
-      withQueryResult("scalar") { implicit c =>
+    "fail with sub-parser when there is no data" >> {
+      "by throwing exception" in withQueryResult("scalar") { implicit c =>
         lazy val sub = for {
           b <- SqlParser.str("b")
           c <- SqlParser.int("c")
@@ -44,6 +44,21 @@ object SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
 
         SQL("SELECT * FROM test") as parser.single must throwA[Exception](
           message = "'col1' not found")
+      }
+
+      "with captured failure" in withQueryResult("scalar") { implicit c =>
+        lazy val sub = for {
+          b <- SqlParser.str("b")
+          c <- SqlParser.int("c")
+        } yield (b -> c)
+
+        lazy val parser = for {
+          a <- SqlParser.str("col1")
+          bc <- sub
+        } yield Tuple3(a, bc._1, bc._2)
+
+        SQL("SELECT * FROM test").asTry(parser.single) must beFailedTry.
+          withThrowable[AnormException](".*'col1' not found.*")
       }
     }
 
@@ -150,7 +165,7 @@ object SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
         var i = 0
         lazy val agg = res.copy(resultSet =
           res.resultSet.and(probe).map(_._1)).fold(List[Int]()) {
-          (l, _) => i = i + 1; l :+ i
+          (l, x) => i = i + 1; l :+ i
         }
 
         agg aka "aggregation" must_== Right(List(1, 2, 3)) and (
@@ -206,6 +221,26 @@ object SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
   }
 
   "Aggregation over variable number of rows" should {
+    "support user alias in fold" in withQueryResult(
+      stringList :+ "A" :+ "B" :+ "C") { implicit c =>
+        val parser = SqlParser.str("foo")
+
+        SQL"SELECT str".executeQuery().fold(List.empty[String],
+          ColumnAliaser.withPattern(Set(1), "foo")) { (ls, row) =>
+            parser(row).fold(_ => ls, _ :: ls)
+          } must beRight(List("C", "B", "A"))
+      }
+
+    "support user alias in foldWhile" in withQueryResult(
+      rowList1(classOf[String] -> "bar") :+ "A" :+ "B" :+ "C") { implicit c =>
+        val parser = SqlParser.str("foo.bar.lorem")
+
+        SQL"SELECT str".executeQuery().foldWhile(List.empty[String],
+          ColumnAliaser.withPattern(Set(1), "foo.", ".lorem")) { (ls, row) =>
+            parser(row).fold(_ => ls, _ :: ls) -> true
+          } must beRight(List("C", "B", "A"))
+      }
+
     "release resources" in withQueryResult(
       stringList :+ "A" :+ "B" :+ "C") { implicit c =>
 
@@ -359,6 +394,18 @@ object SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
           (SqlParser.str("ali") ~ SqlParser.str("foo") ~ SqlParser.str("ias")).
             map(SqlParser.flatten).single) must_== ("Lorem", "Ipsum", "Ipsum")
       }
+    }
+
+    "be found by user alias" in withTestDB(v2) { implicit c =>
+      SQL"SELECT foo AS AL, bar FROM test1".
+        asTry(SqlParser.str("pre.AL").single,
+          ColumnAliaser.withPattern1("pre.")(1)).
+          aka("by user alias") must beSuccessfulTry(v2) and (
+            SQL"SELECT foo AS AL, bar FROM test1".asTry(
+              SqlParser.str("pre.AL").single,
+              ColumnAliaser.withPattern(Set(1), "pre.")).
+              aka("by user alias") must beSuccessfulTry(v2))
+
     }
 
     def withTestDB[T](foo: String)(f: java.sql.Connection => T): T =

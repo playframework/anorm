@@ -1,12 +1,13 @@
 import AnormGeneration.{ generateFunctionAdapter => GFA }
 import Common._
+import com.typesafe.tools.mima.core._
 import com.typesafe.tools.mima.plugin.MimaKeys.{
   binaryIssueFilters, previousArtifacts
 }
 
 val PlayVersion = playVersion(sys.props.getOrElse("play.version", "2.5.0-M1"))
 
-lazy val acolyteVersion = "1.0.33-j7p"
+lazy val acolyteVersion = "1.0.35-j7p"
 
 lazy val `anorm-tokenizer` = project
   .in(file("tokenizer"))
@@ -36,9 +37,18 @@ lazy val anorm = project
       missMeth("anorm.SqlQuery.copy"/* private */),
       missMeth("anorm.SqlQuery.copy$default$4"/* private */),
       missMeth("anorm.Sql.getFilledStatement"/* deprecated 2.3.6 */),
-      missMeth("anorm.Sql.executeInsert1$default$3"/* new function */),
       missMeth("anorm.Sql.executeInsert1"/* new function */),
       missMeth("anorm.Sql.preparedStatement"/* new function */),
+      missMeth("anorm.Sql.asTry"/* private */),
+      missMeth("anorm.WithResult.asTry$default$2"/* private */),
+      missMeth("anorm.Sql.withResult"/* private */),
+      missMeth("anorm.Sql.executeInsert1$default$3"/* new default */),
+      missMeth("anorm.Sql.executeInsert2"/* new function */),
+      missMeth("anorm.Sql.executeInsert2$default$3"/* new default */),
+      missMeth("anorm.Cursor.onFirstRow"/* private */),
+      missMeth("anorm.Cursor.apply"/* private */),
+      ProblemFilters.exclude[MissingTypesProblem](
+        "anorm.MetaData$"/* private */),
       missMeth("anorm.BatchSql.withFetchSize"/* new function */),
       missMeth("anorm.SqlQueryResult.apply"/* deprecated 2.4 */),
       missMeth("anorm.SimpleSql.getFilledStatement"/* deprecated 2.3.6 */),
@@ -46,7 +56,11 @@ lazy val anorm = project
       missMeth("anorm.SimpleSql.single"/* deprecated 2.3.5 */),
       missMeth("anorm.SimpleSql.singleOpt"/* deprecated 2.3.5 */),
       missMeth("anorm.SimpleSql.apply"/* deprecated 2.4 */),
-      missMeth("anorm.WithResult.apply"/* deprecated 2.4 */)))
+      missMeth("anorm.WithResult.withResult"/* new function */),
+      missMeth("anorm.WithResult.foldWhile"/* new function */),
+      missMeth("anorm.WithResult.fold"/* new function */),
+      missMeth("anorm.WithResult.apply"/* deprecated 2.4 */),
+      missMeth("anorm.WithResult.asTry"/*new function */)))
   .settings({
     libraryDependencies ++= Seq(
       "com.jsuereth" %% "scala-arm" % "1.4",

@@ -53,6 +53,34 @@ def resultAsEnumerator(implicit con: Connection): Enumerator[String] =
   Iteratees.from(SQL"SELECT * FROM Test", SqlParser.scalar[String])
 ```
 
+## Column aliaser
+
+Consider the following query result.
+
+```
+=> SELECT * FROM test t1 JOIN (SELECT * FROM test WHERE parent_id ISNULL) t2 ON t1.parent_id=t2.id WHERE t1.id='bar';
+ id  | value  | parent_id | id  | value  | parent_id 
+-----+--------+-----------+-----+--------+-----------
+ bar | value2 | foo       | foo | value1 | 
+(1 row)
+```
+
+The table aliases `t1` and `t2` are not supported in JDBC, so Anorm introduces the `ColumnAliaser` to be able to define user aliases over columns as following.
+
+```scala
+import anorm._
+
+val parser: RowParser[(String, String, String, Option[String])] = SqlParser.str("id") ~ SqlParser.str("value") ~ SqlParser.str("parent.value") ~ SqlParser.str("parent.parent_id").? map(SqlParser.flatten)
+
+val aliaser: ColumnAliaser = ColumnAliaser.withPattern((3 to 6).toSet, "parent.")
+
+val res: Try[(String, String, String, Option[String])] = SQL"""SELECT * FROM test t1 JOIN (SELECT * FROM test WHERE parent_id ISNULL) t2 ON t1.parent_id=t2.id WHERE t1.id=${"bar"}""".asTry(parser.single, aliaser)
+
+res.foreach {
+  case (id, value, parentVal, grandPaId) => ???
+}
+```
+
 ## Column conversions
 
 - A date/timestamp column can now be read as a `Long`, representing the [epoch](https://en.wikipedia.org/wiki/Unix_time) milliseconds.
