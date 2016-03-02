@@ -672,12 +672,21 @@ object ColumnSpec
     val sqlArray = ImmutableArray.
       getInstance(classOf[String], Array("aB", "Cd", "EF"))
 
-    "be parsed from SQL array" in withQueryResult(
-      rowList1(classOf[SqlArray]) :+ sqlArray) { implicit con =>
+    "be parsed from SQL array" >> {
+      "when not NULL" in withQueryResult(
+        rowList1(classOf[SqlArray]) :+ sqlArray) { implicit con =>
 
-        SQL"SELECT a".as(scalar[Array[String]].single).
-          aka("parsed array") mustEqual Array("aB", "Cd", "EF")
+          SQL"SELECT a".as(scalar[Array[String]].single).
+            aka("parsed array") mustEqual Array("aB", "Cd", "EF")
+        }
+
+      "when NULL" in withQueryResult(rowList1(
+        classOf[SqlArray]) :+ null.asInstanceOf[SqlArray]) { implicit con =>
+
+        SQL"SELECT a".as(scalar[Array[String]].?.single).
+          aka("optional array") must beNone
       }
+    }
 
     val idArray = Array(java.util.UUID.randomUUID, java.util.UUID.randomUUID)
     "be parsed from raw array" in withQueryResult(
