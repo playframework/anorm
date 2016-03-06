@@ -4,13 +4,13 @@ object Macro {
   import scala.language.experimental.macros
   import scala.reflect.macros.Context
 
-  def namedParserImpl[T: c.WeakTypeTag](c: Context): c.Expr[Any] = {
+  def namedParserImpl[T: c.WeakTypeTag](c: Context): c.Expr[RowParser[T]] = {
     import c.universe._
 
     parserImpl[T](c) { (t, n, _) => q"anorm.SqlParser.get[$t]($n)" }
   }
 
-  def namedParserImpl_[T: c.WeakTypeTag](c: Context)(names: c.Expr[String]*): c.Expr[Any] = {
+  def namedParserImpl_[T: c.WeakTypeTag](c: Context)(names: c.Expr[String]*): c.Expr[RowParser[T]] = {
     import c.universe._
 
     val tpe = c.weakTypeTag[T].tpe
@@ -32,7 +32,7 @@ object Macro {
     }
   }
 
-  def offsetParserImpl[T: c.WeakTypeTag](c: Context)(offset: c.Expr[Int]): c.Expr[Any] = {
+  def offsetParserImpl[T: c.WeakTypeTag](c: Context)(offset: c.Expr[Int]): c.Expr[RowParser[T]] = {
     import c.universe._
 
     parserImpl[T](c) { (t, _, i) =>
@@ -40,13 +40,13 @@ object Macro {
     }
   }
 
-  def indexedParserImpl[T: c.WeakTypeTag](c: Context): c.Expr[Any] = {
+  def indexedParserImpl[T: c.WeakTypeTag](c: Context): c.Expr[RowParser[T]] = {
     import c.universe._
 
     offsetParserImpl[T](c)(reify(0))
   }
 
-  private def parserImpl[T: c.WeakTypeTag](c: Context)(genGet: (c.universe.Type, String, Int) => c.universe.Tree): c.Expr[Any] = {
+  private def parserImpl[T: c.WeakTypeTag](c: Context)(genGet: (c.universe.Type, String, Int) => c.universe.Tree): c.Expr[T] = {
     import c.universe._
 
     val tpe = c.weakTypeTag[T].tpe
