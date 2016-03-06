@@ -2,15 +2,15 @@ package anorm
 
 object Macro {
   import scala.language.experimental.macros
-  import scala.reflect.macros.Context
+  import scala.reflect.macros.whitebox
 
-  def namedParserImpl[T: c.WeakTypeTag](c: Context): c.Expr[Any] = {
+  def namedParserImpl[T: c.WeakTypeTag](c: whitebox.Context): c.Expr[T] = {
     import c.universe._
 
     parserImpl[T](c) { (t, n, _) => q"anorm.SqlParser.get[$t]($n)" }
   }
 
-  def namedParserImpl_[T: c.WeakTypeTag](c: Context)(names: c.Expr[String]*): c.Expr[Any] = {
+  def namedParserImpl_[T: c.WeakTypeTag](c: whitebox.Context)(names: c.Expr[String]*): c.Expr[T] = {
     import c.universe._
 
     val tpe = c.weakTypeTag[T].tpe
@@ -32,7 +32,7 @@ object Macro {
     }
   }
 
-  def offsetParserImpl[T: c.WeakTypeTag](c: Context)(offset: c.Expr[Int]): c.Expr[Any] = {
+  def offsetParserImpl[T: c.WeakTypeTag](c: whitebox.Context)(offset: c.Expr[Int]): c.Expr[T] = {
     import c.universe._
 
     parserImpl[T](c) { (t, _, i) =>
@@ -40,13 +40,13 @@ object Macro {
     }
   }
 
-  def indexedParserImpl[T: c.WeakTypeTag](c: Context): c.Expr[Any] = {
+  def indexedParserImpl[T: c.WeakTypeTag](c: whitebox.Context): c.Expr[T] = {
     import c.universe._
 
     offsetParserImpl[T](c)(reify(0))
   }
 
-  private def parserImpl[T: c.WeakTypeTag](c: Context)(genGet: (c.universe.Type, String, Int) => c.universe.Tree): c.Expr[Any] = {
+  private def parserImpl[T: c.WeakTypeTag](c: whitebox.Context)(genGet: (c.universe.Type, String, Int) => c.universe.Tree): c.Expr[T] = {
     import c.universe._
 
     val tpe = c.weakTypeTag[T].tpe
@@ -146,7 +146,7 @@ object Macro {
    * val p: RowParser[YourCaseClass] = Macros.namedParser[YourCaseClass]
    * }}}
    */
-  def namedParser[T] = macro namedParserImpl[T]
+  def namedParser[T]: RowParser[T] = macro namedParserImpl[T]
 
   /**
    * Returns a row parser generated for a case class `T`,
@@ -161,7 +161,7 @@ object Macro {
    * val p: RowParser[YourCaseClass] = Macros.namedParser[YourCaseClass]
    * }}}
    */
-  def parser[T](names: String*) = macro namedParserImpl_[T]
+  def parser[T](names: String*): RowParser[T] = macro namedParserImpl_[T]
 
   /**
    * Returns a row parser generated for a case class `T`,
@@ -175,7 +175,7 @@ object Macro {
    * val p: RowParser[YourCaseClass] = Macros.indexedParser[YourCaseClass]
    * }}}
    */
-  def indexedParser[T] = macro indexedParserImpl[T]
+  def indexedParser[T]: RowParser[T] = macro indexedParserImpl[T]
 
   /**
    * Returns a row parser generated for a case class `T`,
@@ -190,7 +190,7 @@ object Macro {
    * val p: RowParser[YourCaseClass] = Macros.offsetParser[YourCaseClass](2)
    * }}}
    */
-  def offsetParser[T](offset: Int) = macro offsetParserImpl[T]
+  def offsetParser[T](offset: Int): RowParser[T] = macro offsetParserImpl[T]
 
   private lazy val debugEnabled =
     Option(System.getProperty("anorm.macro.debug")).
