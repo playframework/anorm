@@ -50,9 +50,9 @@ lazy val anorm = project
   .settings({
     libraryDependencies ++= Seq(
       "com.jsuereth" %% "scala-arm" % "1.4",
-      "joda-time" % "joda-time" % "2.6",
-      "org.joda" % "joda-convert" % "1.7",
-      "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.1",
+      "joda-time" % "joda-time" % "2.9.2",
+      "org.joda" % "joda-convert" % "1.8.1",
+      "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4",
       "com.h2database" % "h2" % "1.4.182" % Test,
       "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test,
       "com.chuusai" %% "shapeless" % "2.0.0" % Test
