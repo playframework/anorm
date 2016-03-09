@@ -1,5 +1,7 @@
 package anorm
 
+import java.sql.{ Array => SqlArray }
+
 import acolyte.jdbc.QueryResult
 import acolyte.jdbc.AcolyteDSL.{ connection, handleQuery, withQueryResult }
 import acolyte.jdbc.RowLists.{ rowList1, rowList2, stringList }
@@ -94,9 +96,7 @@ object SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
       rowList1(classOf[Float] -> "f") :+ 1.2f) { implicit c =>
         SQL("SELECT f") as SqlParser.matches("x", 1.2f).single must beFalse
       }
-  }
 
-  "Column" should {
     "be matching in result" in withQueryResult(
       rowList1(classOf[Float] -> "f") :+ 1.2f) { implicit c =>
         SQL("SELECT f") as SqlParser.matches("f", 1.2f).single must beTrue
@@ -111,6 +111,18 @@ object SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
       rowList1(classOf[Float] -> "f") :+ 1.2f) { implicit c =>
         SQL("SELECT f") as SqlParser.matches("x", 1.2f).single must beFalse
       }
+
+    "be None when missing" in withQueryResult(
+      rowList1(classOf[String] -> "foo") :+ "bar") { implicit c =>
+        SQL"SELECT *".as(SqlParser.str("lorem").?.single).
+          aka("result") must beNone
+      }
+
+    "be None when NULL" in withQueryResult(rowList1(
+      classOf[String] -> "foo") :+ null.asInstanceOf[String]) { implicit c =>
+
+      SQL"SELECT *".as(SqlParser.str("foo").?.single) must beNone
+    }
   }
 
   "Collecting" should {
