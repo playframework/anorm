@@ -6,7 +6,6 @@ package anorm
 import java.util.{ Date, UUID }
 import java.sql.{ Connection, PreparedStatement, ResultSet }
 
-import scala.language.postfixOps
 import scala.collection.TraversableOnce
 import scala.util.{ Failure, Try }
 
@@ -20,48 +19,6 @@ import resource.{ managed, ManagedResource }
  * }}}
  */
 case class Object(value: Any)
-
-/**
- * @param qualified the qualified column name
- * @param alias the column alias
- */
-case class ColumnName(qualified: String, alias: Option[String])
-
-/**
- * @param column the name of the column
- * @param nullable true if the column is nullable
- * @param clazz the class of the JDBC column value
- */
-case class MetaDataItem(column: ColumnName, nullable: Boolean, clazz: String)
-
-private[anorm] case class MetaData(ms: List[MetaDataItem]) {
-  /** Returns meta data for specified column. */
-  def get(columnName: String): Option[MetaDataItem] = {
-    val key = columnName.toUpperCase
-    aliasedDictionary.get(key).
-      orElse(dictionary2 get key).orElse(dictionary get key)
-  }
-
-  private lazy val dictionary: Map[String, MetaDataItem] =
-    ms.map(m => m.column.qualified.toUpperCase() -> m).toMap
-
-  private lazy val dictionary2: Map[String, MetaDataItem] =
-    ms.map(m => {
-      val column = m.column.qualified.split('.').last;
-      column.toUpperCase() -> m
-    }).toMap
-
-  private lazy val aliasedDictionary: Map[String, MetaDataItem] =
-    ms.flatMap(m =>
-      m.column.alias.map(a => Map(a.toUpperCase() -> m)).getOrElse(Map.empty)
-    ).toMap
-
-  lazy val columnCount = ms.size
-
-  lazy val availableColumns: List[String] =
-    ms.flatMap(i => i.column.qualified :: i.column.alias.toList)
-
-}
 
 /**
  * Wrapper to use [[Seq]] as SQL parameter, with custom formatting.
@@ -178,7 +135,7 @@ private[anorm] trait Sql extends WithResult {
    * // ... generated string key
    * }}}
    */
-  def executeInsert[A](generatedKeysParser: ResultSetParser[A] = SqlParser.scalar[Long].singleOpt)(implicit connection: Connection): A = execInsert[A](preparedStatement(_, true), generatedKeysParser).get
+  def executeInsert[A](generatedKeysParser: ResultSetParser[A] = SqlParser.scalar[Long].singleOpt)(implicit connection: Connection): A = execInsert[A](preparedStatement(_, true), generatedKeysParser, ColumnAliaser.empty).get
 
   /**
    * Executes this SQL as an insert statement.
@@ -199,12 +156,34 @@ private[anorm] trait Sql extends WithResult {
    * // ... generated string key
    * }}}
    */
-  def executeInsert1[A](generatedColumn: String, otherColumns: String*)(generatedKeysParser: ResultSetParser[A] = SqlParser.scalar[Long].singleOpt)(implicit connection: Connection): Try[A] = execInsert[A](preparedStatement(_, generatedColumn, otherColumns), generatedKeysParser)
+  def executeInsert1[A](generatedColumn: String, otherColumns: String*)(generatedKeysParser: ResultSetParser[A] = SqlParser.scalar[Long].singleOpt)(implicit connection: Connection): Try[A] = execInsert[A](preparedStatement(_, generatedColumn, otherColumns), generatedKeysParser, ColumnAliaser.empty)
 
-  private def execInsert[A](prep: Connection => ManagedResource[PreparedStatement], generatedKeysParser: ResultSetParser[A])(implicit connection: Connection): Try[A] = Sql.asTry(generatedKeysParser, prep(connection).flatMap { stmt =>
+  /**
+   * Executes this SQL as an insert statement.
+   *
+   * @param generatedColumn the first (mandatory) column name to consider from the generated keys
+   * @param otherColumns the other (possibly none) column name(s) from the generated keys
+   * @param generatedKeysParser the parser for generated key (default: scalar long)
+   * @param aliaser the column aliaser
+   * @return Parsed generated keys
+   *
+   * {{{
+   * import anorm.SqlParser.scalar
+   *
+   * val keys1 = SQL("INSERT INTO Test(x) VALUES ({x})").
+   *   on("x" -> "y").executeInsert1("generatedCol", "colB")()
+   *
+   * val keys2 = SQL("INSERT INTO Test(x) VALUES ({x})").
+   *   on("x" -> "y").executeInsert1("generatedCol")(scalar[String].singleOpt)
+   * // ... generated string key
+   * }}}
+   */
+  def executeInsert2[A](generatedColumn: String, otherColumns: String*)(generatedKeysParser: ResultSetParser[A] = SqlParser.scalar[Long].singleOpt, aliaser: ColumnAliaser)(implicit connection: Connection): Try[A] = execInsert[A](preparedStatement(_, generatedColumn, otherColumns), generatedKeysParser, aliaser)
+
+  private def execInsert[A](prep: Connection => ManagedResource[PreparedStatement], generatedKeysParser: ResultSetParser[A], as: ColumnAliaser)(implicit connection: Connection): Try[A] = Sql.asTry(generatedKeysParser, prep(connection).flatMap { stmt =>
     stmt.executeUpdate()
     managed(stmt.getGeneratedKeys)
-  }, resultSetOnFirstRow)
+  }, resultSetOnFirstRow, as)
 
   /**
    * Executes this SQL query, and returns its result.
@@ -227,10 +206,10 @@ object Sql { // TODO: Rename to SQL
   import scala.util.{ Success => TrySuccess, Try }
   import scala.util.control.NoStackTrace
 
-  private[anorm] def withResult[T](res: ManagedResource[ResultSet], onFirstRow: Boolean)(op: Option[Cursor] => T): ManagedResource[T] =
-    res.map(rs => op(if (onFirstRow) Cursor.onFirstRow(rs) else Cursor(rs)))
+  private[anorm] def withResult[T](res: ManagedResource[ResultSet], onFirstRow: Boolean, as: ColumnAliaser)(op: Option[Cursor] => T): ManagedResource[T] =
+    res.map(rs => op(if (onFirstRow) Cursor.onFirstRow(rs, as) else Cursor(rs, as)))
 
-  private[anorm] def asTry[T](parser: ResultSetParser[T], rs: ManagedResource[ResultSet], onFirstRow: Boolean)(implicit connection: Connection): Try[T] = Try(withResult(rs, onFirstRow)(parser) acquireAndGet identity).flatMap(_.fold[Try[T]](_.toFailure, TrySuccess.apply))
+  private[anorm] def asTry[T](parser: ResultSetParser[T], rs: ManagedResource[ResultSet], onFirstRow: Boolean, as: ColumnAliaser)(implicit connection: Connection): Try[T] = Try(withResult(rs, onFirstRow, as)(parser) acquireAndGet identity).flatMap(_.fold[Try[T]](_.toFailure, TrySuccess.apply))
 
   @annotation.tailrec
   private[anorm] def zipParams(ns: Seq[String], vs: Seq[ParameterValue], ps: Map[String, ParameterValue]): Map[String, ParameterValue] = (ns.headOption, vs.headOption) match {

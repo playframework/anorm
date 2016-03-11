@@ -196,6 +196,34 @@ val parser: RowParser[Map[String, Any]] =
 val result: List[Map[String, Any]] = SQL"SELECT * FROM dyn_table".as(parser.*)
 ```
 
+#### Table alias
+
+With some databases, it's possible to define aliases for table (or for sub-query), as in the following example.
+
+```
+=> SELECT * FROM test t1 JOIN (SELECT * FROM test WHERE parent_id ISNULL) t2 ON t1.parent_id=t2.id WHERE t1.id='bar';
+ id  | value  | parent_id | id  | value  | parent_id 
+-----+--------+-----------+-----+--------+-----------
+ bar | value2 | foo       | foo | value1 | 
+(1 row)
+```
+
+Unfortunately, such aliases are not supported in JDBC, so Anorm introduces the `ColumnAliaser` to be able to define user aliases over columns.
+
+```scala
+import anorm._
+
+val parser: RowParser[(String, String, String, Option[String])] = SqlParser.str("id") ~ SqlParser.str("value") ~ SqlParser.str("parent.value") ~ SqlParser.str("parent.parent_id").? map(SqlParser.flatten)
+
+val aliaser: ColumnAliaser = ColumnAliaser.withPattern((3 to 6).toSet, "parent.")
+
+val res: Try[(String, String, String, Option[String])] = SQL"""SELECT * FROM test t1 JOIN (SELECT * FROM test WHERE parent_id ISNULL) t2 ON t1.parent_id=t2.id WHERE t1.id=${"bar"}""".asTry(parser.single, aliaser)
+
+res.foreach {
+  case (id, value, parentVal, grandPaId) => ???
+}
+```
+
 ### SQL queries using String Interpolation
 
 Since Scala 2.10 supports custom String Interpolation there is also a 1-step alternative to `SQL(queryString).on(params)` seen before. You can abbreviate the code as: 

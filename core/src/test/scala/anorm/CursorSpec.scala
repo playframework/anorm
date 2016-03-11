@@ -8,20 +8,20 @@ object CursorSpec extends org.specs2.mutable.Specification {
 
   "Cursor" should {
     "not be returned when there is no result" in {
-      Cursor(stringList.resultSet) aka "cursor" must beNone
+      Cursor(stringList.resultSet, ColumnAliaser.empty) aka "cursor" must beNone
     }
 
     "be returned for one row" in {
-      Cursor(stringList :+ "A" resultSet) aka "cursor" must beSome.
-        which { cur =>
+      Cursor(stringList :+ "A" resultSet, ColumnAliaser.empty).
+        aka("cursor") must beSome.which { cur =>
           cur.row[String]("str") aka "row" must_== "A" and (
             cur.next aka "after first" must beNone)
         }
     }
 
     "be return for three rows" in {
-      Cursor(stringList :+ "red" :+ "green" :+ "blue" resultSet).
-        aka("cursor") must beSome.which { first =>
+      Cursor(stringList :+ "red" :+ "green" :+ "blue" resultSet,
+        ColumnAliaser.empty) aka "cursor" must beSome.which { first =>
           first.row[String]("str") aka "row #1" must_== "red" and (
             first.next aka "after first" must beSome.which { snd =>
               snd.row[String]("str") aka "row #2" must_== "green" and (
@@ -34,12 +34,13 @@ object CursorSpec extends org.specs2.mutable.Specification {
     }
 
     "match pattern" in {
-      Cursor(stringList :+ "Foo" :+ "Bar" resultSet) must beSome[Cursor].like {
-        case Cursor(row1, b) => row1[String](1) must_== "Foo" and (
-          b must beSome[Cursor].like {
-            case Cursor(row2, None) => row2[String](1) must_== "Bar"
-          })
-      }
+      Cursor(stringList :+ "Foo" :+ "Bar" resultSet, ColumnAliaser.empty).
+        aka("cursor") must beSome[Cursor].like {
+          case Cursor(row1, b) => row1[String](1) must_== "Foo" and (
+            b must beSome[Cursor].like {
+              case Cursor(row2, None) => row2[String](1) must_== "Bar"
+            })
+        }
     }
   }
 
