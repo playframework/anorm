@@ -57,6 +57,7 @@ object Macro {
     }
 
     val colTpe = c.weakTypeTag[Column[_]].tpe
+    val parserTpe = c.weakTypeTag[RowParser[_]].tpe
     val ctor = tpe.decl(termNames.CONSTRUCTOR).asMethod
 
     if (ctor.paramLists.isEmpty) {
@@ -91,10 +92,30 @@ object Macro {
                 val ctype = appliedType(colTpe, List(tt))
 
                 c.inferImplicitValue(ctype) match {
-                  case EmptyTree =>
-                    abort(s"cannot find $ctype for ${term.name} in $ctor")
+                  case EmptyTree => {
+                    val ptype = appliedType(parserTpe, List(tt))
+
+                    c.inferImplicitValue(ptype) match {
+                      case EmptyTree =>
+                        abort(s"cannot find $ctype nor $ptype for ${term.name} in $ctor")
+                      case pr =>
+                        // Use an existing `RowParser[T]` as part
+                        pq"${term.name}" match {
+                          case b @ Bind(bn, _) =>
+                            val bt = q"${bn.toTermName}"
+
+                            xtr match {
+                              case EmptyTree => (pr, b, List[Tree](bt), pi + 1)
+                              case _ => (q"$xtr ~ $pr",
+                                pq"anorm.~($mp, $b)", bt :: ps, pi + 1)
+
+                            }
+                        }
+                    }
+                  }
 
                   case _ => {
+                    // Generate a `get` for the `Column[T]`
                     val get = genGet(tt, tn, pi)
 
                     pq"${term.name}" match {
@@ -125,8 +146,11 @@ object Macro {
 
     if (debugEnabled) {
       val generated = show(parser).replaceAll("anorm.", "").
-        replaceAll("\\)\\)\\.\\$tilde\\(", ") ~ ").
-        replaceAll("\\)\\.\\$tilde\\(", " ~ ").replaceAll("\\$tilde", "~")
+        replaceAll("\\.\\$tilde", " ~ ").
+        replaceAll("\\(SqlParser([^(]+)\\(([^)]+)\\)\\)", "SqlParser$1($2)").
+        replaceAll("\\.\\$plus\\(([0-9]+)\\)", " + $1").
+        replaceAll("\\(([^ ]+) @ _\\)", "($1)").
+        replaceAll("\\$tilde", "~")
 
       c.echo(c.enclosingPosition, s"row parser generated for $tpe: $generated")
     }
@@ -192,7 +216,8 @@ object Macro {
    */
   def offsetParser[T](offset: Int): RowParser[T] = macro offsetParserImpl[T]
 
-  private lazy val debugEnabled =
+  private lazy val debugEnabled = true
+  private lazy val _debugEnabled =
     Option(System.getProperty("anorm.macro.debug")).
       filterNot(_.isEmpty).map(_.toLowerCase).map { v =>
         "true".equals(v) || v.substring(0, 1) == "y"

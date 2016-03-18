@@ -7,7 +7,7 @@ import com.typesafe.tools.mima.plugin.MimaKeys.{
 
 val PlayVersion = playVersion(sys.props.getOrElse("play.version", "2.5.0"))
 
-lazy val acolyteVersion = "1.0.35-j7p"
+lazy val acolyteVersion = "1.0.36-j7p"
 
 lazy val `anorm-tokenizer` = project
   .in(file("tokenizer"))

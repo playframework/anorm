@@ -99,3 +99,25 @@ val findAll = SQL"SELECT uninteresting_col, skip_col, name, age FROM foo"
 val fooParser = Macro.offsetParser[Foo](2)
 // ignore uninteresting_col & skip_col
 ```
+
+The macros can now use already defined `RowParser` as sub-parser.
+
+```scala
+case class Bar(lorem: Float, ipsum: Long)
+case class Foo(name: String, bar: Bar, age: Int)
+
+import anorm._
+
+// nested parser
+implicit val barParser = Macro.parser[Bar]("bar_lorem", "bar_ipsum")
+
+val fooBar = Macro.namedParser[Foo] /* generated as:
+  get[String]("name") ~ barParser ~ get[Int]("age") map {
+    case name ~ bar ~ age => Foo(name, bar, age)
+  }
+*/
+
+val result: Foo = SQL"""SELECT f.name, age, bar_lorem, bar_ipsum 
+  FROM foo f JOIN bar b ON f.name=b.name WHERE f.name=${"Foo"}""".
+  as(fooBar.single)
+```

@@ -520,7 +520,7 @@ trait RowParser[+A] extends (Row => SqlResult[A]) { parent =>
    *
    * val parser: RowParser[Int] = SqlParser.str("col").map(_.length)
    * // Prepares a parser that first get 'col' string value,
-   * // an then returns the length of that
+   * // and then returns the length of that
    * }}}
    */
   def map[B](f: A => B): RowParser[B] = RowParser(parent.andThen(_.map(f)))

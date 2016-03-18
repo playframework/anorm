@@ -45,6 +45,21 @@ object MacroSpec extends org.specs2.mutable.Specification {
         SQL"TEST".as(parser1.*) must_== expected and (
           SQL("TEST").as(parser2.*) must_== expected)
       }
+
+    "use a sub-parser from the implicit scope" in {
+      implicit val barParser: RowParser[Bar] = Macro.namedParser[Bar]
+      val fooBar = Macro.namedParser[Foo[Bar]]
+
+      val row = RowLists.rowList6(
+        classOf[Float] -> "r", classOf[String] -> "bar",
+        classOf[Int] -> "lorem", classOf[Long] -> "opt",
+        classOf[Boolean] -> "x", classOf[Int] -> "v")
+
+      withQueryResult(row :+ (1.2F, "str1", 1, 2L, true, 6)) { implicit c =>
+        SQL"TEST".as(fooBar.singleOpt) must beSome(
+          Foo(1.2F, "str1")(Bar(6), Some(2))(Some(true)))
+      }
+    }
   }
 
   "Generated indexed parser" should {
