@@ -9,14 +9,14 @@ object MacroSpec extends org.specs2.mutable.Specification {
 
   val barRow = RowLists.rowList1(classOf[Int] -> "v")
 
+  val bazRow = RowLists.rowList4(classOf[String] -> "s", classOf[Boolean] -> "b", classOf[Float] -> "f", classOf[Int] -> "i")
+
   val fooRow = RowLists.rowList5(
     classOf[Float] -> "r", classOf[String] -> "bar",
     classOf[Int] -> "lorem", classOf[Long] -> "opt",
     classOf[Boolean] -> "x")
 
   "Generated named parser" should {
-    // No Column[Bar] so compilation error is expected
-    shapeless.test.illTyped("anorm.Macro.namedParser[Foo[Bar]]")
 
     // Not enough column names for class parameters
     shapeless.test.illTyped(
@@ -28,6 +28,14 @@ object MacroSpec extends org.specs2.mutable.Specification {
 
       SQL"TEST".as(parser1.*) must_== List(Bar(1), Bar(3)) and (
         SQL"TEST".as(parser2.*) must_== List(Bar(1), Bar(3)))
+    }
+
+    "be successful for Baz" in withQueryResult(bazRow :+ ("test", false, 1.23F, 1)) { implicit c =>
+      val parser1 = Macro.namedParser[Baz]
+      val parser2 = Macro.parser[Baz]("s", "f", "i", "b")
+
+      SQL"TEST".as(parser1.*) must_== List(Baz("test", Qux(1.23F, 1), false)) and (
+        SQL"TEST".as(parser2.*) must_== List(Baz("test", Qux(1.23F, 1), false)))
     }
 
     "be successful for Foo[Int]" in withQueryResult(
@@ -48,8 +56,6 @@ object MacroSpec extends org.specs2.mutable.Specification {
   }
 
   "Generated indexed parser" should {
-    // No Column[Bar] so compilation error is expected
-    shapeless.test.illTyped("anorm.Macro.indexedParser[Foo[Bar]]")
 
     "be successful for Bar" in withQueryResult(
       RowLists.intList :+ 1 :+ 3) { implicit c =>
@@ -100,6 +106,8 @@ object MacroSpec extends org.specs2.mutable.Specification {
       }
   }
 
+  case class Baz(s: String, bar: Qux, b: Boolean)
+  case class Qux(f: Float, i: Int)
   case class Bar(v: Int)
   case class Foo[T](r: Float, bar: String = "Default")(
       lorem: T, opt: Option[Long] = None)(x: Option[Boolean]) {
