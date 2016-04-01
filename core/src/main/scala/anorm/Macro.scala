@@ -2,18 +2,20 @@ package anorm
 
 object Macro {
   import scala.language.experimental.macros
-  import scala.reflect.macros.whitebox
+  import scala.reflect.macros.{ whitebox, Universe }
+  import whitebox.Context
 
-  def namedParserImpl[T: c.WeakTypeTag](c: whitebox.Context): c.Expr[T] = {
+  def namedParserImpl[T: c.WeakTypeTag](c: Context): c.Expr[T] = {
     import c.universe._
-
-    parserImpl[T](c) { (t, n, _) => q"anorm.SqlParser.get[$t]($n)" }
+    val tpe = weakTypeOf[T]
+    val (parser, _) = parserImpl[T, c.type](c)({ (t, n, _) => q"anorm.SqlParser.get[$t]($n)" }, tpe)
+    parser
   }
 
-  def namedParserImpl_[T: c.WeakTypeTag](c: whitebox.Context)(names: c.Expr[String]*): c.Expr[T] = {
+  def namedParserImpl_[T: c.WeakTypeTag](c: Context)(names: c.Expr[String]*): c.Expr[T] = {
     import c.universe._
 
-    val tpe = c.weakTypeTag[T].tpe
+    val tpe = weakTypeOf[T]
     val ctor = tpe.decl(termNames.CONSTRUCTOR).asMethod
     val params = ctor.paramLists.flatten
 
@@ -22,41 +24,42 @@ object Macro {
         "no column name for parameters: ${show(names)} < $params")
 
     } else {
-      parserImpl[T](c) { (t, _, i) =>
+      val (parser, _) = parserImpl[T, c.type](c)({ (t, _, i) =>
         names.lift(i) match {
           case Some(n) => q"anorm.SqlParser.get[$t]($n)"
           case _ => c.abort(c.enclosingPosition,
             s"missing column name for parameter $i")
         }
-      }
+      }, tpe)
+      parser
     }
   }
 
-  def offsetParserImpl[T: c.WeakTypeTag](c: whitebox.Context)(offset: c.Expr[Int]): c.Expr[T] = {
+  def offsetParserImpl[T: c.WeakTypeTag](c: Context)(offset: c.Expr[Int]): c.Expr[T] = {
     import c.universe._
-
-    parserImpl[T](c) { (t, _, i) =>
+    val tpe = weakTypeOf[T]
+    val (parser, _) = parserImpl[T, c.type](c)({ (t, _, i) =>
       q"anorm.SqlParser.get[$t]($offset + ${i + 1})"
-    }
+    }, tpe)
+    parser
   }
 
-  def indexedParserImpl[T: c.WeakTypeTag](c: whitebox.Context): c.Expr[T] = {
+  def indexedParserImpl[T: c.WeakTypeTag](c: Context): c.Expr[T] = {
     import c.universe._
 
     offsetParserImpl[T](c)(reify(0))
   }
 
-  private def parserImpl[T: c.WeakTypeTag](c: whitebox.Context)(genGet: (c.universe.Type, String, Int) => c.universe.Tree): c.Expr[T] = {
+  private def parserImpl[T: c.WeakTypeTag, C <: Context](c: C, index: Int = 0)(genGet: (c.universe.Type, String, Int) => c.universe.Tree, tpe: c.universe.Type): (c.Expr[T], Int) = {
     import c.universe._
 
-    val tpe = c.weakTypeTag[T].tpe
     @inline def abort(m: String) = c.abort(c.enclosingPosition, m)
 
     if (!tpe.typeSymbol.isClass || !tpe.typeSymbol.asClass.isCaseClass) {
       abort(s"case class expected: ${tpe}")
     }
 
-    val colTpe = c.weakTypeTag[Column[_]].tpe
+    val colTpe = weakTypeOf[Column[_]]
     val ctor = tpe.decl(termNames.CONSTRUCTOR).asMethod
 
     if (ctor.paramLists.isEmpty) {
@@ -72,12 +75,10 @@ object Macro {
       case (sym, ty) => sym.fullName -> ty
     }.toMap
 
-    val optTpe = c.weakTypeTag[Option[_]].tpe
-
     // ---
 
-    val (x, m, body, _) = ctor.paramLists.
-      foldLeft[(Tree, Tree, Tree, Int)]((EmptyTree, EmptyTree, EmptyTree, 0)) {
+    val (x, m, body, i) = ctor.paramLists.
+      foldLeft[(Tree, Tree, Tree, Int)]((EmptyTree, EmptyTree, EmptyTree, index)) {
         case ((xa, ma, bs, ia), pss) =>
           val (xb, mb, vs, ib) =
             pss.foldLeft((xa, ma, List.empty[Tree], ia)) {
@@ -90,25 +91,27 @@ object Macro {
                 }
                 val ctype = appliedType(colTpe, List(tt))
 
-                c.inferImplicitValue(ctype) match {
+                val (get, paramIndex) = c.inferImplicitValue(ctype) match {
                   case EmptyTree =>
-                    abort(s"cannot find $ctype for ${term.name} in $ctor")
+                    c.warning(c.enclosingPosition, s"cannot find $ctype for ${term.name} in $ctor")
+                    val (parser, i) = parserImpl[T, C](c, pi)(genGet, tt)
+                    (parser.tree, i - 1)
 
                   case _ => {
-                    val get = genGet(tt, tn, pi)
+                    (genGet(tt, tn, pi), pi)
 
-                    pq"${term.name}" match {
-                      case b @ Bind(bn, _) =>
-                        val bt = q"${bn.toTermName}"
-
-                        xtr match {
-                          case EmptyTree => (get, b, List[Tree](bt), pi + 1)
-                          case _ => (q"$xtr ~ $get",
-                            pq"anorm.~($mp, $b)", bt :: ps, pi + 1)
-
-                        }
-                    }
                   }
+                }
+                pq"${term.name}" match {
+                  case b @ Bind(bn, _) =>
+                    val bt = q"${bn.toTermName}"
+
+                    xtr match {
+                      case EmptyTree => (get, b, List[Tree](bt), paramIndex + 1)
+                      case _ => (q"$xtr ~ $get",
+                        pq"anorm.~($mp, $b)", bt :: ps, paramIndex + 1)
+
+                    }
                 }
             }
 
@@ -131,7 +134,7 @@ object Macro {
       c.echo(c.enclosingPosition, s"row parser generated for $tpe: $generated")
     }
 
-    c.Expr(c.typecheck(parser))
+    (c.Expr(c.typecheck(parser)), i)
   }
 
   /**
