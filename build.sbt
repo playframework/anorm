@@ -73,7 +73,7 @@ lazy val anorm = project
     ) ++ Seq(
       "specs2-core",
       "specs2-junit"
-    ).map("org.specs2" %% _ % "2.4.9" % Test)
+    ).map("org.specs2" %% _ % "3.6.4" % Test)
   }).dependsOn(`anorm-tokenizer`)
 
 lazy val `anorm-iteratee` = (project in file("iteratee"))
@@ -94,7 +94,7 @@ lazy val `anorm-parent` = (project in file("."))
   .enablePlugins(PlayRootProject)
   .aggregate(`anorm-tokenizer`, anorm, `anorm-iteratee`)
   .settings(
-  scalaVersion := "2.11.7",
+  scalaVersion := "2.11.8",
     previousArtifacts := Set.empty)
 
 lazy val docs = project
