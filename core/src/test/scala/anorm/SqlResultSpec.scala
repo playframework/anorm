@@ -419,17 +419,18 @@ object SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
               aka("by user alias") must beSuccessfulTry(v2))
 
     }
-
-    def withTestDB[T](foo: String)(f: java.sql.Connection => T): T =
-      withH2Database { implicit c =>
-        createTest1Table()
-        SQL("insert into test1(id, foo, bar) values ({id}, {foo}, {bar})").
-          on('id -> 10L, 'foo -> foo, 'bar -> 20).execute()
-
-        f(c)
-      }
   }
 
-  def queryResultAndOptions[A](r: QueryResult, ps: List[(String, String)] = List.empty)(f: java.sql.Connection => A): A = f(connection(handleQuery { _ => r }, ps: _*))
+  // ---
 
+  def withTestDB[T](foo: String)(f: java.sql.Connection => T): T =
+    withH2Database { implicit c =>
+      createTest1Table()
+      SQL("insert into test1(id, foo, bar) values ({id}, {foo}, {bar})").
+        on('id -> 10L, 'foo -> foo, 'bar -> 20).execute()
+
+      f(c)
+    }
+
+  def queryResultAndOptions[A](r: QueryResult, ps: List[(String, String)] = List.empty)(f: java.sql.Connection => A): A = f(connection(handleQuery { _ => r }, ps: _*))
 }
