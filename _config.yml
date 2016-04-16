@@ -1,13 +1,12 @@
-pygments: true
-name: "Anorm"
+title: "Anorm"
 description: "The simple SQL data access"
-url: "http://playframework.github.io/anorm"
-baseurl: "/anorm"
+show_downloads: false
+google_analytics:
+theme: jekyll-theme-cayman
 
-markdown: kramdown
-highlighter: rouge
 exclude: [README.md, jekyll.sh, anorm]
+baseUrl: "/anorm"
 latest_major_release: 2.5
-latest_release: 2.5.0
+latest_release: 2.5.3
 
-_2_5_latest_minor: 2.5.0
+_2_5_latest_minor: 2.5.3

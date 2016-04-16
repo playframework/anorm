@@ -1,0 +1,2376 @@
+<!DOCTYPE html >
+<html>
+        <head>
+          <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+          <title></title>
+          <meta name="description" content="" />
+          <meta name="keywords" content="" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../lib/index.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../lib/jquery.js"></script>
+      <script type="text/javascript" src="../lib/jquery.panzoom.min.js"></script>
+      <script type="text/javascript" src="../lib/jquery.mousewheel.min.js"></script>
+      <script type="text/javascript" src="../lib/index.js"></script>
+      <script type="text/javascript" src="../index.js"></script>
+      <script type="text/javascript" src="../lib/scheduler.js"></script>
+      <script type="text/javascript" src="../lib/template.js"></script>
+      <script type="text/javascript" src="../lib/tools.tooltip.js"></script>
+      
+      <script type="text/javascript">
+        /* this variable can be used by the JS to determine the path to the root document */
+        var toRoot = '../';
+      </script>
+    
+        </head>
+        <body>
+      <div id="search">
+        <span id="doc-title"><span id="doc-version"></span></span>
+        <span class="close-results"><span class="left">&lt;</span> Back</span>
+        <div id="textfilter">
+          <span class="input">
+            <input autocapitalize="none" placeholder="Search" id="index-input" type="text" accesskey="/" />
+            <i class="clear material-icons"></i>
+            <i id="search-icon" class="material-icons"></i>
+          </span>
+        </div>
+    </div>
+      <div id="search-results">
+        <div id="search-progress">
+          <div id="progress-fill"></div>
+        </div>
+        <div id="results-content">
+          <div id="entity-results"></div>
+          <div id="member-results"></div>
+        </div>
+      </div>
+      <div id="content-scroll-container" style="-webkit-overflow-scrolling: touch;">
+        <div id="content-container" style="-webkit-overflow-scrolling: touch;">
+          <div id="subpackage-spacer">
+            <div id="packages">
+              <h1>Packages</h1>
+              <ul>
+                <li name="_root_.root" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="_root_"></a><a id="root:_root_"></a>
+      <span class="permalink">
+      <a href="index.html#_root_" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../index.html"><span class="name">root</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="_root_">root</a></dd></dl></div>
+    </li><li name="_root_.anorm" visbl="pub" class="indented1 current" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="anorm"></a><a id="anorm:anorm"></a>
+      <span class="permalink">
+      <a href="index.html#anorm" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">anorm</span>
+      </span>
+      
+      <p class="shortcomment cmt">Anorm API</p><div class="fullcomment"><div class="comment cmt"><p>Anorm API</p><p>Use the SQL method to start an SQL query</p><pre><span class="kw">import</span> anorm._
+
+SQL(<span class="lit">"Select 1"</span>)</pre></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="_root_">root</a></dd></dl></div>
+    </li><li name="anorm.macros" visbl="pub" class="indented2 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="macros"></a><a id="macros:macros"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#macros" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="macros/index.html"><span class="name">macros</span></a>
+      </span>
+      
+      
+    </li><li name="anorm.postgresql" visbl="pub" class="indented2 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="postgresql"></a><a id="postgresql:postgresql"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#postgresql" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="postgresql/index.html"><span class="name">postgresql</span></a>
+      </span>
+      
+      
+    </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="object" href="AkkaStream$.html" title="Anorm companion for the http://doc.akka.io/docs/akka/2.4.4/scala/stream/."></a>
+                        <a href="AkkaStream$.html" title="Anorm companion for the http://doc.akka.io/docs/akka/2.4.4/scala/stream/.">AkkaStream</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="class" href="AnormException.html" title="Anorm runtime exception"></a>
+                        <a href="AnormException.html" title="Anorm runtime exception">AnormException</a>
+                      </li><li class="current-entities indented1">
+                        <a class="object" href="BatchSql$.html" title="SQL batch companion"></a>
+                        <a class="trait" href="BatchSql.html" title="SQL batch"></a>
+                        <a href="BatchSql.html" title="SQL batch">BatchSql</a>
+                      </li><li class="current-entities indented1">
+                        <a class="object" href="Column$.html" title="Column companion, providing default conversions."></a>
+                        <a class="trait" href="Column.html" title="Column mapping"></a>
+                        <a href="Column.html" title="Column mapping">Column</a>
+                      </li><li class="current-entities indented1">
+                        <a class="object" href="ColumnAliaser$.html" title=""></a>
+                        <a class="trait" href="ColumnAliaser.html" title="Allows to define or overwrite the alias for a column."></a>
+                        <a href="ColumnAliaser.html" title="Allows to define or overwrite the alias for a column.">ColumnAliaser</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="class" href="ColumnName.html" title=""></a>
+                        <a href="ColumnName.html" title="">ColumnName</a>
+                      </li><li class="current-entities indented1">
+                        <a class="object" href="ColumnNotFound$.html" title=""></a>
+                        <a class="class" href="ColumnNotFound.html" title="Error raised when the specified column cannot be found in results."></a>
+                        <a href="ColumnNotFound.html" title="Error raised when the specified column cannot be found in results.">ColumnNotFound</a>
+                      </li><li class="current-entities indented1">
+                        <a class="object" href="Cursor$.html" title="Cursor companion"></a>
+                        <a class="trait" href="Cursor.html" title="Result cursor"></a>
+                        <a href="Cursor.html" title="Result cursor">Cursor</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="class" href="DefaultParameterValue.html" title=""></a>
+                        <a href="DefaultParameterValue.html" title="">DefaultParameterValue</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="trait" href="DeprecatedSqlParser.html" title=""></a>
+                        <a href="DeprecatedSqlParser.html" title="">DeprecatedSqlParser</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="class" href="Error.html" title="Erroneous result (failure while parsing)."></a>
+                        <a href="Error.html" title="Erroneous result (failure while parsing).">Error</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="object" href="Iteratees$.html" title="Anorm companion for the https://www.playframework.com/documentation/2.4.x/Iteratees."></a>
+                        <a href="Iteratees$.html" title="Anorm companion for the https://www.playframework.com/documentation/2.4.x/Iteratees.">Iteratees</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="trait" href="JavaTimeColumn.html" title=""></a>
+                        <a href="JavaTimeColumn.html" title="">JavaTimeColumn</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="trait" href="JavaTimeParameterMetaData.html" title=""></a>
+                        <a href="JavaTimeParameterMetaData.html" title="">JavaTimeParameterMetaData</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="trait" href="JavaTimeToStatement.html" title=""></a>
+                        <a href="JavaTimeToStatement.html" title="">JavaTimeToStatement</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="trait" href="JodaColumn.html" title=""></a>
+                        <a href="JodaColumn.html" title="">JodaColumn</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="object" href="JodaParameterMetaData$.html" title="Meta data for Joda parameters"></a>
+                        <a href="JodaParameterMetaData$.html" title="Meta data for Joda parameters">JodaParameterMetaData</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="trait" href="JodaToStatement.html" title=""></a>
+                        <a href="JodaToStatement.html" title="">JodaToStatement</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="object" href="Macro$.html" title=""></a>
+                        <a href="Macro$.html" title="">Macro</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="class" href="MetaDataItem.html" title=""></a>
+                        <a href="MetaDataItem.html" title="">MetaDataItem</a>
+                      </li><li class="current-entities indented1">
+                        <a class="object" href="NamedParameter$.html" title="Companion object for applied named parameter."></a>
+                        <a class="class" href="NamedParameter.html" title="Applied named parameter."></a>
+                        <a href="NamedParameter.html" title="Applied named parameter.">NamedParameter</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="trait" href="NotNullGuard.html" title="Marker trait to indicate that even if a type T accept null as value, it must be refused in some Anorm context."></a>
+                        <a href="NotNullGuard.html" title="Marker trait to indicate that even if a type T accept null as value, it must be refused in some Anorm context.">NotNullGuard</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="class" href="Object.html" title="Untyped value wrapper."></a>
+                        <a href="Object.html" title="Untyped value wrapper.">Object</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="trait" href="PGJson.html" title=""></a>
+                        <a href="PGJson.html" title="">PGJson</a>
+                      </li><li class="current-entities indented1">
+                        <a class="object" href="ParameterMetaData$.html" title="ParameterMetaData companion, providing defaults based on SQL92."></a>
+                        <a class="trait" href="ParameterMetaData.html" title="Parameter meta data for type T"></a>
+                        <a href="ParameterMetaData.html" title="Parameter meta data for type T">ParameterMetaData</a>
+                      </li><li class="current-entities indented1">
+                        <a class="object" href="ParameterValue$.html" title="Value factory for parameter."></a>
+                        <a class="trait" href="ParameterValue.html" title="Prepared parameter value."></a>
+                        <a href="ParameterValue.html" title="Prepared parameter value.">ParameterValue</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="trait" href="ResultSetParser.html" title="Parses result from the cursor."></a>
+                        <a href="ResultSetParser.html" title="Parses result from the cursor.">ResultSetParser</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="object" href="package$$ResultSetResource$.html" title=""></a>
+                        <a href="package$$ResultSetResource$.html" title="">ResultSetResource</a>
+                      </li><li class="current-entities indented1">
+                        <a class="object" href="Row$.html" title="Companion object for row."></a>
+                        <a class="trait" href="Row.html" title=""></a>
+                        <a href="Row.html" title="">Row</a>
+                      </li><li class="current-entities indented1">
+                        <a class="object" href="RowParser$.html" title=""></a>
+                        <a class="trait" href="RowParser.html" title=""></a>
+                        <a href="RowParser.html" title="">RowParser</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="trait" href="ScalarRowParser.html" title="Parser for scalar row (row of one single column)."></a>
+                        <a href="ScalarRowParser.html" title="Parser for scalar row (row of one single column).">ScalarRowParser</a>
+                      </li><li class="current-entities indented1">
+                        <a class="object" href="SeqParameter$.html" title="SeqParameter factory"></a>
+                        <a class="trait" href="SeqParameter.html" title="Wrapper to use a value sequence as SQL parameter, with custom formatting."></a>
+                        <a href="SeqParameter.html" title="Wrapper to use a value sequence as SQL parameter, with custom formatting.">SeqParameter</a>
+                      </li><li class="current-entities indented1">
+                        <a class="object" href="Show$.html" title=""></a>
+                        <a class="trait" href="Show.html" title="Typeclass for string representation"></a>
+                        <a href="Show.html" title="Typeclass for string representation">Show</a>
+                      </li><li class="current-entities indented1">
+                        <a class="object" href="SimpleSql$.html" title=""></a>
+                        <a class="class" href="SimpleSql.html" title="Simple/plain SQL."></a>
+                        <a href="SimpleSql.html" title="Simple/plain SQL.">SimpleSql</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="object" href="Sql$.html" title=""></a>
+                        <a href="Sql$.html" title="">Sql</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="class" href="SqlMappingError.html" title=""></a>
+                        <a href="SqlMappingError.html" title="">SqlMappingError</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="object" href="SqlParser$.html" title=""></a>
+                        <a href="SqlParser$.html" title="">SqlParser</a>
+                      </li><li class="current-entities indented1">
+                        <a class="object" href="SqlQuery$.html" title=""></a>
+                        <a class="trait" href="SqlQuery.html" title="Initial SQL query, without parameter values."></a>
+                        <a href="SqlQuery.html" title="Initial SQL query, without parameter values.">SqlQuery</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="class" href="SqlQueryResult.html" title="A result from execution of an SQL query, row data and context (e.g."></a>
+                        <a href="SqlQueryResult.html" title="A result from execution of an SQL query, row data and context (e.g.">SqlQueryResult</a>
+                      </li><li class="current-entities indented1">
+                        <a class="object" href="SqlRequestError$.html" title=""></a>
+                        <a class="trait" href="SqlRequestError.html" title="Error from processing SQL"></a>
+                        <a href="SqlRequestError.html" title="Error from processing SQL">SqlRequestError</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="trait" href="SqlResult.html" title="Parsed SQL result."></a>
+                        <a href="SqlResult.html" title="Parsed SQL result.">SqlResult</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="object" href="SqlStatementParser$.html" title="Parser for SQL statement."></a>
+                        <a href="SqlStatementParser$.html" title="Parser for SQL statement.">SqlStatementParser</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="class" href="package$$SqlStringInterpolation.html" title="Creates an SQL query using String Interpolation feature."></a>
+                        <a href="package$$SqlStringInterpolation.html" title="Creates an SQL query using String Interpolation feature.">SqlStringInterpolation</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="object" href="package$$StatementResource$.html" title=""></a>
+                        <a href="package$$StatementResource$.html" title="">StatementResource</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="class" href="StringShow.html" title=""></a>
+                        <a href="StringShow.html" title="">StringShow</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="object" href="package$$StringWrapper2$.html" title=""></a>
+                        <a href="package$$StringWrapper2$.html" title="">StringWrapper2</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="class" href="Success.html" title="Successfully parsed result."></a>
+                        <a href="Success.html" title="Successfully parsed result.">Success</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="object" href="package$$TimestampWrapper1$.html" title=""></a>
+                        <a href="package$$TimestampWrapper1$.html" title="">TimestampWrapper1</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="object" href="package$$TimestampWrapper2$.html" title=""></a>
+                        <a href="package$$TimestampWrapper2$.html" title="">TimestampWrapper2</a>
+                      </li><li class="current-entities indented1">
+                        <a class="object" href="ToParameterList$.html" title="Companion/factory for ToParameterList."></a>
+                        <a class="trait" href="ToParameterList.html" title="Convert to a list of NamedParameter"></a>
+                        <a href="ToParameterList.html" title="Convert to a list of NamedParameter">ToParameterList</a>
+                      </li><li class="current-entities indented1">
+                        <a class="object" href="ToParameterValue$.html" title=""></a>
+                        <a class="trait" href="ToParameterValue.html" title=""></a>
+                        <a href="ToParameterValue.html" title="">ToParameterValue</a>
+                      </li><li class="current-entities indented1">
+                        <a class="object" href="ToSql$.html" title="Provided ToSql implementations."></a>
+                        <a class="trait" href="ToSql.html" title="Set value as prepared SQL statement fragment."></a>
+                        <a href="ToSql.html" title="Set value as prepared SQL statement fragment.">ToSql</a>
+                      </li><li class="current-entities indented1">
+                        <a class="object" href="ToStatement$.html" title=""></a>
+                        <a class="trait" href="ToStatement.html" title="Sets value as statement parameter."></a>
+                        <a href="ToStatement.html" title="Sets value as statement parameter.">ToStatement</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="trait" href="ToStatementPriority0.html" title=""></a>
+                        <a href="ToStatementPriority0.html" title="">ToStatementPriority0</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="trait" href="ToStatementPriority1.html" title=""></a>
+                        <a href="ToStatementPriority1.html" title="">ToStatementPriority1</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="object" href="TokenGroup$.html" title=""></a>
+                        <a href="TokenGroup$.html" title="">TokenGroup</a>
+                      </li><li class="current-entities indented1">
+                        <a class="object" href="TupleFlattener$.html" title="Conversions to flatten columns to tuple."></a>
+                        <a class="class" href="TupleFlattener.html" title=""></a>
+                        <a href="TupleFlattener.html" title="">TupleFlattener</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="trait" href="TupleFlattenerPriority1.html" title="Conversion from 2-column tuple-like to scala.Tuple2, with resolution priority 1."></a>
+                        <a href="TupleFlattenerPriority1.html" title="Conversion from 2-column tuple-like to scala.Tuple2, with resolution priority 1.">TupleFlattenerPriority1</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="trait" href="TupleFlattenerPriority10.html" title="Conversion from 11-column tuple-like to scala.Tuple11, with resolution priority 10."></a>
+                        <a href="TupleFlattenerPriority10.html" title="Conversion from 11-column tuple-like to scala.Tuple11, with resolution priority 10.">TupleFlattenerPriority10</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="trait" href="TupleFlattenerPriority11.html" title="Conversion from 12-column tuple-like to scala.Tuple12, with resolution priority 11."></a>
+                        <a href="TupleFlattenerPriority11.html" title="Conversion from 12-column tuple-like to scala.Tuple12, with resolution priority 11.">TupleFlattenerPriority11</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="trait" href="TupleFlattenerPriority12.html" title="Conversion from 13-column tuple-like to scala.Tuple13, with resolution priority 12."></a>
+                        <a href="TupleFlattenerPriority12.html" title="Conversion from 13-column tuple-like to scala.Tuple13, with resolution priority 12.">TupleFlattenerPriority12</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="trait" href="TupleFlattenerPriority13.html" title="Conversion from 14-column tuple-like to scala.Tuple14, with resolution priority 13."></a>
+                        <a href="TupleFlattenerPriority13.html" title="Conversion from 14-column tuple-like to scala.Tuple14, with resolution priority 13.">TupleFlattenerPriority13</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="trait" href="TupleFlattenerPriority14.html" title="Conversion from 15-column tuple-like to scala.Tuple15, with resolution priority 14."></a>
+                        <a href="TupleFlattenerPriority14.html" title="Conversion from 15-column tuple-like to scala.Tuple15, with resolution priority 14.">TupleFlattenerPriority14</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="trait" href="TupleFlattenerPriority15.html" title="Conversion from 16-column tuple-like to scala.Tuple16, with resolution priority 15."></a>
+                        <a href="TupleFlattenerPriority15.html" title="Conversion from 16-column tuple-like to scala.Tuple16, with resolution priority 15.">TupleFlattenerPriority15</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="trait" href="TupleFlattenerPriority16.html" title="Conversion from 17-column tuple-like to scala.Tuple17, with resolution priority 16."></a>
+                        <a href="TupleFlattenerPriority16.html" title="Conversion from 17-column tuple-like to scala.Tuple17, with resolution priority 16.">TupleFlattenerPriority16</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="trait" href="TupleFlattenerPriority17.html" title="Conversion from 18-column tuple-like to scala.Tuple18, with resolution priority 17."></a>
+                        <a href="TupleFlattenerPriority17.html" title="Conversion from 18-column tuple-like to scala.Tuple18, with resolution priority 17.">TupleFlattenerPriority17</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="trait" href="TupleFlattenerPriority18.html" title="Conversion from 19-column tuple-like to scala.Tuple19, with resolution priority 18."></a>
+                        <a href="TupleFlattenerPriority18.html" title="Conversion from 19-column tuple-like to scala.Tuple19, with resolution priority 18.">TupleFlattenerPriority18</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="trait" href="TupleFlattenerPriority19.html" title="Conversion from 20-column tuple-like to scala.Tuple20, with resolution priority 19."></a>
+                        <a href="TupleFlattenerPriority19.html" title="Conversion from 20-column tuple-like to scala.Tuple20, with resolution priority 19.">TupleFlattenerPriority19</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="trait" href="TupleFlattenerPriority2.html" title="Conversion from 3-column tuple-like to scala.Tuple3, with resolution priority 2."></a>
+                        <a href="TupleFlattenerPriority2.html" title="Conversion from 3-column tuple-like to scala.Tuple3, with resolution priority 2.">TupleFlattenerPriority2</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="trait" href="TupleFlattenerPriority20.html" title="Conversion from 21-column tuple-like to scala.Tuple21, with resolution priority 20."></a>
+                        <a href="TupleFlattenerPriority20.html" title="Conversion from 21-column tuple-like to scala.Tuple21, with resolution priority 20.">TupleFlattenerPriority20</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="trait" href="TupleFlattenerPriority21.html" title="Conversion from 22-column tuple-like to scala.Tuple22, with resolution priority 21."></a>
+                        <a href="TupleFlattenerPriority21.html" title="Conversion from 22-column tuple-like to scala.Tuple22, with resolution priority 21.">TupleFlattenerPriority21</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="trait" href="TupleFlattenerPriority3.html" title="Conversion from 4-column tuple-like to scala.Tuple4, with resolution priority 3."></a>
+                        <a href="TupleFlattenerPriority3.html" title="Conversion from 4-column tuple-like to scala.Tuple4, with resolution priority 3.">TupleFlattenerPriority3</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="trait" href="TupleFlattenerPriority4.html" title="Conversion from 5-column tuple-like to scala.Tuple5, with resolution priority 4."></a>
+                        <a href="TupleFlattenerPriority4.html" title="Conversion from 5-column tuple-like to scala.Tuple5, with resolution priority 4.">TupleFlattenerPriority4</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="trait" href="TupleFlattenerPriority5.html" title="Conversion from 6-column tuple-like to scala.Tuple6, with resolution priority 5."></a>
+                        <a href="TupleFlattenerPriority5.html" title="Conversion from 6-column tuple-like to scala.Tuple6, with resolution priority 5.">TupleFlattenerPriority5</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="trait" href="TupleFlattenerPriority6.html" title="Conversion from 7-column tuple-like to scala.Tuple7, with resolution priority 6."></a>
+                        <a href="TupleFlattenerPriority6.html" title="Conversion from 7-column tuple-like to scala.Tuple7, with resolution priority 6.">TupleFlattenerPriority6</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="trait" href="TupleFlattenerPriority7.html" title="Conversion from 8-column tuple-like to scala.Tuple8, with resolution priority 7."></a>
+                        <a href="TupleFlattenerPriority7.html" title="Conversion from 8-column tuple-like to scala.Tuple8, with resolution priority 7.">TupleFlattenerPriority7</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="trait" href="TupleFlattenerPriority8.html" title="Conversion from 9-column tuple-like to scala.Tuple9, with resolution priority 8."></a>
+                        <a href="TupleFlattenerPriority8.html" title="Conversion from 9-column tuple-like to scala.Tuple9, with resolution priority 8.">TupleFlattenerPriority8</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="trait" href="TupleFlattenerPriority9.html" title="Conversion from 10-column tuple-like to scala.Tuple10, with resolution priority 9."></a>
+                        <a href="TupleFlattenerPriority9.html" title="Conversion from 10-column tuple-like to scala.Tuple10, with resolution priority 9.">TupleFlattenerPriority9</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="class" href="TypeDoesNotMatch.html" title=""></a>
+                        <a href="TypeDoesNotMatch.html" title="">TypeDoesNotMatch</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="class" href="UnexpectedNullableFound.html" title=""></a>
+                        <a href="UnexpectedNullableFound.html" title="">UnexpectedNullableFound</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="object" href="package$$features$.html" title="Activable features"></a>
+                        <a href="package$$features$.html" title="Activable features">features</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="class" href="$tilde.html" title="Columns tuple-like"></a>
+                        <a href="$tilde.html" title="Columns tuple-like">~</a>
+                      </li>
+              </ul>
+            </div>
+          </div>
+          <div id="content">
+            <body class="package value">
+      <div id="definition">
+        <div class="big-circle package">p</div>
+        
+        <h1>anorm<span class="permalink">
+      <a href="../anorm/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span></h1>
+        
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">anorm</span>
+      </span>
+      </h4>
+
+      
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Anorm API</p><p>Use the SQL method to start an SQL query</p><pre><span class="kw">import</span> anorm._
+
+SQL(<span class="lit">"Select 1"</span>)</pre></div><div class="toggleContainer block">
+          <span class="toggle">
+            Linear Supertypes
+          </span>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></div>
+        </div></div>
+        
+
+      <div id="mbrsel">
+        <div class="toggle"></div>
+        <div id="memberfilter">
+          <i class="material-icons arrow"></i>
+          <span class="input">
+            <input id="mbrsel-input" placeholder="Filter all members" type="text" accesskey="/" />
+          </span>
+          <i class="clear material-icons"></i>
+        </div>
+        <div id="filterby">
+          <div id="order">
+            <span class="filtertype">Ordering</span>
+            <ol>
+              
+              <li class="alpha in"><span>Alphabetic</span></li>
+              <li class="inherit out"><span>By Inheritance</span></li>
+            </ol>
+          </div>
+          <div class="ancestors">
+                  <span class="filtertype">Inherited<br />
+                  </span>
+                  <ol id="linearization">
+                    <li class="in" name="anorm"><span>anorm</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  </ol>
+                </div><div class="ancestors">
+              <span class="filtertype"></span>
+              <ol>
+                <li class="hideall out"><span>Hide All</span></li>
+                <li class="showall in"><span>Show All</span></li>
+              </ol>
+            </div>
+          <div id="visbl">
+              <span class="filtertype">Visibility</span>
+              <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+            </div>
+        </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="anorm.AnormException" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="AnormExceptionextendsExceptionwithNoStackTracewithProductwithSerializable"></a><a id="AnormException:AnormException"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#AnormExceptionextendsExceptionwithNoStackTracewithProductwithSerializable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="Anorm runtime exception" href="AnormException.html"><span class="name">AnormException</span></a><span class="params">(<span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="http://www.scala-lang.org/api/2.12.4/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Anorm runtime exception</p>
+    </li><li name="anorm.BatchSql" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="BatchSqlextendsAnyRef"></a><a id="BatchSql:BatchSql"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#BatchSqlextendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="SQL batch" href="BatchSql.html"><span class="name">BatchSql</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">SQL batch</p>
+    </li><li name="anorm.Column" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="Column[A]extends(Any,anorm.MetaDataItem)=&gt;Either[anorm.SqlRequestError,A]"></a><a id="Column[A]:Column[A]"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#Column[A]extends(Any,anorm.MetaDataItem)=&gt;Either[anorm.SqlRequestError,A]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Column mapping" href="Column.html"><span class="name">Column</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends (<a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a>, <a href="MetaDataItem.html" class="extype" name="anorm.MetaDataItem">MetaDataItem</a>) ⇒ <span class="extype" name="scala.Either">Either</span>[<a href="SqlRequestError.html" class="extype" name="anorm.SqlRequestError">SqlRequestError</a>, <span class="extype" name="anorm.Column.A">A</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Column mapping</p><div class="fullcomment"><div class="comment cmt"><p>Column mapping</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@implicitNotFound</span><span class="args">(<span>
+      
+      <span class="defval" name="&quot;No column extractor found for the type ${A}: `anorm.Column[${A}]` required; See https://github.com/playframework/anorm/blob/master/docs/manual/working/scalaGuide/main/sql/ScalaAnorm.md#column-parsers&quot;">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="anorm.ColumnAliaser" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ColumnAliaserextendsFunction[(Int,anorm.ColumnName),Option[String]]"></a><a id="ColumnAliaser:ColumnAliaser"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#ColumnAliaserextendsFunction[(Int,anorm.ColumnName),Option[String]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Allows to define or overwrite the alias for a column." href="ColumnAliaser.html"><span class="name">ColumnAliaser</span></a><span class="result"> extends <span class="extype" name="scala.Predef.Function">Function</span>[(<a href="http://www.scala-lang.org/api/2.12.4/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a>, <a href="ColumnName.html" class="extype" name="anorm.ColumnName">ColumnName</a>), <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Allows to define or overwrite the alias for a column.</p>
+    </li><li name="anorm.ColumnName" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ColumnNameextendsProductwithSerializable"></a><a id="ColumnName:ColumnName"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#ColumnNameextendsProductwithSerializable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ColumnName.html"><span class="name">ColumnName</span></a><span class="params">(<span name="qualified">qualified: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="alias">alias: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">qualified</dt><dd class="cmt"><p>the qualified column name</p></dd><dt class="param">alias</dt><dd class="cmt"><p>the column alias</p></dd></dl></div>
+    </li><li name="anorm.ColumnNotFound" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ColumnNotFoundextendsSqlRequestErrorwithProductwithSerializable"></a><a id="ColumnNotFound:ColumnNotFound"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#ColumnNotFoundextendsSqlRequestErrorwithProductwithSerializable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="Error raised when the specified column cannot be found in results." href="ColumnNotFound.html"><span class="name">ColumnNotFound</span></a><span class="params">(<span name="column">column: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="available">available: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result"> extends <a href="SqlRequestError.html" class="extype" name="anorm.SqlRequestError">SqlRequestError</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Error raised when the specified <code>column</code> cannot be found in results.</p><div class="fullcomment"><div class="comment cmt"><p>Error raised when the specified <code>column</code> cannot be found in results.
+</p></div><dl class="paramcmts block"><dt class="param">column</dt><dd class="cmt"><p>the name of the not found column</p></dd><dt class="param">available</dt><dd class="cmt"><p>the names of the available columns</p></dd></dl></div>
+    </li><li name="anorm.Cursor" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="CursorextendsAnyRef"></a><a id="Cursor:Cursor"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#CursorextendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Result cursor" href="Cursor.html"><span class="name">Cursor</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Result cursor</p>
+    </li><li name="anorm.DefaultParameterValue" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DefaultParameterValue[A]extendsParameterValuewithParameterValue.Wrapper[A]"></a><a id="DefaultParameterValue[A]:DefaultParameterValue[A]"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#DefaultParameterValue[A]extendsParameterValuewithParameterValue.Wrapper[A]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="DefaultParameterValue.html"><span class="name">DefaultParameterValue</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="ParameterValue.html" class="extype" name="anorm.ParameterValue">ParameterValue</a> with <span class="extype" name="anorm.ParameterValue.Wrapper">Wrapper</span>[<span class="extype" name="anorm.DefaultParameterValue.A">A</span>]</span>
+      </span>
+      
+      
+    </li><li name="anorm.Error" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ErrorextendsSqlResult[Nothing]withProductwithSerializable"></a><a id="Error:Error"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#ErrorextendsSqlResult[Nothing]withProductwithSerializable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="Erroneous result (failure while parsing)." href="Error.html"><span class="name">Error</span></a><span class="params">(<span name="msg">msg: <a href="SqlRequestError.html" class="extype" name="anorm.SqlRequestError">SqlRequestError</a></span>)</span><span class="result"> extends <a href="SqlResult.html" class="extype" name="anorm.SqlResult">SqlResult</a>[<a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Nothing" class="extype" name="scala.collection.immutable.List">Nothing</a>] with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Erroneous result (failure while parsing).</p>
+    </li><li name="anorm.JavaTimeColumn" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="JavaTimeColumnextendsAnyRef"></a><a id="JavaTimeColumn:JavaTimeColumn"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#JavaTimeColumnextendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="JavaTimeColumn.html"><span class="name">JavaTimeColumn</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+      </span>
+      
+      
+    </li><li name="anorm.JavaTimeParameterMetaData" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="JavaTimeParameterMetaDataextendsAnyRef"></a><a id="JavaTimeParameterMetaData:JavaTimeParameterMetaData"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#JavaTimeParameterMetaDataextendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="JavaTimeParameterMetaData.html"><span class="name">JavaTimeParameterMetaData</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+      </span>
+      
+      
+    </li><li name="anorm.JavaTimeToStatement" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="JavaTimeToStatementextendsAnyRef"></a><a id="JavaTimeToStatement:JavaTimeToStatement"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#JavaTimeToStatementextendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="JavaTimeToStatement.html"><span class="name">JavaTimeToStatement</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+      </span>
+      
+      
+    </li><li name="anorm.JodaColumn" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="JodaColumnextendsAnyRef"></a><a id="JodaColumn:JodaColumn"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#JodaColumnextendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="JodaColumn.html"><span class="name">JodaColumn</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+      </span>
+      
+      
+    </li><li name="anorm.JodaToStatement" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="JodaToStatementextendsAnyRef"></a><a id="JodaToStatement:JodaToStatement"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#JodaToStatementextendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="JodaToStatement.html"><span class="name">JodaToStatement</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+      </span>
+      
+      
+    </li><li name="anorm.MetaDataItem" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="MetaDataItemextendsProductwithSerializable"></a><a id="MetaDataItem:MetaDataItem"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#MetaDataItemextendsProductwithSerializable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="MetaDataItem.html"><span class="name">MetaDataItem</span></a><span class="params">(<span name="column">column: <a href="ColumnName.html" class="extype" name="anorm.ColumnName">ColumnName</a></span>, <span name="nullable">nullable: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>, <span name="clazz">clazz: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">column</dt><dd class="cmt"><p>the name of the column</p></dd><dt class="param">nullable</dt><dd class="cmt"><p>true if the column is nullable</p></dd><dt class="param">clazz</dt><dd class="cmt"><p>the class of the JDBC column value</p></dd></dl></div>
+    </li><li name="anorm.NamedParameter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NamedParameterextendsProductwithSerializable"></a><a id="NamedParameter:NamedParameter"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#NamedParameterextendsProductwithSerializable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="Applied named parameter." href="NamedParameter.html"><span class="name">NamedParameter</span></a><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="value">value: <a href="ParameterValue.html" class="extype" name="anorm.ParameterValue">ParameterValue</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Applied named parameter.</p>
+    </li><li name="anorm.NotNullGuard" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="NotNullGuardextendsAnyRef"></a><a id="NotNullGuard:NotNullGuard"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#NotNullGuardextendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Marker trait to indicate that even if a type T accept null as value, it must be refused in some Anorm context." href="NotNullGuard.html"><span class="name">NotNullGuard</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Marker trait to indicate that even if a type T accept null as value,
+it must be refused in some Anorm context.</p>
+    </li><li name="anorm.Object" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ObjectextendsProductwithSerializable"></a><a id="Object:Object"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#ObjectextendsProductwithSerializable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="Untyped value wrapper." href="Object.html"><span class="name">Object</span></a><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Untyped value wrapper.</p><div class="fullcomment"><div class="comment cmt"><p>Untyped value wrapper.</p><pre>SQL(<span class="lit">"UPDATE t SET val = {o}"</span>).on('o -&gt; anorm.<span class="std">Object</span>(<span class="kw">val</span>))</pre></div></div>
+    </li><li name="anorm.PGJson" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="PGJsonextendsAnyRef"></a><a id="PGJson:PGJson"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#PGJsonextendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="PGJson.html"><span class="name">PGJson</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+      </span>
+      
+      
+    </li><li name="anorm.ParameterMetaData" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="ParameterMetaData[T]extendsAnyRef"></a><a id="ParameterMetaData[T]:ParameterMetaData[T]"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#ParameterMetaData[T]extendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Parameter meta data for type T" href="ParameterMetaData.html"><span class="name">ParameterMetaData</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Parameter meta data for type <code>T</code></p><div class="fullcomment"><div class="comment cmt"><p>Parameter meta data for type <code>T</code></p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@implicitNotFound</span><span class="args">(<span>
+      
+      <span class="defval" name="&quot;Meta data not found for parameter of type ${T}: `anorm.ParameterMetaData[${T}]` required; See https://github.com/playframework/anorm/blob/master/docs/manual/working/scalaGuide/main/sql/ScalaAnorm.md#parameters&quot;">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="anorm.ParameterValue" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="ParameterValueextendsShow"></a><a id="ParameterValue:ParameterValue"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#ParameterValueextendsShow" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Prepared parameter value." href="ParameterValue.html"><span class="name">ParameterValue</span></a><span class="result"> extends <a href="Show.html" class="extype" name="anorm.Show">Show</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Prepared parameter value.</p><div class="fullcomment"><div class="comment cmt"><p>Prepared parameter value.</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@implicitNotFound</span><span class="args">(<span>
+      
+      <span class="defval" name="&quot;Wrapper not found for the parameter value&quot;">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="anorm.ResultSetParser" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ResultSetParser[+A]extendsOption[anorm.Cursor]=&gt;anorm.SqlResult[A]"></a><a id="ResultSetParser[+A]:ResultSetParser[A]"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#ResultSetParser[+A]extendsOption[anorm.Cursor]=&gt;anorm.SqlResult[A]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Parses result from the cursor." href="ResultSetParser.html"><span class="name">ResultSetParser</span></a><span class="tparams">[<span name="A">+A</span>]</span><span class="result"> extends (<a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="Cursor.html" class="extype" name="anorm.Cursor">Cursor</a>]) ⇒ <a href="SqlResult.html" class="extype" name="anorm.SqlResult">SqlResult</a>[<span class="extype" name="anorm.ResultSetParser.A">A</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Parses result from the cursor.</p>
+    </li><li name="anorm.Row" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="RowextendsAnyRef"></a><a id="Row:Row"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#RowextendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="Row.html"><span class="name">Row</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+      </span>
+      
+      
+    </li><li name="anorm.RowParser" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="RowParser[+A]extendsanorm.Row=&gt;anorm.SqlResult[A]"></a><a id="RowParser[+A]:RowParser[A]"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#RowParser[+A]extendsanorm.Row=&gt;anorm.SqlResult[A]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="RowParser.html"><span class="name">RowParser</span></a><span class="tparams">[<span name="A">+A</span>]</span><span class="result"> extends (<a href="Row.html" class="extype" name="anorm.Row">Row</a>) ⇒ <a href="SqlResult.html" class="extype" name="anorm.SqlResult">SqlResult</a>[<span class="extype" name="anorm.RowParser.A">A</span>]</span>
+      </span>
+      
+      
+    </li><li name="anorm.ScalarRowParser" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ScalarRowParser[+A]extendsRowParser[A]"></a><a id="ScalarRowParser[+A]:ScalarRowParser[A]"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#ScalarRowParser[+A]extendsRowParser[A]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Parser for scalar row (row of one single column)." href="ScalarRowParser.html"><span class="name">ScalarRowParser</span></a><span class="tparams">[<span name="A">+A</span>]</span><span class="result"> extends <a href="RowParser.html" class="extype" name="anorm.RowParser">RowParser</a>[<span class="extype" name="anorm.ScalarRowParser.A">A</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Parser for scalar row (row of one single column).</p>
+    </li><li name="anorm.SeqParameter" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="SeqParameter[A]extendsAnyRef"></a><a id="SeqParameter[A]:SeqParameter[A]"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#SeqParameter[A]extendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Wrapper to use a value sequence as SQL parameter, with custom formatting." href="SeqParameter.html"><span class="name">SeqParameter</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Wrapper to use a value sequence as SQL parameter, with custom formatting.</p><div class="fullcomment"><div class="comment cmt"><p>Wrapper to use a value sequence as SQL parameter, with custom formatting.</p><pre>SQL(<span class="lit">"SELECT * FROM t WHERE %s"</span>).
+  on(SeqParameter(<span class="std">Seq</span>(<span class="lit">"a"</span>, <span class="lit">"b"</span>), <span class="lit">" OR "</span>, <span class="std">Some</span>(<span class="lit">"cat = "</span>)))
+<span class="cmt">// Will execute as:</span>
+<span class="cmt">// SELECT * FROM t WHERE cat = 'a' OR cat = 'b'</span></pre></div></div>
+    </li><li name="anorm.Show" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ShowextendsAnyRef"></a><a id="Show:Show"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#ShowextendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Typeclass for string representation" href="Show.html"><span class="name">Show</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Typeclass for string representation</p>
+    </li><li name="anorm.SimpleSql" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SimpleSql[T]extendsSqlwithProductwithSerializable"></a><a id="SimpleSql[T]:SimpleSql[T]"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#SimpleSql[T]extendsSqlwithProductwithSerializable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="Simple/plain SQL." href="SimpleSql.html"><span class="name">SimpleSql</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="sql">sql: <a href="SqlQuery.html" class="extype" name="anorm.SqlQuery">SqlQuery</a></span>, <span name="params">params: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <a href="ParameterValue.html" class="extype" name="anorm.ParameterValue">ParameterValue</a>]</span>, <span name="defaultParser">defaultParser: <a href="RowParser.html" class="extype" name="anorm.RowParser">RowParser</a>[<span class="extype" name="anorm.SimpleSql.T">T</span>]</span>, <span name="resultSetOnFirstRow">resultSetOnFirstRow: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a> = <span class="symbol">false</span></span>)</span><span class="result"> extends <span class="extype" name="anorm.Sql">Sql</span> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Simple/plain SQL.</p>
+    </li><li name="anorm.SqlMappingError" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SqlMappingErrorextendsSqlRequestErrorwithProductwithSerializable"></a><a id="SqlMappingError:SqlMappingError"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#SqlMappingErrorextendsSqlRequestErrorwithProductwithSerializable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="SqlMappingError.html"><span class="name">SqlMappingError</span></a><span class="params">(<span name="reason">reason: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="SqlRequestError.html" class="extype" name="anorm.SqlRequestError">SqlRequestError</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      
+    </li><li name="anorm.SqlQuery" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="SqlQueryextendsAnyRef"></a><a id="SqlQuery:SqlQuery"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#SqlQueryextendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Initial SQL query, without parameter values." href="SqlQuery.html"><span class="name">SqlQuery</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Initial SQL query, without parameter values.</p>
+    </li><li name="anorm.SqlQueryResult" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="SqlQueryResultextendsWithResultwithProductwithSerializable"></a><a id="SqlQueryResult:SqlQueryResult"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#SqlQueryResultextendsWithResultwithProductwithSerializable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="A result from execution of an SQL query, row data and context (e.g." href="SqlQueryResult.html"><span class="name">SqlQueryResult</span></a><span class="params">(<span name="resultSet">resultSet: <span class="extype" name="resource.ManagedResource">ManagedResource</span>[<span class="extype" name="java.sql.ResultSet">ResultSet</span>]</span>, <span name="resultSetOnFirstRow">resultSetOnFirstRow: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a> = <span class="symbol">false</span></span>)</span><span class="result"> extends <span class="extype" name="anorm.WithResult">WithResult</span> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">A result from execution of an SQL query, row data and context
+(e.g.</p><div class="fullcomment"><div class="comment cmt"><p>A result from execution of an SQL query, row data and context
+(e.g. statement warnings).
+</p></div><dl class="paramcmts block"><dt class="param">resultSet</dt><dd class="cmt"><p>Result set from executed query</p></dd></dl></div>
+    </li><li name="anorm.SqlRequestError" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="SqlRequestErrorextendsAnyRef"></a><a id="SqlRequestError:SqlRequestError"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#SqlRequestErrorextendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Error from processing SQL" href="SqlRequestError.html"><span class="name">SqlRequestError</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Error from processing SQL</p>
+    </li><li name="anorm.SqlResult" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="SqlResult[+A]extendsAnyRef"></a><a id="SqlResult[+A]:SqlResult[A]"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#SqlResult[+A]extendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Parsed SQL result." href="SqlResult.html"><span class="name">SqlResult</span></a><span class="tparams">[<span name="A">+A</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Parsed SQL result.</p>
+    </li><li name="anorm.SqlStringInterpolation" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="SqlStringInterpolationextendsAnyVal"></a><a id="SqlStringInterpolation:SqlStringInterpolation"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#SqlStringInterpolationextendsAnyVal" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Creates an SQL query using String Interpolation feature." href="package$$SqlStringInterpolation.html"><span class="name">SqlStringInterpolation</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyVal" class="extype" name="scala.collection.immutable.List">AnyVal</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Creates an SQL query using String Interpolation feature.</p><div class="fullcomment"><div class="comment cmt"><p>Creates an SQL query using String Interpolation feature.
+It is a 1-step alternative for SQL(&quot;...&quot;).on(...) functions.</p><pre>SQL<span class="lit">""</span><span class="lit">"
+  UPDATE computer SET name = \${computer.name},
+  introduced = \${computer.introduced},
+  discontinued = \${computer.discontinued},
+  company_id = \${computer.companyId}
+  WHERE id = \$id
+"</span><span class="lit">""</span>.executeUpdate()</pre></div></div>
+    </li><li name="anorm.StringShow" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="StringShowextendsShow"></a><a id="StringShow:StringShow"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#StringShowextendsShow" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="StringShow.html"><span class="name">StringShow</span></a><span class="result"> extends <a href="Show.html" class="extype" name="anorm.Show">Show</a></span>
+      </span>
+      
+      
+    </li><li name="anorm.StringWrapper2" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="StringWrapper2=AnyRef{defstringValue:String}"></a><a id="StringWrapper2:StringWrapper2"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#StringWrapper2=AnyRef{defstringValue:String}" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">StringWrapper2</span><span class="result alias"> = <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a> { def stringValue: String }</span>
+      </span>
+      
+      <p class="shortcomment cmt">Structural type for oracle.sql.ROWID wrapper.</p>
+    </li><li name="anorm.Success" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Success[A]extendsSqlResult[A]withProductwithSerializable"></a><a id="Success[A]:Success[A]"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#Success[A]extendsSqlResult[A]withProductwithSerializable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="Successfully parsed result." href="Success.html"><span class="name">Success</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="a">a: <span class="extype" name="anorm.Success.A">A</span></span>)</span><span class="result"> extends <a href="SqlResult.html" class="extype" name="anorm.SqlResult">SqlResult</a>[<span class="extype" name="anorm.Success.A">A</span>] with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Successfully parsed result.</p>
+    </li><li name="anorm.TimestampWrapper1" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TimestampWrapper1=AnyRef{defgetTimestamp:java.sql.Timestamp}"></a><a id="TimestampWrapper1:TimestampWrapper1"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#TimestampWrapper1=AnyRef{defgetTimestamp:java.sql.Timestamp}" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">TimestampWrapper1</span><span class="result alias"> = <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a> { def getTimestamp: java.sql.Timestamp }</span>
+      </span>
+      
+      <p class="shortcomment cmt">Structural type for timestamp wrapper.</p>
+    </li><li name="anorm.TimestampWrapper2" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TimestampWrapper2=AnyRef{deftimestampValue:java.sql.Timestamp}"></a><a id="TimestampWrapper2:TimestampWrapper2"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#TimestampWrapper2=AnyRef{deftimestampValue:java.sql.Timestamp}" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">TimestampWrapper2</span><span class="result alias"> = <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a> { def timestampValue: java.sql.Timestamp }</span>
+      </span>
+      
+      <p class="shortcomment cmt">Structural type for oracle.sql.TIMESTAMP wrapper.</p>
+    </li><li name="anorm.ToParameterList" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="ToParameterList[A]extendsA=&gt;List[anorm.NamedParameter]"></a><a id="ToParameterList[A]:ToParameterList[A]"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#ToParameterList[A]extendsA=&gt;List[anorm.NamedParameter]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Convert to a list of NamedParameter" href="ToParameterList.html"><span class="name">ToParameterList</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends (<span class="extype" name="anorm.ToParameterList.A">A</span>) ⇒ <span class="extype" name="scala.List">List</span>[<a href="NamedParameter.html" class="extype" name="anorm.NamedParameter">NamedParameter</a>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Convert to a list of <a href="NamedParameter.html" class="extype" name="anorm.NamedParameter">NamedParameter</a></p><div class="fullcomment"><div class="comment cmt"><p>Convert to a list of <a href="NamedParameter.html" class="extype" name="anorm.NamedParameter">NamedParameter</a></p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@implicitNotFound</span><span class="args">(<span>
+      
+      <span class="defval" name="&quot;No converter to SQL parameters for the type ${A}: `anorm.ToParameterList[${A}]` required&quot;">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="anorm.ToParameterValue" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="ToParameterValue[A]extendsA=&gt;anorm.ParameterValue"></a><a id="ToParameterValue[A]:ToParameterValue[A]"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#ToParameterValue[A]extendsA=&gt;anorm.ParameterValue" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ToParameterValue.html"><span class="name">ToParameterValue</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends (<span class="extype" name="anorm.ToParameterValue.A">A</span>) ⇒ <a href="ParameterValue.html" class="extype" name="anorm.ParameterValue">ParameterValue</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@implicitNotFound</span><span class="args">(<span>
+      
+      <span class="defval" name="&quot;No converter found for type ${A} to `ParameterValue`; Please define appropriate `ToParameter` and `ParameterMetaData`.&quot;">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="anorm.ToSql" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="ToSql[A]extendsAnyRef"></a><a id="ToSql[A]:ToSql[A]"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#ToSql[A]extendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Set value as prepared SQL statement fragment." href="ToSql.html"><span class="name">ToSql</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Set value as prepared SQL statement fragment.</p><div class="fullcomment"><div class="comment cmt"><p>Set value as prepared SQL statement fragment.</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@implicitNotFound</span><span class="args">(<span>
+      
+      <span class="defval" name="&quot;No SQL renderer found for parameter of type ${A}: `anorm.ToSql[${A}]` required&quot;">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="anorm.ToStatement" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="ToStatement[A]extendsToStatementBase[A]"></a><a id="ToStatement[A]:ToStatement[A]"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#ToStatement[A]extendsToStatementBase[A]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Sets value as statement parameter." href="ToStatement.html"><span class="name">ToStatement</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <span class="extype" name="anorm.ToStatementBase">ToStatementBase</span>[<span class="extype" name="anorm.ToStatement.A">A</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Sets value as statement parameter.</p><div class="fullcomment"><div class="comment cmt"><p>Sets value as statement parameter.</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@implicitNotFound</span><span class="args">(<span>
+      
+      <span class="defval" name="&quot;Cannot set value of type ${A} as parameter on statement: `anorm.ToStatement[${A}] required`&quot;">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="anorm.ToStatementPriority0" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ToStatementPriority0extendsAnyRef"></a><a id="ToStatementPriority0:ToStatementPriority0"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#ToStatementPriority0extendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ToStatementPriority0.html"><span class="name">ToStatementPriority0</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+      </span>
+      
+      
+    </li><li name="anorm.ToStatementPriority1" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ToStatementPriority1extendsToStatementPriority0"></a><a id="ToStatementPriority1:ToStatementPriority1"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#ToStatementPriority1extendsToStatementPriority0" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ToStatementPriority1.html"><span class="name">ToStatementPriority1</span></a><span class="result"> extends <a href="ToStatementPriority0.html" class="extype" name="anorm.ToStatementPriority0">ToStatementPriority0</a></span>
+      </span>
+      
+      
+    </li><li name="anorm.TupleFlattener" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TupleFlattener[F]extendsProductwithSerializable"></a><a id="TupleFlattener[F]:TupleFlattener[F]"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#TupleFlattener[F]extendsProductwithSerializable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="TupleFlattener.html"><span class="name">TupleFlattener</span></a><span class="tparams">[<span name="F">F</span>]</span><span class="params">(<span name="f">f: <span class="extype" name="anorm.TupleFlattener.F">F</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      
+    </li><li name="anorm.TupleFlattenerPriority1" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="TupleFlattenerPriority1extendsAnyRef"></a><a id="TupleFlattenerPriority1:TupleFlattenerPriority1"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#TupleFlattenerPriority1extendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Conversion from 2-column tuple-like to scala.Tuple2, with resolution priority 1." href="TupleFlattenerPriority1.html"><span class="name">TupleFlattenerPriority1</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Conversion from 2-column tuple-like to <a href="http://www.scala-lang.org/api/2.12.4/scala/Tuple2.html" class="extype" name="scala.Tuple2">scala.Tuple2</a>,
+with resolution priority 1.</p>
+    </li><li name="anorm.TupleFlattenerPriority10" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="TupleFlattenerPriority10extendsTupleFlattenerPriority9"></a><a id="TupleFlattenerPriority10:TupleFlattenerPriority10"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#TupleFlattenerPriority10extendsTupleFlattenerPriority9" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Conversion from 11-column tuple-like to scala.Tuple11, with resolution priority 10." href="TupleFlattenerPriority10.html"><span class="name">TupleFlattenerPriority10</span></a><span class="result"> extends <a href="TupleFlattenerPriority9.html" class="extype" name="anorm.TupleFlattenerPriority9">TupleFlattenerPriority9</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Conversion from 11-column tuple-like to <a href="http://www.scala-lang.org/api/2.12.4/scala/Tuple11.html" class="extype" name="scala.Tuple11">scala.Tuple11</a>,
+with resolution priority 10.</p>
+    </li><li name="anorm.TupleFlattenerPriority11" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="TupleFlattenerPriority11extendsTupleFlattenerPriority10"></a><a id="TupleFlattenerPriority11:TupleFlattenerPriority11"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#TupleFlattenerPriority11extendsTupleFlattenerPriority10" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Conversion from 12-column tuple-like to scala.Tuple12, with resolution priority 11." href="TupleFlattenerPriority11.html"><span class="name">TupleFlattenerPriority11</span></a><span class="result"> extends <a href="TupleFlattenerPriority10.html" class="extype" name="anorm.TupleFlattenerPriority10">TupleFlattenerPriority10</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Conversion from 12-column tuple-like to <a href="http://www.scala-lang.org/api/2.12.4/scala/Tuple12.html" class="extype" name="scala.Tuple12">scala.Tuple12</a>,
+with resolution priority 11.</p>
+    </li><li name="anorm.TupleFlattenerPriority12" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="TupleFlattenerPriority12extendsTupleFlattenerPriority11"></a><a id="TupleFlattenerPriority12:TupleFlattenerPriority12"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#TupleFlattenerPriority12extendsTupleFlattenerPriority11" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Conversion from 13-column tuple-like to scala.Tuple13, with resolution priority 12." href="TupleFlattenerPriority12.html"><span class="name">TupleFlattenerPriority12</span></a><span class="result"> extends <a href="TupleFlattenerPriority11.html" class="extype" name="anorm.TupleFlattenerPriority11">TupleFlattenerPriority11</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Conversion from 13-column tuple-like to <a href="http://www.scala-lang.org/api/2.12.4/scala/Tuple13.html" class="extype" name="scala.Tuple13">scala.Tuple13</a>,
+with resolution priority 12.</p>
+    </li><li name="anorm.TupleFlattenerPriority13" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="TupleFlattenerPriority13extendsTupleFlattenerPriority12"></a><a id="TupleFlattenerPriority13:TupleFlattenerPriority13"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#TupleFlattenerPriority13extendsTupleFlattenerPriority12" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Conversion from 14-column tuple-like to scala.Tuple14, with resolution priority 13." href="TupleFlattenerPriority13.html"><span class="name">TupleFlattenerPriority13</span></a><span class="result"> extends <a href="TupleFlattenerPriority12.html" class="extype" name="anorm.TupleFlattenerPriority12">TupleFlattenerPriority12</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Conversion from 14-column tuple-like to <a href="http://www.scala-lang.org/api/2.12.4/scala/Tuple14.html" class="extype" name="scala.Tuple14">scala.Tuple14</a>,
+with resolution priority 13.</p>
+    </li><li name="anorm.TupleFlattenerPriority14" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="TupleFlattenerPriority14extendsTupleFlattenerPriority13"></a><a id="TupleFlattenerPriority14:TupleFlattenerPriority14"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#TupleFlattenerPriority14extendsTupleFlattenerPriority13" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Conversion from 15-column tuple-like to scala.Tuple15, with resolution priority 14." href="TupleFlattenerPriority14.html"><span class="name">TupleFlattenerPriority14</span></a><span class="result"> extends <a href="TupleFlattenerPriority13.html" class="extype" name="anorm.TupleFlattenerPriority13">TupleFlattenerPriority13</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Conversion from 15-column tuple-like to <a href="http://www.scala-lang.org/api/2.12.4/scala/Tuple15.html" class="extype" name="scala.Tuple15">scala.Tuple15</a>,
+with resolution priority 14.</p>
+    </li><li name="anorm.TupleFlattenerPriority15" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="TupleFlattenerPriority15extendsTupleFlattenerPriority14"></a><a id="TupleFlattenerPriority15:TupleFlattenerPriority15"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#TupleFlattenerPriority15extendsTupleFlattenerPriority14" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Conversion from 16-column tuple-like to scala.Tuple16, with resolution priority 15." href="TupleFlattenerPriority15.html"><span class="name">TupleFlattenerPriority15</span></a><span class="result"> extends <a href="TupleFlattenerPriority14.html" class="extype" name="anorm.TupleFlattenerPriority14">TupleFlattenerPriority14</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Conversion from 16-column tuple-like to <a href="http://www.scala-lang.org/api/2.12.4/scala/Tuple16.html" class="extype" name="scala.Tuple16">scala.Tuple16</a>,
+with resolution priority 15.</p>
+    </li><li name="anorm.TupleFlattenerPriority16" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="TupleFlattenerPriority16extendsTupleFlattenerPriority15"></a><a id="TupleFlattenerPriority16:TupleFlattenerPriority16"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#TupleFlattenerPriority16extendsTupleFlattenerPriority15" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Conversion from 17-column tuple-like to scala.Tuple17, with resolution priority 16." href="TupleFlattenerPriority16.html"><span class="name">TupleFlattenerPriority16</span></a><span class="result"> extends <a href="TupleFlattenerPriority15.html" class="extype" name="anorm.TupleFlattenerPriority15">TupleFlattenerPriority15</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Conversion from 17-column tuple-like to <a href="http://www.scala-lang.org/api/2.12.4/scala/Tuple17.html" class="extype" name="scala.Tuple17">scala.Tuple17</a>,
+with resolution priority 16.</p>
+    </li><li name="anorm.TupleFlattenerPriority17" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="TupleFlattenerPriority17extendsTupleFlattenerPriority16"></a><a id="TupleFlattenerPriority17:TupleFlattenerPriority17"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#TupleFlattenerPriority17extendsTupleFlattenerPriority16" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Conversion from 18-column tuple-like to scala.Tuple18, with resolution priority 17." href="TupleFlattenerPriority17.html"><span class="name">TupleFlattenerPriority17</span></a><span class="result"> extends <a href="TupleFlattenerPriority16.html" class="extype" name="anorm.TupleFlattenerPriority16">TupleFlattenerPriority16</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Conversion from 18-column tuple-like to <a href="http://www.scala-lang.org/api/2.12.4/scala/Tuple18.html" class="extype" name="scala.Tuple18">scala.Tuple18</a>,
+with resolution priority 17.</p>
+    </li><li name="anorm.TupleFlattenerPriority18" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="TupleFlattenerPriority18extendsTupleFlattenerPriority17"></a><a id="TupleFlattenerPriority18:TupleFlattenerPriority18"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#TupleFlattenerPriority18extendsTupleFlattenerPriority17" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Conversion from 19-column tuple-like to scala.Tuple19, with resolution priority 18." href="TupleFlattenerPriority18.html"><span class="name">TupleFlattenerPriority18</span></a><span class="result"> extends <a href="TupleFlattenerPriority17.html" class="extype" name="anorm.TupleFlattenerPriority17">TupleFlattenerPriority17</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Conversion from 19-column tuple-like to <a href="http://www.scala-lang.org/api/2.12.4/scala/Tuple19.html" class="extype" name="scala.Tuple19">scala.Tuple19</a>,
+with resolution priority 18.</p>
+    </li><li name="anorm.TupleFlattenerPriority19" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="TupleFlattenerPriority19extendsTupleFlattenerPriority18"></a><a id="TupleFlattenerPriority19:TupleFlattenerPriority19"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#TupleFlattenerPriority19extendsTupleFlattenerPriority18" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Conversion from 20-column tuple-like to scala.Tuple20, with resolution priority 19." href="TupleFlattenerPriority19.html"><span class="name">TupleFlattenerPriority19</span></a><span class="result"> extends <a href="TupleFlattenerPriority18.html" class="extype" name="anorm.TupleFlattenerPriority18">TupleFlattenerPriority18</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Conversion from 20-column tuple-like to <a href="http://www.scala-lang.org/api/2.12.4/scala/Tuple20.html" class="extype" name="scala.Tuple20">scala.Tuple20</a>,
+with resolution priority 19.</p>
+    </li><li name="anorm.TupleFlattenerPriority2" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="TupleFlattenerPriority2extendsTupleFlattenerPriority1"></a><a id="TupleFlattenerPriority2:TupleFlattenerPriority2"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#TupleFlattenerPriority2extendsTupleFlattenerPriority1" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Conversion from 3-column tuple-like to scala.Tuple3, with resolution priority 2." href="TupleFlattenerPriority2.html"><span class="name">TupleFlattenerPriority2</span></a><span class="result"> extends <a href="TupleFlattenerPriority1.html" class="extype" name="anorm.TupleFlattenerPriority1">TupleFlattenerPriority1</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Conversion from 3-column tuple-like to <a href="http://www.scala-lang.org/api/2.12.4/scala/Tuple3.html" class="extype" name="scala.Tuple3">scala.Tuple3</a>,
+with resolution priority 2.</p>
+    </li><li name="anorm.TupleFlattenerPriority20" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="TupleFlattenerPriority20extendsTupleFlattenerPriority19"></a><a id="TupleFlattenerPriority20:TupleFlattenerPriority20"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#TupleFlattenerPriority20extendsTupleFlattenerPriority19" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Conversion from 21-column tuple-like to scala.Tuple21, with resolution priority 20." href="TupleFlattenerPriority20.html"><span class="name">TupleFlattenerPriority20</span></a><span class="result"> extends <a href="TupleFlattenerPriority19.html" class="extype" name="anorm.TupleFlattenerPriority19">TupleFlattenerPriority19</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Conversion from 21-column tuple-like to <a href="http://www.scala-lang.org/api/2.12.4/scala/Tuple21.html" class="extype" name="scala.Tuple21">scala.Tuple21</a>,
+with resolution priority 20.</p>
+    </li><li name="anorm.TupleFlattenerPriority21" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="TupleFlattenerPriority21extendsTupleFlattenerPriority20"></a><a id="TupleFlattenerPriority21:TupleFlattenerPriority21"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#TupleFlattenerPriority21extendsTupleFlattenerPriority20" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Conversion from 22-column tuple-like to scala.Tuple22, with resolution priority 21." href="TupleFlattenerPriority21.html"><span class="name">TupleFlattenerPriority21</span></a><span class="result"> extends <a href="TupleFlattenerPriority20.html" class="extype" name="anorm.TupleFlattenerPriority20">TupleFlattenerPriority20</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Conversion from 22-column tuple-like to <a href="http://www.scala-lang.org/api/2.12.4/scala/Tuple22.html" class="extype" name="scala.Tuple22">scala.Tuple22</a>,
+with resolution priority 21.</p>
+    </li><li name="anorm.TupleFlattenerPriority3" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="TupleFlattenerPriority3extendsTupleFlattenerPriority2"></a><a id="TupleFlattenerPriority3:TupleFlattenerPriority3"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#TupleFlattenerPriority3extendsTupleFlattenerPriority2" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Conversion from 4-column tuple-like to scala.Tuple4, with resolution priority 3." href="TupleFlattenerPriority3.html"><span class="name">TupleFlattenerPriority3</span></a><span class="result"> extends <a href="TupleFlattenerPriority2.html" class="extype" name="anorm.TupleFlattenerPriority2">TupleFlattenerPriority2</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Conversion from 4-column tuple-like to <a href="http://www.scala-lang.org/api/2.12.4/scala/Tuple4.html" class="extype" name="scala.Tuple4">scala.Tuple4</a>,
+with resolution priority 3.</p>
+    </li><li name="anorm.TupleFlattenerPriority4" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="TupleFlattenerPriority4extendsTupleFlattenerPriority3"></a><a id="TupleFlattenerPriority4:TupleFlattenerPriority4"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#TupleFlattenerPriority4extendsTupleFlattenerPriority3" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Conversion from 5-column tuple-like to scala.Tuple5, with resolution priority 4." href="TupleFlattenerPriority4.html"><span class="name">TupleFlattenerPriority4</span></a><span class="result"> extends <a href="TupleFlattenerPriority3.html" class="extype" name="anorm.TupleFlattenerPriority3">TupleFlattenerPriority3</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Conversion from 5-column tuple-like to <a href="http://www.scala-lang.org/api/2.12.4/scala/Tuple5.html" class="extype" name="scala.Tuple5">scala.Tuple5</a>,
+with resolution priority 4.</p>
+    </li><li name="anorm.TupleFlattenerPriority5" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="TupleFlattenerPriority5extendsTupleFlattenerPriority4"></a><a id="TupleFlattenerPriority5:TupleFlattenerPriority5"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#TupleFlattenerPriority5extendsTupleFlattenerPriority4" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Conversion from 6-column tuple-like to scala.Tuple6, with resolution priority 5." href="TupleFlattenerPriority5.html"><span class="name">TupleFlattenerPriority5</span></a><span class="result"> extends <a href="TupleFlattenerPriority4.html" class="extype" name="anorm.TupleFlattenerPriority4">TupleFlattenerPriority4</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Conversion from 6-column tuple-like to <a href="http://www.scala-lang.org/api/2.12.4/scala/Tuple6.html" class="extype" name="scala.Tuple6">scala.Tuple6</a>,
+with resolution priority 5.</p>
+    </li><li name="anorm.TupleFlattenerPriority6" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="TupleFlattenerPriority6extendsTupleFlattenerPriority5"></a><a id="TupleFlattenerPriority6:TupleFlattenerPriority6"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#TupleFlattenerPriority6extendsTupleFlattenerPriority5" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Conversion from 7-column tuple-like to scala.Tuple7, with resolution priority 6." href="TupleFlattenerPriority6.html"><span class="name">TupleFlattenerPriority6</span></a><span class="result"> extends <a href="TupleFlattenerPriority5.html" class="extype" name="anorm.TupleFlattenerPriority5">TupleFlattenerPriority5</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Conversion from 7-column tuple-like to <a href="http://www.scala-lang.org/api/2.12.4/scala/Tuple7.html" class="extype" name="scala.Tuple7">scala.Tuple7</a>,
+with resolution priority 6.</p>
+    </li><li name="anorm.TupleFlattenerPriority7" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="TupleFlattenerPriority7extendsTupleFlattenerPriority6"></a><a id="TupleFlattenerPriority7:TupleFlattenerPriority7"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#TupleFlattenerPriority7extendsTupleFlattenerPriority6" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Conversion from 8-column tuple-like to scala.Tuple8, with resolution priority 7." href="TupleFlattenerPriority7.html"><span class="name">TupleFlattenerPriority7</span></a><span class="result"> extends <a href="TupleFlattenerPriority6.html" class="extype" name="anorm.TupleFlattenerPriority6">TupleFlattenerPriority6</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Conversion from 8-column tuple-like to <a href="http://www.scala-lang.org/api/2.12.4/scala/Tuple8.html" class="extype" name="scala.Tuple8">scala.Tuple8</a>,
+with resolution priority 7.</p>
+    </li><li name="anorm.TupleFlattenerPriority8" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="TupleFlattenerPriority8extendsTupleFlattenerPriority7"></a><a id="TupleFlattenerPriority8:TupleFlattenerPriority8"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#TupleFlattenerPriority8extendsTupleFlattenerPriority7" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Conversion from 9-column tuple-like to scala.Tuple9, with resolution priority 8." href="TupleFlattenerPriority8.html"><span class="name">TupleFlattenerPriority8</span></a><span class="result"> extends <a href="TupleFlattenerPriority7.html" class="extype" name="anorm.TupleFlattenerPriority7">TupleFlattenerPriority7</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Conversion from 9-column tuple-like to <a href="http://www.scala-lang.org/api/2.12.4/scala/Tuple9.html" class="extype" name="scala.Tuple9">scala.Tuple9</a>,
+with resolution priority 8.</p>
+    </li><li name="anorm.TupleFlattenerPriority9" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="TupleFlattenerPriority9extendsTupleFlattenerPriority8"></a><a id="TupleFlattenerPriority9:TupleFlattenerPriority9"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#TupleFlattenerPriority9extendsTupleFlattenerPriority8" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Conversion from 10-column tuple-like to scala.Tuple10, with resolution priority 9." href="TupleFlattenerPriority9.html"><span class="name">TupleFlattenerPriority9</span></a><span class="result"> extends <a href="TupleFlattenerPriority8.html" class="extype" name="anorm.TupleFlattenerPriority8">TupleFlattenerPriority8</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Conversion from 10-column tuple-like to <a href="http://www.scala-lang.org/api/2.12.4/scala/Tuple10.html" class="extype" name="scala.Tuple10">scala.Tuple10</a>,
+with resolution priority 9.</p>
+    </li><li name="anorm.TypeDoesNotMatch" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TypeDoesNotMatchextendsSqlRequestErrorwithProductwithSerializable"></a><a id="TypeDoesNotMatch:TypeDoesNotMatch"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#TypeDoesNotMatchextendsSqlRequestErrorwithProductwithSerializable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="TypeDoesNotMatch.html"><span class="name">TypeDoesNotMatch</span></a><span class="params">(<span name="reason">reason: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="SqlRequestError.html" class="extype" name="anorm.SqlRequestError">SqlRequestError</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      
+    </li><li name="anorm.UnexpectedNullableFound" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="UnexpectedNullableFoundextendsSqlRequestErrorwithProductwithSerializable"></a><a id="UnexpectedNullableFound:UnexpectedNullableFound"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#UnexpectedNullableFoundextendsSqlRequestErrorwithProductwithSerializable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="UnexpectedNullableFound.html"><span class="name">UnexpectedNullableFound</span></a><span class="params">(<span name="reason">reason: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="SqlRequestError.html" class="extype" name="anorm.SqlRequestError">SqlRequestError</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      
+    </li><li name="anorm.~" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="~[+A,+B]extendsProductwithSerializable"></a><a id="~[+A,+B]:~[A,B]"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#~[+A,+B]extendsProductwithSerializable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="Columns tuple-like" href="$tilde.html"><span title="gt4s: $tilde" class="name">~</span></a><span class="tparams">[<span name="A">+A</span>, <span name="B">+B</span>]</span><span class="params">(<span name="_1">_1: <span class="extype" name="anorm.~.A">A</span></span>, <span name="_2">_2: <span class="extype" name="anorm.~.B">B</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Columns tuple-like</p><div class="fullcomment"><div class="comment cmt"><p>Columns tuple-like</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@SuppressWarnings</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="anorm.DeprecatedSqlParser" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="DeprecatedSqlParserextendsAnyRef"></a><a id="DeprecatedSqlParser:DeprecatedSqlParser"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#DeprecatedSqlParserextendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="DeprecatedSqlParser.html"><span class="name deprecated" title="Deprecated: (Since version 2.5.4) Do not use these combinators">DeprecatedSqlParser</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2.5.4)</i> Do not use these combinators</p></dd></dl></div>
+    </li></ol>
+            </div>
+
+        
+
+        <div class="values members">
+              <h3>Value Members</h3>
+              <ol>
+                <li name="anorm#SQL" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="SQL(stmt:String):anorm.SqlQuery"></a><a id="SQL(String):SqlQuery"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#SQL(stmt:String):anorm.SqlQuery" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">SQL</span><span class="params">(<span name="stmt">stmt: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="SqlQuery.html" class="extype" name="anorm.SqlQuery">SqlQuery</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Creates an SQL query with given statement.</p><div class="fullcomment"><div class="comment cmt"><p>Creates an SQL query with given statement.</p></div><dl class="paramcmts block"><dt class="param">stmt</dt><dd class="cmt"><p>SQL statement</p><pre><span class="kw">val</span> query = SQL(<span class="lit">"SELECT * FROM Country"</span>)</pre></dd></dl><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@SuppressWarnings</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="anorm#sqlToSimple" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="sqlToSimple(sql:anorm.SqlQuery):anorm.SimpleSql[anorm.Row]"></a><a id="sqlToSimple(SqlQuery):SimpleSql[Row]"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#sqlToSimple(sql:anorm.SqlQuery):anorm.SimpleSql[anorm.Row]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">sqlToSimple</span><span class="params">(<span name="sql">sql: <a href="SqlQuery.html" class="extype" name="anorm.SqlQuery">SqlQuery</a></span>)</span><span class="result">: <a href="SimpleSql.html" class="extype" name="anorm.SimpleSql">SimpleSql</a>[<a href="Row.html" class="extype" name="anorm.Row">Row</a>]</span>
+      </span>
+      
+      
+    </li><li name="anorm.AkkaStream" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="AkkaStream"></a><a id="AkkaStream:AkkaStream"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#AkkaStream" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="Anorm companion for the http://doc.akka.io/docs/akka/2.4.4/scala/stream/." href="AkkaStream$.html"><span class="name">AkkaStream</span></a>
+      </span>
+      
+      <p class="shortcomment cmt">Anorm companion for the <a href="http://doc.akka.io/docs/akka/2.4.4/scala/stream/" target="_blank">http://doc.akka.io/docs/akka/2.4.4/scala/stream/</a>.</p>
+    </li><li name="anorm.BatchSql" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="BatchSql"></a><a id="BatchSql:BatchSql"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#BatchSql" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="SQL batch companion" href="BatchSql$.html"><span class="name">BatchSql</span></a>
+      </span>
+      
+      <p class="shortcomment cmt">SQL batch companion</p>
+    </li><li name="anorm.Column" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Column"></a><a id="Column:Column"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#Column" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="Column companion, providing default conversions." href="Column$.html"><span class="name">Column</span></a><span class="result"> extends <a href="JodaColumn.html" class="extype" name="anorm.JodaColumn">JodaColumn</a> with <a href="JavaTimeColumn.html" class="extype" name="anorm.JavaTimeColumn">JavaTimeColumn</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Column companion, providing default conversions.</p>
+    </li><li name="anorm.ColumnAliaser" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ColumnAliaser"></a><a id="ColumnAliaser:ColumnAliaser"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#ColumnAliaser" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ColumnAliaser$.html"><span class="name">ColumnAliaser</span></a>
+      </span>
+      
+      
+    </li><li name="anorm.ColumnNotFound" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ColumnNotFound"></a><a id="ColumnNotFound:ColumnNotFound"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#ColumnNotFound" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ColumnNotFound$.html"><span class="name">ColumnNotFound</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      
+    </li><li name="anorm.Cursor" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Cursor"></a><a id="Cursor:Cursor"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#Cursor" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="Cursor companion" href="Cursor$.html"><span class="name">Cursor</span></a>
+      </span>
+      
+      <p class="shortcomment cmt">Cursor companion</p>
+    </li><li name="anorm.Iteratees" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Iteratees"></a><a id="Iteratees:Iteratees"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#Iteratees" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="Anorm companion for the https://www.playframework.com/documentation/2.4.x/Iteratees." href="Iteratees$.html"><span class="name">Iteratees</span></a>
+      </span>
+      
+      <p class="shortcomment cmt">Anorm companion for the <a href="https://www.playframework.com/documentation/2.4.x/Iteratees" target="_blank">https://www.playframework.com/documentation/2.4.x/Iteratees</a>.</p>
+    </li><li name="anorm.JodaParameterMetaData" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="JodaParameterMetaData"></a><a id="JodaParameterMetaData:JodaParameterMetaData"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#JodaParameterMetaData" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="Meta data for Joda parameters" href="JodaParameterMetaData$.html"><span class="name">JodaParameterMetaData</span></a>
+      </span>
+      
+      <p class="shortcomment cmt">Meta data for Joda parameters</p>
+    </li><li name="anorm.Macro" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Macro"></a><a id="Macro:Macro"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#Macro" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="Macro$.html"><span class="name">Macro</span></a>
+      </span>
+      
+      <p class="shortcomment cmt"></p>
+    </li><li name="anorm.NamedParameter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NamedParameter"></a><a id="NamedParameter:NamedParameter"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#NamedParameter" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="Companion object for applied named parameter." href="NamedParameter$.html"><span class="name">NamedParameter</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Companion object for applied named parameter.</p>
+    </li><li name="anorm.ParameterMetaData" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ParameterMetaData"></a><a id="ParameterMetaData:ParameterMetaData"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#ParameterMetaData" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="ParameterMetaData companion, providing defaults based on SQL92." href="ParameterMetaData$.html"><span class="name">ParameterMetaData</span></a><span class="result"> extends <a href="JavaTimeParameterMetaData.html" class="extype" name="anorm.JavaTimeParameterMetaData">JavaTimeParameterMetaData</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">ParameterMetaData companion, providing defaults based on SQL92.</p>
+    </li><li name="anorm.ParameterValue" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ParameterValue"></a><a id="ParameterValue:ParameterValue"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#ParameterValue" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="Value factory for parameter." href="ParameterValue$.html"><span class="name">ParameterValue</span></a>
+      </span>
+      
+      <p class="shortcomment cmt">Value factory for parameter.</p><div class="fullcomment"><div class="comment cmt"><p>Value factory for parameter.</p><pre><span class="kw">val</span> param = ParameterValue(<span class="lit">"str"</span>, <span class="kw">null</span>, setter)
+
+SQL(<span class="lit">"..."</span>).onParams(param)</pre></div></div>
+    </li><li name="anorm.ResultSetResource" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ResultSetResource"></a><a id="ResultSetResource:ResultSetResource"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#ResultSetResource" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="package$$ResultSetResource$.html"><span class="name">ResultSetResource</span></a><span class="result"> extends <span class="extype" name="resource.Resource">Resource</span>[<span class="extype" name="java.sql.ResultSet">ResultSet</span>]</span>
+      </span>
+      
+      
+    </li><li name="anorm.Row" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Row"></a><a id="Row:Row"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#Row" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="Companion object for row." href="Row$.html"><span class="name">Row</span></a>
+      </span>
+      
+      <p class="shortcomment cmt">Companion object for row.</p>
+    </li><li name="anorm.RowParser" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RowParser"></a><a id="RowParser:RowParser"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#RowParser" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="RowParser$.html"><span class="name">RowParser</span></a>
+      </span>
+      
+      
+    </li><li name="anorm.SeqParameter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SeqParameter"></a><a id="SeqParameter:SeqParameter"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#SeqParameter" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="SeqParameter factory" href="SeqParameter$.html"><span class="name">SeqParameter</span></a>
+      </span>
+      
+      <p class="shortcomment cmt">SeqParameter factory</p>
+    </li><li name="anorm.Show" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Show"></a><a id="Show:Show"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#Show" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="Show$.html"><span class="name">Show</span></a>
+      </span>
+      
+      
+    </li><li name="anorm.SimpleSql" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SimpleSql"></a><a id="SimpleSql:SimpleSql"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#SimpleSql" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="SimpleSql$.html"><span class="name">SimpleSql</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      
+    </li><li name="anorm.Sql" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Sql"></a><a id="Sql:Sql"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#Sql" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="Sql$.html"><span class="name">Sql</span></a>
+      </span>
+      
+      
+    </li><li name="anorm.SqlParser" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SqlParser"></a><a id="SqlParser:SqlParser"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#SqlParser" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="SqlParser$.html"><span class="name">SqlParser</span></a><span class="result"> extends <span class="extype" name="anorm.FunctionAdapter">FunctionAdapter</span> with <a href="DeprecatedSqlParser.html" class="extype" name="anorm.DeprecatedSqlParser">DeprecatedSqlParser</a></span>
+      </span>
+      
+      
+    </li><li name="anorm.SqlQuery" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SqlQuery"></a><a id="SqlQuery:SqlQuery"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#SqlQuery" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="SqlQuery$.html"><span class="name">SqlQuery</span></a>
+      </span>
+      
+      
+    </li><li name="anorm.SqlRequestError" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SqlRequestError"></a><a id="SqlRequestError:SqlRequestError"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#SqlRequestError" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="SqlRequestError$.html"><span class="name">SqlRequestError</span></a>
+      </span>
+      
+      
+    </li><li name="anorm.SqlStatementParser" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SqlStatementParser"></a><a id="SqlStatementParser:SqlStatementParser"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#SqlStatementParser" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="Parser for SQL statement." href="SqlStatementParser$.html"><span class="name">SqlStatementParser</span></a><span class="result"> extends <span class="extype" name="scala.util.parsing.combinator.JavaTokenParsers">JavaTokenParsers</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Parser for SQL statement.</p>
+    </li><li name="anorm.StatementResource" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="StatementResource"></a><a id="StatementResource:StatementResource"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#StatementResource" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="package$$StatementResource$.html"><span class="name">StatementResource</span></a><span class="result"> extends <span class="extype" name="resource.Resource">Resource</span>[<span class="extype" name="java.sql.PreparedStatement">PreparedStatement</span>]</span>
+      </span>
+      
+      
+    </li><li name="anorm.StringWrapper2" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="StringWrapper2"></a><a id="StringWrapper2:StringWrapper2"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#StringWrapper2" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="package$$StringWrapper2$.html"><span class="name">StringWrapper2</span></a>
+      </span>
+      
+      
+    </li><li name="anorm.TimestampWrapper1" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TimestampWrapper1"></a><a id="TimestampWrapper1:TimestampWrapper1"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#TimestampWrapper1" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="package$$TimestampWrapper1$.html"><span class="name">TimestampWrapper1</span></a>
+      </span>
+      
+      
+    </li><li name="anorm.TimestampWrapper2" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TimestampWrapper2"></a><a id="TimestampWrapper2:TimestampWrapper2"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#TimestampWrapper2" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="package$$TimestampWrapper2$.html"><span class="name">TimestampWrapper2</span></a>
+      </span>
+      
+      
+    </li><li name="anorm.ToParameterList" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ToParameterList"></a><a id="ToParameterList:ToParameterList"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#ToParameterList" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="Companion/factory for ToParameterList." href="ToParameterList$.html"><span class="name">ToParameterList</span></a>
+      </span>
+      
+      <p class="shortcomment cmt">Companion/factory for <a href="ToParameterList.html" class="extype" name="anorm.ToParameterList">ToParameterList</a>.</p>
+    </li><li name="anorm.ToParameterValue" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ToParameterValue"></a><a id="ToParameterValue:ToParameterValue"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#ToParameterValue" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ToParameterValue$.html"><span class="name">ToParameterValue</span></a>
+      </span>
+      
+      
+    </li><li name="anorm.ToSql" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ToSql"></a><a id="ToSql:ToSql"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#ToSql" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="Provided ToSql implementations." href="ToSql$.html"><span class="name">ToSql</span></a>
+      </span>
+      
+      <p class="shortcomment cmt">Provided ToSql implementations.</p>
+    </li><li name="anorm.ToStatement" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ToStatement"></a><a id="ToStatement:ToStatement"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#ToStatement" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ToStatement$.html"><span class="name">ToStatement</span></a><span class="result"> extends <span class="extype" name="anorm.ToStatementConversions">ToStatementConversions</span></span>
+      </span>
+      
+      
+    </li><li name="anorm.TokenGroup" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TokenGroup"></a><a id="TokenGroup:TokenGroup"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#TokenGroup" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="TokenGroup$.html"><span class="name">TokenGroup</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/runtime/AbstractFunction2.html#scala.runtime.AbstractFunction2" class="extype" name="scala.runtime.AbstractFunction2">AbstractFunction2</a>[<span class="extype" name="scala.List">List</span>[<span class="extype" name="anorm.StatementToken">StatementToken</span>], <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="scala.Predef.String">String</span>], <span class="extype" name="anorm.TokenGroup">TokenGroup</span>] with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      
+    </li><li name="anorm.TupleFlattener" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TupleFlattener"></a><a id="TupleFlattener:TupleFlattener"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#TupleFlattener" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="Conversions to flatten columns to tuple." href="TupleFlattener$.html"><span class="name">TupleFlattener</span></a><span class="result"> extends <a href="TupleFlattenerPriority21.html" class="extype" name="anorm.TupleFlattenerPriority21">TupleFlattenerPriority21</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Conversions to flatten columns to tuple.</p>
+    </li><li name="anorm.features" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="features"></a><a id="features:features"></a>
+      <span class="permalink">
+      <a href="../anorm/index.html#features" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="Activable features" href="package$$features$.html"><span class="name">features</span></a>
+      </span>
+      
+      <p class="shortcomment cmt">Activable features</p>
+    </li>
+              </ol>
+            </div>
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        <div class="parent" name="scala.AnyRef">
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></h3>
+            </div>
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+    </body>
+          </div>
+        </div>
+      </div>
+    </body>
+      </html>
