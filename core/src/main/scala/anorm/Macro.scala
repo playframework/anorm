@@ -19,7 +19,7 @@ object Macro {
 
     if (names.size < params.size) {
       c.abort(c.enclosingPosition,
-        "no column name for parameters: ${show(names)} < $params")
+        s"no column name for parameters: ${show(names)} < $params")
 
     } else {
       parserImpl[T](c) { (t, _, i) =>
