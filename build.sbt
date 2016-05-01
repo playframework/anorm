@@ -5,7 +5,7 @@ import com.typesafe.tools.mima.plugin.MimaKeys.{
   binaryIssueFilters, previousArtifacts
 }
 
-val PlayVersion = playVersion(sys.props.getOrElse("play.version", "2.5.0"))
+val PlayVersion = playVersion(sys.props.getOrElse("play.version", "2.5.3"))
 
 lazy val acolyteVersion = "1.0.36-j7p"
 
