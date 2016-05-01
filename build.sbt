@@ -84,9 +84,9 @@ lazy val `anorm-iteratee` = (project in file("iteratee"))
   .enablePlugins(PlayLibrary)
   .settings(scalariformSettings: _*)
   .settings(
-  previousArtifacts := Set.empty,
+    previousArtifacts := Set.empty,
     libraryDependencies ++= Seq(
-      "com.typesafe.play" %% "play-iteratees" % PlayVersion % "provided",
+      "com.typesafe.play" %% "play-iteratees" % "2.6.0",
       "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test      
     ) ++ Seq(
       "specs2-core",
