@@ -5,7 +5,7 @@ import com.typesafe.tools.mima.plugin.MimaKeys.{
   binaryIssueFilters, previousArtifacts
 }
 
-val PlayVersion = playVersion(sys.props.getOrElse("play.version", "2.5.0"))
+val PlayVersion = playVersion(sys.props.getOrElse("play.version", "2.5.3"))
 
 lazy val acolyteVersion = "1.0.36-j7p"
 
@@ -80,9 +80,9 @@ lazy val `anorm-iteratee` = (project in file("iteratee"))
   .enablePlugins(PlayLibrary)
   .settings(scalariformSettings: _*)
   .settings(
-  previousArtifacts := Set.empty,
+    previousArtifacts := Set.empty,
     libraryDependencies ++= Seq(
-      "com.typesafe.play" %% "play-iteratees" % PlayVersion % "provided",
+      "com.typesafe.play" %% "play-iteratees" % "2.6.0",
       "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test      
     ) ++ Seq(
       "specs2-core",
