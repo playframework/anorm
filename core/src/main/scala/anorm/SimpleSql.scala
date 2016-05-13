@@ -48,27 +48,24 @@ case class SimpleSql[T](sql: SqlQuery, params: Map[String, ParameterValue], defa
     (con: Connection, sql: String) => con.prepareStatement(sql, columns)
   }
 
-  def preparedStatement(connection: Connection, getGeneratedKeys: Boolean = false) = {
-    if (getGeneratedKeys) prepareStatement(connection, prepareGeneratedKeys)
-    else prepareStatement(connection, prepareNoGeneratedKeys)
+  def unsafeStatement(connection: Connection, getGeneratedKeys: Boolean = false) = {
+    if (getGeneratedKeys) unsafeStatement(connection, prepareGeneratedKeys)
+    else unsafeStatement(connection, prepareNoGeneratedKeys)
   }
 
-  def preparedStatement(connection: Connection, generatedColumn: String, generatedColumns: Seq[String]) = prepareStatement(connection, prepareGeneratedCols((generatedColumn +: generatedColumns).toArray))
+  def unsafeStatement(connection: Connection, generatedColumn: String, generatedColumns: Seq[String]) = unsafeStatement(connection, prepareGeneratedCols((generatedColumn +: generatedColumns).toArray))
 
-  private def prepareStatement(connection: Connection, prep: (Connection, String) => PreparedStatement): resource.ManagedResource[PreparedStatement] = {
-    implicit val res = StatementResource
-    resource.managed {
-      val (psql, vs): (String, Seq[(Int, ParameterValue)]) = Sql.prepareQuery(sql.stmt.tokens, sql.paramsInitialOrder, params, 0, new StringBuilder(), List.empty[(Int, ParameterValue)]).get
+  private def unsafeStatement(connection: Connection, prep: (Connection, String) => PreparedStatement): PreparedStatement = {
+    val (psql, vs): (String, Seq[(Int, ParameterValue)]) = Sql.prepareQuery(sql.stmt.tokens, sql.paramsInitialOrder, params, 0, new StringBuilder(), List.empty[(Int, ParameterValue)]).get
 
-      val stmt = prep(connection, psql)
+    val stmt = prep(connection, psql)
 
-      sql.fetchSize.foreach(stmt.setFetchSize(_))
-      sql.timeout.foreach(stmt.setQueryTimeout(_))
+    sql.fetchSize.foreach(stmt.setFetchSize(_))
+    sql.timeout.foreach(stmt.setQueryTimeout(_))
 
-      vs.foreach { case (i, v) => v.set(stmt, i + 1) }
+    vs.foreach { case (i, v) => v.set(stmt, i + 1) }
 
-      stmt
-    }
+    stmt
   }
 
   /**

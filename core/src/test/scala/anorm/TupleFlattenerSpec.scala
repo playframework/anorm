@@ -3,7 +3,6 @@ package anorm
 import SqlParser.{ bool, str, int, long, get }
 
 import acolyte.jdbc.RowLists._
-import acolyte.jdbc.Rows._
 import acolyte.jdbc.AcolyteDSL.withQueryResult
 import acolyte.jdbc.Implicits._
 
