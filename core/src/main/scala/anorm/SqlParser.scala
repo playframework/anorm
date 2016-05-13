@@ -4,7 +4,6 @@
 package anorm
 
 object SqlParser extends FunctionAdapter {
-  import MayErr._
   import java.io.InputStream
   import java.util.Date
 
