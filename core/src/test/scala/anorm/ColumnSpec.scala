@@ -36,6 +36,11 @@ object ColumnSpec
 
   "Column" title
 
+  trait TSWrapper { def stringValue: String }
+  val tssw1 = new TSWrapper {
+    lazy val stringValue = "oracleRowId1235"
+  }
+
   val bd = new java.math.BigDecimal("34.5679")
   val bi = new java.math.BigInteger("1234")
   val clob = new SerialClob(Array[Char]('a', 'b', 'c', 'd', 'e', 'f'))
@@ -67,6 +72,12 @@ object ColumnSpec
         SQL("SELECT a").as(scalar[Array[Byte]].single).
           aka("parsed bytes") must_== "strbytes".getBytes
     }
+
+    "be parsed from oracle.sql.ROWID" in withQueryResult(
+      rowList1(classOf[TSWrapper]) :+ tssw1) { implicit con =>
+        SQL("SELECT a").as(scalar[Array[Byte]].single).
+          aka("parsed bytes") must_== "oracleRowId1235".getBytes
+      }
 
     "have convinence mapping function" in withQueryResult(
       binaryList.withLabel(1, "bin") :+ bindata) { implicit con =>
@@ -593,6 +604,10 @@ object ColumnSpec
     val tsw1 = new TWrapper {
       lazy val getTimestamp = new java.sql.Timestamp(time)
     }
+    trait TWrapper2 { def timestampValue: java.sql.Timestamp }
+    val tsw2 = new TWrapper2 {
+      lazy val timestampValue = new java.sql.Timestamp(time)
+    }
 
     "be parsed from date" in withQueryResult(
       dateList :+ new java.sql.Date(time)) { implicit con =>
@@ -633,6 +648,23 @@ object ColumnSpec
 
       "with a null value" in withQueryResult(
         rowList1(classOf[TWrapper]) :+ null.asInstanceOf[TWrapper]) {
+          implicit con =>
+            SQL("SELECT time").as(scalar[java.util.Date].singleOpt).
+              aka("parsed date") must beNone
+
+        }
+    }
+
+    "be parsed from a Oracle timestamp wrapper" >> {
+      "with a not null value" in withQueryResult(
+        rowList1(classOf[TWrapper2]) :+ tsw2) { implicit con =>
+          SQL("SELECT time").as(scalar[java.util.Date].single).
+            aka("parsed date") must_== new java.util.Date(time)
+
+        }
+
+      "with a null value" in withQueryResult(
+        rowList1(classOf[TWrapper2]) :+ null.asInstanceOf[TWrapper2]) {
           implicit con =>
             SQL("SELECT time").as(scalar[java.util.Date].singleOpt).
               aka("parsed date") must beNone
