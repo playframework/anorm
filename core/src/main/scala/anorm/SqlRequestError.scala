@@ -36,7 +36,10 @@ object ColumnNotFound {
     ColumnNotFound(column, row.metaData.availableColumns)
 }
 
-case class UnexpectedNullableFound(message: String) extends SqlRequestError
+case class UnexpectedNullableFound(reason: String) extends SqlRequestError {
+  lazy val message = s"UnexpectedNullableFound($reason)"
+  override lazy val toString = message
+}
 
 case class SqlMappingError(reason: String) extends SqlRequestError {
   lazy val message = s"SqlMappingError($reason)"
