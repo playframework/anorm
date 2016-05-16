@@ -49,14 +49,15 @@ object Column extends JodaColumn with JavaTimeColumn {
   @inline private[anorm] def className(that: Any): String =
     if (that == null) "<null>" else that.getClass.getName
 
+  private[anorm] def string[T](s: String)(f: String => T): Either[SqlRequestError, T] = Right(if (s == null) null.asInstanceOf[T] else f(s))
+
   implicit val columnToString: Column[String] =
     nonNull[String] { (value, meta) =>
       val MetaDataItem(qualified, nullable, clazz) = meta
       value match {
         case string: String => Right(string)
-        case clob: java.sql.Clob => Right(
-          clob.getSubString(1, clob.length.asInstanceOf[Int]))
-
+        case clob: java.sql.Clob => Right(clob.getSubString(1, clob.length.asInstanceOf[Int]))
+        case StringWrapper2(s) => string(s)(identity)
         case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to String for column $qualified"))
       }
     }
@@ -80,6 +81,7 @@ object Column extends JodaColumn with JavaTimeColumn {
         case stream: InputStream => streamBytes(stream)
         case string: String => Right(string.getBytes)
         case blob: java.sql.Blob => streamBytes(blob.getBinaryStream)
+        case StringWrapper2(s) => string(s)(_.getBytes)
         case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to bytes array for column $qualified"))
       }
     }
@@ -208,6 +210,7 @@ object Column extends JodaColumn with JavaTimeColumn {
       case bool: Boolean => Right(if (!bool) 0L else 1L)
       case date: Date => Right(date.getTime)
       case TimestampWrapper1(ts) => timestamp(ts)(_.getTime)
+      case TimestampWrapper2(ts) => timestamp(ts)(_.getTime)
       case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to Long for column $qualified"))
     }
   }
@@ -328,6 +331,7 @@ object Column extends JodaColumn with JavaTimeColumn {
       case date: Date => Right(date)
       case time: Long => Right(new Date(time))
       case TimestampWrapper1(ts) => timestamp(ts)(t => new Date(t.getTime))
+      case TimestampWrapper2(ts) => timestamp(ts)(t => new Date(t.getTime))
       case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to Date for column $qualified"))
     }
   }
@@ -479,6 +483,7 @@ sealed trait JodaColumn {
         case date: java.util.Date => Right(new LocalDate(date.getTime))
         case time: Long => Right(new LocalDate(time))
         case TimestampWrapper1(ts) => Ts(ts)(t => new LocalDate(t.getTime))
+        case TimestampWrapper2(ts) => Ts(ts)(t => new LocalDate(t.getTime))
         case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to Joda LocalDate for column $qualified"))
       }
     }
@@ -503,6 +508,7 @@ sealed trait JodaColumn {
         case date: java.util.Date => Right(new LocalDateTime(date.getTime))
         case time: Long => Right(new LocalDateTime(time))
         case TimestampWrapper1(ts) => Ts(ts)(t => new LocalDateTime(t.getTime))
+        case TimestampWrapper2(ts) => Ts(ts)(t => new LocalDateTime(t.getTime))
         case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to Joda LocalDateTime for column $qualified"))
       }
     }
@@ -523,6 +529,9 @@ sealed trait JodaColumn {
         case date: Date => Right(new DateTime(date.getTime))
         case time: Long => Right(new DateTime(time))
         case TimestampWrapper1(ts) =>
+          Option(ts).fold(Right(null.asInstanceOf[DateTime]))(t =>
+            Right(new DateTime(t.getTime)))
+        case TimestampWrapper2(ts) =>
           Option(ts).fold(Right(null.asInstanceOf[DateTime]))(t =>
             Right(new DateTime(t.getTime)))
 
@@ -546,6 +555,7 @@ sealed trait JodaColumn {
         case date: Date => Right(new Instant(date.getTime))
         case time: Long => Right(new Instant(time))
         case TimestampWrapper1(ts) => Ts(ts)(t => new Instant(t.getTime))
+        case TimestampWrapper2(ts) => Ts(ts)(t => new Instant(t.getTime))
         case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to Instant for column $qualified"))
       }
     }
@@ -573,6 +583,7 @@ sealed trait JavaTimeColumn {
       case date: java.util.Date => Right(Instant ofEpochMilli date.getTime)
       case time: Long => Right(Instant ofEpochMilli time)
       case TimestampWrapper1(ts) => Ts(ts)(Instant ofEpochMilli _.getTime)
+      case TimestampWrapper2(ts) => Ts(ts)(Instant ofEpochMilli _.getTime)
       case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to Java8 Instant for column $qualified"))
     }
   }
@@ -600,7 +611,7 @@ sealed trait JavaTimeColumn {
         case date: java.util.Date => Right(dateTime(date.getTime))
         case time: Long => Right(dateTime(time))
         case TimestampWrapper1(ts) => Ts(ts)(t => dateTime(t.getTime))
-
+        case TimestampWrapper2(ts) => Ts(ts)(t => dateTime(t.getTime))
         case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to Java8 LocalDateTime for column $qualified"))
       }
     }
@@ -629,6 +640,7 @@ sealed trait JavaTimeColumn {
         case date: java.util.Date => Right(localDate(date.getTime))
         case time: Long => Right(localDate(time))
         case TimestampWrapper1(ts) => Ts(ts)(t => localDate(t.getTime))
+        case TimestampWrapper2(ts) => Ts(ts)(t => localDate(t.getTime))
         case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to Java8 LocalDate for column $qualified"))
       }
     }
@@ -657,6 +669,7 @@ sealed trait JavaTimeColumn {
         case date: java.util.Date => Right(dateTime(date.getTime))
         case time: Long => Right(dateTime(time))
         case TimestampWrapper1(ts) => Ts(ts)(t => dateTime(t.getTime))
+        case TimestampWrapper2(ts) => Ts(ts)(t => dateTime(t.getTime))
         case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to Java8 ZonedDateTime for column $qualified"))
       }
     }

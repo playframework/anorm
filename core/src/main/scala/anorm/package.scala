@@ -2,7 +2,9 @@
  * Copyright (C) 2009-2013 Typesafe Inc. <http://www.typesafe.com>
  */
 
+import java.sql.SQLException
 import java.util.StringTokenizer
+
 import scala.collection.JavaConverters.enumerationAsScalaIteratorConverter
 
 /**
@@ -29,6 +31,34 @@ package object anorm {
       Some(that.asInstanceOf[TimestampWrapper1].getTimestamp)
     } catch {
       case _: NoSuchMethodException => None
+    }
+  }
+
+  /** Structural type for oracle.sql.TIMESTAMP wrapper. */
+  type TimestampWrapper2 = { def timestampValue: java.sql.Timestamp }
+
+  object TimestampWrapper2 {
+    import scala.language.reflectiveCalls
+
+    def unapply(that: Any): Option[java.sql.Timestamp] = try {
+      Some(that.asInstanceOf[TimestampWrapper2].timestampValue)
+    } catch {
+      case _: NoSuchMethodException => None
+      case _: SQLException => None
+    }
+  }
+
+  /** Structural type for oracle.sql.ROWID wrapper. */
+  type StringWrapper2 = { def stringValue: String }
+
+  object StringWrapper2 {
+    import scala.language.reflectiveCalls
+
+    def unapply(that: Any): Option[String] = try {
+      Some(that.asInstanceOf[StringWrapper2].stringValue)
+    } catch {
+      case _: NoSuchMethodException => None
+      case _: SQLException => None
     }
   }
 
