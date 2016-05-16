@@ -13,7 +13,8 @@ object SqlRequestErrorSpec extends org.specs2.mutable.Specification {
   "UnexpectedNullableFound" should {
     "be converted to Failure" in {
       UnexpectedNullableFound("Foo message").toFailure must beFailedTry.
-        withThrowable[AnormException]("Foo message")
+        withThrowable[AnormException](
+          "UnexpectedNullableFound\\(Foo message\\)")
     }
   }
 
