@@ -428,6 +428,40 @@ books match {
 }
 ```
 
+### Akka Stream
+
+The query result from Anorm can be processed as [Source](doc.akka.io/api/akka/2.4.4/#akka.stream.javadsl.Source) with [Akka Stream](http://doc.akka.io/docs/akka/2.4.4/scala/stream/index.html).
+
+To do so, the Anorm Akka module must be used.
+
+```scala
+libraryDependencies ++= Seq(
+  "com.typesafe.play" %% "anorm-akka" % "ANORM_VERSION",
+  "com.typesafe.akka" %% "akka-stream" % "2.4.4")
+```
+
+> This module is tested with Akka Stream 2.4.4.
+
+Once this library is available, the query can be used as streaming source.
+
+```scala
+import java.sql.Connection
+
+import scala.concurrent.Future
+
+import akka.NotUsed
+import akka.stream.Materializer
+import akka.stream.scaladsl.{ Sink, Source }
+
+import anorm._
+
+def resultSource(implicit m: Materializer, con: Connection): Source[String, NotUsed] = AkkaStream.source(SQL"SELECT * FROM Test", SqlParser.scalar[String], ColumnAliaser.empty)
+
+def countStrings()(implicit m: Materializer, con: Connection): Future[Int] =
+  resultSource.runWith(
+    Sink.fold[Int, String](0) { (count, str) => count + str.length })
+```
+
 ### Iteratee
 
 It's possible to use Anorm along with [Play Iteratees](https://www.playframework.com/documentation/latest/Iteratees), using the following dependencies.

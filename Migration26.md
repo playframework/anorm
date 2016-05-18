@@ -27,6 +27,34 @@ The `.getFilledStatement` has been removed.
 
 The former streaming operation `.apply()` is now removed, and must be replaced by either `.fold`, `.foldWhile` or `.withResult`.
 
+### Akka Stream module
+
+A new [Akka](http://doc.akka.io/docs/akka/2.4.2/scala/stream/index.html) module is available to process DB results as [Sources](doc.akka.io/api/akka/2.4.2/#akka.stream.javadsl.Source).
+
+To do so, the Anorm Akka module must be used.
+
+```scala
+libraryDependencies ++= Seq(
+  "com.typesafe.play" %% "anorm-akka" % "ANORM_VERSION",
+  "com.typesafe.akka" %% "akka-stream" % "2.4.4")
+```
+
+> This module is tested with Akka Stream 2.4.4.
+
+Once this library is available, the query can be used as streaming source.
+
+```scala
+import java.sql.Connection
+
+import akka.NotUsed
+import akka.stream.Materializer
+import akka.stream.scaladsl.Source
+
+import anorm._
+
+def resultSource(implicit m: Materializer, con: Connection): Source[String, NotUsed] = AkkaStream.source(SQL"SELECT * FROM Test", SqlParser.scalar[String], ColumnAliaser.empty)
+```
+
 ## Iteratees module
 
 A new Anorm module is available to ease the integration with [Play Iteratees](https://www.playframework.com/documentation/latest/Iteratees).

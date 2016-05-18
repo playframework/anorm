@@ -60,7 +60,11 @@ lazy val anorm = project
       missMeth("anorm.WithResult.foldWhile"/* new function */),
       missMeth("anorm.WithResult.fold"/* new function */),
       missMeth("anorm.WithResult.apply"/* deprecated 2.4 */),
-      missMeth("anorm.WithResult.asTry"/*new function */)))
+      missMeth("anorm.WithResult.asTry"/*new function */),
+      // New functions
+      missMeth("anorm.Sql.unsafeStatement$default$2"),
+      missMeth("anorm.Sql.unsafeResultSet"),
+      missMeth("anorm.Sql.unsafeStatement")))
   .settings({
     libraryDependencies ++= Seq(
       "com.jsuereth" %% "scala-arm" % "1.4",
@@ -90,9 +94,23 @@ lazy val `anorm-iteratee` = (project in file("iteratee"))
     ).map("org.specs2" %% _ % "2.4.9" % Test)
   ).dependsOn(anorm)
 
+lazy val `anorm-akka` = (project in file("akka"))
+  .enablePlugins(PlayLibrary)
+  .settings(scalariformSettings: _*)
+  .settings(
+    previousArtifacts := Set.empty,
+    libraryDependencies ++= Seq(
+      "com.typesafe.akka" %% "akka-stream" % "2.4.4" % "provided",
+      "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test
+    ) ++ Seq(
+      "specs2-core",
+      "specs2-junit"
+    ).map("org.specs2" %% _ % "2.4.9" % Test)
+  ).dependsOn(anorm)
+
 lazy val `anorm-parent` = (project in file("."))
   .enablePlugins(PlayRootProject)
-  .aggregate(`anorm-tokenizer`, anorm, `anorm-iteratee`)
+  .aggregate(`anorm-tokenizer`, anorm, `anorm-iteratee`, `anorm-akka`)
   .settings(
   scalaVersion := "2.11.8",
     previousArtifacts := Set.empty)

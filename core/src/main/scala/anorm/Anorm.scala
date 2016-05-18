@@ -82,18 +82,32 @@ object NamedParameter {
 }
 
 private[anorm] trait Sql extends WithResult {
-  def preparedStatement(connection: Connection, getGeneratedKeys: Boolean = false): ManagedResource[PreparedStatement]
+  private[anorm] def unsafeStatement(connection: Connection, getGeneratedKeys: Boolean = false): PreparedStatement
 
-  def preparedStatement(connection: Connection, generatedColumn: String, generatedColumns: Seq[String]): ManagedResource[PreparedStatement]
+  private[anorm] def unsafeStatement(connection: Connection, generatedColumn: String, generatedColumns: Seq[String]): PreparedStatement
+
+  @deprecated("Do not override. Will be made final", "2.5.3")
+  def preparedStatement(connection: Connection, getGeneratedKeys: Boolean = false): ManagedResource[PreparedStatement] = {
+    implicit val res = StatementResource
+    managed(unsafeStatement(connection, getGeneratedKeys))
+  }
+
+  final def preparedStatement(connection: Connection, generatedColumn: String, generatedColumns: Seq[String]): ManagedResource[PreparedStatement] = {
+    implicit val res = StatementResource
+    managed(unsafeStatement(connection, generatedColumn, generatedColumns))
+  }
 
   /**
    * Executes this statement as query (see [[executeQuery]]) and returns result.
    */
   protected def resultSet(connection: Connection): ManagedResource[ResultSet] =
-    preparedStatement(connection) flatMap { stmt =>
+    preparedStatement(connection).flatMap { stmt =>
       implicit val res = ResultSetResource
       managed(stmt.executeQuery())
     }
+
+  private[anorm] def unsafeResultSet(connection: Connection): ResultSet =
+    unsafeStatement(connection).executeQuery()
 
   /**
    * Executes this SQL statement.
@@ -206,8 +220,12 @@ object Sql { // TODO: Rename to SQL
   import scala.util.{ Success => TrySuccess, Try }
   import scala.util.control.NoStackTrace
 
+  private[anorm] def unsafeCursor(res: ResultSet, onFirstRow: Boolean, as: ColumnAliaser): Option[Cursor] = {
+    if (onFirstRow) Cursor.onFirstRow(res, as) else Cursor(res, as)
+  }
+
   private[anorm] def withResult[T](res: ManagedResource[ResultSet], onFirstRow: Boolean, as: ColumnAliaser)(op: Option[Cursor] => T): ManagedResource[T] =
-    res.map(rs => op(if (onFirstRow) Cursor.onFirstRow(rs, as) else Cursor(rs, as)))
+    res.map(rs => op(unsafeCursor(rs, onFirstRow, as)))
 
   private[anorm] def asTry[T](parser: ResultSetParser[T], rs: ManagedResource[ResultSet], onFirstRow: Boolean, as: ColumnAliaser)(implicit connection: Connection): Try[T] = Try(withResult(rs, onFirstRow, as)(parser) acquireAndGet identity).flatMap(_.fold[Try[T]](_.toFailure, TrySuccess.apply))
 
