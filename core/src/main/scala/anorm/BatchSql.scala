@@ -145,12 +145,6 @@ sealed trait BatchSql {
 
 /** SQL batch companion */
 object BatchSql {
-  @throws[IllegalArgumentException](BatchSqlErrors.HeterogeneousParameterMaps)
-  @throws[IllegalArgumentException](BatchSqlErrors.ParameterNamesNotMatchingPlaceholders)
-  @deprecated(message = "Use `BatchSql(sql, first, other)`", since = "2.3.8")
-  def apply(sql: String, ps: Seq[Seq[NamedParameter]] = Nil): BatchSql =
-    Checked(SQL(sql), ps.map(_.map(_.tupled).toMap))
-
   /**
    * Creates a batch from given `sql` statement,
    * with a `first` parameter list for for SQL execution, and zero or many

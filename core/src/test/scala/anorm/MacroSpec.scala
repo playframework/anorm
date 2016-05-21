@@ -1,18 +1,39 @@
 package anorm
 
+import java.sql.Connection
+
 import acolyte.jdbc.AcolyteDSL.withQueryResult
 import acolyte.jdbc.RowLists
 import acolyte.jdbc.Implicits._
 
-object MacroSpec extends org.specs2.mutable.Specification {
+import Macro.ColumnNaming
+
+class MacroSpec extends org.specs2.mutable.Specification {
   "Macro" title
 
   val barRow = RowLists.rowList1(classOf[Int] -> "v")
 
-  val fooRow = RowLists.rowList5(
+  val fooRow1 = RowLists.rowList5(
     classOf[Float] -> "r", classOf[String] -> "bar",
-    classOf[Int] -> "lorem", classOf[Long] -> "opt",
+    classOf[Int] -> "loremIpsum", classOf[Long] -> "opt",
     classOf[Boolean] -> "x")
+
+  val fooRow2 = RowLists.rowList5(
+    classOf[Float] -> "r", classOf[String] -> "bar",
+    classOf[Int] -> "lorem_ipsum", classOf[Long] -> "opt",
+    classOf[Boolean] -> "x")
+
+  "Column naming" should {
+    import ColumnNaming._
+
+    "be snake case with 'loremIpsum' transformed to 'lorem_ipsum'" in {
+      SnakeCase("loremIpsum") must_== "lorem_ipsum"
+    }
+
+    "be using a custom transformation" in {
+      ColumnNaming(_.toUpperCase).apply("foo") must_== "FOO"
+    }
+  }
 
   "Generated named parser" should {
     // No Column[Bar] so compilation error is expected
@@ -30,21 +51,37 @@ object MacroSpec extends org.specs2.mutable.Specification {
         SQL"TEST".as(parser2.*) must_== List(Bar(1), Bar(3)))
     }
 
-    "be successful for Foo[Int]" in withQueryResult(
-      fooRow :+ (1.2F, "str1", 1, 2L, true) :+ (2.3F, "str2", 4,
-        null.asInstanceOf[Long], null.asInstanceOf[Boolean]) :+ (3.4F, "str3",
-          5, 3L, null.asInstanceOf[Boolean]) :+ (5.6F, "str4", 6,
-            null.asInstanceOf[Long], false)) { implicit con =>
-
-        val parser1: RowParser[Foo[Int]] = Macro.namedParser[Foo[Int]]
-        val parser2: RowParser[Foo[Int]] =
-          Macro.parser[Foo[Int]]("r", "bar", "lorem", "opt", "x")
-
+    "be successful for Foo[Int]" >> {
+      def spec(parser1: RowParser[Foo[Int]], parser2: RowParser[Foo[Int]])(implicit c: Connection) = {
         val expected = List(Foo(1.2F, "str1")(1, Some(2L))(Some(true)), Foo(2.3F, "str2")(4, None)(None), Foo(3.4F, "str3")(5, Some(3L))(None), Foo(5.6F, "str4")(6, None)(Some(false)))
 
         SQL"TEST".as(parser1.*) must_== expected and (
           SQL("TEST").as(parser2.*) must_== expected)
       }
+
+      "using the default column naming" in withQueryResult(
+        fooRow1 :+ (1.2F, "str1", 1, 2L, true) :+ (2.3F, "str2", 4,
+          null.asInstanceOf[Long], null.asInstanceOf[Boolean]) :+ (3.4F, "str3",
+            5, 3L, null.asInstanceOf[Boolean]) :+ (5.6F, "str4", 6,
+              null.asInstanceOf[Long], false)) { implicit con =>
+
+          spec(Macro.namedParser[Foo[Int]],
+            Macro.parser[Foo[Int]]("r", "bar", "loremIpsum", "opt", "x"))
+
+        }
+
+      "using the snake case naming" in withQueryResult(
+        fooRow2 :+ (1.2F, "str1", 1, 2L, true) :+ (2.3F, "str2", 4,
+          null.asInstanceOf[Long], null.asInstanceOf[Boolean]) :+ (3.4F, "str3",
+            5, 3L, null.asInstanceOf[Boolean]) :+ (5.6F, "str4", 6,
+              null.asInstanceOf[Long], false)) { implicit con =>
+
+          spec(Macro.namedParser[Foo[Int]](ColumnNaming.SnakeCase),
+            Macro.parser[Foo[Int]](ColumnNaming.SnakeCase,
+              "r", "bar", "loremIpsum", "opt", "x"))
+
+        }
+    }
 
     "use a sub-parser from the implicit scope" in {
       implicit val barParser: RowParser[Bar] = Macro.namedParser[Bar]
@@ -52,7 +89,7 @@ object MacroSpec extends org.specs2.mutable.Specification {
 
       val row = RowLists.rowList6(
         classOf[Float] -> "r", classOf[String] -> "bar",
-        classOf[Int] -> "lorem", classOf[Long] -> "opt",
+        classOf[Int] -> "loremIpsum", classOf[Long] -> "opt",
         classOf[Boolean] -> "x", classOf[Int] -> "v")
 
       withQueryResult(row :+ (1.2F, "str1", 1, 2L, true, 6)) { implicit c =>
@@ -72,7 +109,7 @@ object MacroSpec extends org.specs2.mutable.Specification {
       }
 
     "be successful for Foo[Int]" in withQueryResult(
-      fooRow :+ (1.2F, "str1", 1, 2L, true) :+ (
+      fooRow1 :+ (1.2F, "str1", 1, 2L, true) :+ (
         2.3F, "str2", 4, null.asInstanceOf[Long],
         null.asInstanceOf[Boolean]) :+ (3.4F, "str3", 5, 3L,
           null.asInstanceOf[Boolean]) :+ (5.6F, "str4", 6,
@@ -93,7 +130,7 @@ object MacroSpec extends org.specs2.mutable.Specification {
       }
 
     "be successful for Foo[Int]" in withQueryResult(
-      fooRow :+ (1.2F, "str1", 1, 2L, true) :+ (
+      fooRow1 :+ (1.2F, "str1", 1, 2L, true) :+ (
         2.3F, "str2", 4, null.asInstanceOf[Long],
         null.asInstanceOf[Boolean]) :+ (3.4F, "str3", 5, 3L,
           null.asInstanceOf[Boolean]) :+ (5.6F, "str4", 6,
@@ -104,7 +141,7 @@ object MacroSpec extends org.specs2.mutable.Specification {
       }
 
     "be successful for Goo[T] with offset = 2" in withQueryResult(
-      fooRow :+ (1.2F, "str1", 1, 2L, true) :+ (
+      fooRow1 :+ (1.2F, "str1", 1, 2L, true) :+ (
         2.3F, "str2", 4, null.asInstanceOf[Long],
         null.asInstanceOf[Boolean]) :+ (3.4F, "str3", 5, 3L,
           null.asInstanceOf[Boolean]) :+ (5.6F, "str4", 6,
@@ -117,10 +154,10 @@ object MacroSpec extends org.specs2.mutable.Specification {
 
   case class Bar(v: Int)
   case class Foo[T](r: Float, bar: String = "Default")(
-      lorem: T, opt: Option[Long] = None)(x: Option[Boolean]) {
-    override lazy val toString = s"Foo($r, $bar)($lorem, $opt)($x)"
+      loremIpsum: T, opt: Option[Long] = None)(x: Option[Boolean]) {
+    override lazy val toString = s"Foo($r, $bar)($loremIpsum, $opt)($x)"
   }
-  case class Goo[T](lorem: T, opt: Option[Long], x: Option[Boolean]) {
-    override lazy val toString = s"Goo($lorem, $opt, $x)"
+  case class Goo[T](loremIpsum: T, opt: Option[Long], x: Option[Boolean]) {
+    override lazy val toString = s"Goo($loremIpsum, $opt, $x)"
   }
 }

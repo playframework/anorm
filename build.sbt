@@ -30,6 +30,9 @@ lazy val anorm = project
   .settings(
   scalacOptions += "-Xlog-free-terms",
     binaryIssueFilters ++= Seq(
+      missMeth("anorm.DefaultParameterValue.stringValue"/* deprecated */),
+      missMeth("anorm.ParameterValue.stringValue"/* deprecated */),
+      missMeth("anorm.BatchSql.apply"/* was deprecated */),
       missMeth("anorm.SqlQuery.getFilledStatement"/* deprecated 2.3.6 */),
       missMeth("anorm.SqlQuery.fetchSize"/* new field */),
       missMeth("anorm.SqlQuery.withFetchSize"/* new function */),

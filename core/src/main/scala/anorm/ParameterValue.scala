@@ -24,9 +24,6 @@ sealed trait ParameterValue extends Show {
 
   /** Returns string representation of this value. */
   def show: String
-
-  @deprecated(message = "Use [[show]]", since = "2.3.8")
-  final def stringValue = show
 }
 
 final class DefaultParameterValue[A](
