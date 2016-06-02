@@ -128,6 +128,23 @@ val fooParser = Macro.offsetParser[Foo](2)
 // ignore uninteresting_col & skip_col
 ```
 
+There are also new variant of the `namedParser` macros, which can be passed a naming strategy. This naming strategy determines the column name for each case class property; e.g. To use snake case:
+
+```scala
+import anorm.{ Macro, RowParser }, Macro.ColumnNaming
+
+case class Info(name: String, lastModified: Long)
+
+val parser: RowParser[Info] = Macro.namedParser[Info](ColumnNaming.SnakeCase)
+/* Generated as:
+get[String]("name") ~ get[Long]("last_modified") map {
+  case name ~ year => Info(name, year)
+}
+*/
+```
+
+A custom column naming can be defined using `ColumnNaming(String => String)`.
+
 The macros can now use already defined `RowParser` as sub-parser.
 
 ```scala

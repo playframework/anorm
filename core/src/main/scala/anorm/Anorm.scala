@@ -86,7 +86,7 @@ private[anorm] trait Sql extends WithResult {
 
   private[anorm] def unsafeStatement(connection: Connection, generatedColumn: String, generatedColumns: Seq[String]): PreparedStatement
 
-  @deprecated("Do not override. Will be made final", "2.5.3")
+  @deprecated("Do not override. Will be made final", "2.5.2")
   def preparedStatement(connection: Connection, getGeneratedKeys: Boolean = false): ManagedResource[PreparedStatement] = {
     implicit val res = StatementResource
     managed(unsafeStatement(connection, getGeneratedKeys))

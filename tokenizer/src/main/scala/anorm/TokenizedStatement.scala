@@ -25,8 +25,8 @@ private[anorm] case class TokenizedStatement(
 private[anorm] object TokenizedStatement {
   import java.util.StringTokenizer
   import scala.collection.JavaConverters.enumerationAsScalaIteratorConverter
-  import scala.reflect.macros.Context
   import scala.language.experimental.macros
+  import scala.reflect.macros.whitebox
 
   /** Returns empty tokenized statement. */
   lazy val empty = TokenizedStatement(Nil, Nil)
@@ -35,7 +35,7 @@ private[anorm] object TokenizedStatement {
   def stringInterpolation[T](parts: Seq[String], params: Seq[T with Show]): (TokenizedStatement, Map[String, T]) = macro tokenizeImpl[T]
 
   /** Tokenization macro */
-  def tokenizeImpl[T: c.WeakTypeTag](c: Context)(parts: c.Expr[Seq[String]], params: c.Expr[Seq[T with Show]]): c.Expr[(TokenizedStatement, Map[String, T])] =
+  def tokenizeImpl[T: c.WeakTypeTag](c: whitebox.Context)(parts: c.Expr[Seq[String]], params: c.Expr[Seq[T with Show]]): c.Expr[(TokenizedStatement, Map[String, T])] =
     c.universe.reify(tokenize(Iterator[String](), Nil, parts.splice,
       params.splice, Nil, Nil, Map.empty[String, T]))
 

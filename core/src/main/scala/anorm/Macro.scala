@@ -1,8 +1,45 @@
 package anorm
 
+/**
+ * @define caseTParam the type of case class
+ * @define namingParam the column naming, to resolve the column name for each case class property
+ * @define namesParam the names of the columns corresponding to the case class properties
+ */
 object Macro {
   import scala.language.experimental.macros
   import scala.reflect.macros.whitebox
+
+  /**
+   * Naming strategy, to map each class property to the corresponding column.
+   */
+  trait ColumnNaming extends (String => String) {
+    /**
+     * Returns the column name for the class property.
+     *
+     * @param property the name of the case class property
+     */
+    def apply(property: String): String
+  }
+
+  /** Naming companion */
+  object ColumnNaming {
+    /**
+     * For each class property, use the snake case equivalent
+     * to name its column (e.g. fooBar -> foo_bar).
+     */
+    object SnakeCase extends ColumnNaming {
+      private val re = "[A-Z]+".r
+
+      def apply(property: String): String =
+        re.replaceAllIn(property, { m => s"_${m.matched.toLowerCase}" })
+    }
+
+    /** Naming using a custom transformation function. */
+    def apply(transformation: String => String): ColumnNaming =
+      new ColumnNaming {
+        def apply(property: String): String = transformation(property)
+      }
+  }
 
   def namedParserImpl[T: c.WeakTypeTag](c: whitebox.Context): c.Expr[T] = {
     import c.universe._
@@ -10,7 +47,28 @@ object Macro {
     parserImpl[T](c) { (t, n, _) => q"anorm.SqlParser.get[$t]($n)" }
   }
 
-  def namedParserImpl_[T: c.WeakTypeTag](c: whitebox.Context)(names: c.Expr[String]*): c.Expr[T] = {
+  def namedParserImpl1[T: c.WeakTypeTag](c: whitebox.Context)(naming: c.Expr[ColumnNaming]): c.Expr[T] = {
+    import c.universe._
+
+    parserImpl[T](c) { (t, n, _) => q"anorm.SqlParser.get[$t]($naming($n))" }
+  }
+
+  @deprecated("Use [[namedParserImpl2]]", "2.5.2")
+  def namedParserImpl_[T: c.WeakTypeTag](c: whitebox.Context)(names: c.Expr[String]*): c.Expr[T] = namedParserImpl2[T](c)(names: _*)
+
+  def namedParserImpl2[T: c.WeakTypeTag](c: whitebox.Context)(names: c.Expr[String]*): c.Expr[T] = {
+    import c.universe._
+
+    namedParserImpl4[T](c)(names) { n => q"$n" }
+  }
+
+  def namedParserImpl3[T: c.WeakTypeTag](c: whitebox.Context)(naming: c.Expr[ColumnNaming], names: c.Expr[String]*): c.Expr[T] = {
+    import c.universe._
+
+    namedParserImpl4[T](c)(names) { n => q"$naming($n)" }
+  }
+
+  private def namedParserImpl4[T: c.WeakTypeTag](c: whitebox.Context)(names: Seq[c.Expr[String]])(naming: c.Expr[String] => c.universe.Tree): c.Expr[T] = {
     import c.universe._
 
     val tpe = c.weakTypeTag[T].tpe
@@ -24,7 +82,11 @@ object Macro {
     } else {
       parserImpl[T](c) { (t, _, i) =>
         names.lift(i) match {
-          case Some(n) => q"anorm.SqlParser.get[$t]($n)"
+          case Some(n) => {
+            val cn = naming(n)
+            q"anorm.SqlParser.get[$t]($cn)"
+          }
+
           case _ => c.abort(c.enclosingPosition,
             s"missing column name for parameter $i")
         }
@@ -162,7 +224,7 @@ object Macro {
    * Returns a row parser generated for a case class `T`,
    * getting column values by name.
    *
-   * @tparam T the type of case class
+   * @tparam T $caseTParam
    *
    * {{{
    * import anorm.{ Macros, RowParser }
@@ -174,10 +236,10 @@ object Macro {
 
   /**
    * Returns a row parser generated for a case class `T`,
-   * getting column values using given `names`.
+   * getting column values by name.
    *
-   * @tparam T the type of case class
-   * @param names the names of columns corresponding to the case class values
+   * @tparam T $caseTParam
+   * @param naming $namingParam
    *
    * {{{
    * import anorm.{ Macros, RowParser }
@@ -185,13 +247,47 @@ object Macro {
    * val p: RowParser[YourCaseClass] = Macros.namedParser[YourCaseClass]
    * }}}
    */
-  def parser[T](names: String*): RowParser[T] = macro namedParserImpl_[T]
+  def namedParser[T](naming: Macro.ColumnNaming): RowParser[T] = macro namedParserImpl1[T]
+
+  /**
+   * Returns a row parser generated for a case class `T`,
+   * getting column values according the property `names`.
+   *
+   * @tparam T $caseTParam
+   * @param names $namesParam
+   *
+   * {{{
+   * import anorm.{ Macros, RowParser }
+   *
+   * val p: RowParser[YourCaseClass] =
+   *   Macros.parser[YourCaseClass]("foo", "bar")
+   * }}}
+   */
+  def parser[T](names: String*): RowParser[T] = macro namedParserImpl2[T]
+
+  /**
+   * Returns a row parser generated for a case class `T`,
+   * getting column values according the property `names`.
+   *
+   * @tparam T $caseTParam
+   *
+   * @param naming $namingParam
+   * @param names $namesParam
+   *
+   * {{{
+   * import anorm.{ Macros, RowParser }
+   *
+   * val p: RowParser[YourCaseClass] =
+   *   Macros.parser[YourCaseClass]("foo", "loremIpsum")
+   * }}}
+   */
+  def parser[T](naming: Macro.ColumnNaming, names: String*): RowParser[T] = macro namedParserImpl3[T]
 
   /**
    * Returns a row parser generated for a case class `T`,
    * getting column values by position.
    *
-   * @tparam T the type of case class
+   * @tparam T $caseTParam
    *
    * {{{
    * import anorm.{ Macros, RowParser }
@@ -205,7 +301,7 @@ object Macro {
    * Returns a row parser generated for a case class `T`,
    * getting column values by position, with an offset.
    *
-   * @tparam T the type of case class
+   * @tparam T $caseTParam
    * @param offset the offset of column to be considered by the parser
    *
    * {{{
@@ -216,9 +312,10 @@ object Macro {
    */
   def offsetParser[T](offset: Int): RowParser[T] = macro offsetParserImpl[T]
 
-  private lazy val debugEnabled = 
+  private lazy val debugEnabled =
     Option(System.getProperty("anorm.macro.debug")).
       filterNot(_.isEmpty).map(_.toLowerCase).map { v =>
         "true".equals(v) || v.substring(0, 1) == "y"
       }.getOrElse(false)
+
 }
