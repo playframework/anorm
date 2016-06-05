@@ -216,8 +216,7 @@ object Macro {
    */
   def offsetParser[T](offset: Int): RowParser[T] = macro offsetParserImpl[T]
 
-  private lazy val debugEnabled = true
-  private lazy val _debugEnabled =
+  private lazy val debugEnabled = 
     Option(System.getProperty("anorm.macro.debug")).
       filterNot(_.isEmpty).map(_.toLowerCase).map { v =>
         "true".equals(v) || v.substring(0, 1) == "y"
