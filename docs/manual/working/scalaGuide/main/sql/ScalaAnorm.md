@@ -183,19 +183,6 @@ val parser: RowParser[Map[String, Any]] =
 val result: List[Map[String, Any]] = SQL"SELECT * FROM dyn_table".as(parser.*)
 ```
 
-If the columns are not strictly defined (e.g. with types that can vary), the `SqlParser.folder` can be used to fold each row in a custom way.
-
-```scala
-import anorm.{ RowParser, SqlParser }
-
-val parser: RowParser[Map[String, Any]] = 
-  SqlParser.folder(Map.empty[String, Any]) { (map, value, meta) => 
-    Right(map + (meta.column.qualified -> value))
-  }
-
-val result: List[Map[String, Any]] = SQL"SELECT * FROM dyn_table".as(parser.*)
-```
-
 #### Table alias
 
 With some databases, it's possible to define aliases for table (or for sub-query), as in the following example.
