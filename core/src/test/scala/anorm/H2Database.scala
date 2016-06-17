@@ -4,7 +4,6 @@ import java.sql.{ DriverManager, Connection }
 import scala.util.Random
 
 trait H2Database {
-
   def withH2Database[R](block: Connection => R): R = {
     val url = "jdbc:h2:mem:test" + Random.alphanumeric.take(6).mkString("")
     val connection = DriverManager.getConnection(url, "sa", "")
