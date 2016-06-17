@@ -17,7 +17,7 @@ import java.math.{ BigDecimal => JBigDec, BigInteger }
 
 import java.sql.Timestamp
 
-object ParameterMetaDataSpec extends org.specs2.mutable.Specification {
+class ParameterMetaDataSpec extends org.specs2.mutable.Specification {
   "Parameter metadata" title
 
   "Metadata" should {

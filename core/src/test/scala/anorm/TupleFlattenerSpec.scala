@@ -6,7 +6,7 @@ import acolyte.jdbc.RowLists._
 import acolyte.jdbc.AcolyteDSL.withQueryResult
 import acolyte.jdbc.Implicits._
 
-object TupleFlattenerSpec extends org.specs2.mutable.Specification {
+class TupleFlattenerSpec extends org.specs2.mutable.Specification {
   "Tuple flattener" title
 
   "Raw tuple-like" should {

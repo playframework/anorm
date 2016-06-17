@@ -30,6 +30,11 @@ lazy val anorm = project
   .settings(
   scalacOptions += "-Xlog-free-terms",
     binaryIssueFilters ++= Seq(
+      // was private:
+      ProblemFilters.exclude[FinalClassProblem]("anorm.Sql$MissingParameter"),
+      missMeth("anorm.DefaultParameterValue.stringValue"/* deprecated */),
+      missMeth("anorm.ParameterValue.stringValue"/* deprecated */),
+      missMeth("anorm.BatchSql.apply"/* was deprecated */),
       missMeth("anorm.SqlQuery.getFilledStatement"/* deprecated 2.3.6 */),
       missMeth("anorm.SqlQuery.fetchSize"/* new field */),
       missMeth("anorm.SqlQuery.withFetchSize"/* new function */),
@@ -77,7 +82,7 @@ lazy val anorm = project
     ) ++ Seq(
       "specs2-core",
       "specs2-junit"
-    ).map("org.specs2" %% _ % "3.6.4" % Test)
+    ).map("org.specs2" %% _ % "3.8.3" % Test)
   }).dependsOn(`anorm-tokenizer`)
 
 lazy val `anorm-iteratee` = (project in file("iteratee"))
@@ -91,7 +96,7 @@ lazy val `anorm-iteratee` = (project in file("iteratee"))
     ) ++ Seq(
       "specs2-core",
       "specs2-junit"
-    ).map("org.specs2" %% _ % "2.4.9" % Test)
+    ).map("org.specs2" %% _ % "3.8.3" % Test)
   ).dependsOn(anorm)
 
 lazy val `anorm-akka` = (project in file("akka"))
@@ -100,12 +105,12 @@ lazy val `anorm-akka` = (project in file("akka"))
   .settings(
     previousArtifacts := Set.empty,
     libraryDependencies ++= Seq(
-      "com.typesafe.akka" %% "akka-stream" % "2.4.4" % "provided",
+      "com.typesafe.akka" %% "akka-stream" % "2.4.8" % "provided",
       "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test
     ) ++ Seq(
       "specs2-core",
       "specs2-junit"
-    ).map("org.specs2" %% _ % "2.4.9" % Test)
+    ).map("org.specs2" %% _ % "3.8.3" % Test)
   ).dependsOn(anorm)
 
 lazy val `anorm-parent` = (project in file("."))

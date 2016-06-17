@@ -6,7 +6,7 @@ import acolyte.jdbc.RowLists._
 import acolyte.jdbc.AcolyteDSL.withQueryResult
 import acolyte.jdbc.Implicits._
 
-object FunctionAdapterSpec extends org.specs2.mutable.Specification {
+class FunctionAdapterSpec extends org.specs2.mutable.Specification {
   "Function flattener" title
 
   "Single column" should {

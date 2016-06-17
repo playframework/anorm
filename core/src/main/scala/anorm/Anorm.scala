@@ -242,11 +242,12 @@ object Sql { // TODO: Rename to SQL
     case (sql, _) => sql
   }
 
-  private class MissingParameter(after: String) extends java.util.NoSuchElementException(s"Missing parameter value after: $after") with NoStackTrace {}
+  final class MissingParameter(after: String) extends java.util.NoSuchElementException(s"Missing parameter value after: $after") with NoStackTrace {}
 
-  private object NoMorePlaceholder extends Exception("No more placeholder")
+  final object NoMorePlaceholder extends Exception("No more placeholder")
     with NoStackTrace {}
 
+  @deprecated("Internal function: will be made private", "2.5.2")
   @annotation.tailrec
   def prepareQuery(tok: List[TokenGroup], ns: List[String], ps: Map[String, ParameterValue], i: Int, buf: StringBuilder, vs: List[(Int, ParameterValue)]): Try[(String, Seq[(Int, ParameterValue)])] =
     (tok.headOption, ns.headOption.flatMap(ps.lift(_))) match {
@@ -256,8 +257,9 @@ object Sql { // TODO: Rename to SQL
 
         prepareQuery(tok.tail, ns.tail, ps, i + c, prepared, (i, p) :: vs)
       }
+
       case (Some(TokenGroup(pr, Some(pl))), _) =>
-        Failure(new MissingParameter(pr mkString ""))
+        Failure(new MissingParameter(pr mkString ", "))
 
       case (Some(TokenGroup(pr, None)), _) =>
         prepareQuery(tok.tail, ns, ps, i, toSql(pr, buf), vs)
@@ -266,6 +268,7 @@ object Sql { // TODO: Rename to SQL
         val (frag, c): (String, Int) = p.toSql
         prepareQuery(tok, ns.tail, ps, i + c, buf, (i, p) :: vs)
       }
+
       case (None, _) | (_, None) => TrySuccess(buf.toString -> vs.reverse)
       case _ => Failure(NoMorePlaceholder)
     }

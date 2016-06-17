@@ -199,7 +199,7 @@ trait JodaColumnSpec { specs: Specification =>
   }
 }
 
-trait JodaParameterSpec { specs: ParameterSpec.type =>
+trait JodaParameterSpec { specs: ParameterSpec =>
   import JodaParameterMetaData._
 
   lazy val dateTime1 = new DateTime(Date1.getTime)

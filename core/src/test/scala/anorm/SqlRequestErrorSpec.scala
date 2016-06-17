@@ -1,6 +1,6 @@
 package anorm
 
-object SqlRequestErrorSpec extends org.specs2.mutable.Specification {
+class SqlRequestErrorSpec extends org.specs2.mutable.Specification {
   "SQL request error" title
 
   "ColumnNotFound" should {

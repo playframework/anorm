@@ -20,7 +20,7 @@ import acolyte.jdbc.Implicits._
 
 import SqlParser.scalar
 
-object AnormSpec extends Specification with H2Database with AnormTest {
+class AnormSpec extends Specification with H2Database with AnormTest {
   "Anorm" title
 
   lazy val fooBarTable = rowList3(

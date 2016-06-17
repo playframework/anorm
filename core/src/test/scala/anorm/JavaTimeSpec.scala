@@ -7,8 +7,7 @@ import acolyte.jdbc.RowLists._
 import acolyte.jdbc.Implicits._
 import org.specs2.mutable.Specification
 
-object JavaTimeColumnSpec extends Specification {
-
+class JavaTimeColumnSpec extends Specification {
   import SqlParser.scalar
 
   "Column mapped as Java8 instant" should {

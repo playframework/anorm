@@ -5,8 +5,11 @@ trait Show {
 }
 
 private[anorm] sealed trait StatementToken
-private[anorm] case class StringToken(value: String) extends StatementToken
 private[anorm] case object PercentToken extends StatementToken
+
+private[anorm] case class StringToken(value: String) extends StatementToken {
+  override lazy val toString = s""""${value.replaceAll("\"", "\\\"")}""""
+}
 
 /**
  * @param prepared Already prepared tokens, not requiring to rewrite placeholder.
@@ -41,7 +44,6 @@ private[anorm] object TokenizedStatement {
 
   @annotation.tailrec
   private[anorm] def tokenize[T](ti: Iterator[String], tks: List[StatementToken], parts: Seq[String], ps: Seq[T with Show], gs: List[TokenGroup], ns: List[String], m: Map[String, T]): (TokenizedStatement, Map[String, T]) = if (ti.hasNext) ti.next match {
-    case "%" => tokenize(ti, PercentToken :: tks, parts, ps, gs, ns, m)
     case s: String =>
       tokenize(ti, StringToken(s) :: tks, parts, ps, gs, ns, m)
     case _ => /* should not occur */ tokenize(ti, tks, parts, ps, gs, ns, m)
@@ -77,7 +79,7 @@ private[anorm] object TokenizedStatement {
       }
     } else parts.headOption match {
       case Some(part) =>
-        val it = new StringTokenizer(part, "%", true).asScala.map(_.toString)
+        val it = List(part).iterator.map(_.toString)
 
         if (!it.hasNext /* empty */ ) {
           tokenize(it, List(StringToken("")), parts.tail, ps, gs, ns, m)

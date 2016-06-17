@@ -28,7 +28,7 @@ import acolyte.jdbc.{
 import acolyte.jdbc.AcolyteDSL.{ connection, handleStatement }
 import acolyte.jdbc.Implicits._
 
-object ParameterSpec
+class ParameterSpec
     extends org.specs2.mutable.Specification with JodaParameterSpec {
 
   "Parameter" title

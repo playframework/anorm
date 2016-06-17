@@ -3,7 +3,7 @@ package anorm
 import acolyte.jdbc.RowLists.rowList3
 import acolyte.jdbc.Implicits._
 
-object MetaDataSpec extends org.specs2.mutable.Specification {
+class MetaDataSpec extends org.specs2.mutable.Specification {
   "Meta-data" title
 
   "Meta-data" should {

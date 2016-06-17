@@ -6,7 +6,7 @@ import acolyte.jdbc.AcolyteDSL.withQueryResult
 import acolyte.jdbc.RowLists.{ rowList2, rowList1, stringList }
 import acolyte.jdbc.Implicits._
 
-object RowSpec extends org.specs2.mutable.Specification {
+class RowSpec extends org.specs2.mutable.Specification {
   "Row" title
 
   "List of column values" should {

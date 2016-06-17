@@ -3,7 +3,7 @@ package anorm
 import acolyte.jdbc.RowLists.rowList1
 import acolyte.jdbc.Implicits._
 
-object CursorSpec extends org.specs2.mutable.Specification {
+class CursorSpec extends org.specs2.mutable.Specification {
   "Cursor" title
 
   "Cursor" should {
