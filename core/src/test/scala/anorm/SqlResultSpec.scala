@@ -7,7 +7,7 @@ import acolyte.jdbc.AcolyteDSL.{ connection, handleQuery, withQueryResult }
 import acolyte.jdbc.RowLists.{ rowList1, rowList2, stringList }
 import acolyte.jdbc.Implicits._
 
-object SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
+class SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
   "SQL result" title
 
   "For-comprehension over result" should {

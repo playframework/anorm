@@ -31,7 +31,7 @@ import acolyte.jdbc.Implicits._
 
 import SqlParser.{ byte, double, float, int, long, scalar, short }
 
-object ColumnSpec
+class ColumnSpec
     extends org.specs2.mutable.Specification with JodaColumnSpec {
 
   "Column" title
