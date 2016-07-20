@@ -84,7 +84,7 @@ import anorm.SqlParser.str
 val id: List[String] = 
   SQL("insert into City(name, country) values ({name}, {country})")
   .on('name -> "Cambridge", 'country -> "New Zealand")
-  .executeInsert(str.+) // insertion returns a list of at least one string keys
+  .executeInsert(str(1).+) // insertion returns a list of at least one string keys
 ```
 
 Since Scala supports multi-line strings, feel free to use them for complex SQL statements:
