@@ -9,6 +9,7 @@ import scala.collection.immutable.Seq
 
 import akka.NotUsed
 import akka.stream.scaladsl.{ Sink, Source }
+import akka.stream.testkit.Utils.assertAllStagesStopped
 
 import org.specs2.concurrent.{ ExecutionEnv => EE }
 
@@ -24,10 +25,12 @@ class AkkaStreamSpec extends org.specs2.mutable.Specification {
 
   "Akka Stream" should {
     "expose the query result as source" in { implicit ee: EE =>
-      withQueryResult(stringList :+ "A" :+ "B" :+ "C") { implicit con =>
-        AkkaStream.source(SQL"SELECT * FROM Test", SqlParser.scalar[String]).
-          runWith(Sink.seq[String]) must beEqualTo(Seq("A", "B", "C")).
-          await(0, 5.second)
+      assertAllStagesStopped {
+        withQueryResult(stringList :+ "A" :+ "B" :+ "C") { implicit con =>
+          AkkaStream.source(SQL"SELECT * FROM Test", SqlParser.scalar[String]).
+            runWith(Sink.seq[String]) must beEqualTo(Seq("A", "B", "C")).
+            await(0, 5.second)
+        }
       }
     }
 
@@ -46,7 +49,7 @@ class AkkaStreamSpec extends org.specs2.mutable.Specification {
         Source.fromGraph(graph).runWith(sink).map { _ => graph.resultSet }
       }
 
-      "on success" in { implicit ee: EE =>
+      "on success" in assertAllStagesStopped { implicit ee: EE =>
         withQueryResult(stringList :+ "A" :+ "B" :+ "C") { implicit con =>
           runAsync(Sink.seq[String]) must beLike[ResultSet] {
             case rs => rs.isClosed must beTrue and (
@@ -58,18 +61,22 @@ class AkkaStreamSpec extends org.specs2.mutable.Specification {
 
       "on cancellation" in (
         withQueryResult(stringList :+ "A" :+ "B" :+ "C")) { implicit con =>
-          run(Sink.cancelled[String]) must beLike[ResultSet] {
-            case rs => rs must beNull or (rs.isClosed must beTrue and (
-              rs.getStatement.isClosed must beTrue))
+          assertAllStagesStopped {
+            run(Sink.cancelled[String]) must beLike[ResultSet] {
+              case rs => rs must beNull or (rs.isClosed must beTrue and (
+                rs.getStatement.isClosed must beTrue))
+            }
           }
         }
 
       "on failure" in (
         withQueryResult(stringList :+ "A" :+ "B" :+ "C")) { implicit con =>
-          run(Sink.reduce[String] { (_, _) => sys.error("Foo") }).
-            aka("result") must beLike[ResultSet] {
-              case rs => rs must beNull or (rs.isClosed must beTrue)
-            }
+          assertAllStagesStopped {
+            run(Sink.reduce[String] { (_, _) => sys.error("Foo") }).
+              aka("result") must beLike[ResultSet] {
+                case rs => rs must beNull or (rs.isClosed must beTrue)
+              }
+          }
         }
     }
   }

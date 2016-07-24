@@ -89,11 +89,12 @@ object AkkaStream {
 
     private[anorm] var resultSet: ResultSet = null
 
-    val out: Outlet[T] = Outlet("AnormQueryResult")
+    override val toString = "AnormQueryResult"
+    val out: Outlet[T] = Outlet("${toString}.out")
     val shape: SourceShape[T] = SourceShape(out)
 
     def createLogic(inheritedAttributes: Attributes): GraphStageLogic =
-      new GraphStageLogic(shape) {
+      new GraphStageLogic(shape) with OutHandler {
         private var cursor: Option[Cursor] = None
 
         override def preStart() {
@@ -121,21 +122,24 @@ object AkkaStream {
           cursor = Sql.unsafeCursor(resultSet, sql.resultSetOnFirstRow, as)
         }
 
-        setHandler(out, new OutHandler {
-          def onPull(): Unit = cursor match {
-            case Some(c) => c.row.as(parser) match {
-              case Success(parsed) => {
-                push(out, parsed)
-                nextCursor()
-              }
-              case Failure(cause) => fail(out, cause)
+        def onPull(): Unit = cursor match {
+          case Some(c) => c.row.as(parser) match {
+            case Success(parsed) => {
+              push(out, parsed)
+              nextCursor()
             }
-
-            case _ => complete(out)
+            case Failure(cause) => fail(out, cause)
           }
 
-          override def onDownstreamFinish() = release()
-        })
+          case _ => complete(out)
+        }
+
+        override def onDownstreamFinish() = {
+          release()
+          super.onDownstreamFinish()
+        }
+
+        setHandler(out, this)
       }
   }
 }
