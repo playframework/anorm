@@ -124,10 +124,21 @@ trait Row {
    * @param name Column qualified name, or label/alias
    */
   private[anorm] def get(a: String): MayErr[SqlRequestError, (Any, MetaDataItem)] = for {
-    m <- MayErr(metaData.get(a).toRight(ColumnNotFound(a, this)))
-    data <- MayErr(m.column.alias.flatMap(aliasesDictionary.get(_)).
-      orElse(columnsDictionary.get(m.column.qualified.toUpperCase())).
-      toRight(ColumnNotFound(m.column.qualified, metaData.availableColumns)))
+    m <- MayErr(metaData.get(a.toUpperCase).toRight(ColumnNotFound(a, this)))
+    data <- {
+      def d = if (a.indexOf(".") > 0) {
+        // if expected to be a qualified (dotted) name
+        columnsDictionary.get(m.column.qualified.toUpperCase).
+          orElse(m.column.alias.flatMap(aliasesDictionary.get(_)))
+
+      } else {
+        m.column.alias.flatMap(aliasesDictionary.get(_)).
+          orElse(columnsDictionary.get(m.column.qualified.toUpperCase))
+      }
+
+      MayErr(d.toRight(
+        ColumnNotFound(m.column.qualified, metaData.availableColumns)))
+    }
   } yield (data, m)
 
   /** Try to get data matching index. */
