@@ -453,17 +453,36 @@ import java.sql.Connection
 
 import scala.concurrent.Future
 
-import akka.NotUsed
 import akka.stream.Materializer
 import akka.stream.scaladsl.{ Sink, Source }
 
 import anorm._
 
-def resultSource(implicit m: Materializer, con: Connection): Source[String, NotUsed] = AkkaStream.source(SQL"SELECT * FROM Test", SqlParser.scalar[String], ColumnAliaser.empty)
+def resultSource(implicit m: Materializer, con: Connection): Source[String, Future[Int]] = AkkaStream.source(SQL"SELECT * FROM Test", SqlParser.scalar[String], ColumnAliaser.empty)
 
 def countStrings()(implicit m: Materializer, con: Connection): Future[Int] =
   resultSource.runWith(
     Sink.fold[Int, String](0) { (count, str) => count + str.length })
+```
+
+It materializes a `Future` containing either the number of read rows from the source if successful, or the exception if row parsing failed.
+This could be useful to actually close the connection afterwards.
+
+```scala
+import java.sql.Connection
+
+import scala.concurrent.Future
+
+import akka.stream.Materializer
+import akka.stream.scaladsl.{ Sink, Source }
+
+import anorm._
+
+def source(implicit m: Materializer, connection: Connection): Source[String, Future[Int]]#ReprMat[String, Unit] = 
+  AkkaStream.source(SQL"SELECT * FROM Test", SqlParser.scalar[String], ColumnAliaser.empty)
+    .mapMaterializedValue(_.onComplete { _ =>
+      connection.close()
+    })
 ```
 
 ### Iteratee
