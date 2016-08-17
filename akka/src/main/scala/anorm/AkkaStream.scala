@@ -2,15 +2,19 @@ package anorm
 
 import java.sql.Connection
 
-import scala.concurrent.Future
-
-import akka.NotUsed
-import akka.stream.Materializer
-import akka.stream.scaladsl.Source
+import scala.concurrent.{ Future, Promise }
+import akka.stream.{ MaterializationContext, Materializer, Outlet, SourceShape }
+import akka.stream.impl.SourceModule
+import akka.stream.impl.Stages.DefaultAttributes
+import akka.stream.impl.StreamLayout.Module
+import akka.stream.scaladsl.{ Sink, Source }
+import org.reactivestreams.Publisher
 
 /**
  * Anorm companion for the [[http://doc.akka.io/docs/akka/2.4.4/scala/stream/]].
  *
+ * @define materialization It materializes a [[Future]] of [[Int]] containing the number of rows read from the source upon completion,
+ *                         and a possible exception if row parsing failed.
  * @define sqlParam the SQL query
  * @define materializerParam the stream materializer
  * @define connectionParam the JDBC connection, which must not be closed until the source is materialized.
@@ -19,6 +23,8 @@ import akka.stream.scaladsl.Source
 object AkkaStream {
   /**
    * Returns the rows parsed from the `sql` query as a reactive source.
+   *
+   * $materialization
    *
    * @tparam T the type of the result elements
    * @param sql $sqlParam
@@ -39,10 +45,15 @@ object AkkaStream {
    * def resultSource(implicit m: Materializer, con: Connection): Source[String, NotUsed] = AkkaStream.source(SQL"SELECT * FROM Test", SqlParser.scalar[String], ColumnAliaser.empty)
    * }}}
    */
-  def source[T](sql: => Sql, parser: RowParser[T], as: ColumnAliaser)(implicit m: Materializer, con: Connection): Source[T, NotUsed] = Source.fromGraph(new ResultSource[T](con, sql, as, parser))
+  def source[T](sql: => Sql, parser: RowParser[T], as: ColumnAliaser)(implicit m: Materializer, con: Connection): Source[T, Future[Int]] = {
+    val resultSourceShape = SourceShape[T](Outlet[T]("AnormQueryResult.out"))
+    new Source(new ResultSource[T](con, sql, as, parser, resultSourceShape))
+  }
 
   /**
    * Returns the rows parsed from the `sql` query as a reactive source.
+   *
+   * $materialization
    *
    * @tparam T the type of the result elements
    * @param sql $sqlParam
@@ -50,29 +61,33 @@ object AkkaStream {
    * @param m $materializerParam
    * @param connection $connectionParam
    */
-  def source[T](sql: => Sql, parser: RowParser[T])(implicit m: Materializer, con: Connection): Source[T, NotUsed] = source[T](sql, parser, ColumnAliaser.empty)
+  def source[T](sql: => Sql, parser: RowParser[T])(implicit m: Materializer, con: Connection): Source[T, Future[Int]] = source[T](sql, parser, ColumnAliaser.empty)
 
   /**
    * Returns the result rows from the `sql` query as an enumerator.
    * This is equivalent to `source[Row](sql, RowParser.successful, as)`.
+   *
+   * $materialization
    *
    * @param sql $sqlParam
    * @param as $columnAliaserParam
    * @param m $materializerParam
    * @param connection $connectionParam
    */
-  def source(sql: => Sql, as: ColumnAliaser)(implicit m: Materializer, connnection: Connection): Source[Row, NotUsed] = source(sql, RowParser.successful, as)
+  def source(sql: => Sql, as: ColumnAliaser)(implicit m: Materializer, connnection: Connection): Source[Row, Future[Int]] = source(sql, RowParser.successful, as)
 
   /**
    * Returns the result rows from the `sql` query as an enumerator.
    * This is equivalent to
    * `source[Row](sql, RowParser.successful, ColumnAliaser.empty)`.
    *
+   * $materialization
+   *
    * @param sql $sqlParam
    * @param m $materializerParam
    * @param connection $connectionParam
    */
-  def source(sql: => Sql)(implicit m: Materializer, connnection: Connection): Source[Row, NotUsed] = source(sql, RowParser.successful, ColumnAliaser.empty)
+  def source(sql: => Sql)(implicit m: Materializer, connnection: Connection): Source[Row, Future[Int]] = source(sql, RowParser.successful, ColumnAliaser.empty)
 
   // Internal stages
 
@@ -82,6 +97,31 @@ object AkkaStream {
   import akka.stream.stage.{ GraphStage, GraphStageLogic, OutHandler }
 
   private[anorm] class ResultSource[T](
+      connection: Connection,
+      sql: Sql,
+      as: ColumnAliaser,
+      parser: RowParser[T],
+      shape: SourceShape[T])(implicit mat: Materializer) extends SourceModule[T, Future[Int]](shape) {
+
+    override def create(context: MaterializationContext): (Publisher[T], Future[Int]) = {
+      val result = Promise[Int]()
+      (Source.fromGraph(new AnormResult[T](result, connection, sql, as, parser))
+        .runWith(Sink.asPublisher(false)), result.future)
+    }
+
+    override protected def newInstance(shape: SourceShape[T]): SourceModule[T, Future[Int]] =
+      new ResultSource[T](connection, sql, as, parser, shape)
+
+    override def withAttributes(attr: Attributes): Module =
+      new ResultSource[T](connection, sql, as, parser, amendShape(attr))
+
+    override def attributes: Attributes = Attributes.name("resultSource") and DefaultAttributes.IODispatcher
+
+    override protected def label: String = s"ResultSource($parser)"
+  }
+
+  private[anorm] class AnormResult[T](
+      result: Promise[Int],
       connection: Connection,
       sql: Sql,
       as: ColumnAliaser,
@@ -96,6 +136,7 @@ object AkkaStream {
     def createLogic(inheritedAttributes: Attributes): GraphStageLogic =
       new GraphStageLogic(shape) with OutHandler {
         private var cursor: Option[Cursor] = None
+        private var counter: Int = 0
 
         override def preStart() {
           resultSet = sql.unsafeResultSet(connection)
@@ -125,13 +166,18 @@ object AkkaStream {
         def onPull(): Unit = cursor match {
           case Some(c) => c.row.as(parser) match {
             case Success(parsed) => {
+              counter += 1
               push(out, parsed)
               nextCursor()
             }
-            case Failure(cause) => fail(out, cause)
+            case Failure(cause) =>
+              result.failure(cause)
+              fail(out, cause)
           }
 
-          case _ => complete(out)
+          case _ =>
+            result.success(counter)
+            complete(out)
         }
 
         override def onDownstreamFinish() = {

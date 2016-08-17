@@ -2,17 +2,12 @@ package anorm
 
 import java.sql.{ Connection, ResultSet }
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ ExecutionContext, Future, Promise }
 import scala.concurrent.duration._
-
 import scala.collection.immutable.Seq
-
-import akka.NotUsed
-import akka.stream.scaladsl.{ Sink, Source }
+import akka.stream.scaladsl.{ Keep, Sink, Source }
 import akka.stream.testkit.Utils.assertAllStagesStopped
-
 import org.specs2.concurrent.{ ExecutionEnv => EE }
-
 import acolyte.jdbc.AcolyteDSL.withQueryResult
 import acolyte.jdbc.RowLists.stringList
 import acolyte.jdbc.Implicits._
@@ -31,6 +26,13 @@ class AkkaStreamSpec extends org.specs2.mutable.Specification {
             runWith(Sink.seq[String]) must beEqualTo(Seq("A", "B", "C")).
             await(0, 5.second)
         }
+      }
+    }
+
+    "be done if the stream run through" in { implicit ee: EE =>
+      withQueryResult(stringList :+ "A" :+ "B" :+ "C") { implicit con =>
+        AkkaStream.source(SQL"SELECT * FROM Test", SqlParser.scalar[String]).
+          toMat(Sink.ignore)(Keep.left).run() must beEqualTo(3).await(0, 3.seconds)
       }
     }
 
@@ -81,5 +83,5 @@ class AkkaStreamSpec extends org.specs2.mutable.Specification {
     }
   }
 
-  def source[T](sql: Sql, parser: RowParser[T])(implicit connection: Connection) = new AkkaStream.ResultSource[T](connection, sql, ColumnAliaser.empty, parser)
+  def source[T](sql: Sql, parser: RowParser[T])(implicit connection: Connection) = new AkkaStream.AnormResult[T](Promise[Int](), connection, sql, ColumnAliaser.empty, parser)
 }
