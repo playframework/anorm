@@ -3,12 +3,8 @@ package anorm
 import java.sql.Connection
 
 import scala.concurrent.{ Future, Promise }
-import akka.stream.{ MaterializationContext, Materializer, Outlet, SourceShape }
-import akka.stream.impl.SourceModule
-import akka.stream.impl.Stages.DefaultAttributes
-import akka.stream.impl.StreamLayout.Module
-import akka.stream.scaladsl.{ Sink, Source }
-import org.reactivestreams.Publisher
+import akka.stream.{ Materializer, Outlet, SourceShape }
+import akka.stream.scaladsl.{ Source }
 
 /**
  * Anorm companion for the [[http://doc.akka.io/docs/akka/2.4.4/scala/stream/]].
@@ -46,8 +42,7 @@ object AkkaStream {
    * }}}
    */
   def source[T](sql: => Sql, parser: RowParser[T], as: ColumnAliaser)(implicit m: Materializer, con: Connection): Source[T, Future[Int]] = {
-    val resultSourceShape = SourceShape[T](Outlet[T]("AnormQueryResult.out"))
-    new Source(new ResultSource[T](con, sql, as, parser, resultSourceShape))
+    Source.fromGraph(new ResultSource[T](con, sql, as, parser))
   }
 
   /**
@@ -94,38 +89,13 @@ object AkkaStream {
   import scala.util.{ Failure, Success }
   import java.sql.ResultSet
   import akka.stream.{ Attributes, Outlet, SourceShape }
-  import akka.stream.stage.{ GraphStage, GraphStageLogic, OutHandler }
+  import akka.stream.stage.{ GraphStageWithMaterializedValue, GraphStageLogic, OutHandler }
 
   private[anorm] class ResultSource[T](
       connection: Connection,
       sql: Sql,
       as: ColumnAliaser,
-      parser: RowParser[T],
-      shape: SourceShape[T])(implicit mat: Materializer) extends SourceModule[T, Future[Int]](shape) {
-
-    override def create(context: MaterializationContext): (Publisher[T], Future[Int]) = {
-      val result = Promise[Int]()
-      (Source.fromGraph(new AnormResult[T](result, connection, sql, as, parser))
-        .runWith(Sink.asPublisher(false)), result.future)
-    }
-
-    override protected def newInstance(shape: SourceShape[T]): SourceModule[T, Future[Int]] =
-      new ResultSource[T](connection, sql, as, parser, shape)
-
-    override def withAttributes(attr: Attributes): Module =
-      new ResultSource[T](connection, sql, as, parser, amendShape(attr))
-
-    override def attributes: Attributes = Attributes.name("resultSource") and DefaultAttributes.IODispatcher
-
-    override protected def label: String = s"ResultSource($parser)"
-  }
-
-  private[anorm] class AnormResult[T](
-      result: Promise[Int],
-      connection: Connection,
-      sql: Sql,
-      as: ColumnAliaser,
-      parser: RowParser[T]) extends GraphStage[SourceShape[T]] {
+      parser: RowParser[T]) extends GraphStageWithMaterializedValue[SourceShape[T], Future[Int]] {
 
     private[anorm] var resultSet: ResultSet = null
 
@@ -133,8 +103,9 @@ object AkkaStream {
     val out: Outlet[T] = Outlet("${toString}.out")
     val shape: SourceShape[T] = SourceShape(out)
 
-    def createLogic(inheritedAttributes: Attributes): GraphStageLogic =
-      new GraphStageLogic(shape) with OutHandler {
+    override def createLogicAndMaterializedValue(inheritedAttributes: Attributes): (GraphStageLogic, Future[Int]) = {
+      val result = Promise[Int]()
+      val logic = new GraphStageLogic(shape) with OutHandler {
         private var cursor: Option[Cursor] = None
         private var counter: Int = 0
 
@@ -187,5 +158,9 @@ object AkkaStream {
 
         setHandler(out, this)
       }
+
+      (logic, result.future)
+    }
   }
+
 }

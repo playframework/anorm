@@ -83,5 +83,5 @@ class AkkaStreamSpec extends org.specs2.mutable.Specification {
     }
   }
 
-  def source[T](sql: Sql, parser: RowParser[T])(implicit connection: Connection) = new AkkaStream.AnormResult[T](Promise[Int](), connection, sql, ColumnAliaser.empty, parser)
+  def source[T](sql: Sql, parser: RowParser[T])(implicit connection: Connection) = new AkkaStream.ResultSource[T](connection, sql, ColumnAliaser.empty, parser)
 }
