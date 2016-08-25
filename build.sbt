@@ -99,7 +99,7 @@ lazy val `anorm-iteratee` = (project in file("iteratee"))
     ).map("org.specs2" %% _ % "3.8.3" % Test)
   ).dependsOn(anorm)
 
-val akkaVer = "2.4.8"
+val akkaVer = "2.4.9"
 
 lazy val `anorm-akka` = (project in file("akka"))
   .enablePlugins(PlayLibrary)
