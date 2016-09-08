@@ -8,12 +8,9 @@ import java.math.{ BigDecimal => JBigDec, BigInteger }
 import java.util.{ Date, UUID }
 import java.sql.Timestamp
 
-import scala.language.reflectiveCalls
 import scala.util.{ Failure, Success => TrySuccess, Try }
 
 import resource.managed
-
-import scala.language.reflectiveCalls
 
 /** Column mapping */
 @annotation.implicitNotFound(

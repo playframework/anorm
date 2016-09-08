@@ -503,6 +503,10 @@ object RowParser {
   object successful extends RowParser[Row] {
     def apply(row: Row): SqlResult[Row] = Success(row)
   }
+
+  def failed[A](error: => Error): RowParser[A] = new RowParser[A] {
+    def apply(row: Row): SqlResult[A] = error
+  }
 }
 
 trait RowParser[+A] extends (Row => SqlResult[A]) { parent =>
@@ -661,7 +665,7 @@ trait RowParser[+A] extends (Row => SqlResult[A]) { parent =>
 sealed trait ScalarRowParser[+A] extends RowParser[A] {
   override def singleOpt: ResultSetParser[Option[A]] = ResultSetParser {
     case Some(cur) if cur.next.isEmpty => cur.row.data match {
-      case null :: _ =>
+      case (null :: _) | Nil =>
         // one column present in head row, but column value is null
         Success(Option.empty[A])
 

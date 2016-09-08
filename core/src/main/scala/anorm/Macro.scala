@@ -9,6 +9,18 @@ object Macro {
   import scala.language.experimental.macros
   import scala.reflect.macros.whitebox
 
+  /** Only for internal purposes */
+  final class Placeholder {}
+
+  /** Only for internal purposes */
+  object Placeholder {
+    implicit object Parser extends RowParser[Placeholder] {
+      val success = Success(new Placeholder())
+
+      def apply(row: Row) = success
+    }
+  }
+
   /**
    * Naming strategy, to map each class property to the corresponding column.
    */
@@ -40,6 +52,30 @@ object Macro {
         def apply(property: String): String = transformation(property)
       }
   }
+
+  trait Discriminator extends (String => String) {
+    /** @param tname the name of type (class or object) to be discriminated */
+    def apply(tname: String): String
+  }
+
+  object Discriminator {
+    object Identity extends Discriminator {
+      def apply(tname: String) = tname
+    }
+  }
+
+  trait DiscriminatorNaming extends (String => String) {
+    /** @param familyType the name of the famility type (sealed trait) */
+    def apply(familyType: String): String
+  }
+
+  object DiscriminatorNaming {
+    object Default extends DiscriminatorNaming {
+      def apply(familyType: String) = "classname"
+    }
+  }
+
+  // ---
 
   def namedParserImpl[T: c.WeakTypeTag](c: whitebox.Context): c.Expr[T] = {
     import c.universe._
@@ -108,14 +144,141 @@ object Macro {
     offsetParserImpl[T](c)(reify(0))
   }
 
+  private def directKnownSubclasses(c: whitebox.Context)(tpe: c.Type): List[c.Type] = {
+    // Workaround for SI-7046: https://issues.scala-lang.org/browse/SI-7046
+    import c.universe._
+
+    val tpeSym = tpe.typeSymbol.asClass
+
+    @annotation.tailrec
+    def allSubclasses(path: Traversable[Symbol], subclasses: Set[Type]): Set[Type] = path.headOption match {
+      case Some(cls: ClassSymbol) if (
+        tpeSym != cls && cls.selfType.baseClasses.contains(tpeSym)
+      ) => {
+        val newSub: Set[Type] = if (!cls.isCaseClass) {
+          c.warning(c.enclosingPosition, s"cannot handle class ${cls.fullName}: no case accessor")
+          Set.empty
+        } else if (!cls.typeParams.isEmpty) {
+          c.warning(c.enclosingPosition, s"cannot handle class ${cls.fullName}: type parameter not supported")
+          Set.empty
+        } else Set(cls.selfType)
+
+        allSubclasses(path.tail, subclasses ++ newSub)
+      }
+
+      case Some(o: ModuleSymbol) if (
+        o.companion == NoSymbol && // not a companion object
+        tpeSym != c && o.typeSignature.baseClasses.contains(tpeSym)
+      ) => {
+        val newSub: Set[Type] = if (!o.moduleClass.asClass.isCaseClass) {
+          c.warning(c.enclosingPosition, s"cannot handle object ${o.fullName}: no case accessor")
+          Set.empty
+        } else Set(o.typeSignature)
+
+        allSubclasses(path.tail, subclasses ++ newSub)
+      }
+
+      case Some(o: ModuleSymbol) if (
+        o.companion == NoSymbol // not a companion object
+      ) => allSubclasses(path.tail, subclasses)
+
+      case Some(_) => allSubclasses(path.tail, subclasses)
+
+      case _ => subclasses
+    }
+
+    if (tpeSym.isSealed && tpeSym.isAbstract) {
+      allSubclasses(tpeSym.owner.typeSignature.decls, Set.empty).toList
+    } else List.empty
+  }
+
+  def sealedParserImpl[T: c.WeakTypeTag](c: whitebox.Context): c.Expr[RowParser[T]] = {
+    import c.universe._
+
+    val tpe = c.weakTypeTag[T].tpe
+
+    // TODO: Get from params
+    val classNaming = Discriminator.Identity(_)
+    val discriminator = DiscriminatorNaming.Default(tpe.typeSymbol.fullName)
+
+    @inline def abort(msg: String) = c.abort(c.enclosingPosition, msg)
+    val sub = directKnownSubclasses(c)(tpe).filter { subclass =>
+      if (!subclass.typeSymbol.asClass.typeParams.isEmpty) {
+        c.warning(c.enclosingPosition, s"class with type parameters is not supported as family member: $subclass")
+
+        false
+      } else true
+    }
+
+    if (sub.isEmpty) {
+      abort(s"cannot find any subclass: $tpe")
+    }
+
+    val parserTpe = c.weakTypeTag[RowParser[_]].tpe
+    val missing: List[Type] = sub.flatMap { subclass =>
+      val ptype = appliedType(parserTpe, List(subclass))
+
+      c.inferImplicitValue(ptype) match {
+        case EmptyTree => List(subclass)
+        case _ => List.empty
+      }
+    }
+
+    if (!missing.isEmpty) {
+      def details = missing.map { subclass =>
+        val typeStr = if (subclass.typeSymbol.companion == NoSymbol) {
+          s"${subclass.typeSymbol.fullName}.type"
+        } else subclass.typeSymbol.fullName
+
+        s"- cannot find anorm.RowParser[$typeStr] in the implicit scope"
+      }.mkString(",\r\n")
+
+      abort(s"fails to generate sealed parser: $tpe;\r\n$details")
+    }
+
+    // ---
+
+    val cases = sub.map { subclass =>
+      val key = classNaming(subclass.typeSymbol.fullName)
+      val subtype = {
+        if (subclass.typeSymbol.asClass.typeParams.isEmpty) subclass
+        else subclass.erasure
+      }
+
+      key -> cq"$key => implicitly[anorm.RowParser[$subtype]]"
+    }.toMap
+
+    @inline def supported = cases.keys.mkString(", ")
+    def mappingError = q"""anorm.RowParser.failed[$tpe](anorm.Error(anorm.SqlMappingError("unexpected row type '%s'; expected: %s".format(d, $supported))))"""
+
+    val discriminatorTerm = TermName(c.freshName("discriminator"))
+    val matching = Match(
+      q"$discriminatorTerm", cases.values.toList :+ cq"d => $mappingError")
+
+    val parser = q"""new anorm.RowParser[$tpe] {
+      val underlying: anorm.RowParser[$tpe] = 
+        anorm.SqlParser.str($discriminator).flatMap { $discriminatorTerm: String => 
+          $matching
+        }
+
+      def apply(row: Row): anorm.SqlResult[$tpe] = underlying(row)
+    }"""
+
+    if (debugEnabled) {
+      c.echo(c.enclosingPosition, s"row parser generated for $tpe: ${pretty(c)(parser)}")
+    }
+
+    c.Expr[RowParser[T]](c.typecheck(parser))
+  }
+
   private def parserImpl[T: c.WeakTypeTag](c: whitebox.Context)(genGet: (c.universe.Type, String, Int) => c.universe.Tree): c.Expr[T] = {
     import c.universe._
 
     val tpe = c.weakTypeTag[T].tpe
-    @inline def abort(m: String) = c.abort(c.enclosingPosition, m)
+    @inline def abort(msg: String) = c.abort(c.enclosingPosition, msg)
 
     if (!tpe.typeSymbol.isClass || !tpe.typeSymbol.asClass.isCaseClass) {
-      abort(s"case class expected: ${tpe}")
+      abort(s"case class expected: $tpe")
     }
 
     val colTpe = c.weakTypeTag[Column[_]].tpe
@@ -126,97 +289,228 @@ object Macro {
       abort(s"parsed data cannot be passed as parameter: $ctor")
     }
 
-    val TypeRef(_, _, tpeArgs) = tpe
+    val tpeArgs: List[c.Type] = tpe match {
+      case SingleType(_, _) => List.empty
+      case TypeRef(_, _, args) => args
+      case i @ ClassInfoType(_, _, _) => i.typeArgs
+    }
 
     val companion = tpe.typeSymbol.companion.typeSignature
     val apply = companion.decl(TermName("apply")).asMethod
 
-    val boundTypes = apply.typeParams.zip(tpeArgs).map {
-      case (sym, ty) => sym.fullName -> ty
-    }.toMap
+    object ImplicitResolver {
+      // Per each symbol of the type parameters, which type is bound to
+      val boundTypes: Map[String, Type] = apply.typeParams.zip(tpeArgs).map {
+        case (sym, ty) => sym.fullName -> ty
+      }.toMap
+
+      // The placeholder type
+      private val PlaceholderType: Type = typeOf[Placeholder]
+
+      /* Refactor the input types, by replacing any type matching the `filter`,
+       * by the given `replacement`.
+       */
+      @annotation.tailrec
+      private def refactor(in: List[Type], base: TypeSymbol, out: List[Type], tail: List[(List[Type], TypeSymbol, List[Type])], filter: Type => Boolean, replacement: Type, altered: Boolean): (Type, Boolean) = in match {
+        case tpe :: ts =>
+          boundTypes.getOrElse(tpe.typeSymbol.fullName, tpe) match {
+            case t if (filter(t)) =>
+              refactor(ts, base, (replacement :: out), tail,
+                filter, replacement, true)
+
+            case TypeRef(_, sym, as) if as.nonEmpty =>
+              refactor(as, sym.asType, List.empty, (ts, base, out) :: tail,
+                filter, replacement, altered)
+
+            case t => refactor(ts, base, (t :: out), tail,
+              filter, replacement, altered)
+          }
+
+        case _ => {
+          val tpe = appliedType(base, out.reverse)
+
+          tail match {
+            case (x, y, more) :: ts =>
+              refactor(x, y, (tpe :: more), ts, filter, replacement, altered)
+
+            case _ => tpe -> altered
+          }
+        }
+      }
+
+      /**
+       * Replaces any reference to the type itself by the Placeholder type.
+       * @return the normalized type + whether any self reference has been found
+       */
+      private def normalized(ptype: Type): (Type, Boolean) =
+        boundTypes.getOrElse(ptype.typeSymbol.fullName, ptype) match {
+          case t if (t =:= tpe) =>
+            PlaceholderType -> true
+
+          case TypeRef(_, sym, args) if args.nonEmpty =>
+            refactor(args, sym.asType, List.empty, List.empty,
+              _ =:= tpe, PlaceholderType, false)
+
+          case t => t -> false
+        }
+
+      /* Restores reference to the type itself when Placeholder is found. */
+      private def denormalized(ptype: Type): Type = ptype match {
+        case PlaceholderType => tpe
+
+        case TypeRef(_, sym, args) =>
+          refactor(args, sym.asType, List.empty, List.empty,
+            _ == PlaceholderType, tpe, false)._1
+
+        case _ => ptype
+      }
+
+      val forwardName = TermName(c.freshName("forward"))
+
+      private object ImplicitTransformer extends Transformer {
+        override def transform(tree: Tree): Tree = tree match {
+          case tt: TypeTree =>
+            super.transform(TypeTree(denormalized(tt.tpe)))
+
+          case Select(Select(This(TypeName("Macro")), t), sym) if (
+            t.toString == "Placeholder" && sym.toString == "Parser"
+          ) => super.transform(q"$forwardName")
+
+          case _ =>
+            super.transform(tree)
+        }
+      }
+
+      def resolve(name: Name, ptype: Type, typeclass: Type): Implicit = {
+        val (ntpe, selfRef) = normalized(ptype)
+        val ptpe = boundTypes.get(ntpe.typeSymbol.fullName).getOrElse(ntpe)
+
+        // infers implicit
+        val neededImplicitType = appliedType(typeclass, ptpe)
+        val neededImplicit = if (!selfRef) {
+          c.inferImplicitValue(neededImplicitType)
+        } else c.untypecheck(
+          // Reset the type attributes on the refactored tree for the implicit
+          ImplicitTransformer.transform(
+            c.inferImplicitValue(neededImplicitType)))
+
+        Implicit(name, ptype, neededImplicit, tpe, selfRef)
+      }
+
+      // ---
+
+      // Now we find all the implicits that we need
+      final case class Implicit(
+        paramName: Name,
+        paramType: Type,
+        neededImplicit: Tree,
+        tpe: Type,
+        selfRef: Boolean)
+    }
 
     // ---
 
-    val (x, m, body, _) = ctor.paramLists.
-      foldLeft[(Tree, Tree, Tree, Int)]((EmptyTree, EmptyTree, EmptyTree, 0)) {
-        case ((xa, ma, bs, ia), pss) =>
-          val (xb, mb, vs, ib) =
-            pss.foldLeft((xa, ma, List.empty[Tree], ia)) {
-              case ((xtr, mp, ps, pi), term: TermSymbol) =>
-                val tn = term.name.toString
-                val tt = {
-                  val t = term.typeSignature
-                  boundTypes.lift(t.typeSymbol.fullName).getOrElse(t)
-                  // TODO: term.isParamWithDefault
-                }
-                val ctype = appliedType(colTpe, List(tt))
+    import ImplicitResolver.Implicit
 
-                c.inferImplicitValue(ctype) match {
-                  case EmptyTree => {
-                    val ptype = appliedType(parserTpe, List(tt))
+    val (x, m, body, _, hasSelfRef) = ctor.paramLists.foldLeft[(Tree, Tree, Tree, Int, Boolean)]((EmptyTree, EmptyTree, EmptyTree, 0, false)) {
+      case ((xa, ma, bs, ia, sr), pss) =>
+        val (xb, mb, vs, ib, selfRef) =
+          pss.foldLeft((xa, ma, List.empty[Tree], ia, sr)) {
+            case ((xtr, mp, ps, pi, sref), term: TermSymbol) =>
+              val tn = term.name.toString
+              val tt = {
+                val t = term.typeSignature
+                ImplicitResolver.boundTypes.
+                  getOrElse(t.typeSymbol.fullName, t)
+                // TODO: term.isParamWithDefault
+              }
 
-                    c.inferImplicitValue(ptype) match {
-                      case EmptyTree =>
-                        abort(s"cannot find $ctype nor $ptype for ${term.name} in $ctor")
-                      case pr =>
-                        // Use an existing `RowParser[T]` as part
-                        pq"${term.name}" match {
-                          case b @ Bind(bn, _) =>
-                            val bt = q"${bn.toTermName}"
+              // Try to resolve `Column[tt]`
+              ImplicitResolver.resolve(term.name, tt, colTpe) match {
+                case Implicit(_, _, EmptyTree, _, _) => // No `Column[tt]` ...
+                  // ... try to resolve `RowParser[tt]`
+                  ImplicitResolver.resolve(term.name, tt, parserTpe) match {
+                    case Implicit(_, _, EmptyTree, _, _) => abort(s"cannot find $colTpe nor $parserTpe for ${term.name}:$tt in $ctor")
 
-                            xtr match {
-                              case EmptyTree => (pr, b, List[Tree](bt), pi + 1)
-                              case _ => (q"$xtr ~ $pr",
-                                pq"anorm.~($mp, $b)", bt :: ps, pi + 1)
+                    case Implicit(_, _, pr, _, s) => {
+                      // Use an existing `RowParser[T]` as part
+                      pq"${term.name}" match {
+                        case b @ Bind(bn, _) =>
+                          val bt = q"${bn.toTermName}"
 
-                            }
-                        }
+                          xtr match {
+                            case EmptyTree =>
+                              (pr, b, List[Tree](bt), pi + 1, s || sref)
+
+                            case _ => (q"$xtr ~ $pr",
+                              pq"anorm.~($mp, $b)", bt :: ps, pi + 1, s || sref)
+
+                          }
+                      }
                     }
                   }
 
-                  case _ => {
-                    // Generate a `get` for the `Column[T]`
-                    val get = genGet(tt, tn, pi)
+                case Implicit(_, _, itree, _, _) => {
+                  // Generate a `get` for the `Column[T]`
+                  val get = genGet(tt, tn, pi)
 
-                    pq"${term.name}" match {
-                      case b @ Bind(bn, _) =>
-                        val bt = q"${bn.toTermName}"
+                  pq"${term.name}" match {
+                    case b @ Bind(bn, _) =>
+                      val bt = q"${bn.toTermName}"
 
-                        xtr match {
-                          case EmptyTree => (get, b, List[Tree](bt), pi + 1)
-                          case _ => (q"$xtr ~ $get",
-                            pq"anorm.~($mp, $b)", bt :: ps, pi + 1)
+                      xtr match {
+                        case EmptyTree =>
+                          (get, b, List[Tree](bt), pi + 1, sref)
 
-                        }
-                    }
+                        case _ => (q"$xtr ~ $get($itree)",
+                          pq"anorm.~($mp, $b)", bt :: ps, pi + 1, sref)
+
+                      }
                   }
                 }
-            }
-
-          val by = bs match {
-            case EmptyTree => q"new $tpe(..${vs.reverse})"
-            case xs => q"$xs(..${vs.reverse})"
+              }
           }
 
-          (xb, mb, by, ib)
-      }
+        val by = bs match {
+          case EmptyTree => q"new $tpe(..${vs.reverse})"
+          case xs => q"$xs(..${vs.reverse})"
+        }
+
+        (xb, mb, by, ib, selfRef)
+    }
 
     val caseDef = cq"$m => { $body }"
-    val parser = q"$x map[$tpe] { _ match { case $caseDef } }"
+    val patMat = q"$x.map[$tpe] { _ match { case $caseDef } }"
+    val parser = if (!hasSelfRef) patMat else {
+      val generated = TypeName(c.freshName("Generated"))
+      val rowParser = TermName(c.freshName("rowParser"))
+
+      q"""{
+        final class $generated() {
+          val ${ImplicitResolver.forwardName} = 
+            anorm.RowParser[$tpe]($rowParser)
+
+          def $rowParser: anorm.RowParser[$tpe] = $patMat
+        }
+
+        new $generated().$rowParser
+      }"""
+    }
 
     if (debugEnabled) {
-      val generated = show(parser).replaceAll("anorm.", "").
-        replaceAll("\\.\\$tilde", " ~ ").
-        replaceAll("\\(SqlParser([^(]+)\\(([^)]+)\\)\\)", "SqlParser$1($2)").
-        replaceAll("\\.\\$plus\\(([0-9]+)\\)", " + $1").
-        replaceAll("\\(([^ ]+) @ _\\)", "($1)").
-        replaceAll("\\$tilde", "~")
-
-      c.echo(c.enclosingPosition, s"row parser generated for $tpe: $generated")
+      c.echo(c.enclosingPosition, s"row parser generated for $tpe: ${pretty(c)(parser)}")
     }
 
     c.Expr(c.typecheck(parser))
   }
+
+  private def pretty(c: whitebox.Context)(parser: c.Tree): String =
+    c.universe.show(parser).replaceAll("anorm.", "").
+      replaceAll("\\.\\$tilde", " ~ ").
+      replaceAll("\\(SqlParser([^(]+)\\(([^)]+)\\)\\)", "SqlParser$1($2)").
+      replaceAll("\\.\\$plus\\(([0-9]+)\\)", " + $1").
+      replaceAll("\\(([^ ]+) @ _\\)", "($1)").
+      replaceAll("\\$tilde", "~")
 
   /**
    * Returns a row parser generated for a case class `T`,
@@ -309,6 +603,15 @@ object Macro {
    * }}}
    */
   def offsetParser[T](offset: Int): RowParser[T] = macro offsetParserImpl[T]
+
+  /**
+   * Returns a row parser generated for a sealed class family.
+   * Each direct known subclasses `C` must be provided with an appropriate
+   * `RowParser[C]` in the implicit scope.
+   *
+   * @tparam T the type of the type family (either a sealed trait or abstract class)
+   */
+  def sealedParser[T]: RowParser[T] = macro sealedParserImpl[T]
 
   private lazy val debugEnabled =
     Option(System.getProperty("anorm.macro.debug")).

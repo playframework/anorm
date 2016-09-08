@@ -15,7 +15,6 @@ trait ToSql[A] {
 
 /** Provided ToSql implementations. */
 object ToSql {
-  import scala.language.implicitConversions
   import scala.collection.immutable.SortedSet
 
   /**

@@ -8,8 +8,6 @@ private[anorm] case class TokenizedStatement(
   tokens: List[TokenGroup], names: List[String])
 
 private[anorm] object TokenizedStatement {
-  import java.util.StringTokenizer
-  import scala.collection.JavaConverters.enumerationAsScalaIteratorConverter
   import scala.language.experimental.macros
   import scala.reflect.macros.whitebox
 

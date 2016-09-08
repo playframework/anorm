@@ -127,6 +127,8 @@ lazy val `anorm-parent` = (project in file("."))
 lazy val docs = project
   .in(file("docs"))
   .enablePlugins(PlayDocsPlugin)
-  .dependsOn(anorm)
+  .settings(
+    scalaVersion := "2.11.8"
+  ).dependsOn(anorm)
 
 playBuildRepoName in ThisBuild := "anorm"

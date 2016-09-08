@@ -9,8 +9,7 @@ import akka.stream.scaladsl.{ Source }
 /**
  * Anorm companion for the [[http://doc.akka.io/docs/akka/2.4.4/scala/stream/]].
  *
- * @define materialization It materializes a [[Future]] of [[Int]] containing the number of rows read from the source upon completion,
- *                         and a possible exception if row parsing failed.
+ * @define materialization It materializes a [[Future]] of [[Int]] containing the number of rows read from the source upon completion, and a possible exception if row parsing failed.
  * @define sqlParam the SQL query
  * @define materializerParam the stream materializer
  * @define connectionParam the JDBC connection, which must not be closed until the source is materialized.
@@ -141,14 +140,17 @@ object AkkaStream {
               push(out, parsed)
               nextCursor()
             }
-            case Failure(cause) =>
+
+            case Failure(cause) => {
               result.failure(cause)
               fail(out, cause)
+            }
           }
 
-          case _ =>
+          case _ => {
             result.success(counter)
             complete(out)
+          }
         }
 
         override def onDownstreamFinish() = {
