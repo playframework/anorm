@@ -6,7 +6,7 @@ import scala.concurrent.{ ExecutionContext, Future, Promise }
 import scala.concurrent.duration._
 import scala.collection.immutable.Seq
 import akka.stream.scaladsl.{ Keep, Sink, Source }
-import akka.stream.testkit.Utils.assertAllStagesStopped
+import akka.stream.contrib.TestKit.assertAllStagesStopped
 import org.specs2.concurrent.{ ExecutionEnv => EE }
 import acolyte.jdbc.AcolyteDSL.withQueryResult
 import acolyte.jdbc.RowLists.stringList

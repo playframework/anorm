@@ -99,26 +99,23 @@ lazy val `anorm-iteratee` = (project in file("iteratee"))
     ).map("org.specs2" %% _ % "3.8.3" % Test)
   ).dependsOn(anorm)
 
-val akkaVer = "2.4.9"
-
 lazy val `anorm-akka` = (project in file("akka"))
   .enablePlugins(PlayLibrary)
   .settings(scalariformSettings: _*)
   .settings(
     previousArtifacts := Set.empty,
     resolvers ++= Seq(
-      // For Akka Stream TestKit 'tests' (see akka/akka#21028)
+      // For Akka Stream Contrib TestKit (see akka/akka-stream-contrib/pull/51)
       "Tatami Releases".at(
-        "https://raw.github.com/cchantep/tatami/master/releases")),
+        "https://raw.github.com/cchantep/tatami/master/snapshots")),
     libraryDependencies ++= Seq(
-      "com.typesafe.akka" %% "akka-stream" % akkaVer % "provided",
+      "com.typesafe.akka" %% "akka-stream" % "2.4.10" % "provided",
       "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test
     ) ++ Seq(
       "specs2-core",
       "specs2-junit"
     ).map("org.specs2" %% _ % "3.8.3" % Test) ++ Seq(
-      ("com.typesafe.akka" %% "akka-stream-testkit" % akkaVer % Test).
-      classifier("tests"))
+      "com.typesafe.akka" %% "akka-stream-contrib" % "0.3-9-gaeac7b2" % Test)
   ).dependsOn(anorm)
 
 lazy val `anorm-parent` = (project in file("."))
