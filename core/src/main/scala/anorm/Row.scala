@@ -132,7 +132,7 @@ trait Row {
           orElse(m.column.alias.flatMap(aliasesDictionary.get(_)))
 
       } else {
-        m.column.alias.flatMap(aliasesDictionary.get(_)).
+        m.column.alias.flatMap(a => aliasesDictionary.get(a.toUpperCase)).
           orElse(columnsDictionary.get(m.column.qualified.toUpperCase))
       }
 

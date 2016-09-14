@@ -6,7 +6,7 @@ import acolyte.jdbc.AcolyteDSL.withQueryResult
 import acolyte.jdbc.RowLists.{ rowList2, rowList1, stringList }
 import acolyte.jdbc.Implicits._
 
-class RowSpec extends org.specs2.mutable.Specification {
+class RowSpec extends org.specs2.mutable.Specification with H2Database {
   "Row" title
 
   "List of column values" should {
@@ -83,6 +83,26 @@ class RowSpec extends org.specs2.mutable.Specification {
       implicit c =>
         SQL("SELECT *").as(RowParser(r => Success(r[String](1))).single).
           aka("column by name") must_== "byPos"
+    }
+
+    "be found by alias when column name is duplicated" in {
+      withH2Database { implicit c =>
+        createTest1Table()
+
+        val id1 = System.identityHashCode(c).toLong
+        SQL"insert into test1(id, foo, bar) values ($id1, ${"Lorem"}, ${100})".
+          execute()
+
+        val id2 = System.identityHashCode(id1).toLong
+        SQL"insert into test1(id, foo, bar) values ($id2, ${"Ipsum"}, ${101})".
+          execute()
+
+        SQL"""SELECT a.foo AS ali, b.foo, b.foo AS ias FROM test1 a
+              JOIN test1 b ON a.bar <> b.bar WHERE a.id = $id1 LIMIT 1""".fold(List.empty[(String, String, String)]) { (l, row) =>
+          println(row.metaData)
+          (row[String]("ali"), row[String]("foo"), row[String]("ias")) +: l
+        } must_== Right(List(("Lorem", "Ipsum", "Ipsum")))
+      }
     }
   }
 
