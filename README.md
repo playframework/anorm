@@ -1,6 +1,9 @@
 # Anorm
 
-Anorm is a simple data access layer that uses plain SQL to interact with the database and provides an API to parse and transform the resulting datasets: [More information](docs/manual/working/scalaGuide/main/sql/ScalaAnorm.md).
+Anorm is a simple data access layer that uses plain SQL to interact with the database and provides an API to parse and transform the resulting datasets.
+
+- [User guide](docs/manual/working/scalaGuide/main/sql/ScalaAnorm.md)
+- [Scaladoc](https://oss.sonatype.org/service/local/repositories/releases/archive/com/typesafe/play/anorm_2.11/2.5.2/anorm_2.11-2.5.2-javadoc.jar/!/index.html)
 
 ## Usage
 
