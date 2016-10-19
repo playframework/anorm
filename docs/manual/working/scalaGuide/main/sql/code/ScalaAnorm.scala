@@ -1,9 +1,9 @@
 package scalaGuide.main.sql
-
+//#playdb
 import play.api.db.Database
 import anorm._
 import com.google.inject.Inject
-//#playdb
+
 class ScalaAnorm  @Inject () (db: Database) {
 
   db.withConnection { implicit connection =>
