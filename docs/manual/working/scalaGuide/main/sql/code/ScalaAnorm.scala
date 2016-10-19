@@ -1,23 +1,14 @@
-package scalaguide.sql.anorm
+package scalaGuide.main.sql
+//#playdb
+import play.api.db.Database
+import anorm._
+import com.google.inject.Inject
 
-import org.specs2.mutable.Specification
-import play.api.test._
-import play.api.test.Helpers._
+class ScalaAnorm  @Inject () (db: Database) {
 
-object ScalaAnorm extends Specification {
-  "Code samples" title
+  db.withConnection { implicit connection =>
+    val result: Boolean = SQL("Select 1").execute()
 
-  "Anorm" should {
-    "be usable in play" in new WithApplication(FakeApplication(additionalConfiguration = inMemoryDatabase())) {
-      //#playdb
-      import anorm._
-      import play.api.db.DB
-
-      DB.withConnection { implicit c =>
-        val result: Boolean = SQL("Select 1").execute()
-      }
-      //#playdb
-      ok
-    }
   }
 }
+//#playdb

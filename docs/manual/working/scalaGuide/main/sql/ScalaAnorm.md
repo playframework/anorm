@@ -56,7 +56,7 @@ libraryDependencies ++= Seq(
 
 To start you need to learn how to execute SQL queries.
 
-First, import `anorm._`, and then simply use the `SQL` object to create queries. You need a `Connection` to run a query, and you can retrieve one from the `play.api.db.DB` helper:
+First, import `anorm._`, and then simply use the `SQL` object to create queries. You need a `Connection` to run a query, and you can retrieve one from the `play.api.db.DB` helper with the help of DI:
 
 @[playdb](code/ScalaAnorm.scala)
 
