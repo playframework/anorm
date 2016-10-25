@@ -37,6 +37,24 @@ class RowSpec extends org.specs2.mutable.Specification {
           aka("column list") must_== List(Some("str"))
 
       }
+
+    "find the second lowercase alias when duplicate qualified column names exist" in {
+      case class ResultRow(metaData: MetaData, data: List[Any]) extends Row
+      val meta1 = MetaDataItem(ColumnName("table.id", Some("first_id")), false, "java.lang.Integer")
+      val meta2 = MetaDataItem(ColumnName("table.id", Some("second_id")), false, "java.lang.Integer")
+      val metaData = MetaData(List(meta1, meta2))
+      val row = ResultRow(metaData, List(1, 2))
+      row.get("second_id").toEither must beRight((2, meta2))
+    }
+
+    "find the correct mixed-case alias when duplicate qualified column names exist" in {
+      case class ResultRow(metaData: MetaData, data: List[Any]) extends Row
+      val meta1 = MetaDataItem(ColumnName("data.name", Some("WrongAlias")), false, "java.lang.String")
+      val meta2 = MetaDataItem(ColumnName("data.name", Some("CorrectAlias")), false, "java.lang.String")
+      val metaData = MetaData(List(meta1, meta2))
+      val row = ResultRow(metaData, List("IncorrectString", "CorrectString"))
+      row.get("CorrectAlias").toEither must beRight(("CorrectString", meta2))
+    }
   }
 
   "Column dictionary" should {
