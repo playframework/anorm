@@ -5,9 +5,7 @@ import com.typesafe.tools.mima.plugin.MimaKeys.{
   binaryIssueFilters, previousArtifacts
 }
 
-val PlayVersion = playVersion(sys.props.getOrElse("play.version", "2.5.4"))
-
-lazy val acolyteVersion = "1.0.41-j7p"
+lazy val acolyteVersion = "1.0.42-j7p"
 
 lazy val `anorm-tokenizer` = project
   .in(file("tokenizer"))
@@ -109,7 +107,7 @@ lazy val `anorm-akka` = (project in file("akka"))
       "Tatami Releases".at(
         "https://raw.github.com/cchantep/tatami/master/snapshots")),
     libraryDependencies ++= Seq(
-      "com.typesafe.akka" %% "akka-stream" % "2.4.10" % "provided",
+      "com.typesafe.akka" %% "akka-stream" % "2.4.11" % "provided",
       "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test
     ) ++ Seq(
       "specs2-core",
@@ -122,7 +120,8 @@ lazy val `anorm-parent` = (project in file("."))
   .enablePlugins(PlayRootProject)
   .aggregate(`anorm-tokenizer`, anorm, `anorm-iteratee`, `anorm-akka`)
   .settings(
-  scalaVersion := "2.11.8",
+    scalaVersion in ThisBuild := "2.11.8",
+    crossScalaVersions in ThisBuild := Seq("2.11.8", "2.12.0"),
     previousArtifacts := Set.empty)
 
 lazy val docs = project
