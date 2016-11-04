@@ -1,15 +1,12 @@
 package scalaGuide.main.sql
 //#playdb
-import play.api.db.Database
+import javax.inject.Inject
 import anorm._
-import javax.inject.{Inject, Singleton}
+import play.api.db.Database
 
-@Singleton
-class ScalaAnorm  @Inject () (db: Database) {
-  def test(): Boolean = {
-    db.withConnection { implicit connection =>
-      SQL("Select 1").execute()
-    }
+class ScalaAnorm @Inject()(db: Database) {
+  db.withConnection { implicit connection =>
+    SQL("Select 1").execute()
   }
 }
 //#playdb
