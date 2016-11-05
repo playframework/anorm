@@ -1,14 +1,12 @@
 package scalaGuide.main.sql
 //#playdb
-import play.api.db.Database
+import javax.inject.Inject
 import anorm._
-import com.google.inject.Inject
+import play.api.db.Database
 
-class ScalaAnorm  @Inject () (db: Database) {
-
+class ScalaAnorm @Inject()(db: Database) {
   db.withConnection { implicit connection =>
-    val result: Boolean = SQL("Select 1").execute()
-
+    SQL("Select 1").execute()
   }
 }
 //#playdb
