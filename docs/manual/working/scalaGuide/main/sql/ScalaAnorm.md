@@ -1091,7 +1091,7 @@ String                  | str
 The [Joda](http://www.joda.org) and [Java 8](#Java_8) temporal types are also supported.
 
 ↓JDBC / JVM➞                  | Date<sup>1</sup> | DateTime<sup>2</sup> | Instant<sup>3</sup> | Long
------------------------------ | ---------------- | -------------------- | -------------------
+----------------------------- | ---------------- | -------------------- | ------------------- | ----
 Date                          | Yes              | Yes                  | Yes                 | Yes
 Long                          | Yes              | Yes                  | Yes                 | Yes
 Timestamp                     | Yes              | Yes                  | Yes                 | Yes
