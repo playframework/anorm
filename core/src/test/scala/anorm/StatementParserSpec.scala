@@ -38,6 +38,16 @@ class StatementParserSpec extends org.specs2.mutable.Specification {
         aka("statement") must beSuccessfulTry(TokenizedStatement(List(TokenGroup(List(StringToken("SELECT * FROM Test WHERE id = ")), Some("id")), TokenGroup(List(StringToken(" AND n LIKE '"), PercentToken, StringToken("strange"), PercentToken, StringToken("s fruit"), PercentToken, StringToken("s'")), None)), List("id")))
 
     }
+
+    "characters must be escaped by '\\'" in {
+      SqlStatementParser.parse(
+        "SELECT \\* \\FROM Test WHERE title = 'x \\{foo\\}' AND id = {id}").
+        aka("parsed") must beSuccessfulTry(TokenizedStatement(
+          List(TokenGroup(List(StringToken(
+            "SELECT * FROM Test WHERE title = 'x {foo}' AND id = ")),
+            Some("id"))), List("id")))
+
+    }
   }
 
   "Value" should {
@@ -112,13 +122,13 @@ class StatementParserSpec extends org.specs2.mutable.Specification {
     "be successfully prepared" in {
       val hell = "sinki"
       val query = SQL"""
-         SELECT * FROM (SELECT 'Hello' AS COL1, 'World' AS COL2) AS MY_TABLE WHERE COL1 LIKE $hell + '%'
+         SELECT * FROM (SELECT 'Hello' AS COL1, 'World' AS COL2) AS MY_TABLE WHERE COL1 LIKE $hell + '{foo} %'
       """
 
       query.sql.stmt aka "tokenized" must_== TokenizedStatement(List(
         TokenGroup(List(StringToken("""
          SELECT * FROM (SELECT 'Hello' AS COL1, 'World' AS COL2) AS MY_TABLE WHERE COL1 LIKE """)), Some("_0")),
-        TokenGroup(List(StringToken(""" + '%'
+        TokenGroup(List(StringToken(""" + '{foo} %'
       """)), None)), List("_0")) and {
         query.sql.paramsInitialOrder aka "parameter names" must_== List("_0")
       } and {
