@@ -103,3 +103,16 @@ case class SimpleSql[T](sql: SqlQuery, params: Map[String, ParameterValue], defa
     copy(sql.withFetchSize(count))
 
 }
+
+object SimpleSql {
+  final class SimpleSqlShow[T](sql: SimpleSql[T]) extends Show {
+
+    def show = s"SimpleSql(${Show.mkString(sql.sql)})"
+  }
+
+  final class ShowMaker[T] extends Show.Maker[SimpleSql[T]] {
+    def apply(subject: SimpleSql[T]): Show = new SimpleSqlShow(subject)
+  }
+
+  implicit def showMaker[T]: Show.Maker[SimpleSql[T]] = new ShowMaker[T]
+}

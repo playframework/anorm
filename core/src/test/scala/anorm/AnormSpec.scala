@@ -29,9 +29,9 @@ class AnormSpec extends Specification with H2Database with AnormTest {
   "Row parser" should {
     "return newly inserted data" in withH2Database { implicit c =>
       createTest1Table()
-      val ex: Boolean =
-        SQL"""insert into test1(id, foo, bar) 
-              values (${10L}, ${"Hello"}, ${20})""".execute()
+
+      val ex: Boolean = SQL"""insert into test1(id, foo, bar) 
+        values (${10L}, ${"Hello"}, ${20})""".execute()
 
       ex aka "update executed" must beFalse /*not query*/ and {
         SQL("select * from test1 where id = {id}").on('id -> 10L)
@@ -520,6 +520,25 @@ class AnormSpec extends Specification with H2Database with AnormTest {
           aka("converted") must beAnInstanceOf[SimpleSql[_]] and (
             SQL("SELECT 1").execute() aka "executed" must beTrue)
       }
+
+    "be properly shown as string representation" >> {
+      "using parser" in {
+        Show.mkString(
+          SQL("insert into test1(id, foo, bar) values ({id}, {foo}, {bar})")).
+          aka("representation") must_== "SqlQuery(insert into test1(id, foo, bar) values ({id}, {foo}, {bar}), timeout = None, fetchSize = None)"
+      }
+
+      "using interpolation" in {
+        val id = 1
+        val foo = "lorem"
+        val bar = "ipsum"
+
+        Show.mkString(
+          SQL"insert into test1(id, foo, bar) values ($id, $foo, $bar)").
+          aka("representation") must_== "SimpleSql(SqlQuery(insert into test1(id, foo, bar) values ({_0}, {_1}, {_2}), timeout = None, fetchSize = None))"
+
+      }
+    }
   }
 
   "Timestamp wrapper" should {

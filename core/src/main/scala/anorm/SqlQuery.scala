@@ -57,6 +57,9 @@ sealed trait SqlQuery {
   private def defaultParser: RowParser[Row] = RowParser(Success(_))
 
   private[anorm] def copy(statement: TokenizedStatement = this.stmt, paramsInitialOrder: List[String] = this.paramsInitialOrder, timeout: Option[Int] = this.timeout, fetchSize: Option[Int] = this.fetchSize) = SqlQuery.prepare(statement, paramsInitialOrder, timeout, fetchSize)
+
+  override def toString = s"SqlQuery($stmt, $paramsInitialOrder, timeout = $timeout, fetchSize = $fetchSize)"
+
 }
 
 /* TODO: Make it private[anorm] to prevent SqlQuery from being created with
@@ -79,4 +82,12 @@ object SqlQuery {
 
   /** Extractor for pattern matching */
   def unapply(query: SqlQuery): Option[(TokenizedStatement, List[String], Option[Int])] = Option(query).map(q => (q.stmt, q.paramsInitialOrder, q.timeout))
+
+  final class SqlQueryShow(query: SqlQuery) extends Show {
+    def show = s"SqlQuery(${Show.mkString(query.stmt)}, timeout = ${query.timeout}, fetchSize = ${query.fetchSize})"
+  }
+
+  implicit object ShowMaker extends Show.Maker[SqlQuery] {
+    def apply(subject: SqlQuery): Show = new SqlQueryShow(subject)
+  }
 }

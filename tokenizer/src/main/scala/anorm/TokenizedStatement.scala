@@ -1,26 +1,8 @@
 package anorm
 
-trait Show {
-  def show: String
-}
-
-private[anorm] sealed trait StatementToken
-private[anorm] case object PercentToken extends StatementToken
-
-private[anorm] case class StringToken(value: String) extends StatementToken {
-  override lazy val toString = s""""${value.replaceAll("\"", "\\\"")}""""
-}
-
 /**
- * @param prepared Already prepared tokens, not requiring to rewrite placeholder.
- * @param placeholder Optional placeholder (name), after already prepared tokens
- */
-private[anorm] case class TokenGroup(
-  prepared: List[StatementToken], placeholder: Option[String])
-
-/**
- * @param tokens Token groups
- * @param names Binding names of parsed placeholders
+ * @param tokens the token groups
+ * @param names the binding names of parsed placeholders
  */
 private[anorm] case class TokenizedStatement(
   tokens: List[TokenGroup], names: List[String])
@@ -95,5 +77,15 @@ private[anorm] object TokenizedStatement {
 
         TokenizedStatement(groups, ns.reverse) -> m
     }
+  }
+
+  final class TokenizedStatementShow(
+      subject: TokenizedStatement) extends Show {
+    def show = subject.tokens.map(Show.mkString(_)).mkString
+  }
+
+  implicit object ShowMaker extends Show.Maker[TokenizedStatement] {
+    def apply(subject: TokenizedStatement): Show =
+      new TokenizedStatementShow(subject)
   }
 }
