@@ -111,6 +111,8 @@ SQL(
 ).on("countryCode" -> "FRA")
 ```
 
+> The curly braces can be escaped using `\`: `SQL("SELECT * FROM test WHERE code = '\{foo\}'")`.
+
 You can also use string interpolation to pass parameters (see details thereafter).
 
 In case several columns are found with same name in query result, for example columns named `code` in both `Country` and `CountryLanguage` tables, there can be ambiguity. By default a mapping like following one will use the last column:
