@@ -9,7 +9,7 @@ import play.api.libs.iteratee.Enumerator
 /** Anorm companion for the [[https://www.playframework.com/documentation/2.4.x/Iteratees]]. */
 object Iteratees {
   import scala.util.{ Failure, Success }
-  import play.api.libs.iteratee.{ Concurrent, Input }
+  import play.api.libs.iteratee.Concurrent
 
   /**
    * Returns the rows parsed from the `sql` query as an enumerator.

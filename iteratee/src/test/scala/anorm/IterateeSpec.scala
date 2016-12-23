@@ -1,4 +1,3 @@
-import scala.concurrent.Future
 import scala.concurrent.duration._
 
 import org.specs2.concurrent.{ ExecutionEnv => EE }

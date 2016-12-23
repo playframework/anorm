@@ -340,9 +340,14 @@ object Macro {
 
     object ImplicitResolver {
       // Per each symbol of the type parameters, which type is bound to
-      val boundTypes: Map[String, Type] = apply.typeParams.zip(tpeArgs).map {
-        case (sym, ty) => sym.fullName -> ty
-      }.toMap
+      val boundTypes: Map[String, Type] = if (tpeArgs.isEmpty) Map.empty else {
+        // Need apply rather than ctor to resolve parameter symbols
+
+        if (apply.paramLists.isEmpty) Map.empty
+        else apply.typeParams.zip(tpeArgs).map {
+          case (sym, ty) => sym.fullName -> ty
+        }.toMap
+      }
 
       // The placeholder type
       private val PlaceholderType: Type = typeOf[Placeholder]

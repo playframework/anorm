@@ -8,7 +8,7 @@ import java.util.UUID
 
 import scala.util.Random
 
-import acolyte.jdbc.{ QueryResult, ImmutableArray }
+import acolyte.jdbc.ImmutableArray
 import acolyte.jdbc.RowLists.{
   bigDecimalList,
   binaryList,
@@ -26,7 +26,7 @@ import acolyte.jdbc.RowLists.{
   timeList,
   timestampList
 }
-import acolyte.jdbc.AcolyteDSL.{ connection, handleQuery, withQueryResult }
+import acolyte.jdbc.AcolyteDSL.withQueryResult
 import acolyte.jdbc.Implicits._
 
 import SqlParser.{ byte, double, float, int, long, scalar, short }
@@ -819,7 +819,7 @@ class ColumnSpec
 
       }
 
-    "not be parsed from float" in withQueryResult(floatList :+ 2f) {
+    "not be parsed from float" in withQueryResult(floatList :+ 2F) {
       implicit con =>
         SQL"SELECT a".as(scalar[List[String]].single).
           aka("parsing") must throwA[Exception](message =
@@ -833,6 +833,35 @@ class ColumnSpec
         SQL"SELECT a".as(scalar[List[BigInteger]].single).
           aka("parsed list") mustEqual List(
             BigInteger.valueOf(1), BigInteger.valueOf(3))
+      }
+    }
+  }
+
+  "Column mapped as option" should {
+    "be Some Long" in withQueryResult(longList :+ 3L) { implicit con =>
+      SQL"SELECT value".as(scalar[Option[Long]].single).
+        aka("parsed optional value") must beSome(3L)
+    }
+
+    "be Some String" in withQueryResult(stringList :+ "foo") { implicit con =>
+      SQL"SELECT value".as(scalar[Option[String]].single).
+        aka("parsed optional value") must beSome("foo")
+    }
+
+    "be empty of Long for null" in {
+      // avoid implicit conversion to 0
+      val nullLong = null.asInstanceOf[java.lang.Long]
+
+      withQueryResult(longList :+ nullLong) { implicit con =>
+        SQL"SELECT value".as(scalar[Option[Long]].single).
+          aka("parsed optional value") must beNone
+      }
+    }
+
+    "be empty of String for null" in {
+      withQueryResult(stringList :+ null.asInstanceOf[String]) { implicit con =>
+        SQL"SELECT value".as(scalar[Option[String]].single).
+          aka("parsed optional value") must beNone
       }
     }
   }
