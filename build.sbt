@@ -5,7 +5,7 @@ import com.typesafe.tools.mima.plugin.MimaKeys.{
   binaryIssueFilters, previousArtifacts
 }
 
-lazy val acolyteVersion = "1.0.42-j7p"
+lazy val acolyteVersion = "1.0.43-j7p"
 
 lazy val `anorm-tokenizer` = project
   .in(file("tokenizer"))
@@ -113,7 +113,7 @@ lazy val `anorm-akka` = (project in file("akka"))
       "specs2-core",
       "specs2-junit"
     ).map("org.specs2" %% _ % "3.8.6" % Test) ++ Seq(
-      "com.typesafe.akka" %% "akka-stream-contrib" % "0.3-9-gaeac7b2" % Test)
+      "com.typesafe.akka" %% "akka-stream-contrib" % "0.6" % Test)
   ).dependsOn(anorm)
 
 lazy val `anorm-parent` = (project in file("."))
