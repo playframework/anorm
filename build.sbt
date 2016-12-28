@@ -107,6 +107,7 @@ lazy val `anorm-akka` = (project in file("akka"))
       "Tatami Releases".at(
         "https://raw.github.com/cchantep/tatami/master/snapshots")),
     libraryDependencies ++= Seq(
+      "com.typesafe.akka" %% "akka-testkit" % "2.4.16" % "provided",
       "com.typesafe.akka" %% "akka-stream" % "2.4.16" % "provided",
       "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test
     ) ++ Seq(
