@@ -4,6 +4,14 @@ package anorm
  * @define caseTParam the type of case class
  * @define namingParam the column naming, to resolve the column name for each case class property
  * @define namesParam the names of the columns corresponding to the case class properties
+ * @define sealedParserDoc Returns a row parser generated
+ * for a sealed class family.
+ * Each direct known subclasses `C` must be provided with an appropriate
+ * `RowParser[C]` in the implicit scope.
+ *
+ * @define discriminatorNamingParam the naming function for the discriminator column
+ * @define discriminateParam the discriminating function applied to each name of the family type
+ * @define familyTParam the type of the type family (either a sealed trait or abstract class)
  */
 object Macro {
   import scala.language.experimental.macros
@@ -53,26 +61,48 @@ object Macro {
       }
   }
 
-  trait Discriminator extends (String => String) {
-    /** @param tname the name of type (class or object) to be discriminated */
+  trait Discriminate extends (String => String) {
+    /**
+     * Returns the value representing the specified type,
+     * to be used as a discriminator within a sealed family.
+     *
+     * @param tname the name of type (class or object) to be discriminated
+     */
     def apply(tname: String): String
   }
 
-  object Discriminator {
-    object Identity extends Discriminator {
-      def apply(tname: String) = tname
+  object Discriminate {
+    sealed class Function(f: String => String) extends Discriminate {
+      def apply(tname: String) = f(tname)
     }
+
+    /** Uses the type name as-is as value for the discriminator */
+    object Identity extends Function(identity[String])
+
+    /** Returns a `Discriminate` function from any `String => String`. */
+    def apply(discriminate: String => String): Discriminate =
+      new Function(discriminate)
   }
 
   trait DiscriminatorNaming extends (String => String) {
-    /** @param familyType the name of the famility type (sealed trait) */
+    /**
+     * Returns the name for the discriminator column.
+     * @param familyType the name of the famility type (sealed trait)
+     */
     def apply(familyType: String): String
   }
 
   object DiscriminatorNaming {
-    object Default extends DiscriminatorNaming {
-      def apply(familyType: String) = "classname"
+    sealed class Function(f: String => String) extends DiscriminatorNaming {
+      def apply(familyType: String) = f(familyType)
     }
+
+    /** Always use "classname" as name for the discriminator column. */
+    object Default extends Function(_ => "classname")
+
+    /** Returns a naming according from any `String => String`. */
+    def apply(naming: String => String): DiscriminatorNaming =
+      new Function(naming)
   }
 
   // ---
@@ -192,14 +222,20 @@ object Macro {
     } else List.empty
   }
 
-  def sealedParserImpl[T: c.WeakTypeTag](c: whitebox.Context): c.Expr[RowParser[T]] = {
+  def sealedParserImpl1[T: c.WeakTypeTag](c: whitebox.Context): c.Expr[RowParser[T]] = {
+    import c.universe.reify
+    sealedParserImpl(c)(
+      reify(DiscriminatorNaming.Default), reify(Discriminate.Identity))
+  }
+
+  def sealedParserImpl2[T: c.WeakTypeTag](c: whitebox.Context)(naming: c.Expr[DiscriminatorNaming]): c.Expr[RowParser[T]] = sealedParserImpl(c)(naming, c.universe.reify(Discriminate.Identity))
+
+  def sealedParserImpl3[T: c.WeakTypeTag](c: whitebox.Context)(discriminate: c.Expr[Discriminate]): c.Expr[RowParser[T]] = sealedParserImpl(c)(c.universe.reify(DiscriminatorNaming.Default), discriminate)
+
+  def sealedParserImpl[T: c.WeakTypeTag](c: whitebox.Context)(naming: c.Expr[DiscriminatorNaming], discriminate: c.Expr[Discriminate]): c.Expr[RowParser[T]] = {
     import c.universe._
 
     val tpe = c.weakTypeTag[T].tpe
-
-    // TODO: Get from params
-    val classNaming = Discriminator.Identity(_)
-    val discriminator = DiscriminatorNaming.Default(tpe.typeSymbol.fullName)
 
     @inline def abort(msg: String) = c.abort(c.enclosingPosition, msg)
     val sub = directKnownSubclasses(c)(tpe).filter { subclass =>
@@ -239,26 +275,30 @@ object Macro {
     // ---
 
     val cases = sub.map { subclass =>
-      val key = classNaming(subclass.typeSymbol.fullName)
+      val caseName = TermName(c.freshName("discriminated"))
+      val key = q"$discriminate(${subclass.typeSymbol.fullName})"
+      val caseDecl = q"val $caseName = $key"
       val subtype = {
         if (subclass.typeSymbol.asClass.typeParams.isEmpty) subclass
         else subclass.erasure
       }
 
-      key -> cq"$key => implicitly[anorm.RowParser[$subtype]]"
-    }.toMap
+      (key, caseDecl, cq"`$caseName` => implicitly[anorm.RowParser[$subtype]]")
+    }
 
-    @inline def supported = cases.keys.mkString(", ")
+    lazy val supported = q"List(..${cases.map(_._1)})"
     def mappingError = q"""anorm.RowParser.failed[$tpe](anorm.Error(anorm.SqlMappingError("unexpected row type '%s'; expected: %s".format(d, $supported))))"""
 
     val discriminatorTerm = TermName(c.freshName("discriminator"))
+    val colTerm = TermName(c.freshName("column"))
     val matching = Match(
-      q"$discriminatorTerm", cases.values.toList :+ cq"d => $mappingError")
+      q"$discriminatorTerm", cases.map(_._3) :+ cq"d => $mappingError")
 
     val parser = q"""new anorm.RowParser[$tpe] {
+      val $colTerm = $naming(${tpe.typeSymbol.fullName})
       val underlying: anorm.RowParser[$tpe] = 
-        anorm.SqlParser.str($discriminator).flatMap { $discriminatorTerm: String => 
-          $matching
+        anorm.SqlParser.str($colTerm).flatMap { $discriminatorTerm: String => 
+          ..${cases.map(_._2) :+ matching}
         }
 
       def apply(row: Row): anorm.SqlResult[$tpe] = underlying(row)
@@ -605,13 +645,37 @@ object Macro {
   def offsetParser[T](offset: Int): RowParser[T] = macro offsetParserImpl[T]
 
   /**
-   * Returns a row parser generated for a sealed class family.
-   * Each direct known subclasses `C` must be provided with an appropriate
-   * `RowParser[C]` in the implicit scope.
+   * $sealedParserDoc
+   * The default naming is used.
    *
-   * @tparam T the type of the type family (either a sealed trait or abstract class)
+   * @tparam T $familyTParam
    */
-  def sealedParser[T]: RowParser[T] = macro sealedParserImpl[T]
+  def sealedParser[T]: RowParser[T] = macro sealedParserImpl1[T]
+
+  /**
+   * $sealedParserDoc
+   *
+   * @param naming $discriminatorNamingParam
+   * @tparam T $familyTParam
+   */
+  def sealedParser[T](naming: Macro.DiscriminatorNaming): RowParser[T] = macro sealedParserImpl2[T]
+
+  /**
+   * $sealedParserDoc
+   *
+   * @param discriminate $discriminateParam
+   * @tparam T $familyTParam
+   */
+  def sealedParser[T](discriminate: Macro.Discriminate): RowParser[T] = macro sealedParserImpl3[T]
+
+  /**
+   * $sealedParserDoc
+   *
+   * @param naming $discriminatorNamingParam
+   * @param discriminate $discriminateParam
+   * @tparam T $familyTParam
+   */
+  def sealedParser[T](naming: Macro.DiscriminatorNaming, discriminate: Macro.Discriminate): RowParser[T] = macro sealedParserImpl[T]
 
   private lazy val debugEnabled =
     Option(System.getProperty("anorm.macro.debug")).

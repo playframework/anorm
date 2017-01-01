@@ -158,6 +158,32 @@ class MacroSpec extends org.specs2.mutable.Specification {
       }
   }
 
+  "Discriminator naming" should {
+    import Macro.DiscriminatorNaming
+
+    "be 'classname' by default" in {
+      DiscriminatorNaming.Default("foo") must_== "classname"
+    }
+
+    "be customized" in {
+      val naming = DiscriminatorNaming { _ => "foo" }
+      naming("bar") must_== "foo"
+    }
+  }
+
+  "Discriminate function" should {
+    import Macro.Discriminate
+
+    "be identity by default" in {
+      Discriminate.Identity("x.y.z.Type") must_== "x.y.z.Type"
+    }
+
+    "be customized" in {
+      val discriminate = Discriminate(_.split("\\.").last)
+      discriminate("x.y.z.Type") must_== "Type"
+    }
+  }
+
   "Sealed parser" should {
     // No subclass
     shapeless.test.illTyped("anorm.Macro.sealedParser[NoSubclass]")
@@ -166,19 +192,42 @@ class MacroSpec extends org.specs2.mutable.Specification {
     // from the implicit scope
     shapeless.test.illTyped("Macro.sealedParser[Family]")
 
-    val barRow2 = RowLists.rowList2(
-      classOf[String] -> "classname", classOf[Int] -> "v")
+    "be successful for the Family trait" >> {
+      "with the default discrimination" in {
+        val barRow2 = RowLists.rowList2(
+          classOf[String] -> "classname", classOf[Int] -> "v")
 
-    "be successful for the Family trait" in withQueryResult(barRow2 :+ (
-      "anorm.MacroSpec.Bar", 1) :+ ("anorm.MacroSpec.CaseObj", -1)) {
-      implicit c =>
-        implicit val caseObjParser =
-          RowParser[CaseObj.type] { _ => Success(CaseObj) }
+        withQueryResult(barRow2 :+ (
+          "anorm.MacroSpec.Bar", 1) :+ ("anorm.MacroSpec.CaseObj", -1)) {
+          implicit c =>
+            implicit val caseObjParser =
+              RowParser[CaseObj.type] { _ => Success(CaseObj) }
 
-        implicit val barParser = Macro.namedParser[Bar]
-        val familyParser = Macro.sealedParser[Family]
+            implicit val barParser = Macro.namedParser[Bar]
+            val familyParser = Macro.sealedParser[Family]
 
-        SQL"TEST".as(familyParser.*) must_== List(Bar(1), CaseObj)
+            SQL"TEST".as(familyParser.*) must_== List(Bar(1), CaseObj)
+        }
+      }
+
+      "with a customized discrimination" in {
+        val barRow2 = RowLists.rowList2(
+          classOf[String] -> "foo", classOf[Int] -> "v")
+
+        withQueryResult(barRow2 :+ ("Bar", 1) :+ ("CaseObj", -1)) {
+          implicit c =>
+            implicit val caseObjParser =
+              RowParser[CaseObj.type] { _ => Success(CaseObj) }
+
+            implicit val barParser = Macro.namedParser[Bar]
+            val familyParser = Macro.sealedParser[Family](
+              Macro.DiscriminatorNaming(_ => "foo"),
+              Macro.Discriminate(_.split("\\.").last)
+            )
+
+            SQL"TEST".as(familyParser.*) must_== List(Bar(1), CaseObj)
+        }
+      }
     }
   }
 
