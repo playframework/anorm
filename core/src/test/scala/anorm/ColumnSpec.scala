@@ -434,14 +434,14 @@ class ColumnSpec
     "be parsed from double" in withQueryResult(doubleList :+ 1.35d) {
       implicit con =>
         SQL("SELECT d").as(scalar[java.math.BigDecimal].single).
-          aka("parsed big decimal") must_== java.math.BigDecimal.valueOf(1.35d)
+          aka("parsed big decimal") must_== java.math.BigDecimal.valueOf(1.35D)
 
     }
 
     "be parsed from float" in withQueryResult(floatList :+ 1.35f) {
       implicit con =>
         SQL("SELECT f").as(scalar[java.math.BigDecimal].single).
-          aka("parsed big decimal") must_== java.math.BigDecimal.valueOf(1.35f)
+          aka("parsed big decimal") must_== java.math.BigDecimal.valueOf(1.35F)
 
     }
 

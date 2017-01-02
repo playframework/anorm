@@ -404,7 +404,7 @@ class SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
         SQL"""SELECT a.foo AS ali, b.foo, b.foo AS ias FROM test1 a
               JOIN test1 b ON a.bar <> b.bar WHERE a.id = $id1 LIMIT 1""".as(
           (SqlParser.str("ali") ~ SqlParser.str("foo") ~ SqlParser.str("ias")).
-            map(SqlParser.flatten).single) must_== ("Lorem", "Ipsum", "Ipsum")
+            map(SqlParser.flatten).single) must_== (("Lorem", "Ipsum", "Ipsum"))
       }
     }
 

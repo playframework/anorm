@@ -18,7 +18,9 @@ object Common extends AutoPlugin {
       "http://dl.bintray.com/scalaz/releases" // specs2 depends on scalaz-stream
     },
     scalacOptions ~= (_.filterNot(_ == "-Xfatal-warnings")),
-    scalacOptions ++= Seq("-Ywarn-unused-import", "-unchecked"),
+    scalacOptions ++= Seq("-unchecked", "-deprecation", "-Xlint",
+      "-Ywarn-unused-import", "-Ywarn-unused", "-Ywarn-dead-code",
+      "-Ywarn-numeric-widen"),
     fork in Test := true,
     previousArtifacts := {
       if (crossPaths.value) {

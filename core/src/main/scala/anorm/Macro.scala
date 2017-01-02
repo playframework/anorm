@@ -135,8 +135,6 @@ object Macro {
       case (sym, ty) => sym.fullName -> ty
     }.toMap
 
-    val optTpe = c.weakTypeTag[Option[_]].tpe
-
     // ---
 
     val (x, m, body, _) = ctor.paramLists.
