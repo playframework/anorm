@@ -143,7 +143,7 @@ private[anorm] object MetaData {
       } + "." + meta.getColumnName(i),
         alias = Option(meta.getColumnLabel(i)))
 
-      val colName = as(i, cn).fold(cn)(a => cn.copy(alias = Some(a)))
+      val colName = as(i -> cn).fold(cn)(a => cn.copy(alias = Some(a)))
 
       MetaDataItem(column = colName,
         nullable = meta.isNullable(i) == ResultSetMetaData.columnNullable,

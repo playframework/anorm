@@ -77,7 +77,7 @@ sealed trait BatchSql {
   }
 
   @annotation.tailrec
-  private def fill(con: Connection, statement: PreparedStatement, getGeneratedKeys: Boolean = false, pm: Seq[Map[String, ParameterValue]]): PreparedStatement = (statement, pm.headOption) match {
+  private def fill(con: Connection, statement: PreparedStatement, getGeneratedKeys: Boolean, pm: Seq[Map[String, ParameterValue]]): PreparedStatement = (statement, pm.headOption) match {
     case (null, Some(ps)) => { // First with parameters
       val (psql, vs): (String, Seq[(Int, ParameterValue)]) =
         Sql.prepareQuery(sql.stmt.tokens, sql.paramsInitialOrder, ps,
@@ -110,8 +110,6 @@ sealed trait BatchSql {
     }
     case _ => statement
   }
-
-  @inline private def toMap(args: Seq[NamedParameter]): Map[String, ParameterValue] = args.foldLeft(Map[String, ParameterValue]())((m, np) => m + np.tupled)
 
   @throws[IllegalArgumentException](BatchSqlErrors.UnexpectedParameterName)
   @throws[IllegalArgumentException](BatchSqlErrors.MissingParameter)

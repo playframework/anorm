@@ -53,7 +53,7 @@ object Column extends JodaColumn with JavaTimeColumn {
 
   implicit val columnToString: Column[String] =
     nonNull[String] { (value, meta) =>
-      val MetaDataItem(qualified, nullable, clazz) = meta
+      val MetaDataItem(qualified, _, _) = meta
       value match {
         case string: String => Right(string)
         case clob: java.sql.Clob => Right(clob.getSubString(1, clob.length.asInstanceOf[Int]))
@@ -75,7 +75,7 @@ object Column extends JodaColumn with JavaTimeColumn {
    */
   implicit val columnToByteArray: Column[Array[Byte]] =
     nonNull[Array[Byte]] { (value, meta) =>
-      val MetaDataItem(qualified, nullable, clazz) = meta
+      val MetaDataItem(qualified, _, _) = meta
       value match {
         case bytes: Array[Byte] => Right(bytes)
         case stream: InputStream => streamBytes(stream)
@@ -97,7 +97,7 @@ object Column extends JodaColumn with JavaTimeColumn {
    * }}}
    */
   implicit val columnToChar: Column[Char] = nonNull[Char] { (value, meta) =>
-    val MetaDataItem(qualified, nullable, clazz) = meta
+    val MetaDataItem(qualified, _, _) = meta
     value match {
       case string: String => Right(string.charAt(0))
       case clob: java.sql.Clob => Right(clob.getSubString(1, 1).charAt(0))
@@ -106,7 +106,7 @@ object Column extends JodaColumn with JavaTimeColumn {
   }
 
   implicit val columnToInt: Column[Int] = nonNull { (value, meta) =>
-    val MetaDataItem(qualified, nullable, clazz) = meta
+    val MetaDataItem(qualified, _, _) = meta
     value match {
       case bi: BigInteger => Right(bi.intValue)
       case bd: JBigDec => Right(bd.intValue)
@@ -132,7 +132,7 @@ object Column extends JodaColumn with JavaTimeColumn {
    */
   implicit val columnToInputStream: Column[InputStream] =
     nonNull[InputStream] { (value, meta) =>
-      val MetaDataItem(qualified, nullable, clazz) = meta
+      val MetaDataItem(qualified, _, _) = meta
       value match {
         case bytes: Array[Byte] => Right(new ByteArrayInputStream(bytes))
         case stream: InputStream => Right(stream)
@@ -143,7 +143,7 @@ object Column extends JodaColumn with JavaTimeColumn {
     }
 
   implicit val columnToFloat: Column[Float] = nonNull { (value, meta) =>
-    val MetaDataItem(qualified, nullable, clazz) = meta
+    val MetaDataItem(qualified, _, _) = meta
     value match {
       case f: Float => Right(f)
       case bi: BigInteger => Right(bi.floatValue)
@@ -155,7 +155,7 @@ object Column extends JodaColumn with JavaTimeColumn {
   }
 
   implicit val columnToDouble: Column[Double] = nonNull { (value, meta) =>
-    val MetaDataItem(qualified, nullable, clazz) = meta
+    val MetaDataItem(qualified, _, _) = meta
     value match {
       case bg: JBigDec => Right(bg.doubleValue)
       case d: Double => Right(d)
@@ -169,7 +169,7 @@ object Column extends JodaColumn with JavaTimeColumn {
   }
 
   implicit val columnToShort: Column[Short] = nonNull { (value, meta) =>
-    val MetaDataItem(qualified, nullable, clazz) = meta
+    val MetaDataItem(qualified, _, _) = meta
     value match {
       case b: Byte => Right(b.toShort)
       case s: Short => Right(s)
@@ -179,7 +179,7 @@ object Column extends JodaColumn with JavaTimeColumn {
   }
 
   implicit val columnToByte: Column[Byte] = nonNull { (value, meta) =>
-    val MetaDataItem(qualified, nullable, clazz) = meta
+    val MetaDataItem(qualified, _, _) = meta
     value match {
       case b: Byte => Right(b)
       case s: Short => Right(s.toByte)
@@ -189,7 +189,7 @@ object Column extends JodaColumn with JavaTimeColumn {
   }
 
   implicit val columnToBoolean: Column[Boolean] = nonNull { (value, meta) =>
-    val MetaDataItem(qualified, nullable, clazz) = meta
+    val MetaDataItem(qualified, _, _) = meta
     value match {
       case bool: Boolean => Right(bool)
       case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to Boolean for column $qualified"))
@@ -199,11 +199,11 @@ object Column extends JodaColumn with JavaTimeColumn {
   private[anorm] def timestamp[T](ts: Timestamp)(f: Timestamp => T): Either[SqlRequestError, T] = Right(if (ts == null) null.asInstanceOf[T] else f(ts))
 
   implicit val columnToLong: Column[Long] = nonNull { (value, meta) =>
-    val MetaDataItem(qualified, nullable, clazz) = meta
+    val MetaDataItem(qualified, _, _) = meta
     value match {
       case bi: BigInteger => Right(bi.longValue)
       case bd: JBigDec => Right(bd.longValue)
-      case int: Int => Right(int: Long)
+      case int: Int => Right(int.toLong)
       case long: Long => Right(long)
       case s: Short => Right(s.toLong)
       case b: Byte => Right(b.toLong)
@@ -217,14 +217,14 @@ object Column extends JodaColumn with JavaTimeColumn {
 
   // Used to convert Java or Scala big integer
   private def anyToBigInteger(value: Any, meta: MetaDataItem): Either[SqlRequestError, BigInteger] = {
-    val MetaDataItem(qualified, nullable, clazz) = meta
+    val MetaDataItem(qualified, _, _) = meta
     value match {
       case bi: BigInteger => Right(bi)
       case bd: JBigDec => Right(bd.toBigInteger)
       case long: Long => Right(BigInteger.valueOf(long))
-      case int: Int => Right(BigInteger.valueOf(int))
-      case s: Short => Right(BigInteger.valueOf(s))
-      case b: Byte => Right(BigInteger.valueOf(b))
+      case int: Int => Right(BigInteger.valueOf(int.toLong))
+      case s: Short => Right(BigInteger.valueOf(s.toLong))
+      case b: Byte => Right(BigInteger.valueOf(b.toLong))
       case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to BigInteger for column $qualified"))
     }
   }
@@ -257,7 +257,7 @@ object Column extends JodaColumn with JavaTimeColumn {
     nonNull((value, meta) => anyToBigInteger(value, meta).right.map(BigInt(_)))
 
   implicit val columnToUUID: Column[UUID] = nonNull { (value, meta) =>
-    val MetaDataItem(qualified, nullable, clazz) = meta
+    val MetaDataItem(qualified, _, _) = meta
     value match {
       case d: UUID => Right(d)
       case s: String => Try { UUID.fromString(s) } match {
@@ -270,16 +270,16 @@ object Column extends JodaColumn with JavaTimeColumn {
 
   // Used to convert Java or Scala big decimal
   private def anyToBigDecimal(value: Any, meta: MetaDataItem): Either[SqlRequestError, JBigDec] = {
-    val MetaDataItem(qualified, nullable, clazz) = meta
+    val MetaDataItem(qualified, _, _) = meta
     value match {
       case bd: JBigDec => Right(bd)
       case bi: BigInteger => Right(new JBigDec(bi))
       case d: Double => Right(JBigDec.valueOf(d))
-      case f: Float => Right(JBigDec.valueOf(f))
+      case f: Float => Right(JBigDec.valueOf(f.toDouble))
       case l: Long => Right(JBigDec.valueOf(l))
-      case i: Int => Right(JBigDec.valueOf(i))
-      case s: Short => Right(JBigDec.valueOf(s))
-      case b: Byte => Right(JBigDec.valueOf(b))
+      case i: Int => Right(JBigDec.valueOf(i.toLong))
+      case s: Short => Right(JBigDec.valueOf(s.toLong))
+      case b: Byte => Right(JBigDec.valueOf(b.toLong))
       case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to BigDecimal for column $qualified"))
     }
   }
@@ -326,7 +326,7 @@ object Column extends JodaColumn with JavaTimeColumn {
    * }}}
    */
   implicit val columnToDate: Column[Date] = nonNull { (value, meta) =>
-    val MetaDataItem(qualified, nullable, clazz) = meta
+    val MetaDataItem(qualified, _, _) = meta
     value match {
       case date: Date => Right(date)
       case time: Long => Right(new Date(time))
@@ -349,7 +349,7 @@ object Column extends JodaColumn with JavaTimeColumn {
    * }}}
    */
   implicit def columnToArray[T](implicit transformer: Column[T], t: scala.reflect.ClassTag[T]): Column[Array[T]] = Column.nonNull[Array[T]] { (value, meta) =>
-    val MetaDataItem(qualified, nullable, clazz) = meta
+    val MetaDataItem(qualified, _, _) = meta
 
     @inline def typeNotMatch(value: Any, target: String, cause: Any) = TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to $target for column $qualified: $cause")
 
@@ -401,7 +401,7 @@ object Column extends JodaColumn with JavaTimeColumn {
    * }}}
    */
   implicit def columnToList[T](implicit transformer: Column[T], t: scala.reflect.ClassTag[T]): Column[List[T]] = Column.nonNull[List[T]] { (value, meta) =>
-    val MetaDataItem(qualified, nullable, clazz) = meta
+    val MetaDataItem(qualified, _, _) = meta
 
     @inline def typeNotMatch(value: Any, target: String, cause: Any) = TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to $target for column $qualified: $cause")
 
@@ -477,7 +477,7 @@ sealed trait JodaColumn {
    */
   implicit val columnToJodaLocalDate: Column[LocalDate] =
     nonNull { (value, meta) =>
-      val MetaDataItem(qualified, nullable, clazz) = meta
+      val MetaDataItem(qualified, _, _) = meta
 
       value match {
         case date: java.util.Date => Right(new LocalDate(date.getTime))
@@ -502,7 +502,7 @@ sealed trait JodaColumn {
    */
   implicit val columnToJodaLocalDateTime: Column[LocalDateTime] =
     nonNull { (value, meta) =>
-      val MetaDataItem(qualified, nullable, clazz) = meta
+      val MetaDataItem(qualified, _, _) = meta
 
       value match {
         case date: java.util.Date => Right(new LocalDateTime(date.getTime))
@@ -524,7 +524,7 @@ sealed trait JodaColumn {
    */
   implicit val columnToJodaDateTime: Column[DateTime] =
     nonNull { (value, meta) =>
-      val MetaDataItem(qualified, nullable, clazz) = meta
+      val MetaDataItem(qualified, _, _) = meta
       value match {
         case date: Date => Right(new DateTime(date.getTime))
         case time: Long => Right(new DateTime(time))
@@ -550,7 +550,7 @@ sealed trait JodaColumn {
    */
   implicit val columnToJodaInstant: Column[Instant] =
     nonNull { (value, meta) =>
-      val MetaDataItem(qualified, nullable, clazz) = meta
+      val MetaDataItem(qualified, _, _) = meta
       value match {
         case date: Date => Right(new Instant(date.getTime))
         case time: Long => Right(new Instant(time))
@@ -578,7 +578,7 @@ sealed trait JavaTimeColumn {
    * }}}
    */
   implicit val columnToInstant: Column[Instant] = nonNull { (value, meta) =>
-    val MetaDataItem(qualified, nullable, clazz) = meta
+    val MetaDataItem(qualified, _, _) = meta
     value match {
       case date: java.util.Date => Right(Instant ofEpochMilli date.getTime)
       case time: Long => Right(Instant ofEpochMilli time)
@@ -606,7 +606,7 @@ sealed trait JavaTimeColumn {
       Instant.ofEpochMilli(ts), ZoneId.systemDefault)
 
     nonNull { (value, meta) =>
-      val MetaDataItem(qualified, nullable, clazz) = meta
+      val MetaDataItem(qualified, _, _) = meta
       value match {
         case date: java.util.Date => Right(dateTime(date.getTime))
         case time: Long => Right(dateTime(time))
@@ -635,7 +635,7 @@ sealed trait JavaTimeColumn {
       Instant.ofEpochMilli(ts), ZoneId.systemDefault).toLocalDate
 
     nonNull { (value, meta) =>
-      val MetaDataItem(qualified, nullable, clazz) = meta
+      val MetaDataItem(qualified, _, _) = meta
       value match {
         case date: java.util.Date => Right(localDate(date.getTime))
         case time: Long => Right(localDate(time))
@@ -664,7 +664,7 @@ sealed trait JavaTimeColumn {
       Instant.ofEpochMilli(ts), ZoneId.systemDefault)
 
     nonNull { (value, meta) =>
-      val MetaDataItem(qualified, nullable, clazz) = meta
+      val MetaDataItem(qualified, _, _) = meta
       value match {
         case date: java.util.Date => Right(dateTime(date.getTime))
         case time: Long => Right(dateTime(time))

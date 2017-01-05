@@ -265,7 +265,7 @@ object Sql { // TODO: Rename to SQL
         prepareQuery(tok.tail, ns, ps, i, toSql(pr, buf), vs)
 
       case (_, Some(p)) => {
-        val (frag, c): (String, Int) = p.toSql
+        val c: Int = p.toSql._2
         prepareQuery(tok, ns.tail, ps, i + c, buf, (i, p) :: vs)
       }
 

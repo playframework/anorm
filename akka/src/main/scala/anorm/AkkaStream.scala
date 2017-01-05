@@ -100,7 +100,7 @@ object AkkaStream {
     private[anorm] var resultSet: ResultSet = null
 
     override val toString = "AnormQueryResult"
-    val out: Outlet[T] = Outlet("${toString}.out")
+    val out: Outlet[T] = Outlet(s"${toString}.out")
     val shape: SourceShape[T] = SourceShape(out)
 
     override def createLogicAndMaterializedValue(inheritedAttributes: Attributes): (GraphStageLogic, Future[Int]) = {
