@@ -5,7 +5,7 @@ import com.typesafe.tools.mima.plugin.MimaKeys.{
   binaryIssueFilters, previousArtifacts
 }
 
-lazy val acolyteVersion = "1.0.42-j7p"
+lazy val acolyteVersion = "1.0.43-j7p"
 
 lazy val `anorm-tokenizer` = project
   .in(file("tokenizer"))
@@ -70,17 +70,17 @@ lazy val anorm = project
       missMeth("anorm.Sql.unsafeStatement")))
   .settings({
     libraryDependencies ++= Seq(
-      "com.jsuereth" %% "scala-arm" % "1.4",
+      "com.jsuereth" %% "scala-arm" % "2.0",
       "joda-time" % "joda-time" % "2.9.2",
       "org.joda" % "joda-convert" % "1.8.1",
       "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4",
       "com.h2database" % "h2" % "1.4.182" % Test,
       "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test,
-      "com.chuusai" %% "shapeless" % "2.0.0" % Test
+      "com.chuusai" %% "shapeless" % "2.3.2" % Test
     ) ++ Seq(
       "specs2-core",
       "specs2-junit"
-    ).map("org.specs2" %% _ % "3.8.3" % Test)
+    ).map("org.specs2" %% _ % "3.8.6" % Test)
   }).dependsOn(`anorm-tokenizer`)
 
 lazy val `anorm-iteratee` = (project in file("iteratee"))
@@ -89,12 +89,12 @@ lazy val `anorm-iteratee` = (project in file("iteratee"))
   .settings(
     previousArtifacts := Set.empty,
     libraryDependencies ++= Seq(
-      "com.typesafe.play" %% "play-iteratees" % "2.6.0",
+      "com.typesafe.play" %% "play-iteratees" % "2.6.1",
       "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test      
     ) ++ Seq(
       "specs2-core",
       "specs2-junit"
-    ).map("org.specs2" %% _ % "3.8.3" % Test)
+    ).map("org.specs2" %% _ % "3.8.6" % Test)
   ).dependsOn(anorm)
 
 lazy val `anorm-akka` = (project in file("akka"))
@@ -107,13 +107,14 @@ lazy val `anorm-akka` = (project in file("akka"))
       "Tatami Releases".at(
         "https://raw.github.com/cchantep/tatami/master/snapshots")),
     libraryDependencies ++= Seq(
-      "com.typesafe.akka" %% "akka-stream" % "2.4.11" % "provided",
+      "com.typesafe.akka" %% "akka-testkit" % "2.4.16" % "provided",
+      "com.typesafe.akka" %% "akka-stream" % "2.4.16" % "provided",
       "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test
     ) ++ Seq(
       "specs2-core",
       "specs2-junit"
-    ).map("org.specs2" %% _ % "3.8.3" % Test) ++ Seq(
-      "com.typesafe.akka" %% "akka-stream-contrib" % "0.3-9-gaeac7b2" % Test)
+    ).map("org.specs2" %% _ % "3.8.6" % Test) ++ Seq(
+      "com.typesafe.akka" %% "akka-stream-contrib" % "0.6" % Test)
   ).dependsOn(anorm)
 
 lazy val `anorm-parent` = (project in file("."))
@@ -121,7 +122,7 @@ lazy val `anorm-parent` = (project in file("."))
   .aggregate(`anorm-tokenizer`, anorm, `anorm-iteratee`, `anorm-akka`)
   .settings(
     scalaVersion in ThisBuild := "2.11.8",
-    crossScalaVersions in ThisBuild := Seq("2.11.8", "2.12.0"),
+    crossScalaVersions in ThisBuild := Seq("2.11.8", "2.12.1"),
     previousArtifacts := Set.empty)
 
 lazy val docs = project

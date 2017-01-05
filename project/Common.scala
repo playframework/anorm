@@ -23,11 +23,13 @@ object Common extends AutoPlugin {
       "-Ywarn-numeric-widen"),
     fork in Test := true,
     previousArtifacts := {
-      if (crossPaths.value) {
-        Set(organization.value % s"${moduleName.value}_${scalaBinaryVersion.value}" % previousVersion)
-      } else {
-        Set(organization.value % moduleName.value % previousVersion)
-      }
+       if (scalaVersion.value startsWith "2.12.") Set.empty else {
+         if (crossPaths.value) {
+           Set(organization.value % s"${moduleName.value}_${scalaBinaryVersion.value}" % previousVersion)
+         } else {
+           Set(organization.value % moduleName.value % previousVersion)
+         }
+       }
     }
   )
 
