@@ -115,11 +115,9 @@ object Macro {
     @inline def abort(m: String) = c.abort(c.enclosingPosition, m)
 
     if (!tpe.typeSymbol.isClass || !tpe.typeSymbol.asClass.isCaseClass) {
-      abort(s"case class expected: ${tpe}")
+      abort(s"case class expected: $tpe")
     }
 
-    val colTpe = c.weakTypeTag[Column[_]].tpe
-    val parserTpe = c.weakTypeTag[RowParser[_]].tpe
     val ctor = tpe.decl(termNames.CONSTRUCTOR).asMethod
 
     if (ctor.paramLists.isEmpty) {
@@ -128,14 +126,20 @@ object Macro {
 
     val TypeRef(_, _, tpeArgs) = tpe
 
-    val companion = tpe.typeSymbol.companion.typeSignature
-    val apply = companion.decl(TermName("apply")).asMethod
+    val boundTypes: Map[String, Type] = if (tpeArgs.isEmpty) Map.empty else {
+      // Need apply rather than ctor to resolve parameter symbols
 
-    val boundTypes = apply.typeParams.zip(tpeArgs).map {
-      case (sym, ty) => sym.fullName -> ty
-    }.toMap
+      val companion = tpe.typeSymbol.companion.typeSignature
+      val apply = companion.decl(TermName("apply")).asMethod
 
-    val optTpe = c.weakTypeTag[Option[_]].tpe
+      if (apply.paramLists.isEmpty) Map.empty
+      else apply.typeParams.zip(tpeArgs).map {
+        case (sym, ty) => sym.fullName -> ty
+      }.toMap
+    }
+
+    val colTpe = c.weakTypeTag[Column[_]].tpe
+    val parserTpe = c.weakTypeTag[RowParser[_]].tpe
 
     // ---
 
@@ -160,7 +164,11 @@ object Macro {
                     c.inferImplicitValue(ptype) match {
                       case EmptyTree =>
                         abort(s"cannot find $ctype nor $ptype for ${term.name} in $ctor")
-                      case pr =>
+                      case pr => {
+                        if (debugEnabled) {
+                          c.echo(c.enclosingPosition, s"instance of RowParser[$tt] resolved for ${tpe.typeSymbol.fullName}.$tn: $pr")
+                        }
+
                         // Use an existing `RowParser[T]` as part
                         pq"${term.name}" match {
                           case b @ Bind(bn, _) =>
@@ -173,10 +181,15 @@ object Macro {
 
                             }
                         }
+                      }
                     }
                   }
 
-                  case _ => {
+                  case ic => {
+                    if (debugEnabled) {
+                      c.echo(c.enclosingPosition, s"instance of Column[$tt] resolved for ${tpe.typeSymbol.fullName}.$tn: $ic")
+                    }
+
                     // Generate a `get` for the `Column[T]`
                     val get = genGet(tt, tn, pi)
 
