@@ -9,5 +9,4 @@ cache:
   directories:
   - $HOME/.ivy2
   - $HOME/.sbt
-script:
-  - sbt +mimaReportBinaryIssues +test docs/test
+script: ./.travis_scripts/validate.sh

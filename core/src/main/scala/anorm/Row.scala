@@ -121,7 +121,7 @@ trait Row {
 
   /**
    * Try to get data matching name.
-   * @param name Column qualified name, or label/alias
+   * @param a Column qualified name, or label/alias
    */
   private[anorm] def get(a: String): MayErr[SqlRequestError, (Any, MetaDataItem)] = for {
     m <- MayErr(metaData.get(a.toUpperCase).toRight(ColumnNotFound(a, this)))

@@ -1,8 +1,5 @@
 package anorm
 
-import java.sql.{ Connection, PreparedStatement }
-import resource.ManagedResource
-
 /** Initial SQL query, without parameter values. */
 sealed trait SqlQuery {
   private[anorm] def stmt: TokenizedStatement

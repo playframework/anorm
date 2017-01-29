@@ -3,10 +3,8 @@
  */
 package anorm
 
-import java.util.{ Date, UUID }
 import java.sql.{ Connection, PreparedStatement, ResultSet }
 
-import scala.collection.TraversableOnce
 import scala.util.{ Failure, Try }
 
 import resource.{ managed, ManagedResource }

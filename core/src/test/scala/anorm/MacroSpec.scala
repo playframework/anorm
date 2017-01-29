@@ -11,7 +11,7 @@ import Macro.ColumnNaming
 class MacroSpec extends org.specs2.mutable.Specification {
   "Macro" title
 
-  val barRow = RowLists.rowList1(classOf[Int] -> "v")
+  val barRow1 = RowLists.rowList1(classOf[Int] -> "v")
 
   val fooRow1 = RowLists.rowList5(
     classOf[Float] -> "r", classOf[String] -> "bar",
@@ -43,7 +43,7 @@ class MacroSpec extends org.specs2.mutable.Specification {
     shapeless.test.illTyped(
       """anorm.Macro.parser[Foo[Int]]("Foo", "Bar")""")
 
-    "be successful for Bar" in withQueryResult(barRow :+ 1 :+ 3) { implicit c =>
+    "be successful for Bar" in withQueryResult(barRow1 :+ 1 :+ 3) { implicit c =>
       val parser1 = Macro.namedParser[Bar]
       val parser2 = Macro.parser[Bar]("v")
 
@@ -96,6 +96,12 @@ class MacroSpec extends org.specs2.mutable.Specification {
         SQL"TEST".as(fooBar.singleOpt) must beSome(
           Foo(1.2F, "str1")(Bar(6), Some(2))(Some(true)))
       }
+    }
+
+    "support self reference" in {
+      val parser = Macro.namedParser[Self]
+
+      ok // TODO: Supports aliasing to make it really usable (see #124)
     }
   }
 
@@ -152,12 +158,94 @@ class MacroSpec extends org.specs2.mutable.Specification {
       }
   }
 
-  case class Bar(v: Int)
+  "Discriminator naming" should {
+    import Macro.DiscriminatorNaming
+
+    "be 'classname' by default" in {
+      DiscriminatorNaming.Default("foo") must_== "classname"
+    }
+
+    "be customized" in {
+      val naming = DiscriminatorNaming { _ => "foo" }
+      naming("bar") must_== "foo"
+    }
+  }
+
+  "Discriminate function" should {
+    import Macro.Discriminate
+
+    "be identity by default" in {
+      Discriminate.Identity("x.y.z.Type") must_== "x.y.z.Type"
+    }
+
+    "be customized" in {
+      val discriminate = Discriminate(_.split("\\.").last)
+      discriminate("x.y.z.Type") must_== "Type"
+    }
+  }
+
+  "Sealed parser" should {
+    // No subclass
+    shapeless.test.illTyped("anorm.Macro.sealedParser[NoSubclass]")
+
+    // Cannot find the RowParser instances for the subclasses,
+    // from the implicit scope
+    shapeless.test.illTyped("Macro.sealedParser[Family]")
+
+    "be successful for the Family trait" >> {
+      "with the default discrimination" in {
+        val barRow2 = RowLists.rowList2(
+          classOf[String] -> "classname", classOf[Int] -> "v")
+
+        withQueryResult(barRow2 :+ (
+          "anorm.MacroSpec.Bar", 1) :+ ("anorm.MacroSpec.CaseObj", -1)) {
+          implicit c =>
+            implicit val caseObjParser =
+              RowParser[CaseObj.type] { _ => Success(CaseObj) }
+
+            implicit val barParser = Macro.namedParser[Bar]
+            val familyParser = Macro.sealedParser[Family]
+
+            SQL"TEST".as(familyParser.*) must_== List(Bar(1), CaseObj)
+        }
+      }
+
+      "with a customized discrimination" in {
+        val barRow2 = RowLists.rowList2(
+          classOf[String] -> "foo", classOf[Int] -> "v")
+
+        withQueryResult(barRow2 :+ ("Bar", 1) :+ ("CaseObj", -1)) {
+          implicit c =>
+            implicit val caseObjParser =
+              RowParser[CaseObj.type] { _ => Success(CaseObj) }
+
+            implicit val barParser = Macro.namedParser[Bar]
+            val familyParser = Macro.sealedParser[Family](
+              Macro.DiscriminatorNaming(_ => "foo"),
+              Macro.Discriminate(_.split("\\.").last)
+            )
+
+            SQL"TEST".as(familyParser.*) must_== List(Bar(1), CaseObj)
+        }
+      }
+    }
+  }
+
+  sealed trait NoSubclass
+  object NotFamilly
+
+  sealed trait Family
+  case class Bar(v: Int) extends Family
+  case object CaseObj extends Family
+  object NotCase extends Family
+
   case class Foo[T](r: Float, bar: String = "Default")(
-      loremIpsum: T, opt: Option[Long] = None)(x: Option[Boolean]) {
+    loremIpsum: T, opt: Option[Long] = None)(x: Option[Boolean])
+      extends Family {
     override lazy val toString = s"Foo($r, $bar)($loremIpsum, $opt)($x)"
   }
   case class Goo[T](loremIpsum: T, opt: Option[Long], x: Option[Boolean]) {
     override lazy val toString = s"Goo($loremIpsum, $opt, $x)"
   }
+  case class Self(id: String, next: Self)
 }
