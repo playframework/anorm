@@ -585,6 +585,17 @@ sealed trait JavaTimeColumn {
     }
   }
 
+  private def temporalColumn[T](epoch: Long => T, description: String): Column[T] = nonNull { (value, meta) =>
+    val MetaDataItem(qualified, _, _) = meta
+    value match {
+      case date: java.util.Date => Right(epoch(date.getTime))
+      case time: Long => Right(epoch(time))
+      case TimestampWrapper1(ts) => Ts(ts)(t => epoch(t.getTime))
+      case TimestampWrapper2(ts) => Ts(ts)(t => epoch(t.getTime))
+      case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to $description for column $qualified"))
+    }
+  }
+
   /**
    * Parses column as Java8 local date/time.
    * Time zone offset is the one of default JVM time zone
@@ -598,21 +609,10 @@ sealed trait JavaTimeColumn {
    *   as(scalar[LocalDateTime].single)
    * }}}
    */
-  implicit val columnToLocalDateTime: Column[LocalDateTime] = {
-    @inline def dateTime(ts: Long) = LocalDateTime.ofInstant(
-      Instant.ofEpochMilli(ts), ZoneId.systemDefault)
-
-    nonNull { (value, meta) =>
-      val MetaDataItem(qualified, _, _) = meta
-      value match {
-        case date: java.util.Date => Right(dateTime(date.getTime))
-        case time: Long => Right(dateTime(time))
-        case TimestampWrapper1(ts) => Ts(ts)(t => dateTime(t.getTime))
-        case TimestampWrapper2(ts) => Ts(ts)(t => dateTime(t.getTime))
-        case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to Java8 LocalDateTime for column $qualified"))
-      }
-    }
-  }
+  implicit val columnToLocalDateTime: Column[LocalDateTime] =
+    temporalColumn[LocalDateTime]({ ts: Long =>
+      LocalDateTime.ofInstant(Instant.ofEpochMilli(ts), ZoneId.systemDefault)
+    }, "Java8 LocalDateTime")
 
   /**
    * Parses column as Java8 local date.
@@ -627,21 +627,11 @@ sealed trait JavaTimeColumn {
    *   as(scalar[LocalDateTime].single)
    * }}}
    */
-  implicit val columnToLocalDate: Column[LocalDate] = {
-    @inline def localDate(ts: Long) = LocalDateTime.ofInstant(
-      Instant.ofEpochMilli(ts), ZoneId.systemDefault).toLocalDate
-
-    nonNull { (value, meta) =>
-      val MetaDataItem(qualified, _, _) = meta
-      value match {
-        case date: java.util.Date => Right(localDate(date.getTime))
-        case time: Long => Right(localDate(time))
-        case TimestampWrapper1(ts) => Ts(ts)(t => localDate(t.getTime))
-        case TimestampWrapper2(ts) => Ts(ts)(t => localDate(t.getTime))
-        case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to Java8 LocalDate for column $qualified"))
-      }
-    }
-  }
+  implicit val columnToLocalDate: Column[LocalDate] =
+    temporalColumn[LocalDate]({ ts: Long =>
+      LocalDateTime.ofInstant(
+        Instant.ofEpochMilli(ts), ZoneId.systemDefault).toLocalDate
+    }, "Java8 LocalDate")
 
   /**
    * Parses column as Java8 zoned date/time.
@@ -656,19 +646,8 @@ sealed trait JavaTimeColumn {
    *   as(scalar[ZonedDateTime].single)
    * }}}
    */
-  implicit val columnToZonedDateTime: Column[ZonedDateTime] = {
-    @inline def dateTime(ts: Long) = ZonedDateTime.ofInstant(
-      Instant.ofEpochMilli(ts), ZoneId.systemDefault)
-
-    nonNull { (value, meta) =>
-      val MetaDataItem(qualified, _, _) = meta
-      value match {
-        case date: java.util.Date => Right(dateTime(date.getTime))
-        case time: Long => Right(dateTime(time))
-        case TimestampWrapper1(ts) => Ts(ts)(t => dateTime(t.getTime))
-        case TimestampWrapper2(ts) => Ts(ts)(t => dateTime(t.getTime))
-        case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to Java8 ZonedDateTime for column $qualified"))
-      }
-    }
-  }
+  implicit val columnToZonedDateTime: Column[ZonedDateTime] =
+    temporalColumn[ZonedDateTime]({ ts: Long =>
+      ZonedDateTime.ofInstant(Instant.ofEpochMilli(ts), ZoneId.systemDefault)
+    }, "Java8 ZonedDateTime")
 }

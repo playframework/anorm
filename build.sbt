@@ -9,23 +9,19 @@ lazy val acolyteVersion = "1.0.42-j7p"
 
 lazy val `anorm-tokenizer` = project
   .in(file("tokenizer"))
-  .enablePlugins(PlayLibrary)
-  .settings(scalariformSettings: _*)
-  .settings(
+  .enablePlugins(PlayLibrary, CopyPasteDetector)
+  .settings(scalariformSettings ++ Seq(
     libraryDependencies ++= Seq(
       "org.scala-lang" % "scala-reflect" % scalaVersion.value
     )
-  )
+  ))
 
 lazy val anorm = project
   .in(file("core"))
-  .enablePlugins(Playdoc, PlayLibrary)
-  .settings(scalariformSettings: _*)
-  .settings({
+  .enablePlugins(Playdoc, PlayLibrary, CopyPasteDetector)
+  .settings(scalariformSettings ++ Seq(
     sourceGenerators in Compile <+= (
-      sourceManaged in Compile).map(m => Seq(GFA(m / "anorm")))
-  })
-  .settings(
+      sourceManaged in Compile).map(m => Seq(GFA(m / "anorm"))),
   scalacOptions += "-Xlog-free-terms",
     binaryIssueFilters ++= Seq(
       // was private:
@@ -67,8 +63,7 @@ lazy val anorm = project
       // New functions
       missMeth("anorm.Sql.unsafeStatement$default$2"),
       missMeth("anorm.Sql.unsafeResultSet"),
-      missMeth("anorm.Sql.unsafeStatement")))
-  .settings({
+      missMeth("anorm.Sql.unsafeStatement")),
     libraryDependencies ++= Seq(
       "com.jsuereth" %% "scala-arm" % "1.4",
       "joda-time" % "joda-time" % "2.9.2",
@@ -81,12 +76,11 @@ lazy val anorm = project
       "specs2-core",
       "specs2-junit"
     ).map("org.specs2" %% _ % "3.8.3" % Test)
-  }).dependsOn(`anorm-tokenizer`)
+  )).dependsOn(`anorm-tokenizer`)
 
 lazy val `anorm-iteratee` = (project in file("iteratee"))
-  .enablePlugins(PlayLibrary)
-  .settings(scalariformSettings: _*)
-  .settings(
+  .enablePlugins(PlayLibrary, CopyPasteDetector)
+  .settings(scalariformSettings ++ Seq(
     previousArtifacts := Set.empty,
     libraryDependencies ++= Seq(
       "com.typesafe.play" %% "play-iteratees" % "2.6.0",
@@ -95,12 +89,11 @@ lazy val `anorm-iteratee` = (project in file("iteratee"))
       "specs2-core",
       "specs2-junit"
     ).map("org.specs2" %% _ % "3.8.3" % Test)
-  ).dependsOn(anorm)
+  )).dependsOn(anorm)
 
 lazy val `anorm-akka` = (project in file("akka"))
-  .enablePlugins(PlayLibrary)
-  .settings(scalariformSettings: _*)
-  .settings(
+  .enablePlugins(PlayLibrary, CopyPasteDetector)
+  .settings(scalariformSettings ++ Seq(
     previousArtifacts := Set.empty,
     resolvers ++= Seq(
       // For Akka Stream Contrib TestKit (see akka/akka-stream-contrib/pull/51)
@@ -113,8 +106,8 @@ lazy val `anorm-akka` = (project in file("akka"))
       "specs2-core",
       "specs2-junit"
     ).map("org.specs2" %% _ % "3.8.3" % Test) ++ Seq(
-      "com.typesafe.akka" %% "akka-stream-contrib" % "0.3-9-gaeac7b2" % Test)
-  ).dependsOn(anorm)
+      "com.typesafe.akka" %% "akka-stream-contrib" % "0.6" % Test)
+  )).dependsOn(anorm)
 
 lazy val `anorm-parent` = (project in file("."))
   .enablePlugins(PlayRootProject)

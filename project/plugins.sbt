@@ -11,3 +11,4 @@ addSbtPlugin("com.typesafe.sbt" % "sbt-scalariform" % "1.3.0")
 resolvers += Resolver.typesafeRepo("releases")
 libraryDependencies += "org.scalariform" %% "scalariform" % "0.1.5-20140822-69e2e30"
 
+addSbtPlugin("de.johoop" % "cpd4sbt" % "1.2.0")
