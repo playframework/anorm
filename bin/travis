@@ -1,0 +1,10 @@
+#! /bin/bash
+
+set -ev
+
+if [ `echo "$TRAVIS_SCALA_VERSION" | grep '^2\.12\.' | wc -l` -eq 1 ]; then
+  # TODO: Remove when everything is ok for 2.12
+  sbt ++$TRAVIS_SCALA_VERSION mimaReportBinaryIssues test
+else
+  sbt ++$TRAVIS_SCALA_VERSION mimaReportBinaryIssues test docs/test
+fi
