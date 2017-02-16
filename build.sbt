@@ -8,7 +8,7 @@ import com.typesafe.tools.mima.plugin.MimaKeys.{
 val specs2Test = Seq(
   "specs2-core",
   "specs2-junit"
-).map("org.specs2" %% _ % "3.8.6" % Test)
+).map("org.specs2" %% _ % "3.8.8" % Test)
 
 lazy val acolyteVersion = "1.0.43-j7p"
 
@@ -27,8 +27,8 @@ lazy val anorm = project
   .enablePlugins(Playdoc, PlayLibrary)
   .settings(scalariformSettings: _*)
   .settings({
-    sourceGenerators in Compile <+= (
-      sourceManaged in Compile).map(m => Seq(GFA(m / "anorm")))
+    sourceGenerators in Compile += (
+      sourceManaged in Compile).map(m => Seq(GFA(m / "anorm"))).taskValue
   })
   .settings(
   scalacOptions += "-Xlog-free-terms",
@@ -76,10 +76,10 @@ lazy val anorm = project
   .settings({
     libraryDependencies ++= Seq(
       "com.jsuereth" %% "scala-arm" % "2.0",
-      "joda-time" % "joda-time" % "2.9.2",
+      "joda-time" % "joda-time" % "2.9.7",
       "org.joda" % "joda-convert" % "1.8.1",
       "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4",
-      "com.h2database" % "h2" % "1.4.182" % Test,
+      "com.h2database" % "h2" % "1.4.193" % Test,
       "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test,
       "com.chuusai" %% "shapeless" % "2.3.2" % Test
     ) ++ specs2Test
@@ -106,8 +106,8 @@ lazy val `anorm-akka` = (project in file("akka"))
       "Tatami Releases".at(
         "https://raw.github.com/cchantep/tatami/master/snapshots")),
     libraryDependencies ++= Seq(
-      "com.typesafe.akka" %% "akka-testkit" % "2.4.16" % "provided",
-      "com.typesafe.akka" %% "akka-stream" % "2.4.16" % "provided",
+      "com.typesafe.akka" %% "akka-testkit" % "2.4.17" % "provided",
+      "com.typesafe.akka" %% "akka-stream" % "2.4.17" % "provided",
       "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test
     ) ++ specs2Test ++ Seq(
       "com.typesafe.akka" %% "akka-stream-contrib" % "0.6" % Test)
@@ -117,7 +117,7 @@ lazy val `anorm-parent` = (project in file("."))
   .enablePlugins(PlayRootProject)
   .aggregate(`anorm-tokenizer`, anorm, `anorm-iteratee`, `anorm-akka`)
   .settings(
-    scalaVersion in ThisBuild := "2.11.8",
+    scalaVersion in ThisBuild := "2.12.1",
     crossScalaVersions in ThisBuild := Seq("2.11.8", "2.12.1"),
     previousArtifacts := Set.empty)
 
@@ -125,7 +125,7 @@ lazy val docs = project
   .in(file("docs"))
   .enablePlugins(PlayDocsPlugin)
   .settings(
-    scalaVersion := "2.11.8"
+    scalaVersion := "2.12.1"
   ).dependsOn(anorm)
 
 playBuildRepoName in ThisBuild := "anorm"

@@ -1,18 +1,25 @@
 package scalaGuide.sql.anorm
 
+import play.api.Application
+import play.api.db.Database
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test._
 import play.api.test.Helpers._
 
 class ScalaAnorm extends org.specs2.mutable.Specification {
   "Code samples" title
 
+  def createApp(additionalConfiguration: Map[String, _]): Application = {
+    new GuiceApplicationBuilder().configure(additionalConfiguration).build()
+  }
+
   "Anorm" should {
-    "be usable in play" in new WithApplication(FakeApplication(additionalConfiguration = inMemoryDatabase())) {
+    "be usable in play" in new WithApplication(createApp(additionalConfiguration = inMemoryDatabase())) {
+      val database = app.injector.instanceOf[Database]
       //#playdb
       import anorm._
-      import play.api.db.DB
 
-      DB.withConnection { implicit c =>
+      database.withConnection { implicit c =>
         val result: Boolean = SQL("Select 1").execute()
       }
       //#playdb
@@ -49,7 +56,8 @@ object MacroFixtures {
           implicitly[RowParser[Lorem.type]]
 
         case (d) => RowParser.failed[Family](Error(SqlMappingError(
-          "unexpected row type \'%s\'; expected: %s".format(d, "scalaguide.sql.MacroFixtures.Bar, scalaguide.sql.MacroFixtures.Lorem"))))
+          "unexpected row type \'%s\'; expected: %s".format(d, "scalaguide.sql.MacroFixtures.Bar, scalaguide.sql.MacroFixtures.Lorem")
+        )))
       }
     }
   //#macroSealedParser
