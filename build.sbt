@@ -78,7 +78,7 @@ lazy val anorm = project
       "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test,
       "com.chuusai" %% "shapeless" % "2.3.2" % Test
     ) ++ specs2Test
-  }).dependsOn(`anorm-tokenizer`)
+  )).dependsOn(`anorm-tokenizer`)
 
 lazy val `anorm-iteratee` = (project in file("iteratee"))
   .enablePlugins(PlayLibrary, CopyPasteDetector)
