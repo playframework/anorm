@@ -2,7 +2,7 @@ package anorm
 
 import java.sql.{ Connection, ResultSet }
 
-import scala.concurrent.{ ExecutionContext, Future, Promise }
+import scala.concurrent.{ ExecutionContext, Future }
 import scala.concurrent.duration._
 import scala.collection.immutable.Seq
 import akka.stream.scaladsl.{ Keep, Sink, Source }

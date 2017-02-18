@@ -1,7 +1,5 @@
 package anorm
 
-import java.sql.{ Array => SqlArray }
-
 import acolyte.jdbc.QueryResult
 import acolyte.jdbc.AcolyteDSL.{ connection, handleQuery, withQueryResult }
 import acolyte.jdbc.RowLists.{ rowList1, rowList2, stringList }
