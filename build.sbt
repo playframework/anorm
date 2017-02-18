@@ -27,8 +27,8 @@ lazy val anorm = project
   .settings(scalariformSettings ++ Seq(
     sourceGenerators in Compile <+= (
       sourceManaged in Compile).map(m => Seq(GFA(m / "anorm"))),
-      scalacOptions += "-Xlog-free-terms",
-      binaryIssueFilters ++= Seq(
+    scalacOptions += "-Xlog-free-terms",
+    binaryIssueFilters ++= Seq(
       // was private:
       ProblemFilters.exclude[FinalClassProblem]("anorm.Sql$MissingParameter"),
       missMeth("anorm.DefaultParameterValue.stringValue"/* deprecated */),
@@ -88,7 +88,7 @@ lazy val `anorm-iteratee` = (project in file("iteratee"))
       "com.typesafe.play" %% "play-iteratees" % "2.6.1",
       "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test
     ) ++ specs2Test
-  ).dependsOn(anorm)
+  )).dependsOn(anorm)
 
 lazy val `anorm-akka` = (project in file("akka"))
   .enablePlugins(PlayLibrary, CopyPasteDetector)
@@ -104,13 +104,13 @@ lazy val `anorm-akka` = (project in file("akka"))
       "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test
     ) ++ specs2Test ++ Seq(
       "com.typesafe.akka" %% "akka-stream-contrib" % "0.6" % Test)
-  ).dependsOn(anorm)
+  )).dependsOn(anorm)
 
 lazy val `anorm-parent` = (project in file("."))
   .enablePlugins(PlayRootProject)
   .aggregate(`anorm-tokenizer`, anorm, `anorm-iteratee`, `anorm-akka`)
   .settings(
-    scalaVersion in ThisBuild := "2.12.1",
+  scalaVersion in ThisBuild := "2.12.1",
     crossScalaVersions in ThisBuild := Seq("2.11.8", "2.12.1"),
     previousArtifacts := Set.empty)
 
@@ -118,7 +118,7 @@ lazy val docs = project
   .in(file("docs"))
   .enablePlugins(PlayDocsPlugin)
   .settings(
-    scalaVersion := "2.12.1"
-  ).dependsOn(anorm)
+  scalaVersion := "2.12.1"
+).dependsOn(anorm)
 
 playBuildRepoName in ThisBuild := "anorm"
