@@ -1264,3 +1264,157 @@ It can be fixed by adding the package import: `import anorm._`
 `type mismatch; found    : T; required : anorm.ParameterValue`; This compilation error occurs when a value of type `T` is passed as parameter, whereas this `T` type is not supported. You need to ensure that a `anorm.ToStatement[T]` and a `anorm.ParameterMetaData[T]` can be found in the implicit scope (see [parameter conversions](#Custom-parameter-conversions)).
 
 On `.executeInsert()`, you can get the error `TypeDoesNotMatch(Cannot convert <value>: class <T> to Long for column ColumnName(<C>)`. This occurs when the [key returned by the database on insertion](http://docs.oracle.com/javase/8/docs/api/java/sql/Statement.html#getGeneratedKeys--) is not compatible with `Long` (the default key parser). It can be fixed by providing the appropriate key parser; e.g. if the database returns a text key: `SQL"...".executeInsert(scalar[String].singleOpt)` (get an `Option[String]` as insertion key).
+
+
+## Points to remember for integration tests
+
+This section explains about how to write the integration tests in a better way. To write integration tests for anorms, we require to follow following steps,
+
+<ul>
+<li>
+Must inject the Database object into your class as below,
+```scala
+	import play.api.db.Database
+	
+	class EmployeeDAO @Inject() (db: Database) {
+	 
+	  def createEmployee(first_name: String, last_name: String, age: Int): Option[String] = {
+	  	try {
+	  		val INSERT_EMPLOYEE = "insert into employee (first_name, last_name, age) values({first_name},{last_name},{age});"
+	  
+			db.withConnection { implicit connection =>
+				SQL(INSERT_EMPLOYEE)
+				  .on(
+				    "first_name" -> first_name,
+				    "last_name" -> last_name,
+				    "age" -> age
+				  )
+				  .executeInsert()
+			      }
+			None
+	  	} catch {
+	  		case exception: Exception => Some("Unable to create an employee "+exception.getMessage())
+	  	}
+	  }
+	  
+	  def getEmployees: List[Employee] = {
+  		val EXTRACT_EMPLOYEES = "select * from employee;"
+  
+		db.withConnection { implicit connection =>
+			SQL(EXTRACT_EMPLOYEES).as(ParserHelper.employeeParser *)
+		      }
+  	 }
+	  
+	  
+	  
+	}
+```
+
+We are injecting the Database in WeatherDAO class so that while writing the test case, we can pass our own in-memory database into this.
+</li>
+
+<li>
+Create the object for your own in-memory database, refer it to the Evolutions in the test file, as below,
+```scala
+	import play.api.db.Database
+	
+	class EmployeeDAOSpec extends PlaySpecification with Mockito {
+	 
+	 val database = Databases.inMemory(
+	    name = "default",
+	    urlOptions = Map(
+	      "MODE" -> "MYSQL"
+	    ),
+	    config = Map(
+	      "logStatements" -> true
+	    )
+	  )
+
+	  Evolutions.applyEvolutions(database)
+	}
+```
+
+We are creating the database as in-memory so that after the execution of test cases, so that we can execute all the queries on that.
+</li>
+
+<li>
+Now it is the time to pass our in-memory database object into our EmployeeDAO class, as below,
+```scala
+	import play.api.db.Database
+	
+	class EmployeeDAOSpec extends PlaySpecification with Mockito {
+	 
+	 val database = Databases.inMemory(
+	    name = "default",
+	    urlOptions = Map(
+	      "MODE" -> "MYSQL"
+	    ),
+	    config = Map(
+	      "logStatements" -> true
+	    )
+	  )
+
+	  Evolutions.applyEvolutions(database)
+	  
+	  val employeeService = new EmployeeDAO(database)
+	}
+```
+
+</li>
+
+<li>
+Play provides a structured suite for writting the specs, as below,
+```scala
+	"EmployeeDAO Service" should {
+      		"be able a new employee successfully" in new WithApplication() {
+      		  ...
+      		}
+      		
+      		"be able get list of all employees successfully" in new WithApplication() {
+      		  ...
+      		}
+      	}
+```
+This approach is a little bit changed in case of Anorms, as we need to execute them for in-memory database.
+</li>
+
+<li>
+Final step is to write the test cases now. A unique way to write your tests with in memory is to write them as in the Databases.withInMemory() { ... } block, as below,
+```scala
+	import play.api.db.Database
+	
+	class EmployeeDAOSpec extends PlaySpecification with Mockito {
+	 
+	 val database = Databases.inMemory(
+	    name = "default",
+	    urlOptions = Map(
+	      "MODE" -> "MYSQL"
+	    ),
+	    config = Map(
+	      "logStatements" -> true
+	    )
+	  )
+
+	  Evolutions.applyEvolutions(database)
+	  
+	  val employeeService = new EmployeeDAO(database)
+	  
+	  Databases.withInMemory() { database =>
+	  	"EmployeeDAO Service" should {
+	      		"be able a new employee successfully" in new WithApplication() {
+	      		  assert(employeeService.createEmployee("Harsh", "Sharma", 26) === None)
+	      		}
+	      		
+	      		"be able get list of all employees successfully" in new WithApplication() {
+	      		  assert(employeeService.getEmployees === List(Employee("Harsh", "Sharma", 26, 111)))
+	      		}
+      		}
+	  }
+	  
+	}
+```
+
+In this step, the test suite is terminated inside the im the memory block. Here Employee is a case class object having employee information along a primary key of table as the last field.
+</li>
+
+</ul>
