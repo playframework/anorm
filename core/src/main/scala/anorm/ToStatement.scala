@@ -754,4 +754,16 @@ sealed trait ToStatementPriority1 extends ToStatementPriority0 {
 /**
  * Provided conversions to set statement parameter.
  */
-object ToStatement extends ToStatementPriority1 with JodaToStatement with JavaTimeToStatement
+object ToStatement extends ToStatementPriority1
+    with JodaToStatement with JavaTimeToStatement {
+
+  private class FunctionalToStatement[T](
+    f: (PreparedStatement, Int, T) => Unit
+  ) extends ToStatement[T] {
+    def set(s: PreparedStatement, index: Int, v: T) { f(s, index, v) }
+  }
+
+  /** Functional factory */
+  def apply[T](set: (PreparedStatement, Int, T) => Unit): ToStatement[T] =
+    new FunctionalToStatement[T](set)
+}

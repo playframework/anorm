@@ -11,6 +11,7 @@ val specs2Test = Seq(
 ).map("org.specs2" %% _ % "3.8.8" % Test)
 
 lazy val acolyteVersion = "1.0.43-j7p"
+lazy val acolyte = "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test
 
 lazy val `anorm-tokenizer` = project
   .in(file("tokenizer"))
@@ -75,7 +76,7 @@ lazy val anorm = project
       "org.joda" % "joda-convert" % "1.8.1",
       "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4",
       "com.h2database" % "h2" % "1.4.193" % Test,
-      "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test,
+      acolyte,
       "com.chuusai" %% "shapeless" % "2.3.2" % Test
     ) ++ specs2Test
   )).dependsOn(`anorm-tokenizer`)
@@ -90,6 +91,7 @@ lazy val `anorm-iteratee` = (project in file("iteratee"))
     ) ++ specs2Test
   )).dependsOn(anorm)
 
+val akkaVer = "2.4.17"
 lazy val `anorm-akka` = (project in file("akka"))
   .enablePlugins(PlayLibrary, CopyPasteDetector)
   .settings(scalariformSettings ++ Seq(
@@ -104,6 +106,18 @@ lazy val `anorm-akka` = (project in file("akka"))
       "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test
     ) ++ specs2Test ++ Seq(
       "com.typesafe.akka" %% "akka-stream-contrib" % "0.6" % Test)
+  )).dependsOn(anorm)
+
+lazy val pgVer = sys.props.get("postgres.version").getOrElse("9.4.1212")
+lazy val jsonVer = sys.props.get("playJson.version").getOrElse("2.6.0-M3")
+lazy val `anorm-postgres` = (project in file("postgres"))
+  .enablePlugins(PlayLibrary, CopyPasteDetector)
+  .settings(scalariformSettings ++ Seq(
+    previousArtifacts := Set.empty,
+    libraryDependencies ++= Seq(
+      "org.postgresql" % "postgresql" % pgVer,
+      "com.typesafe.play" %% "play-json" % jsonVer
+    ) ++ specs2Test :+ acolyte
   )).dependsOn(anorm)
 
 lazy val `anorm-parent` = (project in file("."))
