@@ -15,7 +15,13 @@ import resource.managed
 /** Column mapping */
 @annotation.implicitNotFound(
   "No column extractor found for the type ${A}: `anorm.Column[${A}]` required; See https://github.com/playframework/anorm/blob/master/docs/manual/working/scalaGuide/main/sql/ScalaAnorm.md#column-parsers")
-trait Column[A] extends ((Any, MetaDataItem) => MayErr[SqlRequestError, A])
+trait Column[A] extends ((Any, MetaDataItem) => MayErr[SqlRequestError, A]) { parent =>
+
+  /** If the column is successfully parsed, then apply the given function. */
+  final def flatMap[B](f: A => MayErr[SqlRequestError, B]): Column[B] =
+    Column[B] { (v: Any, m: MetaDataItem) => parent(v, m).flatMap(f) }
+  // TODO: +map +discipline
+}
 
 /** Column companion, providing default conversions. */
 object Column extends JodaColumn with JavaTimeColumn {
