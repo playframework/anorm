@@ -19,7 +19,7 @@ object SqlParser extends FunctionAdapter {
   def scalar[T](implicit transformer: Column[T]): RowParser[T] =
     new ScalarRowParser[T] {
       def apply(row: Row): SqlResult[T] = {
-        MayErr((for {
+        ((for {
           m <- row.metaData.ms.headOption
           v <- row.data.headOption
         } yield v -> m) toRight NoColumnsInReturnedResult).

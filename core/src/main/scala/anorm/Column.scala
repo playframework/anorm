@@ -12,22 +12,87 @@ import scala.util.{ Failure, Success => TrySuccess, Try }
 
 import resource.managed
 
-/** Column mapping */
+/**
+ * Column mapping
+ *
+ * @define mapDescription If the column is successfully parsed, then apply the given function on the result.
+ */
 @annotation.implicitNotFound(
   "No column extractor found for the type ${A}: `anorm.Column[${A}]` required; See https://github.com/playframework/anorm/blob/master/docs/manual/working/scalaGuide/main/sql/ScalaAnorm.md#column-parsers")
-trait Column[A] extends ((Any, MetaDataItem) => MayErr[SqlRequestError, A]) { parent =>
+trait Column[A] extends ((Any, MetaDataItem) => Either[SqlRequestError, A]) { parent =>
 
-  /** If the column is successfully parsed, then apply the given function. */
-  final def flatMap[B](f: A => MayErr[SqlRequestError, B]): Column[B] =
+  /**
+   * $mapDescription
+   *
+   * {{{
+   * import anorm.{ Column, SqlParser, SQL }
+   *
+   * sealed trait MyEnum
+   * case object Foo extends MyEnum
+   * case object Bar extends MyEnum
+   *
+   * val myEnumCol: Column[MyEnum] = Column.of[Int].mapResult {
+   *   case 1 => Right(Foo) // `Right` means successful
+   *   case 2 => Right(Bar)
+   *   case _ => Left(SqlMappingError("Unexpected"))
+   * }
+   *
+   * def find(id: String) =
+   *   SQL"SELECT enum_code FROM my_table WHERE id = $id".
+   *     as(SqlParser.scalar(myEnumCol).single)
+   * }}}
+   */
+  final def mapResult[B](f: A => Either[SqlRequestError, B]): Column[B] =
     Column[B] { (v: Any, m: MetaDataItem) => parent(v, m).flatMap(f) }
-  // TODO: +map +discipline
+
+  /**
+   * $mapDescription
+   *
+   * {{{
+   * import anorm.{ Column, SqlParser, SQL }
+   *
+   * sealed trait MyEnum
+   * case object Foo extends MyEnum
+   * case object Bar extends MyEnum
+   *
+   * val myEnumCol: Column[MyEnum] = Column.of[Int].map {
+   *   case 1 => Right(Foo) // `Right` means successful
+   *   case 2 => Right(Bar)
+   * }
+   *
+   * def find(id: String) =
+   *   SQL"SELECT enum_code FROM my_table WHERE id = $id".
+   *     as(SqlParser.scalar(myEnumCol).single)
+   * }}}
+   */
+  def map[B](f: A => B): Column[B] = mapResult[B] { a =>
+    try {
+      Right(f(a))
+    } catch {
+      case cause: Throwable => Left(SqlRequestError(cause))
+    }
+  }
 }
 
 /** Column companion, providing default conversions. */
 object Column extends JodaColumn with JavaTimeColumn {
-  def apply[A](transformer: ((Any, MetaDataItem) => MayErr[SqlRequestError, A])): Column[A] = new Column[A] {
+  /**
+   * Resolves the `Column` instance for the given type.
+   * (equivalent to `implicitly[Column[A]]`).
+   *
+   * @tparam A the type of the column value
+   *
+   * {{{
+   * import anorm.Column
+   *
+   * val resolved: Column[String] = Column.of[String]
+   * }}}
+   */
+  @inline def of[A](implicit resolved: Column[A]): Column[A] = resolved
 
-    def apply(value: Any, meta: MetaDataItem): MayErr[SqlRequestError, A] =
+  def apply[A](transformer: ((Any, MetaDataItem) => Either[SqlRequestError, A])): Column[A] = new Column[A] {
+
+    def apply(value: Any, meta: MetaDataItem): Either[SqlRequestError, A] =
       transformer(value, meta)
 
   }
@@ -43,9 +108,9 @@ object Column extends JodaColumn with JavaTimeColumn {
    */
   def nonNull[A](transformer: ((Any, MetaDataItem) => Either[SqlRequestError, A])): Column[A] = Column[A] {
     case (value, meta @ MetaDataItem(qualified, _, _)) =>
-      MayErr(if (value != null) transformer(value, meta)
+      if (value != null) transformer(value, meta)
       else Left[SqlRequestError, A](
-        UnexpectedNullableFound(qualified.toString)))
+        UnexpectedNullableFound(qualified.toString))
 
   }
 
@@ -341,7 +406,7 @@ object Column extends JodaColumn with JavaTimeColumn {
 
   implicit def columnToOption[T](implicit transformer: Column[T]): Column[Option[T]] = Column { (value, meta) =>
     if (value != null) transformer(value, meta).map(Some(_))
-    else MayErr(Right[SqlRequestError, Option[T]](None))
+    else Right[SqlRequestError, Option[T]](None)
   }
 
   /**
@@ -359,7 +424,7 @@ object Column extends JodaColumn with JavaTimeColumn {
     @annotation.tailrec
     def transf(a: Array[_], p: Array[T]): Either[SqlRequestError, Array[T]] =
       a.headOption match {
-        case Some(r) => transformer(r, meta).toEither match {
+        case Some(r) => transformer(r, meta) match {
           case Right(v) => transf(a.tail, p :+ v)
           case Left(cause) => Left(typeNotMatch(value, "array", cause))
         }
@@ -368,7 +433,7 @@ object Column extends JodaColumn with JavaTimeColumn {
 
     @annotation.tailrec
     def jiter(i: java.util.Iterator[_], p: Array[T]): Either[SqlRequestError, Array[T]] = if (!i.hasNext) Right(p)
-    else transformer(i.next, meta).toEither match {
+    else transformer(i.next, meta) match {
       case Right(v) => jiter(i, p :+ v)
       case Left(cause) => Left(typeNotMatch(value, "list", cause))
     }
@@ -411,7 +476,7 @@ object Column extends JodaColumn with JavaTimeColumn {
     @annotation.tailrec
     def transf(a: Array[_], p: List[T]): Either[SqlRequestError, List[T]] =
       a.headOption match {
-        case Some(r) => transformer(r, meta).toEither match {
+        case Some(r) => transformer(r, meta) match {
           case Right(v) => transf(a.tail, p :+ v)
           case Left(cause) => Left(typeNotMatch(value, "list", cause))
         }
@@ -420,7 +485,7 @@ object Column extends JodaColumn with JavaTimeColumn {
 
     @annotation.tailrec
     def jiter(i: java.util.Iterator[_], p: List[T]): Either[SqlRequestError, List[T]] = if (!i.hasNext) Right(p)
-    else transformer(i.next, meta).toEither match {
+    else transformer(i.next, meta) match {
       case Right(v) => jiter(i, p :+ v)
       case Left(cause) => Left(typeNotMatch(value, "list", cause))
     }

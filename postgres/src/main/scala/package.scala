@@ -4,8 +4,12 @@ import play.api.libs.json.{ JsError, JsObject, Json, JsSuccess, JsValue, Reads }
 
 import org.postgresql.util.PGobject
 
-package object postgresql {
-  /** Allows pass a `JsValue` as parameter to be stored as `PGobject`. */
+package object postgresql extends PGJson {
+}
+
+// Could be moved to a separate module
+sealed trait PGJson {
+  /** Allows to pass a `JsValue` as parameter to be stored as `PGobject`. */
   implicit def jsValueToStatement[J <: JsValue] = ToStatement[J] { (s, i, js) =>
     val pgObject = new PGobject()
     pgObject.setType(JsValueParameterMetaData.sqlType)
@@ -45,14 +49,14 @@ package object postgresql {
       }
     }
 
-  implicit val jsObjectColumn: Column[JsObject] = jsValueColumn.flatMap {
+  implicit val jsObjectColumn: Column[JsObject] = jsValueColumn.mapResult {
     case obj @ JsObject(_) => Right(obj)
     case js => Left(TypeDoesNotMatch(
       s"JsValue found, but JsObject expected: ${Json stringify js}"))
   }
 
   implicit def jsonReadsColumn[T](implicit r: Reads[T]): Column[T] =
-    jsValueColumn.flatMap {
+    jsValueColumn.mapResult {
       r.reads(_) match {
         case JsSuccess(v, _) => Right(v)
         case err @ JsError(_) => Left(TypeDoesNotMatch(
