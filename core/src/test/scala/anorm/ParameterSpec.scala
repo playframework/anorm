@@ -417,7 +417,7 @@ class ParameterSpec
     "be double" in withConnection() { implicit c =>
       (SQL("set-double {p}").on("p" -> 23.456d).execute() must beFalse).
         and(SQL("set-double {p}").on(
-          "p" -> new JDouble(23.456d)).execute() must beFalse)
+          "p" -> new JDouble(23.456D)).execute() must beFalse)
     }
 
     "be null double" in withConnection() { implicit c =>
@@ -649,20 +649,18 @@ class ParameterSpec
 
     withConnection() { implicit c =>
       // Do not accept untyped name when feature enabled
-      val name: Any = "untyped"
-
-      shapeless.test.illTyped {
-        """SQL("set-old {untyped}").on(name -> 2l)"""
-      }
+      shapeless.test.illTyped("""
+val name: Any = "untyped"
+SQL("set-old {untyped}").on(name -> 2l)
+""")
     }
 
     withConnection() { implicit c =>
       // Do not accept untyped value when feature enabled
-      val d: Any = new java.util.Date()
-
-      shapeless.test.illTyped {
-        """val params: Seq[NamedParameter] = Seq("mod" -> d, "id" -> "idv")"""
-      }
+      shapeless.test.illTyped("""
+val d: Any = new java.util.Date()
+val params: Seq[NamedParameter] = Seq("mod" -> d, "id" -> "idv")
+""")
     }
 
     "accept value wrapped as opaque parameter object" in withConnection() {
@@ -987,6 +985,21 @@ class ParameterSpec
           onParams(pv("first"), pv("second")).execute() must beFalse
 
       }
+    }
+  }
+
+  "ToStatement" should {
+    implicit def con = connection(handleStatement withUpdateHandler {
+      case UpdateExecution("EXEC proc ?",
+        DParam("value:2", SqlStr) :: Nil) => 1
+      case _ => 0
+    })
+
+    "be contramap'ed" in {
+      implicit val to: ToStatement[Int] = ToStatement.of[String].
+        contramap[Int] { i => s"value:$i" }
+
+      SQL"""EXEC proc ${2}""".executeUpdate() must_== 1
     }
   }
 

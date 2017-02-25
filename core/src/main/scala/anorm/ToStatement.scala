@@ -17,12 +17,31 @@ import java.sql.{ PreparedStatement, Timestamp }
 
 /** Sets value as statement parameter. */
 @annotation.implicitNotFound("Cannot set value of type ${A} as parameter on statement: `anorm.ToStatement[${A}] required`")
-trait ToStatement[A] {
+trait ToStatement[A] { self =>
 
   /**
    * Sets value |v| on statement |s| at specified |index|.
    */
   def set(s: PreparedStatement, index: Int, v: A): Unit
+
+  /**
+    * {{{
+    * import anorm.ToStatement
+    * 
+    * sealed trait MyEnum
+    * case object Foo extends MyEnum
+    * case object Bar extends MyEnum
+    * 
+    * implicit val to: ToStatement[MyEnum] = 
+    *   ToStatement.of[Int].contramap[MyEnum] {
+    *     case Foo => 1
+    *     case Bar => 2
+    *   }
+    * }}}
+    */
+  final def contramap[B](f: B => A): ToStatement[B] =
+    ToStatement[B] { (s, i, b) => self.set(s, i, f(b)) }
+
 }
 
 /*
@@ -766,4 +785,15 @@ object ToStatement extends ToStatementPriority1
   /** Functional factory */
   def apply[T](set: (PreparedStatement, Int, T) => Unit): ToStatement[T] =
     new FunctionalToStatement[T](set)
+
+  /**
+    * Resolves `ToStatement` instance for the given type.
+    * 
+    * {{{
+    * import anorm.ToStatement
+    * 
+    * val to: ToStatement[String] = ToStatement.of[String]
+    * }}}
+    */
+  @inline def of[T](implicit to: ToStatement[T]): ToStatement[T] = to
 }

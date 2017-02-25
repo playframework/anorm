@@ -874,7 +874,7 @@ class ColumnSpec
       }
     }
 
-    "have be map'ed" >> {
+    "be map'ed" >> {
       "successfully from integer to string" in withQueryResult(intList :+ 4) {
         implicit con =>
           val col = Column.of[Int].map { i => s"value:$i" }
