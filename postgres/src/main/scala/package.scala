@@ -19,10 +19,27 @@ sealed trait PGJson {
   }
 
   /**
+    * @tparam the type of value to be written as JSON
+    * @param value the value to be passed as a JSON parameter
     * @param w the Play writes to be used to serialized the value as JSON
+    * 
+    * {{{
+    * import play.api.libs.json._
+    * import anorm._, postgresql._
+    * 
+    * case class Foo(bar: String)
+    * implicit val w: Writes[Foo] = Json.writes[Foo]
+    * 
+    * val value = Foo("lorem")
+    * SQL"INSERT INTO test(id, json) VALUES(${"bar"}, ${value})".executeUpdate()
+    * }}}
     */
-  implicit def jsonWrites[T](implicit w: Writes[T]): ToStatement[T] =
-    jsValueToStatement[JsValue].contramap(w.writes)
+  def asJson[T](value: T)(implicit w: Writes[T]): ParameterValue = {
+    implicit val writeJsonToStatement: ToStatement[T] =
+      jsValueToStatement[JsValue].contramap(w.writes)
+
+    ParameterValue from value
+  }
 
   implicit object JsValueParameterMetaData extends ParameterMetaData[JsValue] {
     val sqlType = "JSONB"
@@ -89,15 +106,15 @@ sealed trait PGJson {
     * import anorm.postgresql._
     * 
     * def foo(implicit r: Reads[Foo]): Foo
-    *   SQL"SELECT json FROM test".as(SqlParser.scalar[Family].single)
+    *   SQL"SELECT json FROM test".
+    *     as(SqlParser.scalar(fromJson[Foo]).single)
     * }}}
     */
-  implicit def jsonReads[T](implicit r: Reads[T]): Column[T] =
-    jsValueColumn.mapResult {
-      r.reads(_) match {
-        case JsSuccess(v, _) => Right(v)
-        case err @ JsError(_) => Left(TypeDoesNotMatch(
-          s"JSON validation error: ${Json.stringify(JsError toJson err)}"))
-      }
+  def fromJson[T](implicit r: Reads[T]): Column[T] = jsValueColumn.mapResult {
+    r.reads(_) match {
+      case JsSuccess(v, _) => Right(v)
+      case err @ JsError(_) => Left(TypeDoesNotMatch(
+        s"JSON validation error: ${Json.stringify(JsError toJson err)}"))
     }
+  }
 }

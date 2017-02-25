@@ -53,29 +53,57 @@ sealed case class NamedParameter(name: String, value: ParameterValue) {
   lazy val tupled: (String, ParameterValue) = (name, value)
 }
 
-/** Companion object for applied named parameter. */
+/**
+ * Companion object for applied named parameter.
+ *
+ * @define namedWithString Conversion to use tuple, with first element being name of parameter as string.
+ * @define namedWithSymbol Conversion to use tuple, with first element being symbolic name or parameter.
+ */
 object NamedParameter {
   import scala.language.implicitConversions
 
   /**
-   * Conversion to use tuple, with first element being name
-   * of parameter as string.
+   * $namedWithString
    *
    * {{{
-   * val p: Parameter = ("name" -> 1L)
+   * def foo(pv: ParameterValue): NamedParameter = "name" -> pv
    * }}}
    */
-  implicit def string[V](t: (String, V))(implicit c: V => ParameterValue): NamedParameter = NamedParameter(t._1, c(t._2))
+  implicit def namedWithString(t: (String, ParameterValue)): NamedParameter = NamedParameter(t._1, t._2)
 
   /**
-   * Conversion to use tuple,
-   * with first element being symbolic name or parameter.
+   * $namedWithString
    *
    * {{{
-   * val p: Parameter = ('name -> 1L)
+   * val p: NamedParameter = "name" -> 1L
    * }}}
    */
-  implicit def symbol[V](t: (Symbol, V))(implicit c: V => ParameterValue): NamedParameter = NamedParameter(t._1.name, c(t._2))
+  implicit def namedWithString[V](t: (String, V))(implicit c: ToParameterValue[V]): NamedParameter = NamedParameter(t._1, c(t._2))
+
+  @deprecated("Use `string` based in `ToParameterValue`", "2.5.4")
+  def string[V](t: (String, V))(implicit c: V => ParameterValue): NamedParameter = NamedParameter(t._1, c(t._2))
+
+  /**
+   * $namedWithSymbol
+   *
+   * {{{
+   * def foo(pv: ParameterValue): NamedParameter = 'name -> pv
+   * }}}
+   */
+  implicit def namedWithSymbol(t: (Symbol, ParameterValue)): NamedParameter =
+    NamedParameter(t._1.name, t._2)
+
+  /**
+   * $namedWithSymbol
+   *
+   * {{{
+   * val p: NamedParameter = 'name -> 1L
+   * }}}
+   */
+  implicit def namedWithSymbol[V](t: (Symbol, V))(implicit c: ToParameterValue[V]): NamedParameter = NamedParameter(t._1.name, c(t._2))
+
+  @deprecated("Use `string` based in `ToParameterValue`", "2.5.4")
+  def symbol[V](t: (Symbol, V))(implicit c: V => ParameterValue): NamedParameter = NamedParameter(t._1.name, c(t._2))
 
 }
 

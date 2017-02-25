@@ -59,11 +59,30 @@ object ParameterValue {
 
   private[anorm] trait Wrapper[T] { def value: T }
 
-  @throws[IllegalArgumentException]("if value `v` is null whereas `toStmt` is marked with [[anorm.NotNullGuard]]") // TODO: MayErr on conversion to parameter values?
-  def apply[A](v: A, s: ToSql[A], toStmt: ToStatement[A]) = (v, toStmt) match {
-    case (null, _: NotNullGuard) => throw new IllegalArgumentException()
-    case _ => new DefaultParameterValue(v, s, toStmt)
+  @throws[IllegalArgumentException]("if value `v` is null whereas `toStmt` is marked with [[anorm.NotNullGuard]]")
+  @inline def apply[A](v: A, s: ToSql[A], toStmt: ToStatement[A]) =
+    (v, toStmt) match {
+      case (null, _: NotNullGuard) => throw new IllegalArgumentException()
+      case _ => new DefaultParameterValue(v, s, toStmt)
+    }
+
+  @deprecated("Use an instance of `ToParameterValue`", "2.5.4")
+  def toParameterValue[A](a: A)(implicit s: ToSql[A] = null, p: ToStatement[A]): ParameterValue = apply(a, s, p)
+
+  implicit def from[A](a: A)(implicit c: ToParameterValue[A]): ParameterValue = c(a)
+}
+
+@annotation.implicitNotFound("No converter found for type ${A} to `ParameterValue`; Please define appropriate `ToParameter` and `ParameterMetaData`.")
+sealed trait ToParameterValue[A] extends (A => ParameterValue) {
+  /** Returns the parameter value corresponding to the given value */
+  def apply(value: A): ParameterValue
+}
+
+object ToParameterValue {
+  private class Default[A](s: ToSql[A], p: ToStatement[A])
+      extends ToParameterValue[A] {
+    def apply(value: A): ParameterValue = ParameterValue(value, s, p)
   }
 
-  implicit def toParameterValue[A](a: A)(implicit s: ToSql[A] = null, p: ToStatement[A]): ParameterValue = apply(a, s, p)
+  implicit def apply[A](implicit s: ToSql[A] = null, p: ToStatement[A]): ToParameterValue[A] = new Default[A](s, p)
 }

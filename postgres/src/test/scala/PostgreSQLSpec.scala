@@ -1,5 +1,8 @@
+import java.sql.Connection
+
+import play.api.libs.json.{ Json, JsObject, JsNumber, JsValue, Reads, Writes }
+
 import anorm._, postgresql._
-import play.api.libs.json.{ Json, JsObject, JsValue, Reads }
 
 import org.postgresql.util.PGobject
 
@@ -23,67 +26,47 @@ class PostgreSQLSpec extends org.specs2.mutable.Specification {
       val JsDef = ParameterMetaData.Default(JsObjectParameterMetaData.jdbcType)
       val ExpectedStmt = "INSERT INTO test(id, json) VALUES (?, ?)"
 
-      "when is an object" in {
+      def withPgo[T](id: String, json: String)(f: Connection => T): T = {
         val JsVal = {
           val pgo = new PGobject()
           pgo.setType(JsObjectParameterMetaData.sqlType)
-          pgo.setValue("""{"bar":1}""")
+          pgo.setValue(json)
           pgo
         }
 
-        // JsObjectParameterMetaData.
-        implicit val con = AcolyteDSL.connection(
-          handleStatement withUpdateHandler {
-            case UpdateExecution(ExpectedStmt,
-              P("foo") :: DefinedParameter(JsVal, JsDef) :: Nil) => {
+        def con = AcolyteDSL.connection(handleStatement withUpdateHandler {
+          case UpdateExecution(ExpectedStmt,
+            P(`id`) :: DefinedParameter(JsVal, JsDef) :: Nil) => {
 
-              1 // update count
-            }
-          })
+            1 // update count
+          }
+        })
 
-        SQL"""INSERT INTO test(id, json) VALUES (${"foo"}, ${Json.obj("bar" -> 1)})""".executeUpdate() must_== 1
+        f(con)
+      }
+
+      "when is an object" in {
+        withPgo("foo", """{"bar":1}""") { implicit con =>
+          SQL"""INSERT INTO test(id, json) VALUES (${"foo"}, ${Json.obj("bar" -> 1)})""".executeUpdate() must_== 1
+        }
       }
 
       "when is a string" in {
-        val JsVal = {
-          val pgo = new PGobject()
-          pgo.setType(JsObjectParameterMetaData.sqlType)
-          pgo.setValue(""""bar"""")
-          pgo
+        withPgo("foo", "\"bar\"") { implicit con =>
+          SQL"""INSERT INTO test(id, json) VALUES (${"foo"}, ${Json toJson "bar"})""".executeUpdate() must_== 1
         }
-
-        // JsObjectParameterMetaData.
-        implicit val con = AcolyteDSL.connection(
-          handleStatement withUpdateHandler {
-            case UpdateExecution(ExpectedStmt,
-              P("foo") :: DefinedParameter(JsVal, JsDef) :: Nil) => {
-
-              1 // update count
-            }
-          })
-
-        SQL"""INSERT INTO test(id, json) VALUES (${"foo"}, ${Json toJson "bar"})""".executeUpdate() must_== 1
       }
 
       "when is a number" in {
-        val JsVal = {
-          val pgo = new PGobject()
-          pgo.setType(JsObjectParameterMetaData.sqlType)
-          pgo.setValue("""3""")
-          pgo
+        withPgo("foo", "3") { implicit con =>
+          SQL"""INSERT INTO test(id, json) VALUES (${"foo"}, ${Json toJson 3L})""".executeUpdate() must_== 1
         }
+      }
 
-        // JsObjectParameterMetaData.
-        implicit val con = AcolyteDSL.connection(
-          handleStatement withUpdateHandler {
-            case UpdateExecution(ExpectedStmt,
-              P("foo") :: DefinedParameter(JsVal, JsDef) :: Nil) => {
-
-              1 // update count
-            }
-          })
-
-        SQL"""INSERT INTO test(id, json) VALUES (${"foo"}, ${Json toJson 3L})""".executeUpdate() must_== 1
+      "using JSON writer" in {
+        withPgo("foo", "2") { implicit con =>
+          SQL"""INSERT INTO test(id, json) VALUES (${"foo"}, ${asJson(Lorem)})""".executeUpdate() must_== 1
+        }
       }
     }
 
@@ -111,23 +94,28 @@ class PostgreSQLSpec extends org.specs2.mutable.Specification {
       "successfully using a Reads" in withQueryResult(table :+ jsonb) {
         implicit con =>
           SQL"SELECT json FROM test".
-            as(SqlParser.scalar[Family].single) must_== Bar
+            as(SqlParser.scalar(fromJson[TestEnum]).single) must_== Bar
       }
     }
   }
 
   // ---
 
-  sealed trait Family
-  case object Bar extends Family
-  case object Lorem extends Family
+  sealed trait TestEnum
+  case object Bar extends TestEnum
+  case object Lorem extends TestEnum
 
-  object Family {
-    implicit val r: Reads[Family] = Reads[Family] { js =>
+  object TestEnum {
+    implicit val r: Reads[TestEnum] = Reads[TestEnum] { js =>
       (js \ "bar").validate[Int].map {
         case 1 => Bar
         case _ => Lorem
       }
+    }
+
+    implicit val w: Writes[TestEnum] = Writes[TestEnum] {
+      case Lorem => JsNumber(2)
+      case _ => JsNumber(1)
     }
   }
 }
