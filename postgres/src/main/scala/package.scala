@@ -1,11 +1,16 @@
 package anorm
 
+import java.util.UUID
+
 import play.api.libs.json.{
   JsError, JsObject, Json, JsSuccess, JsValue, Reads, Writes }
 
 import org.postgresql.util.PGobject
 
 package object postgresql extends PGJson {
+
+  /** Instance of `ToSql` to support PostgreSQL UUID parameter */
+  implicit val UUIDToSql: ToSql[UUID] = ToSql[UUID] { _ => "?::UUID" -> 1 }
 }
 
 // Could be moved to a separate module

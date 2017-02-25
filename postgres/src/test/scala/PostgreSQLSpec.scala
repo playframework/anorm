@@ -1,3 +1,5 @@
+import java.util.UUID
+
 import java.sql.Connection
 
 import play.api.libs.json.{ Json, JsObject, JsNumber, JsValue, Reads, Writes }
@@ -96,6 +98,29 @@ class PostgreSQLSpec extends org.specs2.mutable.Specification {
           SQL"SELECT json FROM test".
             as(SqlParser.scalar(fromJson[TestEnum]).single) must_== Bar
       }
+    }
+  }
+
+  "UUID" should {
+    "be passed as PostgreSQL UUID" in {
+      implicit val con = AcolyteDSL.connection(
+        handleStatement withUpdateHandler {
+          case UpdateExecution("INSERT INTO test_seq VALUES(?::UUID)",
+            DefinedParameter(uuid: String, ParameterMetaData.Str) :: Nil) => {
+
+            try {
+              UUID.fromString(uuid)
+              1
+            } catch {
+              case _: Throwable => -1
+            }
+          }
+
+          case _ => 0
+        })
+
+      SQL"INSERT INTO test_seq VALUES(${UUID.randomUUID()})".
+        executeUpdate() must_== 1
     }
   }
 
