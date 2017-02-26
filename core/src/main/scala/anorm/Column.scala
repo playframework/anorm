@@ -43,7 +43,7 @@ trait Column[A] extends ((Any, MetaDataItem) => Either[SqlRequestError, A]) { pa
    * }}}
    */
   final def mapResult[B](f: A => Either[SqlRequestError, B]): Column[B] =
-    Column[B] { (v: Any, m: MetaDataItem) => parent(v, m).flatMap(f) }
+    Column[B] { (v: Any, m: MetaDataItem) => parent(v, m).right.flatMap(f) }
 
   /**
    * $mapDescription
@@ -405,7 +405,7 @@ object Column extends JodaColumn with JavaTimeColumn {
   }
 
   implicit def columnToOption[T](implicit transformer: Column[T]): Column[Option[T]] = Column { (value, meta) =>
-    if (value != null) transformer(value, meta).map(Some(_))
+    if (value != null) transformer(value, meta).right.map(Some(_))
     else Right[SqlRequestError, Option[T]](None)
   }
 

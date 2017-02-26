@@ -124,7 +124,7 @@ trait Row {
    * @param a Column qualified name, or label/alias
    */
   private[anorm] def get(a: String): Either[SqlRequestError, (Any, MetaDataItem)] = for {
-    m <- metaData.get(a.toUpperCase).toRight(ColumnNotFound(a, this))
+    m <- metaData.get(a.toUpperCase).toRight(ColumnNotFound(a, this)).right
     data <- {
       def d = if (a.indexOf(".") > 0) {
         // if expected to be a qualified (dotted) name
@@ -138,17 +138,17 @@ trait Row {
 
       d.toRight(
         ColumnNotFound(m.column.qualified, metaData.availableColumns))
-    }
+    }.right
   } yield (data, m)
 
   /** Try to get data matching index. */
   private[anorm] def getIndexed(i: Int): Either[SqlRequestError, (Any, MetaDataItem)] =
     for {
       m <- metaData.ms.lift(i).toRight(
-        ColumnNotFound(s"#${i + 1}", metaData.availableColumns))
+        ColumnNotFound(s"#${i + 1}", metaData.availableColumns)).right
 
       d <- data.lift(i).toRight(
-        ColumnNotFound(m.column.qualified, metaData.availableColumns))
+        ColumnNotFound(m.column.qualified, metaData.availableColumns)).right
     } yield (d, m)
 
 }
