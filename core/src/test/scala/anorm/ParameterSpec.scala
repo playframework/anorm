@@ -988,21 +988,6 @@ val params: Seq[NamedParameter] = Seq("mod" -> d, "id" -> "idv")
     }
   }
 
-  "ToStatement" should {
-    implicit def con = connection(handleStatement withUpdateHandler {
-      case UpdateExecution("EXEC proc ?",
-        DParam("value:2", SqlStr) :: Nil) => 1
-      case _ => 0
-    })
-
-    "be contramap'ed" in {
-      implicit val to: ToStatement[Int] = ToStatement.of[String].
-        contramap[Int] { i => s"value:$i" }
-
-      SQL"""EXEC proc ${2}""".executeUpdate() must_== 1
-    }
-  }
-
   private def pv[A](v: A)(implicit s: ToSql[A] = null, p: ToStatement[A]) =
     ParameterValue(v, s, p)
 

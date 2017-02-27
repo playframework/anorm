@@ -30,6 +30,13 @@ lazy val anorm = project
       sourceManaged in Compile).map(m => Seq(GFA(m / "anorm"))),
     scalacOptions += "-Xlog-free-terms",
     binaryIssueFilters ++= Seq(
+      ProblemFilters.exclude[MissingClassProblem]("anorm.MayErr"),
+      ProblemFilters.exclude[MissingClassProblem]("anorm.MayErr$"),
+      // was deprecated:
+      missMeth("anorm.Row.get"),
+      missMeth("anorm.Row.getIndexed"),
+      ProblemFilters.exclude[IncompatibleResultTypeProblem]("anorm.Cursor#ResultRow.get"),
+      ProblemFilters.exclude[IncompatibleResultTypeProblem]("anorm.Cursor#ResultRow.getIndexed"),
       // was private:
       ProblemFilters.exclude[FinalClassProblem]("anorm.Sql$MissingParameter"),
       missMeth("anorm.DefaultParameterValue.stringValue"/* deprecated */),
@@ -69,7 +76,11 @@ lazy val anorm = project
       // New functions
       missMeth("anorm.Sql.unsafeStatement$default$2"),
       missMeth("anorm.Sql.unsafeResultSet"),
-      missMeth("anorm.Sql.unsafeStatement")),
+      missMeth("anorm.Sql.unsafeStatement"),
+      //missMeth("anorm.ToStatement.contramap"),
+      missMeth("anorm.Column.mapResult"),
+      missMeth("anorm.Column.map")
+    ),
     libraryDependencies ++= Seq(
       "com.jsuereth" %% "scala-arm" % "2.0",
       "joda-time" % "joda-time" % "2.9.7",
@@ -108,15 +119,20 @@ lazy val `anorm-akka` = (project in file("akka"))
       "com.typesafe.akka" %% "akka-stream-contrib" % "0.6" % Test)
   )).dependsOn(anorm)
 
-lazy val pgVer = sys.props.get("postgres.version").getOrElse("9.4.1212")
-lazy val jsonVer = sys.props.get("playJson.version").getOrElse("2.6.0-M3")
+lazy val pgVer = sys.env.get("POSTGRES_VERSION").getOrElse("9.4.1212")
+
+val jsonVer = Def.setting[String] {
+  if (scalaVersion.value startsWith "2.12") "2.6.0-M3"
+  else "2.5.5"
+}
+
 lazy val `anorm-postgres` = (project in file("postgres"))
   .enablePlugins(PlayLibrary, CopyPasteDetector)
   .settings(scalariformSettings ++ Seq(
     previousArtifacts := Set.empty,
     libraryDependencies ++= Seq(
       "org.postgresql" % "postgresql" % pgVer,
-      "com.typesafe.play" %% "play-json" % jsonVer
+      "com.typesafe.play" %% "play-json" % jsonVer.value
     ) ++ specs2Test :+ acolyte
   )).dependsOn(anorm)
 
