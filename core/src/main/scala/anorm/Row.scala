@@ -9,6 +9,11 @@ trait Row {
   private[anorm] val data: List[Any]
 
   /**
+   * Returns a list of metadata items, one for each column.
+   */
+  lazy val metaDataItems: List[MetaDataItem] = metaData.ms
+
+  /**
    * Returns row as list of column values.
    *
    * {{{

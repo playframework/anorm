@@ -9,6 +9,17 @@ import acolyte.jdbc.Implicits._
 class RowSpec extends org.specs2.mutable.Specification {
   "Row" title
 
+  "List of metadata items" should {
+    "include all columns" in withQueryResult(rowList2(
+      classOf[String] -> "foo", classOf[Int] -> "bar") :+ ("row1", 100)) {
+      implicit c =>
+        SQL("SELECT * FROM test").map(_.metaDataItems).single.
+          aka("metadata item list") must_== List(
+            MetaDataItem(ColumnName(".foo", Some("foo")), false, "java.lang.String"),
+            MetaDataItem(ColumnName(".bar", Some("bar")), false, "int"))
+    }
+  }
+
   "List of column values" should {
     "be expected one" in withQueryResult(rowList2(
       classOf[String] -> "foo", classOf[Int] -> "bar") :+ ("row1", 100)) {
