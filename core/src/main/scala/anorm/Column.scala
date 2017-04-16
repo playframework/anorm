@@ -69,7 +69,7 @@ trait Column[A] extends ((Any, MetaDataItem) => Either[SqlRequestError, A]) { pa
     try {
       Right(f(a))
     } catch {
-      case cause: Throwable => Left(SqlRequestError(cause))
+      case cause: Exception => Left(SqlRequestError(cause))
     }
   }
 }
@@ -442,19 +442,19 @@ object Column extends JodaColumn with JavaTimeColumn {
       case sql: java.sql.Array => try {
         transf(sql.getArray.asInstanceOf[Array[_]], Array.empty[T])
       } catch {
-        case cause: Throwable => Left(typeNotMatch(value, "array", cause))
+        case cause: Exception => Left(typeNotMatch(value, "array", cause))
       }
 
       case arr: Array[_] => try {
         transf(arr, Array.empty[T])
       } catch {
-        case cause: Throwable => Left(typeNotMatch(value, "list", cause))
+        case cause: Exception => Left(typeNotMatch(value, "list", cause))
       }
 
       case it: java.lang.Iterable[_] => try {
         jiter(it.iterator, Array.empty[T])
       } catch {
-        case cause: Throwable => Left(typeNotMatch(value, "list", cause))
+        case cause: Exception => Left(typeNotMatch(value, "list", cause))
       }
 
       case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to array for column $qualified"))
@@ -494,19 +494,19 @@ object Column extends JodaColumn with JavaTimeColumn {
       case sql: java.sql.Array => try {
         transf(sql.getArray.asInstanceOf[Array[_]], Nil)
       } catch {
-        case cause: Throwable => Left(typeNotMatch(value, "list", cause))
+        case cause: Exception => Left(typeNotMatch(value, "list", cause))
       }
 
       case arr: Array[_] => try {
         transf(arr, Nil)
       } catch {
-        case cause: Throwable => Left(typeNotMatch(value, "list", cause))
+        case cause: Exception => Left(typeNotMatch(value, "list", cause))
       }
 
       case it: java.lang.Iterable[_] => try {
         jiter(it.iterator, Nil)
       } catch {
-        case cause: Throwable => Left(typeNotMatch(value, "list", cause))
+        case cause: Exception => Left(typeNotMatch(value, "list", cause))
       }
 
       case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to list for column $qualified"))

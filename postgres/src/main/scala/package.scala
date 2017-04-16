@@ -2,6 +2,8 @@ package anorm
 
 import java.util.UUID
 
+import scala.util.control.NonFatal
+
 import play.api.libs.json.{
   JsError, JsObject, Json, JsSuccess, JsValue, Reads, Writes }
 
@@ -73,13 +75,14 @@ sealed trait PGJson {
         case s: String => Some(s)
         case clob: java.sql.Clob => Some(
           clob.getSubString(1, clob.length.toInt))
+        case _ => None
       }
 
       str match {
         case Some(js) => try {
           Right(Json parse js)
         } catch {
-          case cause: Throwable => Left(SqlRequestError(cause))
+          case NonFatal(cause) => Left(SqlRequestError(cause))
         }
 
         case _ => Left(TypeDoesNotMatch(s"Cannot convert $value:${value.asInstanceOf[AnyRef].getClass} to JsValue for column ${meta.column}")
