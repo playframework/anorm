@@ -15,11 +15,11 @@ class StatementParserSpec extends org.specs2.mutable.Specification {
   "Statement" should {
     "be parsed with 'name' and 'cat' parameters and support multiple lines" in {
       SqlStatementParser.parse("""
-        SELECT * FROM schema.table
+        SELECT *, '^foo' as foo, 2^3 as bar FROM schema.table
         -- Foo's comment
         WHERE (name = {name} AND category = {cat}) OR id = ?
       """) aka "updated statement and parameters" must beSuccessfulTry(
-        TokenizedStatement(List(TokenGroup(List(StringToken("""SELECT * FROM schema.table
+        TokenizedStatement(List(TokenGroup(List(StringToken("""SELECT *, '^foo' as foo, 2^3 as bar FROM schema.table
         -- Foo's comment
         WHERE (name = """)), Some("name")), TokenGroup(List(StringToken(" AND category = ")), Some("cat")), TokenGroup(List(StringToken(""") OR id = ?
       """)), None)), List("name", "cat")))

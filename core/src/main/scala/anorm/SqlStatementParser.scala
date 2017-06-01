@@ -30,7 +30,7 @@ object SqlStatementParser extends JavaTokenParsers {
     "\\" ~> ".{1}".r ^^ { StringToken(_) }
 
   private val simpleExpr: Parser[StringToken] =
-    """[^%^{\\]+""".r ^^ { StringToken(_) }
+    """[^%{\\]+""".r ^^ { StringToken(_) }
 
   private val instr: Parser[TokenizedStatement] = {
     @inline def normalize(t: StatementToken): Option[TokenGroup] = t match {
