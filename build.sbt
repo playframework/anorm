@@ -121,18 +121,13 @@ lazy val `anorm-akka` = (project in file("akka"))
 
 lazy val pgVer = sys.env.get("POSTGRES_VERSION").getOrElse("9.4.1212")
 
-val jsonVer = Def.setting[String] {
-  if (scalaVersion.value startsWith "2.12") "2.6.0-M3"
-  else "2.5.5"
-}
-
 lazy val `anorm-postgres` = (project in file("postgres"))
   .enablePlugins(PlayLibrary, CopyPasteDetector)
   .settings(scalariformSettings ++ Seq(
     previousArtifacts := Set.empty,
     libraryDependencies ++= Seq(
       "org.postgresql" % "postgresql" % pgVer,
-      "com.typesafe.play" %% "play-json" % jsonVer.value
+      "com.typesafe.play" %% "play-json" % "2.6.0"
     ) ++ specs2Test :+ acolyte
   )).dependsOn(anorm)
 
