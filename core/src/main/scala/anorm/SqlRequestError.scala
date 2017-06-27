@@ -16,6 +16,13 @@ sealed trait SqlRequestError {
   def toFailure = Failure(AnormException(message))
 }
 
+object SqlRequestError {
+  def apply(cause: Throwable): SqlRequestError = new SqlRequestError {
+    val message = cause.getMessage
+    override def toFailure = Failure(cause)
+  }
+}
+
 /**
  * Error raised when the specified `column` cannot be found in results.
  *

@@ -97,10 +97,10 @@ trait Row {
     unsafeGet(SqlParser.get(position)(c))
 
   @inline def unsafeGet[T](rowparser: => RowParser[T]): T =
-    MayErr(rowparser(this) match {
+    (rowparser(this) match {
       case Success(v) => Right(v)
       case Error(err) => Left(err)
-    }).get // TODO: Safe alternative
+    }).right.get // TODO: Safe alternative
 
   // Data per column name
   private lazy val columnsDictionary: Map[String, Any] =
@@ -123,8 +123,8 @@ trait Row {
    * Try to get data matching name.
    * @param a Column qualified name, or label/alias
    */
-  private[anorm] def get(a: String): MayErr[SqlRequestError, (Any, MetaDataItem)] = for {
-    m <- MayErr(metaData.get(a.toUpperCase).toRight(ColumnNotFound(a, this)))
+  private[anorm] def get(a: String): Either[SqlRequestError, (Any, MetaDataItem)] = for {
+    m <- metaData.get(a.toUpperCase).toRight(ColumnNotFound(a, this)).right
     data <- {
       def d = if (a.indexOf(".") > 0) {
         // if expected to be a qualified (dotted) name
@@ -136,18 +136,19 @@ trait Row {
           orElse(columnsDictionary.get(m.column.qualified.toUpperCase))
       }
 
-      MayErr(d.toRight(
-        ColumnNotFound(m.column.qualified, metaData.availableColumns)))
-    }
+      d.toRight(
+        ColumnNotFound(m.column.qualified, metaData.availableColumns))
+    }.right
   } yield (data, m)
 
   /** Try to get data matching index. */
-  private[anorm] def getIndexed(i: Int): MayErr[SqlRequestError, (Any, MetaDataItem)] =
+  private[anorm] def getIndexed(i: Int): Either[SqlRequestError, (Any, MetaDataItem)] =
     for {
-      m <- MayErr(metaData.ms.lift(i).
-        toRight(ColumnNotFound(s"#${i + 1}", metaData.availableColumns)))
-      d <- MayErr(data.lift(i).
-        toRight(ColumnNotFound(m.column.qualified, metaData.availableColumns)))
+      m <- metaData.ms.lift(i).toRight(
+        ColumnNotFound(s"#${i + 1}", metaData.availableColumns)).right
+
+      d <- data.lift(i).toRight(
+        ColumnNotFound(m.column.qualified, metaData.availableColumns)).right
     } yield (d, m)
 
 }

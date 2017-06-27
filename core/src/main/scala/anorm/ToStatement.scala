@@ -15,9 +15,7 @@ import java.math.{ BigDecimal => JBigDec, BigInteger }
 
 import java.sql.{ PreparedStatement, Timestamp }
 
-/** Sets value as statement parameter. */
-@annotation.implicitNotFound("Cannot set value of type ${A} as parameter on statement: `anorm.ToStatement[${A}] required`")
-trait ToStatement[A] {
+private[anorm] trait ToStatementBase[A] { self =>
 
   /**
    * Sets value |v| on statement |s| at specified |index|.
@@ -754,4 +752,17 @@ sealed trait ToStatementPriority1 extends ToStatementPriority0 {
 /**
  * Provided conversions to set statement parameter.
  */
-object ToStatement extends ToStatementPriority1 with JodaToStatement with JavaTimeToStatement
+private[anorm] class ToStatementConversions extends ToStatementPriority1
+    with JodaToStatement with JavaTimeToStatement {
+
+  /**
+    * Resolves `ToStatement` instance for the given type.
+    * 
+    * {{{
+    * import anorm.ToStatement
+    * 
+    * val to: ToStatement[String] = ToStatement.of[String]
+    * }}}
+    */
+  @inline def of[T](implicit to: ToStatement[T]): ToStatement[T] = to
+}

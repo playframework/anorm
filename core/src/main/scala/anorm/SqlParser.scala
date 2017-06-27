@@ -19,10 +19,10 @@ object SqlParser extends FunctionAdapter {
   def scalar[T](implicit transformer: Column[T]): RowParser[T] =
     new ScalarRowParser[T] {
       def apply(row: Row): SqlResult[T] = {
-        MayErr((for {
+        ((for {
           m <- row.metaData.ms.headOption
           v <- row.data.headOption
-        } yield v -> m) toRight NoColumnsInReturnedResult).
+        } yield v -> m) toRight NoColumnsInReturnedResult).right.
           flatMap(transformer.tupled).fold(Error(_), Success(_))
       }
     }
@@ -445,8 +445,8 @@ object SqlParser extends FunctionAdapter {
   def get[T](name: String)(implicit extractor: Column[T]): RowParser[T] =
     RowParser { row =>
       (for {
-        col <- row.get(name)
-        res <- extractor.tupled(col)
+        col <- row.get(name).right
+        res <- extractor.tupled(col).right
       } yield res).fold(Error(_), Success(_))
     }
 
@@ -467,8 +467,8 @@ object SqlParser extends FunctionAdapter {
   def get[T](position: Int)(implicit extractor: Column[T]): RowParser[T] =
     RowParser { row =>
       (for {
-        col <- row.getIndexed(position - 1)
-        result <- extractor.tupled(col)
+        col <- row.getIndexed(position - 1).right
+        result <- extractor.tupled(col).right
       } yield result).fold(e => Error(e), a => Success(a))
     }
 

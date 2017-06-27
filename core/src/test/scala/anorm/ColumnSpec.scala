@@ -865,4 +865,28 @@ class ColumnSpec
       }
     }
   }
+
+  "Column" should {
+    "have its result map'ed from integer to successful string" in {
+      withQueryResult(intList :+ 4) { implicit con =>
+        val col = Column.of[Int].mapResult { i => Right(s"value:$i") }
+        SQL("SELECT i").as(scalar(col).single) must_== "value:4"
+      }
+    }
+
+    "be map'ed" >> {
+      "successfully from integer to string" in withQueryResult(intList :+ 4) {
+        implicit con =>
+          val col = Column.of[Int].map { i => s"value:$i" }
+          SQL("SELECT i").as(scalar(col).single) must_== "value:4"
+      }
+
+      "with error from integer to string" in withQueryResult(intList :+ 4) {
+        implicit con =>
+          val col = Column.of[Int].map[String] { _ => sys.error("Unsafe") }
+          SQL("SELECT i").as(scalar(col).single).
+            aka("result") must throwA[Exception]("Unsafe")
+      }
+    }
+  }
 }

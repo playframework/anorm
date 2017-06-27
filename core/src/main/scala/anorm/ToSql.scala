@@ -17,6 +17,14 @@ trait ToSql[A] {
 object ToSql {
   import scala.collection.immutable.SortedSet
 
+  private class FunctionalToSql[A](
+    f: A => (String, Int)) extends ToSql[A] {
+    def fragment(value: A): (String, Int) = f(value)
+  }
+
+  /** Functional factory */
+  def apply[A](f: A => (String, Int)): ToSql[A] = new FunctionalToSql(f)
+
   /**
    * Returns fragment for each value, separated by ", ".
    *
@@ -82,40 +90,36 @@ object ToSql {
 
   /** Returns fragment for each value, with custom formatting. */
   implicit def seqParamToSql[A](implicit conv: ToSql[A] = null) =
-    new ToSql[SeqParameter[A]] {
-      def fragment(p: SeqParameter[A]): (String, Int) = {
-        val before = p.before.getOrElse("")
-        val after = p.after.getOrElse("")
-        val c: A => (String, Int) =
-          if (conv == null) _ => ("?" -> 1) else conv.fragment
-
-        val sql = p.values.foldLeft(new StringBuilder() -> 0) {
-          case ((sb, i), v) =>
-            val frag = c(v)
-            val st = if (i > 0) sb ++= p.separator ++= before ++= frag._1
-            else sb ++= before ++= frag._1
-
-            (st ++= after, i + frag._2)
-        }
-
-        sql._1.toString -> sql._2
-      }
-    }
-
-  @inline private def traversableToSql[A, T <: Traversable[A]](implicit conv: ToSql[A] = null) = new ToSql[T] {
-    def fragment(values: T): (String, Int) = {
+    ToSql[SeqParameter[A]] { p =>
+      val before = p.before.getOrElse("")
+      val after = p.after.getOrElse("")
       val c: A => (String, Int) =
         if (conv == null) _ => ("?" -> 1) else conv.fragment
 
-      val sql = values.foldLeft(new StringBuilder() -> 0) {
+      val sql = p.values.foldLeft(new StringBuilder() -> 0) {
         case ((sb, i), v) =>
           val frag = c(v)
-          val st = if (i > 0) sb ++= ", " ++= frag._1 else sb ++= frag._1
+          val st = if (i > 0) sb ++= p.separator ++= before ++= frag._1
+          else sb ++= before ++= frag._1
 
-          (st, i + frag._2)
+          (st ++= after, i + frag._2)
       }
 
       sql._1.toString -> sql._2
     }
+
+  @inline private def traversableToSql[A, T <: Traversable[A]](implicit conv: ToSql[A] = null) = ToSql[T] { values =>
+    val c: A => (String, Int) =
+      if (conv == null) _ => ("?" -> 1) else conv.fragment
+
+    val sql = values.foldLeft(new StringBuilder() -> 0) {
+      case ((sb, i), v) =>
+        val frag = c(v)
+        val st = if (i > 0) sb ++= ", " ++= frag._1 else sb ++= frag._1
+
+        (st, i + frag._2)
+    }
+
+    sql._1.toString -> sql._2
   }
 }
