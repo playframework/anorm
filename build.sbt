@@ -8,7 +8,7 @@ import com.typesafe.tools.mima.plugin.MimaKeys.{
 val specs2Test = Seq(
   "specs2-core",
   "specs2-junit"
-).map("org.specs2" %% _ % "3.8.8" % Test)
+).map("org.specs2" %% _ % "3.9.4" % Test)
 
 lazy val acolyteVersion = "1.0.43-j7p"
 lazy val acolyte = "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test
@@ -112,8 +112,8 @@ lazy val `anorm-akka` = (project in file("akka"))
       "Tatami Releases".at(
         "https://raw.github.com/cchantep/tatami/master/snapshots")),
     libraryDependencies ++= Seq(
-      "com.typesafe.akka" %% "akka-testkit" % "2.4.17" % "provided",
-      "com.typesafe.akka" %% "akka-stream" % "2.4.17" % "provided",
+      "com.typesafe.akka" %% "akka-testkit" % akkaVer % "provided",
+      "com.typesafe.akka" %% "akka-stream" % akkaVer % "provided",
       "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test
     ) ++ specs2Test ++ Seq(
       "com.typesafe.akka" %% "akka-stream-contrib" % "0.6" % Test)
@@ -135,15 +135,15 @@ lazy val `anorm-parent` = (project in file("."))
   .enablePlugins(PlayRootProject)
   .aggregate(`anorm-tokenizer`, anorm, `anorm-iteratee`, `anorm-akka`)
   .settings(
-  scalaVersion in ThisBuild := "2.12.1",
-    crossScalaVersions in ThisBuild := Seq("2.11.8", "2.12.1"),
+  scalaVersion in ThisBuild := "2.12.2",
+    crossScalaVersions in ThisBuild := Seq("2.11.11", "2.12.2"),
     previousArtifacts := Set.empty)
 
 lazy val docs = project
   .in(file("docs"))
   .enablePlugins(PlayDocsPlugin)
   .settings(
-  scalaVersion := "2.12.1"
+  scalaVersion := "2.12.2"
 ).dependsOn(anorm)
 
 playBuildRepoName in ThisBuild := "anorm"
