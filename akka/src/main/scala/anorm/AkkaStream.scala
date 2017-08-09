@@ -120,7 +120,7 @@ object AkkaStream {
             if (resultSet != null && !resultSet.isClosed) {
               val s = resultSet.getStatement
               resultSet.close()
-              Some(s)
+              Option(s)
             } else None
           }
 
