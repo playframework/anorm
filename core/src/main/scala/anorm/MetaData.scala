@@ -15,7 +15,7 @@ case class ColumnName(qualified: String, alias: Option[String])
  */
 case class MetaDataItem(column: ColumnName, nullable: Boolean, clazz: String)
 
-private[anorm] case class MetaData(ms: List[MetaDataItem]) {
+private[anorm] case class MetaData(ms: Seq[MetaDataItem]) {
   /** Returns meta data for specified column. */
   def get(columnName: String): Option[MetaDataItem] = {
     val key = columnName.toUpperCase
@@ -38,7 +38,7 @@ private[anorm] case class MetaData(ms: List[MetaDataItem]) {
 
   lazy val columnCount = ms.size
 
-  lazy val availableColumns: List[String] =
+  lazy val availableColumns: Seq[String] =
     ms.flatMap(i => i.column.qualified :: i.column.alias.toList)
 
 }
@@ -131,18 +131,21 @@ private[anorm] object MetaData {
     val meta = rs.getMetaData()
     val nbColumns = meta.getColumnCount()
     MetaData(List.range(1, nbColumns + 1).map { i =>
+      @SuppressWarnings(Array("AsInstanceOf"))
+      def tableName = {
+        if (meta.getClass.getName startsWith "org.postgresql.") {
+          // HACK FOR POSTGRES:
+          // Fix in https://github.com/pgjdbc/pgjdbc/pull/107
+
+          meta.asInstanceOf[PgMeta].getBaseTableName(i)
+        } else {
+          meta.getTableName(i)
+        }
+
+      }
+
       val cn = ColumnName(
-        {
-          if (meta.getClass.getName startsWith "org.postgresql.") {
-            // HACK FOR POSTGRES:
-            // Fix in https://github.com/pgjdbc/pgjdbc/pull/107
-
-            meta.asInstanceOf[PgMeta].getBaseTableName(i)
-          } else {
-            meta.getTableName(i)
-          }
-
-        } + "." + meta.getColumnName(i),
+        tableName + "." + meta.getColumnName(i),
         alias = Option(meta.getColumnLabel(i)))
 
       val colName = as(i -> cn).fold(cn)(a => cn.copy(alias = Some(a)))

@@ -40,7 +40,7 @@ object Cursor {
       def next = apply(rs, meta, columns)
     })
   } catch {
-    case _: Throwable => Option.empty[Cursor]
+    case scala.util.control.NonFatal(_) => Option.empty[Cursor]
   }
 
   /** Returns a cursor with already parsed metadata. */

@@ -36,7 +36,7 @@ sealed trait BatchSql {
         Seq(Sql.zipParams(sql.paramsInitialOrder, args, Map.empty)))
     } else {
       val m = checkedMap(sql.paramsInitialOrder.zip(args).
-        foldLeft(Seq[NamedParameter]())((ps, t) =>
+        foldLeft(Seq.empty[NamedParameter])((ps, t) =>
           ps :+ implicitly[NamedParameter](t)))
 
       copy(params = this.params :+ m)
@@ -59,13 +59,14 @@ sealed trait BatchSql {
 
     } else {
       val ms = args.map(x => checkedMap(sql.paramsInitialOrder.zip(x).
-        foldLeft(Seq[NamedParameter]())((ps, t) =>
+        foldLeft(Seq.empty[NamedParameter])((ps, t) =>
           ps :+ implicitly[NamedParameter](t))))
 
       copy(params = this.params ++ ms)
     }
   }
 
+  @SuppressWarnings(Array("NullParameter"))
   def getFilledStatement(connection: Connection, getGeneratedKeys: Boolean = false) = fill(connection, null, getGeneratedKeys, params)
 
   def execute()(implicit connection: Connection): Array[Int] =
@@ -79,38 +80,42 @@ sealed trait BatchSql {
   }
 
   @annotation.tailrec
-  private def fill(con: Connection, statement: PreparedStatement, getGeneratedKeys: Boolean, pm: Seq[Map[String, ParameterValue]]): PreparedStatement = (statement, pm.headOption) match {
-    case (null, Some(ps)) => { // First with parameters
-      val (psql, vs): (String, Seq[(Int, ParameterValue)]) =
-        Sql.prepareQuery(sql.stmt.tokens, sql.paramsInitialOrder, ps,
-          0, new StringBuilder(), List.empty[(Int, ParameterValue)]).get
-
-      val stmt = if (getGeneratedKeys) con.prepareStatement(psql, java.sql.Statement.RETURN_GENERATED_KEYS) else con.prepareStatement(psql)
-
-      sql.fetchSize.foreach(stmt.setFetchSize(_))
-      sql.timeout.foreach(stmt.setQueryTimeout(_))
-
-      fill(con, addBatchParams(stmt, vs), getGeneratedKeys, pm.tail)
-    }
-    case (null, _ /*None*/ ) => { // First with no parameter
-      val (psql, _): (String, Seq[(Int, ParameterValue)]) =
-        Sql.prepareQuery(sql.stmt.tokens, sql.paramsInitialOrder, Map.empty,
-          0, new StringBuilder(), List.empty[(Int, ParameterValue)]).get
-
-      val stmt = if (getGeneratedKeys) con.prepareStatement(psql, java.sql.Statement.RETURN_GENERATED_KEYS) else con.prepareStatement(psql)
-
-      sql.timeout.foreach(stmt.setQueryTimeout(_))
-
-      stmt
-    }
-    case (stmt, Some(ps)) => {
-      val (_, vs) = Sql.prepareQuery(
-        sql.stmt.tokens, sql.paramsInitialOrder, ps,
+  @SuppressWarnings(Array("NullParameter"))
+  private def fill(con: Connection, statement: PreparedStatement, getGeneratedKeys: Boolean, pm: Seq[Map[String, ParameterValue]]): PreparedStatement = {
+    @SuppressWarnings(Array("TryGet"))
+    def unsafe(ps: Map[String, ParameterValue]) =
+      Sql.query(sql.stmt.tokens, sql.paramsInitialOrder, ps,
         0, new StringBuilder(), List.empty[(Int, ParameterValue)]).get
 
-      fill(con, addBatchParams(stmt, vs), getGeneratedKeys, pm.tail)
+    (statement, pm.headOption) match {
+      case (null, Some(ps)) => { // First with parameters
+        val (psql, vs): (String, Seq[(Int, ParameterValue)]) = unsafe(ps)
+
+        val stmt = if (getGeneratedKeys) con.prepareStatement(psql, java.sql.Statement.RETURN_GENERATED_KEYS) else con.prepareStatement(psql)
+
+        sql.fetchSize.foreach(stmt.setFetchSize(_))
+        sql.timeout.foreach(stmt.setQueryTimeout(_))
+
+        fill(con, addBatchParams(stmt, vs), getGeneratedKeys, pm.tail)
+      }
+
+      case (null, _ /*None*/ ) => { // First with no parameter
+        val (psql, _): (String, Seq[(Int, ParameterValue)]) = unsafe(Map.empty)
+
+        val stmt = if (getGeneratedKeys) con.prepareStatement(psql, java.sql.Statement.RETURN_GENERATED_KEYS) else con.prepareStatement(psql)
+
+        sql.timeout.foreach(stmt.setQueryTimeout(_))
+
+        stmt
+      }
+
+      case (stmt, Some(ps)) => {
+        val (_, vs) = unsafe(ps)
+
+        fill(con, addBatchParams(stmt, vs), getGeneratedKeys, pm.tail)
+      }
+      case _ => statement
     }
-    case _ => statement
   }
 
   @throws[IllegalArgumentException](BatchSqlErrors.UnexpectedParameterName)
@@ -171,6 +176,7 @@ object BatchSql {
 
   @throws[IllegalArgumentException](BatchSqlErrors.HeterogeneousParameterMaps)
   @throws[IllegalArgumentException](BatchSqlErrors.ParameterNamesNotMatchingPlaceholders)
+  @SuppressWarnings(Array("MethodNames"))
   private[anorm] def Checked[M](query: SqlQuery, ps: Traversable[Map[String, ParameterValue]]): BatchSql = ps.headOption.
     fold(Copy(query, Set.empty, Nil)) { m =>
       val ks = m.keySet

@@ -171,6 +171,7 @@ private[anorm] trait WithResult {
    * @param parser the result parser
    * @see #asTry
    */
+  @SuppressWarnings(Array("TryGet" /* TODO: Make it safer */ ))
   def as[T](parser: ResultSetParser[T])(implicit connection: Connection): T =
     asTry[T](parser, ColumnAliaser.empty).get
 

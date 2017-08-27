@@ -31,12 +31,16 @@ private[anorm] class TokenGroup(
 
   val productArity = 2
 
+  @SuppressWarnings(Array("MethodReturningAny"))
   def productElement(n: Int): Any = n match {
     case 1 => prepared
     case 2 => placeholder
   }
 
-  def canEqual(that: Any): Boolean = that.isInstanceOf[TokenGroup]
+  def canEqual(that: Any): Boolean = that match {
+    case _: TokenGroup => true
+    case _ => false
+  }
 
   override def equals(that: Any): Boolean = that match {
     case other: TokenGroup =>

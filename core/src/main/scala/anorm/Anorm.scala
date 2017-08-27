@@ -49,7 +49,7 @@ object SeqParameter {
 }
 
 /** Applied named parameter. */
-sealed case class NamedParameter(name: String, value: ParameterValue) {
+final case class NamedParameter(name: String, value: ParameterValue) {
   lazy val tupled: (String, ParameterValue) = (name, value)
 }
 
@@ -175,6 +175,7 @@ private[anorm] trait Sql extends WithResult {
    * // ... generated string key
    * }}}
    */
+  @SuppressWarnings(Array("TryGet" /* TODO: Make it safer */ ))
   def executeInsert[A](generatedKeysParser: ResultSetParser[A] = SqlParser.scalar[Long].singleOpt)(implicit connection: Connection): A = execInsert[A](preparedStatement(_, true), generatedKeysParser, ColumnAliaser.empty).get
 
   /**
@@ -253,7 +254,7 @@ object Sql { // TODO: Rename to SQL
   private[anorm] def withResult[T](res: ManagedResource[ResultSet], onFirstRow: Boolean, as: ColumnAliaser)(op: Option[Cursor] => T): ManagedResource[T] =
     res.map(rs => op(unsafeCursor(rs, onFirstRow, as)))
 
-  private[anorm] def asTry[T](parser: ResultSetParser[T], rs: ManagedResource[ResultSet], onFirstRow: Boolean, as: ColumnAliaser)(implicit connection: Connection): Try[T] = Try(withResult(rs, onFirstRow, as)(parser) acquireAndGet identity).flatMap(_.fold[Try[T]](_.toFailure, TrySuccess.apply))
+  private[anorm] def asTry[T](parser: ResultSetParser[T], rs: ManagedResource[ResultSet], onFirstRow: Boolean, as: ColumnAliaser): Try[T] = Try(withResult(rs, onFirstRow, as)(parser) acquireAndGet identity).flatMap(_.fold[Try[T]](_.toFailure, TrySuccess.apply))
 
   @annotation.tailrec
   private[anorm] def zipParams(ns: Seq[String], vs: Seq[ParameterValue], ps: Map[String, ParameterValue]): Map[String, ParameterValue] = (ns.headOption, vs.headOption) match {
@@ -268,31 +269,36 @@ object Sql { // TODO: Rename to SQL
     case (sql, _) => sql
   }
 
-  final class MissingParameter(after: String) extends java.util.NoSuchElementException(s"Missing parameter value after: $after") with NoStackTrace {}
+  @SuppressWarnings(Array("IncorrectlyNamedExceptions"))
+  final class MissingParameter(after: String)
+    extends java.util.NoSuchElementException(
+      s"Missing parameter value after: $after") with NoStackTrace {}
 
-  final object NoMorePlaceholder extends Exception("No more placeholder")
+  object NoMorePlaceholder extends Exception("No more placeholder")
     with NoStackTrace {}
 
   @deprecated("Internal function: will be made private", "2.5.2")
+  def prepareQuery(tok: List[TokenGroup], ns: List[String], ps: Map[String, ParameterValue], i: Int, buf: StringBuilder, vs: List[(Int, ParameterValue)]): Try[(String, Seq[(Int, ParameterValue)])] = query(tok, ns, ps, i, buf, vs)
+
   @annotation.tailrec
-  def prepareQuery(tok: List[TokenGroup], ns: List[String], ps: Map[String, ParameterValue], i: Int, buf: StringBuilder, vs: List[(Int, ParameterValue)]): Try[(String, Seq[(Int, ParameterValue)])] =
+  private[anorm] def query(tok: Seq[TokenGroup], ns: List[String], ps: Map[String, ParameterValue], i: Int, buf: StringBuilder, vs: List[(Int, ParameterValue)]): Try[(String, Seq[(Int, ParameterValue)])] =
     (tok.headOption, ns.headOption.flatMap(ps.lift(_))) match {
-      case (Some(TokenGroup(pr, Some(pl))), Some(p)) => {
+      case (Some(TokenGroup(pr, Some(_))), Some(p)) => {
         val (frag, c): (String, Int) = p.toSql
         val prepared = toSql(pr, buf) ++= frag
 
-        prepareQuery(tok.tail, ns.tail, ps, i + c, prepared, (i, p) :: vs)
+        query(tok.tail, ns.tail, ps, i + c, prepared, (i, p) :: vs)
       }
 
-      case (Some(TokenGroup(pr, Some(pl))), _) =>
+      case (Some(TokenGroup(pr, Some(_))), _) =>
         Failure(new MissingParameter(pr mkString ", "))
 
       case (Some(TokenGroup(pr, None)), _) =>
-        prepareQuery(tok.tail, ns, ps, i, toSql(pr, buf), vs)
+        query(tok.tail, ns, ps, i, toSql(pr, buf), vs)
 
       case (_, Some(p)) => {
         val c: Int = p.toSql._2
-        prepareQuery(tok, ns.tail, ps, i + c, buf, (i, p) :: vs)
+        query(tok, ns.tail, ps, i + c, buf, (i, p) :: vs)
       }
 
       case (None, _) | (_, None) => TrySuccess(buf.toString -> vs.reverse)

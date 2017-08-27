@@ -5,7 +5,7 @@ package anorm
  * @param names the binding names of parsed placeholders
  */
 private[anorm] case class TokenizedStatement(
-  tokens: List[TokenGroup], names: List[String])
+  tokens: Seq[TokenGroup], names: Seq[String])
 
 private[anorm] object TokenizedStatement {
   import scala.language.experimental.macros
@@ -15,6 +15,7 @@ private[anorm] object TokenizedStatement {
   lazy val empty = TokenizedStatement(Nil, Nil)
 
   /** String interpolation to tokenize statement. */
+  @SuppressWarnings(Array("UnusedMethodParameter" /* macro */ ))
   def stringInterpolation[T](parts: Seq[String], params: Seq[T with Show]): (TokenizedStatement, Map[String, T]) = macro tokenizeImpl[T]
 
   /** Tokenization macro */
@@ -23,7 +24,7 @@ private[anorm] object TokenizedStatement {
       params.splice, Nil, Nil, Map.empty[String, T]))
 
   @annotation.tailrec
-  private[anorm] def tokenize[T](ti: Iterator[String], tks: List[StatementToken], parts: Seq[String], ps: Seq[T with Show], gs: List[TokenGroup], ns: List[String], m: Map[String, T]): (TokenizedStatement, Map[String, T]) = if (ti.hasNext) ti.next match {
+  private[anorm] def tokenize[T](ti: Iterator[String], tks: List[StatementToken], parts: Seq[String], ps: Seq[T with Show], gs: Seq[TokenGroup], ns: Seq[String], m: Map[String, T]): (TokenizedStatement, Map[String, T]) = if (ti.hasNext) ti.next match {
     case s: String =>
       tokenize(ti, StringToken(s) :: tks, parts, ps, gs, ns, m)
     case _ => /* should not occur */ tokenize(ti, tks, parts, ps, gs, ns, m)
@@ -49,7 +50,7 @@ private[anorm] object TokenizedStatement {
               val n = '_'.toString + ns.size
               tokenize(ti, tks.tail, parts, ps.tail,
                 (ng :: prev.copy(placeholder = Some(n)) :: groups),
-                (n :: ns), m + (n -> v))
+                (n +: ns), m + (n -> v))
           }
           case _ =>
             sys.error(s"No parameter value for placeholder: ${gs.size}")
@@ -59,7 +60,7 @@ private[anorm] object TokenizedStatement {
       }
     } else parts.headOption match {
       case Some(part) =>
-        val it = List(part).iterator.map(_.toString)
+        val it = List(part).iterator
 
         if (!it.hasNext /* empty */ ) {
           tokenize(it, List(StringToken("")), parts.tail, ps, gs, ns, m)

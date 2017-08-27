@@ -60,6 +60,7 @@ object ParameterValue {
   private[anorm] trait Wrapper[T] { def value: T }
 
   @throws[IllegalArgumentException]("if value `v` is null whereas `toStmt` is marked with [[anorm.NotNullGuard]]")
+  @SuppressWarnings(Array("NullParameter"))
   @inline def apply[A](v: A, s: ToSql[A], toStmt: ToStatement[A]) =
     (v, toStmt) match {
       case (null, _: NotNullGuard) => throw new IllegalArgumentException()
@@ -67,7 +68,7 @@ object ParameterValue {
     }
 
   @deprecated("Use an instance of `ToParameterValue`", "2.5.4")
-  def toParameterValue[A](a: A)(implicit s: ToSql[A] = null, p: ToStatement[A]): ParameterValue = apply(a, s, p)
+  def toParameterValue[A](a: A)(implicit s: ToSql[A] = ToSql.missing, p: ToStatement[A]): ParameterValue = apply(a, s, p)
 
   implicit def from[A](a: A)(implicit c: ToParameterValue[A]): ParameterValue = c(a)
 }
@@ -84,5 +85,5 @@ object ToParameterValue {
     def apply(value: A): ParameterValue = ParameterValue(value, s, p)
   }
 
-  implicit def apply[A](implicit s: ToSql[A] = null, p: ToStatement[A]): ToParameterValue[A] = new Default[A](s, p)
+  implicit def apply[A](implicit s: ToSql[A] = ToSql.missing, p: ToStatement[A]): ToParameterValue[A] = new Default[A](s, p)
 }

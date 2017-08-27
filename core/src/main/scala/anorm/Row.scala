@@ -97,11 +97,12 @@ trait Row {
   def apply[B](position: Int)(implicit c: Column[B]): B =
     unsafeGet(SqlParser.get(position)(c))
 
+  @SuppressWarnings(Array("EitherGet")) // TODO: Safe alternative
   @inline def unsafeGet[T](rowparser: => RowParser[T]): T =
     (rowparser(this) match {
       case Success(v) => Right(v)
       case Error(err) => Left(err)
-    }).right.get // TODO: Safe alternative
+    }).right.get
 
   // Data per column name
   private lazy val columnsDictionary: Map[String, Any] =
@@ -111,7 +112,7 @@ trait Row {
   // Data per column alias
   private lazy val aliasesDictionary: Map[String, Any] = {
     @annotation.tailrec
-    def loop(meta: List[MetaDataItem], dt: List[Any], r: Map[String, Any]): Map[String, Any] = (meta, dt) match {
+    def loop(meta: Seq[MetaDataItem], dt: List[Any], r: Map[String, Any]): Map[String, Any] = (meta, dt) match {
       case (m :: ms, d :: ds) => loop(ms, ds,
         m.column.alias.fold(r) { c => r + (c.toUpperCase -> d) })
       case _ => r

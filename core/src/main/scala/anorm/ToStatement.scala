@@ -45,7 +45,7 @@ sealed trait ToStatementPriority0 {
     new ToStatement[S] {
       val jdbcType = implicitly[ParameterMetaData[InputStream]].jdbcType
       def set(s: PreparedStatement, i: Int, bin: S) =
-        if (bin == null) s.setNull(i, jdbcType)
+        if (bin == (null: InputStream)) s.setNull(i, jdbcType)
         else s.setBinaryStream(i, bin)
     }
 
@@ -63,7 +63,7 @@ sealed trait ToStatementPriority0 {
     new ToStatement[B] {
       val jdbcType = implicitly[ParameterMetaData[java.sql.Blob]].jdbcType
       def set(s: PreparedStatement, i: Int, blob: B) =
-        if (blob == null) s.setNull(i, jdbcType)
+        if (blob == (null: java.sql.Blob)) s.setNull(i, jdbcType)
         else s.setBlob(i, blob)
     }
 
@@ -79,7 +79,7 @@ sealed trait ToStatementPriority0 {
     new ToStatement[R] {
       val jdbcType = implicitly[ParameterMetaData[Reader]].jdbcType
       def set(s: PreparedStatement, i: Int, chars: R) =
-        if (chars == null) s.setNull(i, jdbcType)
+        if (chars == (null: Reader)) s.setNull(i, jdbcType)
         else s.setCharacterStream(i, chars)
     }
 
@@ -106,7 +106,7 @@ sealed trait ToStatementPriority0 {
   implicit object javaBooleanToStatement extends ToStatement[JBool] {
     val jdbcType = implicitly[ParameterMetaData[JBool]].jdbcType
     def set(s: PreparedStatement, i: Int, b: JBool): Unit =
-      if (b != null) s.setBoolean(i, b) else s.setNull(i, jdbcType)
+      if (b != (null: JBool)) s.setBoolean(i, b) else s.setNull(i, jdbcType)
   }
 
   /**
@@ -131,7 +131,7 @@ sealed trait ToStatementPriority0 {
   implicit object javaByteToStatement extends ToStatement[JByte] {
     val jdbcType = implicitly[ParameterMetaData[JByte]].jdbcType
     def set(s: PreparedStatement, i: Int, b: JByte): Unit =
-      if (b != null) s.setByte(i, b) else s.setNull(i, jdbcType)
+      if (b != (null: JByte)) s.setByte(i, b) else s.setNull(i, jdbcType)
   }
 
   /**
@@ -157,7 +157,7 @@ sealed trait ToStatementPriority0 {
   implicit object javaDoubleToStatement extends ToStatement[JDouble] {
     val jdbcType = implicitly[ParameterMetaData[JDouble]].jdbcType
     def set(s: PreparedStatement, i: Int, d: JDouble): Unit =
-      if (d != null) s.setDouble(i, d) else s.setNull(i, jdbcType)
+      if (d != (null: JDouble)) s.setDouble(i, d) else s.setNull(i, jdbcType)
   }
 
   /**
@@ -183,7 +183,7 @@ sealed trait ToStatementPriority0 {
   implicit object javaFloatToStatement extends ToStatement[JFloat] {
     val jdbcType = implicitly[ParameterMetaData[JFloat]].jdbcType
     def set(s: PreparedStatement, i: Int, f: JFloat): Unit =
-      if (f != null) s.setFloat(i, f) else s.setNull(i, jdbcType)
+      if (f != (null: JFloat)) s.setFloat(i, f) else s.setNull(i, jdbcType)
   }
 
   /**
@@ -209,7 +209,7 @@ sealed trait ToStatementPriority0 {
   implicit object javaLongToStatement extends ToStatement[JLong] {
     val jdbcType = implicitly[ParameterMetaData[JLong]].jdbcType
     def set(s: PreparedStatement, i: Int, l: JLong): Unit =
-      if (l != null) s.setLong(i, l) else s.setNull(i, jdbcType)
+      if (l != (null: JLong)) s.setLong(i, l) else s.setNull(i, jdbcType)
   }
 
   /**
@@ -235,7 +235,7 @@ sealed trait ToStatementPriority0 {
   implicit object integerToStatement extends ToStatement[Integer] {
     val jdbcType = implicitly[ParameterMetaData[Integer]].jdbcType
     def set(s: PreparedStatement, i: Int, v: Integer): Unit =
-      if (v != null) s.setInt(i, v) else s.setNull(i, jdbcType)
+      if (v != (null: Integer)) s.setInt(i, v) else s.setNull(i, jdbcType)
   }
 
   /**
@@ -261,7 +261,7 @@ sealed trait ToStatementPriority0 {
   implicit object javaShortToStatement extends ToStatement[JShort] {
     val jdbcType = implicitly[ParameterMetaData[JShort]].jdbcType
     def set(s: PreparedStatement, i: Int, v: JShort): Unit =
-      if (v != null) s.setShort(i, v) else s.setNull(i, jdbcType)
+      if (v != (null: JShort)) s.setShort(i, v) else s.setNull(i, jdbcType)
   }
 
   /**
@@ -276,7 +276,8 @@ sealed trait ToStatementPriority0 {
   implicit object characterToStatement extends ToStatement[Character] {
     val jdbcType = implicitly[ParameterMetaData[Character]].jdbcType
     def set(s: PreparedStatement, i: Int, ch: Character) =
-      if (ch != null) s.setString(i, ch.toString) else s.setNull(i, jdbcType)
+      if (ch != (null: Character)) s.setString(i, ch.toString)
+      else s.setNull(i, jdbcType)
   }
 
   /**
@@ -315,7 +316,8 @@ sealed trait ToStatementPriority0 {
     "Parameter value should be passed using `Option.empty[T]`",
     since = "2.3.7")
   implicit object noneToStatement extends ToStatement[None.type] {
-    def set(s: PreparedStatement, i: Int, n: None.type) = s.setObject(i, null)
+    def set(s: PreparedStatement, i: Int, n: None.type) =
+      s.setObject(i, null: Object)
   }
 
   /**
@@ -357,7 +359,7 @@ sealed trait ToStatementPriority0 {
   implicit object javaBigIntegerToStatement extends ToStatement[BigInteger] {
     val jdbcType = implicitly[ParameterMetaData[BigInteger]].jdbcType
     def set(s: PreparedStatement, index: Int, v: BigInteger): Unit =
-      if (v != null) s.setBigDecimal(index, new JBigDec(v))
+      if (v != (null: BigInteger)) s.setBigDecimal(index, new JBigDec(v))
       else s.setNull(index, jdbcType)
   }
 
@@ -372,7 +374,7 @@ sealed trait ToStatementPriority0 {
   implicit object scalaBigIntegerToStatement extends ToStatement[BigInt] {
     val jdbcType = implicitly[ParameterMetaData[BigInt]].jdbcType
     def set(s: PreparedStatement, index: Int, v: BigInt): Unit =
-      if (v != null) s.setBigDecimal(index, new JBigDec(v.bigInteger))
+      if (v != (null: BigInt)) s.setBigDecimal(index, new JBigDec(v.bigInteger))
       else s.setNull(index, jdbcType)
   }
 
@@ -400,7 +402,7 @@ sealed trait ToStatementPriority0 {
   implicit object scalaBigDecimalToStatement extends ToStatement[BigDecimal] {
     val jdbcType = implicitly[ParameterMetaData[BigDecimal]].jdbcType
     def set(s: PreparedStatement, index: Int, v: BigDecimal): Unit =
-      if (v != null) s.setBigDecimal(index, v.bigDecimal)
+      if (v != (null: BigDecimal)) s.setBigDecimal(index, v.bigDecimal)
       else s.setNull(index, jdbcType)
   }
 
@@ -429,8 +431,9 @@ sealed trait ToStatementPriority0 {
   implicit object dateToStatement extends ToStatement[java.util.Date] {
     val jdbcType = implicitly[ParameterMetaData[java.util.Date]].jdbcType
     def set(s: PreparedStatement, index: Int, date: java.util.Date): Unit =
-      if (date != null) s.setTimestamp(index, new Timestamp(date.getTime))
-      else s.setNull(index, jdbcType)
+      if (date != (null: java.util.Date)) {
+        s.setTimestamp(index, new Timestamp(date.getTime))
+      } else s.setNull(index, jdbcType)
   }
 
   /**
@@ -448,7 +451,8 @@ sealed trait ToStatementPriority0 {
    */
   implicit def timestampWrapper1ToStatement[T <: TimestampWrapper1]: ToStatement[T] = new ToStatement[T] {
     def set(s: PreparedStatement, index: Int, tsw: T): Unit =
-      if (tsw != null && tsw.getTimestamp != null) {
+      if (tsw != (null: TimestampWrapper1) &&
+        tsw.getTimestamp != (null: TimestampWrapper1)) {
         s.setTimestamp(index, tsw.getTimestamp)
       } else s.setNull(index, timestampWrapper1JdbcType)
   }
@@ -467,7 +471,7 @@ sealed trait ToStatementPriority0 {
   implicit object uuidToStatement extends ToStatement[JUUID] {
     val jdbcType = implicitly[ParameterMetaData[JUUID]].jdbcType
     def set(s: PreparedStatement, index: Int, id: JUUID): Unit =
-      if (id != null) s.setString(index, id.toString)
+      if (id != (null: JUUID)) s.setString(index, id.toString)
       else s.setNull(index, jdbcType)
   }
 
@@ -565,7 +569,7 @@ sealed trait ToStatementPriority0 {
 
   @inline private def traversableToStatement[A, T <: Traversable[A]](implicit c: ToStatement[A]) = new ToStatement[T] with NotNullGuard {
     def set(s: PreparedStatement, offset: Int, ps: T) =
-      if (ps == null) throw new IllegalArgumentException()
+      if (ps == (null: Traversable[A])) throw new IllegalArgumentException()
       else ps.foldLeft(offset) { (i, p) => c.set(s, i, p); i + 1 }
   }
 
@@ -580,7 +584,7 @@ sealed trait ToStatementPriority0 {
   implicit def arrayToParameter[A <: AnyRef](implicit m: ParameterMetaData[A]) =
     new ToStatement[Array[A]] with NotNullGuard {
       def set(s: PreparedStatement, i: Int, arr: Array[A]) =
-        if (arr == null) throw new IllegalArgumentException()
+        if (arr == (null: AnyRef)) throw new IllegalArgumentException()
         else s.setArray(i, s.getConnection.createArrayOf(
           m.sqlType, arr.map(a => a: AnyRef)))
     }
@@ -629,8 +633,9 @@ sealed trait JodaToStatement {
    */
   implicit def jodaDateTimeToStatement(implicit meta: ParameterMetaData[DateTime]): ToStatement[DateTime] = new ToStatement[DateTime] {
     def set(s: PreparedStatement, index: Int, date: DateTime): Unit =
-      if (date != null) s.setTimestamp(index, new Timestamp(date.getMillis()))
-      else s.setNull(index, meta.jdbcType)
+      if (date != (null: DateTime)) {
+        s.setTimestamp(index, new Timestamp(date.getMillis()))
+      } else s.setNull(index, meta.jdbcType)
   }
 
   /**
@@ -644,7 +649,7 @@ sealed trait JodaToStatement {
    */
   implicit def jodaLocalDateTimeToStatement(implicit meta: ParameterMetaData[LocalDateTime]): ToStatement[LocalDateTime] = new ToStatement[LocalDateTime] {
     def set(s: PreparedStatement, i: Int, t: LocalDateTime): Unit =
-      if (t == null) s.setNull(i, meta.jdbcType)
+      if (t == (null: LocalDateTime)) s.setNull(i, meta.jdbcType)
       else s.setTimestamp(i, new Timestamp(t.toDateTime.getMillis))
   }
 
@@ -659,7 +664,7 @@ sealed trait JodaToStatement {
    */
   implicit def jodaLocalDateToStatement(implicit meta: ParameterMetaData[LocalDate]): ToStatement[LocalDate] = new ToStatement[LocalDate] {
     def set(s: PreparedStatement, i: Int, t: LocalDate): Unit =
-      if (t == null) s.setNull(i, meta.jdbcType)
+      if (t == (null: LocalDate)) s.setNull(i, meta.jdbcType)
       else s.setTimestamp(i, new Timestamp(t.toDate.getTime))
   }
 
@@ -675,10 +680,9 @@ sealed trait JodaToStatement {
    */
   implicit def jodaInstantToStatement(implicit meta: ParameterMetaData[Instant]): ToStatement[Instant] = new ToStatement[Instant] {
     def set(s: PreparedStatement, index: Int, instant: Instant): Unit =
-      if (instant != null) s.setTimestamp(
-        index,
-        new Timestamp(instant.getMillis))
-      else s.setNull(index, meta.jdbcType)
+      if (instant != (null: Instant)) {
+        s.setTimestamp(index, new Timestamp(instant.getMillis))
+      } else s.setNull(index, meta.jdbcType)
   }
 }
 
@@ -697,7 +701,7 @@ sealed trait JavaTimeToStatement {
    */
   implicit def instantToStatement(implicit meta: ParameterMetaData[Instant]): ToStatement[Instant] = new ToStatement[Instant] {
     def set(s: PreparedStatement, i: Int, t: Instant): Unit =
-      if (t == null) s.setNull(i, meta.jdbcType)
+      if (t == (null: Instant)) s.setNull(i, meta.jdbcType)
       else s.setTimestamp(i, Timestamp from t)
   }
 
@@ -713,7 +717,7 @@ sealed trait JavaTimeToStatement {
    */
   implicit def localDateTimeToStatement(implicit meta: ParameterMetaData[LocalDateTime]): ToStatement[LocalDateTime] = new ToStatement[LocalDateTime] {
     def set(s: PreparedStatement, i: Int, t: LocalDateTime): Unit =
-      if (t == null) s.setNull(i, meta.jdbcType)
+      if (t == (null: LocalDateTime)) s.setNull(i, meta.jdbcType)
       else s.setTimestamp(i, Timestamp valueOf t)
   }
 
@@ -729,7 +733,7 @@ sealed trait JavaTimeToStatement {
    */
   implicit def zonedDateTimeToStatement(implicit meta: ParameterMetaData[ZonedDateTime]): ToStatement[ZonedDateTime] = new ToStatement[ZonedDateTime] {
     def set(s: PreparedStatement, i: Int, t: ZonedDateTime): Unit =
-      if (t == null) s.setNull(i, meta.jdbcType)
+      if (t == (null: ZonedDateTime)) s.setNull(i, meta.jdbcType)
       else s.setTimestamp(i, Timestamp from t.toInstant)
   }
 }
@@ -746,7 +750,7 @@ sealed trait ToStatementPriority1 extends ToStatementPriority0 {
   implicit object byteArrayToStatement extends ToStatement[Array[Byte]] {
     val jdbcType = implicitly[ParameterMetaData[Array[Byte]]].jdbcType
     def set(s: PreparedStatement, i: Int, bin: Array[Byte]) =
-      if (bin == null) s.setNull(i, jdbcType)
+      if (bin == (null: Array[Byte])) s.setNull(i, jdbcType)
       else s.setBytes(i, bin)
   }
 }

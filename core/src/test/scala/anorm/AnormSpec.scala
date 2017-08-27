@@ -545,7 +545,7 @@ class AnormSpec extends Specification with H2Database with AnormTest {
   "Timestamp wrapper" should {
     "not match with invalid instance" in {
       ("Foo" match {
-        case TimestampWrapper1(ts) => true
+        case TimestampWrapper1(_) => true
         case _ => false
       }) aka "matching" must beFalse
     }
@@ -554,7 +554,7 @@ class AnormSpec extends Specification with H2Database with AnormTest {
       ((new {
         def getTimestamp: java.sql.Timestamp = sys.error("Foo")
       }) match {
-        case TimestampWrapper1(ts) => true
+        case TimestampWrapper1(_) => true
         case _ => false
       }) aka "matching" must throwA[Exception]("Foo")
     }

@@ -35,6 +35,12 @@ object Common extends AutoPlugin {
   @inline def missMeth(n: String) =
     ProblemFilters.exclude[MissingMethodProblem](n)
 
+  @inline def incoMeth(n: String) =
+    ProblemFilters.exclude[IncompatibleMethTypeProblem](n)
+
+  @inline def incoRet(n: String) =
+    ProblemFilters.exclude[IncompatibleResultTypeProblem](n)
+
 }
 
 object AnormGeneration {

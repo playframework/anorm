@@ -189,7 +189,7 @@ object Macro {
         val newSub: Set[Type] = if (!cls.isCaseClass) {
           c.warning(c.enclosingPosition, s"cannot handle class ${cls.fullName}: no case accessor")
           Set.empty
-        } else if (!cls.typeParams.isEmpty) {
+        } else if (cls.typeParams.nonEmpty) {
           c.warning(c.enclosingPosition, s"cannot handle class ${cls.fullName}: type parameter not supported")
           Set.empty
         } else Set(cls.selfType)
@@ -239,7 +239,7 @@ object Macro {
 
     @inline def abort(msg: String) = c.abort(c.enclosingPosition, msg)
     val sub = directKnownSubclasses(c)(tpe).filter { subclass =>
-      if (!subclass.typeSymbol.asClass.typeParams.isEmpty) {
+      if (subclass.typeSymbol.asClass.typeParams.nonEmpty) {
         c.warning(c.enclosingPosition, s"class with type parameters is not supported as family member: $subclass")
 
         false
@@ -260,7 +260,7 @@ object Macro {
       }
     }
 
-    if (!missing.isEmpty) {
+    if (missing.nonEmpty) {
       def details = missing.map { subclass =>
         val typeStr = if (subclass.typeSymbol.companion == NoSymbol) {
           s"${subclass.typeSymbol.fullName}.type"
@@ -342,8 +342,6 @@ object Macro {
       // Per each symbol of the type parameters, which type is bound to
       val boundTypes: Map[String, Type] = if (tpeArgs.isEmpty) Map.empty else {
         // Need apply rather than ctor to resolve parameter symbols
-
-        // import scala.collection.breakOut
 
         if (apply.paramLists.isEmpty) Map.empty
         else apply.typeParams.zip(tpeArgs).map {
@@ -429,7 +427,7 @@ object Macro {
 
       def resolve(name: Name, ptype: Type, typeclass: Type): Implicit = {
         val (ntpe, selfRef) = normalized(ptype)
-        val ptpe = boundTypes.get(ntpe.typeSymbol.fullName).getOrElse(ntpe)
+        val ptpe = boundTypes.getOrElse(ntpe.typeSymbol.fullName, ntpe)
 
         // infers implicit
         val neededImplicitType = appliedType(typeclass, ptpe)
@@ -552,11 +550,11 @@ object Macro {
 
   private def pretty(c: whitebox.Context)(parser: c.Tree): String =
     c.universe.show(parser).replaceAll("anorm.", "").
-      replaceAll("\\.\\$tilde", " ~ ").
-      replaceAll("\\(SqlParser([^(]+)\\(([^)]+)\\)\\)", "SqlParser$1($2)").
-      replaceAll("\\.\\$plus\\(([0-9]+)\\)", " + $1").
-      replaceAll("\\(([^ ]+) @ _\\)", "($1)").
-      replaceAll("\\$tilde", "~")
+      replaceAll(f"\\.\\$$tilde", " ~ ").
+      replaceAll("\\(SqlParser([^(]+)\\(([^)]+)\\)\\)", f"SqlParser$$1($$2)").
+      replaceAll(f"\\.\\$$plus\\(([0-9]+)\\)", f" + $$1").
+      replaceAll("\\(([^ ]+) @ _\\)", f"($$1)").
+      replaceAll(f"\\$$tilde", "~")
 
   /**
    * Returns a row parser generated for a case class `T`,
@@ -585,6 +583,7 @@ object Macro {
    * val p: RowParser[YourCaseClass] = Macros.namedParser[YourCaseClass]
    * }}}
    */
+  @SuppressWarnings(Array("UnusedMethodParameter" /* macro */ ))
   def namedParser[T](naming: Macro.ColumnNaming): RowParser[T] = macro namedParserImpl1[T]
 
   /**
@@ -601,6 +600,7 @@ object Macro {
    *   Macros.parser[YourCaseClass]("foo", "bar")
    * }}}
    */
+  @SuppressWarnings(Array("UnusedMethodParameter" /* macro */ ))
   def parser[T](names: String*): RowParser[T] = macro namedParserImpl2[T]
 
   /**
@@ -619,6 +619,7 @@ object Macro {
    *   Macros.parser[YourCaseClass]("foo", "loremIpsum")
    * }}}
    */
+  @SuppressWarnings(Array("UnusedMethodParameter" /* macro */ ))
   def parser[T](naming: Macro.ColumnNaming, names: String*): RowParser[T] = macro namedParserImpl3[T]
 
   /**
@@ -648,6 +649,7 @@ object Macro {
    * val p: RowParser[YourCaseClass] = Macros.offsetParser[YourCaseClass](2)
    * }}}
    */
+  @SuppressWarnings(Array("UnusedMethodParameter" /* macro */ ))
   def offsetParser[T](offset: Int): RowParser[T] = macro offsetParserImpl[T]
 
   /**
@@ -664,6 +666,7 @@ object Macro {
    * @param naming $discriminatorNamingParam
    * @tparam T $familyTParam
    */
+  @SuppressWarnings(Array("UnusedMethodParameter" /* macro */ ))
   def sealedParser[T](naming: Macro.DiscriminatorNaming): RowParser[T] = macro sealedParserImpl2[T]
 
   /**
@@ -672,6 +675,7 @@ object Macro {
    * @param discriminate $discriminateParam
    * @tparam T $familyTParam
    */
+  @SuppressWarnings(Array("UnusedMethodParameter" /* macro */ ))
   def sealedParser[T](discriminate: Macro.Discriminate): RowParser[T] = macro sealedParserImpl3[T]
 
   /**
@@ -681,6 +685,7 @@ object Macro {
    * @param discriminate $discriminateParam
    * @tparam T $familyTParam
    */
+  @SuppressWarnings(Array("UnusedMethodParameter" /* macro */ ))
   def sealedParser[T](naming: Macro.DiscriminatorNaming, discriminate: Macro.Discriminate): RowParser[T] = macro sealedParserImpl[T]
 
   private lazy val debugEnabled =
