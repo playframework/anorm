@@ -2,24 +2,29 @@ package anorm
 
 import java.sql.{ Connection, ResultSet }
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.collection.immutable.Seq
+
 import akka.stream.scaladsl.{ Keep, Sink, Source }
 import akka.stream.contrib.TestKit.assertAllStagesStopped
-import org.specs2.concurrent.{ ExecutionEnv => EE }
+
+import org.specs2.concurrent.ExecutionEnv
+
 import acolyte.jdbc.AcolyteDSL.withQueryResult
 import acolyte.jdbc.RowLists.stringList
 import acolyte.jdbc.Implicits._
 
-class AkkaStreamSpec extends org.specs2.mutable.Specification {
+class AkkaStreamSpec(implicit ee: ExecutionEnv)
+  extends org.specs2.mutable.Specification {
+
   "Akka Stream" title
 
   implicit lazy val system = akka.actor.ActorSystem("knox-core-tests")
   implicit def materializer = akka.stream.ActorMaterializer.create(system)
 
   "Akka Stream" should {
-    "expose the query result as source" in { implicit ee: EE =>
+    "expose the query result as source" in {
       assertAllStagesStopped {
         withQueryResult(stringList :+ "A" :+ "B" :+ "C") { implicit con =>
           AkkaStream.source(SQL"SELECT * FROM Test", SqlParser.scalar[String]).
@@ -29,10 +34,11 @@ class AkkaStreamSpec extends org.specs2.mutable.Specification {
       }
     }
 
-    "be done if the stream run through" in { implicit ee: EE =>
+    "be done if the stream run through" in {
       withQueryResult(stringList :+ "A" :+ "B" :+ "C") { implicit con =>
         AkkaStream.source(SQL"SELECT * FROM Test", SqlParser.scalar[String]).
-          toMat(Sink.ignore)(Keep.left).run() must beEqualTo(3).await(0, 3.seconds)
+          toMat(Sink.ignore)(Keep.left).
+          run() must beEqualTo(3).await(0, 3.seconds)
       }
     }
 
@@ -45,13 +51,13 @@ class AkkaStreamSpec extends org.specs2.mutable.Specification {
         })
       }
 
-      def runAsync[T](sink: Sink[String, Future[T]])(implicit ec: ExecutionContext, c: Connection) = {
+      def runAsync[T](sink: Sink[String, Future[T]])(implicit c: Connection) = {
         val graph = source(SQL"SELECT * FROM Test", SqlParser.scalar[String])
 
         Source.fromGraph(graph).runWith(sink).map { _ => graph.resultSet }
       }
 
-      "on success" in assertAllStagesStopped { implicit ee: EE =>
+      "on success" in assertAllStagesStopped {
         withQueryResult(stringList :+ "A" :+ "B" :+ "C") { implicit con =>
           runAsync(Sink.seq[String]) must beLike[ResultSet] {
             case rs => rs.isClosed must beTrue and (

@@ -78,7 +78,7 @@ private[anorm] object TokenizedStatement {
   }
 
   final class TokenizedStatementShow(
-      subject: TokenizedStatement) extends Show {
+    subject: TokenizedStatement) extends Show {
     def show = subject.tokens.map(Show.mkString(_)).mkString
   }
 

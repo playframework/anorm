@@ -24,8 +24,8 @@ private[anorm] object StatementToken {
  * @param placeholder Optional placeholder (name), after already prepared tokens
  */
 private[anorm] class TokenGroup(
-    val prepared: List[StatementToken],
-    val placeholder: Option[String]) extends Product with Serializable {
+  val prepared: List[StatementToken],
+  val placeholder: Option[String]) extends Product with Serializable {
 
   def copy(prepared: List[StatementToken] = this.prepared, placeholder: Option[String] = this.placeholder): TokenGroup = new TokenGroup(prepared, placeholder)
 

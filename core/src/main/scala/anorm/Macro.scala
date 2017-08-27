@@ -142,7 +142,8 @@ object Macro {
     val params = ctor.paramLists.flatten
 
     if (names.size < params.size) {
-      c.abort(c.enclosingPosition,
+      c.abort(
+        c.enclosingPosition,
         s"no column name for parameters: ${show(names)} < $params")
 
     } else {
@@ -153,7 +154,8 @@ object Macro {
             q"anorm.SqlParser.get[$t]($cn)"
           }
 
-          case _ => c.abort(c.enclosingPosition,
+          case _ => c.abort(
+            c.enclosingPosition,
             s"missing column name for parameter $i")
         }
       }
@@ -183,8 +185,7 @@ object Macro {
     @annotation.tailrec
     def allSubclasses(path: Traversable[Symbol], subclasses: Set[Type]): Set[Type] = path.headOption match {
       case Some(cls: ClassSymbol) if (
-        tpeSym != cls && cls.selfType.baseClasses.contains(tpeSym)
-      ) => {
+        tpeSym != cls && cls.selfType.baseClasses.contains(tpeSym)) => {
         val newSub: Set[Type] = if (!cls.isCaseClass) {
           c.warning(c.enclosingPosition, s"cannot handle class ${cls.fullName}: no case accessor")
           Set.empty
@@ -198,8 +199,7 @@ object Macro {
 
       case Some(o: ModuleSymbol) if (
         o.companion == NoSymbol && // not a companion object
-        tpeSym != c && o.typeSignature.baseClasses.contains(tpeSym)
-      ) => {
+        tpeSym != c && o.typeSignature.baseClasses.contains(tpeSym)) => {
         val newSub: Set[Type] = if (!o.moduleClass.asClass.isCaseClass) {
           c.warning(c.enclosingPosition, s"cannot handle object ${o.fullName}: no case accessor")
           Set.empty
@@ -343,6 +343,8 @@ object Macro {
       val boundTypes: Map[String, Type] = if (tpeArgs.isEmpty) Map.empty else {
         // Need apply rather than ctor to resolve parameter symbols
 
+        // import scala.collection.breakOut
+
         if (apply.paramLists.isEmpty) Map.empty
         else apply.typeParams.zip(tpeArgs).map {
           case (sym, ty) => sym.fullName -> ty
@@ -418,8 +420,7 @@ object Macro {
             super.transform(TypeTree(denormalized(tt.tpe)))
 
           case Select(Select(This(TypeName("Macro")), t), sym) if (
-            t.toString == "Placeholder" && sym.toString == "Parser"
-          ) => super.transform(q"$forwardName")
+            t.toString == "Placeholder" && sym.toString == "Parser") => super.transform(q"$forwardName")
 
           case _ =>
             super.transform(tree)

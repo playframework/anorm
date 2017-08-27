@@ -31,7 +31,8 @@ sealed trait BatchSql {
   @throws[IllegalArgumentException](BatchSqlErrors.ParameterNamesNotMatchingPlaceholders)
   def addBatchParams(args: ParameterValue*): BatchSql = {
     if (params.isEmpty) {
-      BatchSql.Checked(sql,
+      BatchSql.Checked(
+        sql,
         Seq(Sql.zipParams(sql.paramsInitialOrder, args, Map.empty)))
     } else {
       val m = checkedMap(sql.paramsInitialOrder.zip(args).
@@ -52,7 +53,8 @@ sealed trait BatchSql {
   @throws[IllegalArgumentException](BatchSqlErrors.ParameterNamesNotMatchingPlaceholders)
   def addBatchParamsList(args: Traversable[Seq[ParameterValue]]): BatchSql = {
     if (params.isEmpty) {
-      BatchSql.Checked(sql,
+      BatchSql.Checked(
+        sql,
         args.map(Sql.zipParams(sql.paramsInitialOrder, _, Map.empty)))
 
     } else {

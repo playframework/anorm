@@ -62,7 +62,7 @@ package object anorm {
     }
   }
 
-  // TODO: Review implicit usage there 
+  // TODO: Review implicit usage there
   // (add explicit functions on SqlQuery?)
   implicit def sqlToSimple(sql: SqlQuery): SimpleSql[Row] = sql.asSimple
 
@@ -156,7 +156,7 @@ package object anorm {
 
   // Optimized resource typeclass not using reflection
   object StatementResource
-      extends resource.Resource[java.sql.PreparedStatement] {
+    extends resource.Resource[java.sql.PreparedStatement] {
     def close(stmt: java.sql.PreparedStatement) = stmt.close()
   }
 

@@ -311,7 +311,8 @@ sealed trait ToStatementPriority0 {
    *   .on('c -> None)
    * }}}
    */
-  @deprecated("Parameter value should be passed using `Option.empty[T]`",
+  @deprecated(
+    "Parameter value should be passed using `Option.empty[T]`",
     since = "2.3.7")
   implicit object noneToStatement extends ToStatement[None.type] {
     def set(s: PreparedStatement, i: Int, n: None.type) = s.setObject(i, null)
@@ -674,7 +675,8 @@ sealed trait JodaToStatement {
    */
   implicit def jodaInstantToStatement(implicit meta: ParameterMetaData[Instant]): ToStatement[Instant] = new ToStatement[Instant] {
     def set(s: PreparedStatement, index: Int, instant: Instant): Unit =
-      if (instant != null) s.setTimestamp(index,
+      if (instant != null) s.setTimestamp(
+        index,
         new Timestamp(instant.getMillis))
       else s.setNull(index, meta.jdbcType)
   }
@@ -753,16 +755,16 @@ sealed trait ToStatementPriority1 extends ToStatementPriority0 {
  * Provided conversions to set statement parameter.
  */
 private[anorm] class ToStatementConversions extends ToStatementPriority1
-    with JodaToStatement with JavaTimeToStatement {
+  with JodaToStatement with JavaTimeToStatement {
 
   /**
-    * Resolves `ToStatement` instance for the given type.
-    * 
-    * {{{
-    * import anorm.ToStatement
-    * 
-    * val to: ToStatement[String] = ToStatement.of[String]
-    * }}}
-    */
+   * Resolves `ToStatement` instance for the given type.
+   *
+   * {{{
+   * import anorm.ToStatement
+   *
+   * val to: ToStatement[String] = ToStatement.of[String]
+   * }}}
+   */
   @inline def of[T](implicit to: ToStatement[T]): ToStatement[T] = to
 }

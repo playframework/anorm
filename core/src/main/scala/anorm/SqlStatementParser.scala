@@ -80,7 +80,8 @@ object SqlStatementParser extends JavaTokenParsers {
 
         case (TokenGroup(ts, pl) :: gs, ns) if ( // trim end #2
           ts.lastOption.filter(_ == StringToken(" ")).isDefined) =>
-          TokenizedStatement((TokenGroup(ts.dropRight(1), pl) :: gs).reverse,
+          TokenizedStatement(
+            (TokenGroup(ts.dropRight(1), pl) :: gs).reverse,
             ns.reverse)
 
         case (gs, ns) => TokenizedStatement(gs.reverse, ns.reverse)

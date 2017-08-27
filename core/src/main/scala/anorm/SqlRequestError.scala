@@ -4,7 +4,7 @@ import scala.util.Failure
 
 /** Anorm runtime exception */
 final case class AnormException(message: String)
-    extends Exception with scala.util.control.NoStackTrace {
+  extends Exception with scala.util.control.NoStackTrace {
   override def getMessage() = message
 }
 
@@ -30,7 +30,7 @@ object SqlRequestError {
  * @param possibilities the names of the available columns
  */
 case class ColumnNotFound(
-    column: String, possibilities: List[String]) extends SqlRequestError {
+  column: String, possibilities: List[String]) extends SqlRequestError {
 
   lazy val message = s"'$column' not found, available columns: " +
     possibilities.map(_.dropWhile(_ == '.')).mkString(", ")

@@ -74,12 +74,12 @@ class AnormSpec extends Specification with H2Database with AnormTest {
       "throw exception when single result is missing" in withQueryResult(
         fooBarTable) { implicit c =>
 
-          SQL("SELECT * FROM test").as(fooBarParser1.single).
-            aka("mapping") must throwA[Exception].like {
-              case e: Exception => e.getMessage aka "error" mustEqual (
-                "SqlMappingError(No rows when expecting a single one)")
-            }
-        }
+        SQL("SELECT * FROM test").as(fooBarParser1.single).
+          aka("mapping") must throwA[Exception].like {
+            case e: Exception => e.getMessage aka "error" mustEqual (
+              "SqlMappingError(No rows when expecting a single one)")
+          }
+      }
 
       "raise error when there is more than 1 required or optional row" in {
         withQueryResult(stringList :+ "A" :+ "B") { implicit c =>
@@ -398,7 +398,8 @@ class AnormSpec extends Specification with H2Database with AnormTest {
     }
 
     @inline def withQRes[T](r: => QueryResult)(f: java.sql.Connection => T): T =
-      f(connection(handleQuery(_ => r),
+      f(connection(
+        handleQuery(_ => r),
         "acolyte.resultSet.initOnFirstRow" -> "true"))
 
     "do nothing when there is no result" in withQueryResult(QueryResult.Nil) {

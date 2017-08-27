@@ -28,7 +28,7 @@ sealed trait ParameterValue extends Show {
 
 final class DefaultParameterValue[A](
   val value: A, s: ToSql[A], toStmt: ToStatement[A])
-    extends ParameterValue with ParameterValue.Wrapper[A] {
+  extends ParameterValue with ParameterValue.Wrapper[A] {
 
   lazy val toSql: (String, Int) =
     if (s == null) ("?" -> 1) else s.fragment(value)
@@ -80,7 +80,7 @@ sealed trait ToParameterValue[A] extends (A => ParameterValue) {
 
 object ToParameterValue {
   private class Default[A](s: ToSql[A], p: ToStatement[A])
-      extends ToParameterValue[A] {
+    extends ToParameterValue[A] {
     def apply(value: A): ParameterValue = ParameterValue(value, s, p)
   }
 

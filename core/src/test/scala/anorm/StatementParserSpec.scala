@@ -43,8 +43,9 @@ class StatementParserSpec extends org.specs2.mutable.Specification {
       SqlStatementParser.parse(
         "SELECT \\* \\FROM Test WHERE title = 'x \\{foo\\}' AND id = {id}").
         aka("parsed") must beSuccessfulTry(TokenizedStatement(
-          List(TokenGroup(List(StringToken(
-            "SELECT * FROM Test WHERE title = 'x {foo}' AND id = ")),
+          List(TokenGroup(
+            List(StringToken(
+              "SELECT * FROM Test WHERE title = 'x {foo}' AND id = ")),
             Some("id"))), List("id")))
 
     }

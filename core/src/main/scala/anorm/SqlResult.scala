@@ -49,7 +49,8 @@ private[anorm] trait WithResult {
    * @see #foldWhile
    * @see #withResult
    */
-  @deprecated(message = "Use `fold` with empty [[ColumnAliaser]]",
+  @deprecated(
+    message = "Use `fold` with empty [[ColumnAliaser]]",
     since = "2.5.1")
   def fold[T](z: => T)(op: (T, Row) => T)(implicit connection: Connection): Either[List[Throwable], T] = {
     @annotation.tailrec
@@ -90,7 +91,8 @@ private[anorm] trait WithResult {
    * @return Either list of failures at left, or aggregated value
    * @see #withResult
    */
-  @deprecated(message = "Use `foldWhile` with empty [[ColumnAliaser]]",
+  @deprecated(
+    message = "Use `foldWhile` with empty [[ColumnAliaser]]",
     since = "2.5.1")
   def foldWhile[T](z: => T)(op: (T, Row) => (T, Boolean))(implicit connection: Connection): Either[List[Throwable], T] = {
     @annotation.tailrec
