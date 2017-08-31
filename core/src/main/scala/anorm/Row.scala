@@ -97,12 +97,11 @@ trait Row {
   def apply[B](position: Int)(implicit c: Column[B]): B =
     unsafeGet(SqlParser.get(position)(c))
 
-  @SuppressWarnings(Array("EitherGet")) // TODO: Safe alternative
   @inline def unsafeGet[T](rowparser: => RowParser[T]): T =
-    (rowparser(this) match {
-      case Success(v) => Right(v)
-      case Error(err) => Left(err)
-    }).right.get
+    rowparser(this) match {
+      case Success(v) => v
+      case Error(err) => throw err.toFailure.exception
+    }
 
   // Data per column name
   private lazy val columnsDictionary: Map[String, Any] =

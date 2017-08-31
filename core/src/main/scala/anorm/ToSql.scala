@@ -123,5 +123,6 @@ object ToSql {
   }
 
   /** Fallback when no instance is available. */
+  @deprecated("Do not use", "2.5.4")
   def missing[A] = null
 }
