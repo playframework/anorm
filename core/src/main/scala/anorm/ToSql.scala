@@ -3,7 +3,6 @@ package anorm
 /** Set value as prepared SQL statement fragment. */
 @annotation.implicitNotFound("No SQL renderer found for parameter of type ${A}: `anorm.ToSql[${A}]` required")
 trait ToSql[A] {
-
   /**
    * Prepares SQL fragment for value,
    * using [[java.sql.PreparedStatement]] syntax (with '?').
@@ -33,7 +32,7 @@ object ToSql {
    * // "?, ?, ?"
    * }}}
    */
-  implicit def listToSql[A](implicit conv: ToSql[A] = null): ToSql[List[A]] =
+  implicit def listToSql[A](implicit conv: ToSql[A] = ToSql.missing[A]): ToSql[List[A]] =
     traversableToSql[A, List[A]]
 
   /**
@@ -44,7 +43,7 @@ object ToSql {
    * // "?, ?, ?"
    * }}}
    */
-  implicit def seqToSql[A](implicit conv: ToSql[A] = null): ToSql[Seq[A]] =
+  implicit def seqToSql[A](implicit conv: ToSql[A] = ToSql.missing[A]): ToSql[Seq[A]] =
     traversableToSql[A, Seq[A]]
 
   /**
@@ -55,7 +54,7 @@ object ToSql {
    * // "?, ?, ?"
    * }}}
    */
-  implicit def setToSql[A](implicit conv: ToSql[A] = null): ToSql[Set[A]] =
+  implicit def setToSql[A](implicit conv: ToSql[A] = ToSql.missing[A]): ToSql[Set[A]] =
     traversableToSql[A, Set[A]]
 
   /**
@@ -66,7 +65,7 @@ object ToSql {
    * // "?, ?, ?"
    * }}}
    */
-  implicit def sortedSetToSql[A](implicit conv: ToSql[A] = null): ToSql[SortedSet[A]] = traversableToSql[A, SortedSet[A]]
+  implicit def sortedSetToSql[A](implicit conv: ToSql[A] = ToSql.missing[A]): ToSql[SortedSet[A]] = traversableToSql[A, SortedSet[A]]
 
   /**
    * Returns fragment for each value, separated by ", ".
@@ -76,7 +75,7 @@ object ToSql {
    * // "?, ?, ?"
    * }}}
    */
-  implicit def streamToSql[A](implicit conv: ToSql[A] = null): ToSql[Stream[A]] = traversableToSql[A, Stream[A]]
+  implicit def streamToSql[A](implicit conv: ToSql[A] = ToSql.missing[A]): ToSql[Stream[A]] = traversableToSql[A, Stream[A]]
 
   /**
    * Returns fragment for each value, separated by ", ".
@@ -86,10 +85,10 @@ object ToSql {
    * // "?, ?, ?"
    * }}}
    */
-  implicit def vectorToSql[A](implicit conv: ToSql[A] = null): ToSql[Vector[A]] = traversableToSql[A, Vector[A]]
+  implicit def vectorToSql[A](implicit conv: ToSql[A] = ToSql.missing[A]): ToSql[Vector[A]] = traversableToSql[A, Vector[A]]
 
   /** Returns fragment for each value, with custom formatting. */
-  implicit def seqParamToSql[A](implicit conv: ToSql[A] = null) =
+  implicit def seqParamToSql[A](implicit conv: ToSql[A] = ToSql.missing[A]) =
     ToSql[SeqParameter[A]] { p =>
       val before = p.before.getOrElse("")
       val after = p.after.getOrElse("")
@@ -108,7 +107,7 @@ object ToSql {
       sql._1.toString -> sql._2
     }
 
-  @inline private def traversableToSql[A, T <: Traversable[A]](implicit conv: ToSql[A] = null) = ToSql[T] { values =>
+  @inline private def traversableToSql[A, T <: Traversable[A]](implicit conv: ToSql[A] = ToSql.missing[A]) = ToSql[T] { values =>
     val c: A => (String, Int) =
       if (conv == null) _ => ("?" -> 1) else conv.fragment
 
@@ -122,4 +121,8 @@ object ToSql {
 
     sql._1.toString -> sql._2
   }
+
+  /** Fallback when no instance is available. */
+  @deprecated("Do not use", "2.5.4")
+  def missing[A] = null
 }

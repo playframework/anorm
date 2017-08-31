@@ -1,5 +1,7 @@
 package anorm
 
+import scala.collection.breakOut
+
 /**
  * @param qualified the qualified column name
  * @param alias the column alias
@@ -13,7 +15,7 @@ case class ColumnName(qualified: String, alias: Option[String])
  */
 case class MetaDataItem(column: ColumnName, nullable: Boolean, clazz: String)
 
-private[anorm] case class MetaData(ms: List[MetaDataItem]) {
+private[anorm] case class MetaData(ms: Seq[MetaDataItem]) {
   /** Returns meta data for specified column. */
   def get(columnName: String): Option[MetaDataItem] = {
     val key = columnName.toUpperCase
@@ -24,20 +26,19 @@ private[anorm] case class MetaData(ms: List[MetaDataItem]) {
   private lazy val dictionary: Map[String, MetaDataItem] =
     ms.map(m => m.column.qualified.toUpperCase() -> m).toMap
 
-  private lazy val dictionary2: Map[String, MetaDataItem] =
-    ms.map(m => {
-      val column = m.column.qualified.split('.').last;
-      column.toUpperCase() -> m
-    }).toMap
+  private lazy val dictionary2: Map[String, MetaDataItem] = ms.map { m =>
+    val column = m.column.qualified.split('.').last;
+    column.toUpperCase() -> m
+  }(breakOut)
 
   private lazy val aliasedDictionary: Map[String, MetaDataItem] =
-    ms.flatMap(m =>
+    ms.flatMap { m =>
       m.column.alias.map(a => Map(a.toUpperCase() -> m)).getOrElse(Map.empty)
-    ).toMap
+    }(breakOut)
 
   lazy val columnCount = ms.size
 
-  lazy val availableColumns: List[String] =
+  lazy val availableColumns: Seq[String] =
     ms.flatMap(i => i.column.qualified :: i.column.alias.toList)
 
 }
@@ -56,7 +57,7 @@ object ColumnAliaser {
   import scala.collection.immutable.Set
 
   private class Default(
-      f: PartialFunction[(Int, ColumnName), String]) extends ColumnAliaser {
+    f: PartialFunction[(Int, ColumnName), String]) extends ColumnAliaser {
 
     def apply(column: (Int, ColumnName)) = f.lift(column)
   }
@@ -90,7 +91,7 @@ object ColumnAliaser {
    * }}}
    */
   def perPositions(positions: Set[Int])(as: ((Int, ColumnName)) => String): ColumnAliaser = new Default({
-    case c @ (pos, cn) if (positions contains pos) => as(c)
+    case c @ (pos, _) if (positions contains pos) => as(c)
   })
 
   /**
@@ -130,7 +131,8 @@ private[anorm] object MetaData {
     val meta = rs.getMetaData()
     val nbColumns = meta.getColumnCount()
     MetaData(List.range(1, nbColumns + 1).map { i =>
-      val cn = ColumnName({
+      @SuppressWarnings(Array("AsInstanceOf"))
+      def tableName = {
         if (meta.getClass.getName startsWith "org.postgresql.") {
           // HACK FOR POSTGRES:
           // Fix in https://github.com/pgjdbc/pgjdbc/pull/107
@@ -140,12 +142,16 @@ private[anorm] object MetaData {
           meta.getTableName(i)
         }
 
-      } + "." + meta.getColumnName(i),
+      }
+
+      val cn = ColumnName(
+        tableName + "." + meta.getColumnName(i),
         alias = Option(meta.getColumnLabel(i)))
 
       val colName = as(i -> cn).fold(cn)(a => cn.copy(alias = Some(a)))
 
-      MetaDataItem(column = colName,
+      MetaDataItem(
+        column = colName,
         nullable = meta.isNullable(i) == ResultSetMetaData.columnNullable,
         clazz = meta.getColumnClassName(i))
     })

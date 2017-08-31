@@ -56,7 +56,10 @@ case class SimpleSql[T](sql: SqlQuery, params: Map[String, ParameterValue], defa
   def unsafeStatement(connection: Connection, generatedColumn: String, generatedColumns: Seq[String]) = unsafeStatement(connection, prepareGeneratedCols((generatedColumn +: generatedColumns).toArray))
 
   private def unsafeStatement(connection: Connection, prep: (Connection, String) => PreparedStatement): PreparedStatement = {
-    val (psql, vs): (String, Seq[(Int, ParameterValue)]) = Sql.prepareQuery(sql.stmt.tokens, sql.paramsInitialOrder, params, 0, new StringBuilder(), List.empty[(Int, ParameterValue)]).get
+    @SuppressWarnings(Array("TryGet"))
+    def unsafe = Sql.query(sql.stmt.tokens, sql.paramsInitialOrder, params, 0, new StringBuilder(), List.empty[(Int, ParameterValue)]).get
+
+    val (psql, vs): (String, Seq[(Int, ParameterValue)]) = unsafe
 
     val stmt = prep(connection, psql)
 

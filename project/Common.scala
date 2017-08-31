@@ -3,11 +3,11 @@ import sbt._
 import sbt.plugins.JvmPlugin
 
 import com.typesafe.tools.mima.plugin.MimaPlugin.mimaDefaultSettings
-import com.typesafe.tools.mima.plugin.MimaKeys.previousArtifacts
+import com.typesafe.tools.mima.plugin.MimaKeys.mimaPreviousArtifacts
 
 object Common extends AutoPlugin {
   import com.typesafe.tools.mima.core._
-  
+
   override def trigger = allRequirements
   override def requires = JvmPlugin
 
@@ -22,20 +22,25 @@ object Common extends AutoPlugin {
       "-Ywarn-unused-import", "-Ywarn-unused", "-Ywarn-dead-code",
       "-Ywarn-numeric-widen"),
     fork in Test := true,
-    previousArtifacts := {
-       if (scalaVersion.value startsWith "2.12.") Set.empty else {
-         if (crossPaths.value) {
-           Set(organization.value % s"${moduleName.value}_${scalaBinaryVersion.value}" % previousVersion)
-         } else {
-           Set(organization.value % moduleName.value % previousVersion)
-         }
-       }
-    }
-  )
+    mimaPreviousArtifacts := {
+      if (scalaVersion.value startsWith "2.12.") Set.empty else {
+        if (crossPaths.value) {
+          Set(organization.value % s"${moduleName.value}_${scalaBinaryVersion.value}" % previousVersion)
+        } else {
+          Set(organization.value % moduleName.value % previousVersion)
+        }
+      }
+    })
 
   @inline def missMeth(n: String) =
     ProblemFilters.exclude[MissingMethodProblem](n)
-  
+
+  @inline def incoMeth(n: String) =
+    ProblemFilters.exclude[IncompatibleMethTypeProblem](n)
+
+  @inline def incoRet(n: String) =
+    ProblemFilters.exclude[IncompatibleResultTypeProblem](n)
+
 }
 
 object AnormGeneration {

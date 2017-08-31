@@ -49,7 +49,7 @@ class MetaDataSpec extends org.specs2.mutable.Specification {
           item2.column.copy(alias = Some("prefix.foo")))
 
         MetaData.parse(rs, ColumnAliaser({
-          case (1, cn) => "my_id"
+          case (1, _) => "my_id"
           case (_, ColumnName(".foo", _)) => "prefix.foo"
         })) must_== MetaData(List(itemA, itemB, item3))
       }

@@ -3,7 +3,7 @@
  */
 package anorm
 
-object SqlParser extends FunctionAdapter {
+object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
   import java.io.InputStream
   import java.util.Date
 
@@ -39,7 +39,7 @@ object SqlParser extends FunctionAdapter {
    */
   def folder[T](z: T)(f: (T, Any, MetaDataItem) => Either[SqlRequestError, T]): RowParser[T] = {
     @annotation.tailrec
-    def go(data: List[Any], meta: List[MetaDataItem], out: T): SqlResult[T] =
+    def go(data: List[Any], meta: Seq[MetaDataItem], out: T): SqlResult[T] =
       (data.headOption, meta.headOption) match {
         case (Some(d), Some(m)) => f(out, d, m) match {
           case Left(err) => Error(err)
@@ -486,12 +486,24 @@ object SqlParser extends FunctionAdapter {
    *
    * @return true if matches, or false if not
    */
-  def matches[TT: Column, T <: TT](column: String, value: T)(implicit c: Column[TT]): RowParser[Boolean] = get[TT](column)(c).?.map(_.fold(false)(_ == value))
+  def matches[T: Column](column: String, value: T): RowParser[Boolean] =
+    get[T](column).?.map(_.fold(false) { _ == value })
+}
+
+@deprecated("Do not use these combinators", "2.5.4")
+sealed trait DeprecatedSqlParser { _: SqlParser.type =>
+
+  @deprecated("Use `matches[T]`", "2.5.4")
+  @SuppressWarnings(Array("AsInstanceOf"))
+  def matches[TT: Column, T <: TT](column: String, value: T)(implicit c: Column[TT]): RowParser[Boolean] = get[TT](column)(c).?.map(_.fold(false) {
+    _.asInstanceOf[T] == value
+  })
 
 }
 
 /** Columns tuple-like */
 // Using List or HList?
+@SuppressWarnings(Array("ClassNames"))
 final case class ~[+A, +B](_1: A, _2: B)
 
 object RowParser {
@@ -605,7 +617,7 @@ trait RowParser[+A] extends (Row => SqlResult[A]) { parent =>
       case Success(a) => Success(Some(a))
       case Error(UnexpectedNullableFound(_)) | Error(ColumnNotFound(_, _)) =>
         Success(None)
-      case e @ Error(f) => e
+      case e @ Error(_) => e
     }
   }
 
@@ -669,7 +681,7 @@ sealed trait ScalarRowParser[+A] extends RowParser[A] {
         // one column present in head row, but column value is null
         Success(Option.empty[A])
 
-      case c :: _ => map(Some(_))(cur.row)
+      case _ :: _ => map(Some(_))(cur.row)
     }
 
     case None => Success(Option.empty[A])

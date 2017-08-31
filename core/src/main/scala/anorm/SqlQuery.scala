@@ -70,9 +70,9 @@ object SqlQuery {
    * @param params Parameter names in initial order (see [[SqlQuery.paramsInitialOrder]])
    * @param tmout Query execution timeout (see [[SqlQuery.timeout]])
    */
-  private[anorm] def prepare(st: TokenizedStatement, params: List[String] = List.empty, tmout: Option[Int] = None, fetchSz: Option[Int] = None): SqlQuery = new SqlQuery {
+  private[anorm] def prepare(st: TokenizedStatement, params: Seq[String] = List.empty, tmout: Option[Int] = None, fetchSz: Option[Int] = None): SqlQuery = new SqlQuery {
     val stmt = st
-    val paramsInitialOrder = params
+    val paramsInitialOrder = params.toList
     val timeout = tmout
     val fetchSize = fetchSz
   }

@@ -235,7 +235,8 @@ class SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
       stringList :+ "A" :+ "B" :+ "C") { implicit c =>
         val parser = SqlParser.str("foo")
 
-        SQL"SELECT str".executeQuery().fold(List.empty[String],
+        SQL"SELECT str".executeQuery().fold(
+          List.empty[String],
           ColumnAliaser.withPattern(Set(1), "foo")) { (ls, row) =>
             parser(row).fold(_ => ls, _ :: ls)
           } must beRight(List("C", "B", "A"))
@@ -245,7 +246,8 @@ class SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
       rowList1(classOf[String] -> "bar") :+ "A" :+ "B" :+ "C") { implicit c =>
         val parser = SqlParser.str("foo.bar.lorem")
 
-        SQL"SELECT str".executeQuery().foldWhile(List.empty[String],
+        SQL"SELECT str".executeQuery().foldWhile(
+          List.empty[String],
           ColumnAliaser.withPattern(Set(1), "foo.", ".lorem")) { (ls, row) =>
             parser(row).fold(_ => ls, _ :: ls) -> true
           } must beRight(List("C", "B", "A"))
@@ -408,7 +410,8 @@ class SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
 
     "be found by user alias" in withTestDB(v2) { implicit c =>
       SQL"SELECT foo AS AL, bar FROM test1".
-        asTry(SqlParser.str("pre.AL").single,
+        asTry(
+          SqlParser.str("pre.AL").single,
           ColumnAliaser.withPattern1("pre.")(1)).
           aka("by user alias") must beSuccessfulTry(v2) and (
             SQL"SELECT foo AS AL, bar FROM test1".asTry(

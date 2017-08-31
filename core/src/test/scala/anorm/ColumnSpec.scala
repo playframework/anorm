@@ -32,7 +32,7 @@ import acolyte.jdbc.Implicits._
 import SqlParser.{ byte, double, float, int, long, scalar, short }
 
 class ColumnSpec
-    extends org.specs2.mutable.Specification with JodaColumnSpec {
+  extends org.specs2.mutable.Specification with JodaColumnSpec {
 
   "Column" title
 
@@ -746,8 +746,9 @@ class ColumnSpec
 
     "not be parsed from array with invalid component type" in withQueryResult(
       rowList1(classOf[SqlArray]) :+ acolyte.jdbc.ImmutableArray.getInstance(
-        classOf[java.sql.Date], Array(new java.sql.Date(1L),
-          new java.sql.Date(2L)))) { implicit con =>
+        classOf[java.sql.Date], Array(
+        new java.sql.Date(1L),
+        new java.sql.Date(2L)))) { implicit con =>
 
         SQL"SELECT a".as(scalar[Array[String]].single).
           aka("parsing") must throwA[Exception](message =
@@ -810,8 +811,9 @@ class ColumnSpec
 
     "not be parsed from SQL array with invalid component type" in withQueryResult(
       rowList1(classOf[SqlArray]) :+ acolyte.jdbc.ImmutableArray.getInstance(
-        classOf[java.sql.Date], Array(new java.sql.Date(1L),
-          new java.sql.Date(2L)))) { implicit con =>
+        classOf[java.sql.Date], Array(
+        new java.sql.Date(1L),
+        new java.sql.Date(2L)))) { implicit con =>
 
         SQL"SELECT a".as(scalar[List[String]].single).
           aka("parsing") must throwA[Exception](message =

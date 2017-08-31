@@ -67,7 +67,8 @@ class MacroSpec extends org.specs2.mutable.Specification {
             5, 3L, nullBoolean) :+ (5.6F, "str4", 6,
               nullLong, false)) { implicit con =>
 
-          spec(Macro.namedParser[Foo[Int]],
+          spec(
+            Macro.namedParser[Foo[Int]],
             Macro.parser[Foo[Int]]("r", "bar", "loremIpsum", "opt", "x"))
 
         }
@@ -78,8 +79,10 @@ class MacroSpec extends org.specs2.mutable.Specification {
             5, 3L, nullBoolean) :+ (5.6F, "str4", 6,
               nullLong, false)) { implicit con =>
 
-          spec(Macro.namedParser[Foo[Int]](ColumnNaming.SnakeCase),
-            Macro.parser[Foo[Int]](ColumnNaming.SnakeCase,
+          spec(
+            Macro.namedParser[Foo[Int]](ColumnNaming.SnakeCase),
+            Macro.parser[Foo[Int]](
+              ColumnNaming.SnakeCase,
               "r", "bar", "loremIpsum", "opt", "x"))
 
         }
@@ -118,7 +121,8 @@ class MacroSpec extends org.specs2.mutable.Specification {
 
     "be successful for Foo[Int]" in withQueryResult(
       fooRow1 :+ (1.2F, "str1", 1, 2L, true) :+ (
-        2.3F, "str2", 4, nullLong,
+        2.3F, "str2", 4,
+        nullLong,
         nullBoolean) :+ (3.4F, "str3", 5, 3L,
           nullBoolean) :+ (5.6F, "str4", 6,
             nullLong, false)) { implicit con =>
@@ -139,7 +143,8 @@ class MacroSpec extends org.specs2.mutable.Specification {
 
     "be successful for Foo[Int]" in withQueryResult(
       fooRow1 :+ (1.2F, "str1", 1, 2L, true) :+ (
-        2.3F, "str2", 4, nullLong,
+        2.3F, "str2", 4,
+        nullLong,
         nullBoolean) :+ (3.4F, "str3", 5, 3L,
           nullBoolean) :+ (5.6F, "str4", 6,
             nullLong, false)) { implicit con =>
@@ -223,8 +228,7 @@ class MacroSpec extends org.specs2.mutable.Specification {
             implicit val barParser = Macro.namedParser[Bar]
             val familyParser = Macro.sealedParser[Family](
               Macro.DiscriminatorNaming(_ => "foo"),
-              Macro.Discriminate(_.split("\\.").last)
-            )
+              Macro.Discriminate(_.split("\\.").last))
 
             SQL"TEST".as(familyParser.*) must_== List(Bar(1), CaseObj)
         }
@@ -245,7 +249,7 @@ class MacroSpec extends org.specs2.mutable.Specification {
   object NotCase extends Family
   case class Foo[T](r: Float, bar: String = "Default")(
     loremIpsum: T, opt: Option[Long] = None)(x: Option[Boolean])
-      extends Family {
+    extends Family {
     override lazy val toString = s"Foo($r, $bar)($loremIpsum, $opt)($x)"
   }
 

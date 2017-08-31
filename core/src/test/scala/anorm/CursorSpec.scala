@@ -20,7 +20,8 @@ class CursorSpec extends org.specs2.mutable.Specification {
     }
 
     "be return for three rows" in {
-      Cursor(stringList :+ "red" :+ "green" :+ "blue" resultSet,
+      Cursor(
+        stringList :+ "red" :+ "green" :+ "blue" resultSet,
         ColumnAliaser.empty) aka "cursor" must beSome.which { first =>
           first.row[String]("str") aka "row #1" must_== "red" and (
             first.next aka "after first" must beSome.which { snd =>

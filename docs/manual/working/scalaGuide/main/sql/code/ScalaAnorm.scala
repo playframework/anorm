@@ -56,8 +56,7 @@ object MacroFixtures {
           implicitly[RowParser[Lorem.type]]
 
         case (d) => RowParser.failed[Family](Error(SqlMappingError(
-          "unexpected row type \'%s\'; expected: %s".format(d, "scalaguide.sql.MacroFixtures.Bar, scalaguide.sql.MacroFixtures.Lorem")
-        )))
+          "unexpected row type \'%s\'; expected: %s".format(d, "scalaguide.sql.MacroFixtures.Bar, scalaguide.sql.MacroFixtures.Lorem"))))
       }
     }
   //#macroSealedParser

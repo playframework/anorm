@@ -38,19 +38,19 @@ object ParameterMetaData extends JavaTimeParameterMetaData {
 
   /** Binary meta data */
   implicit object BlobParameterMetaData
-      extends ParameterMetaData[java.sql.Blob] {
+    extends ParameterMetaData[java.sql.Blob] {
     val sqlType = "BLOB"
     val jdbcType = Types.BLOB
   }
 
   /** Array of byte meta data */
   implicit object ByteArrayParameterMetaData
-      extends ParameterMetaData[Array[Byte]] {
+    extends ParameterMetaData[Array[Byte]] {
     val sqlType = "LONGVARBINARY"
     val jdbcType = Types.LONGVARBINARY
   }
   implicit object InputStreamParameterMetaData
-      extends ParameterMetaData[java.io.InputStream] {
+    extends ParameterMetaData[java.io.InputStream] {
     val sqlType = ByteArrayParameterMetaData.sqlType
     val jdbcType = ByteArrayParameterMetaData.jdbcType
   }
@@ -67,7 +67,7 @@ object ParameterMetaData extends JavaTimeParameterMetaData {
 
   /** Clob meta data */
   implicit object ClobParameterMetaData
-      extends ParameterMetaData[java.sql.Clob] {
+    extends ParameterMetaData[java.sql.Clob] {
     val sqlType = "CLOB"
     val jdbcType = Types.CLOB
   }
@@ -124,7 +124,7 @@ object ParameterMetaData extends JavaTimeParameterMetaData {
     val jdbcType = Types.BIGINT
   }
   implicit object BigIntegerParameterMetaData
-      extends ParameterMetaData[BigInteger] {
+    extends ParameterMetaData[BigInteger] {
     val sqlType = BigIntParameterMetaData.sqlType
     val jdbcType = BigIntParameterMetaData.jdbcType
   }
@@ -139,7 +139,7 @@ object ParameterMetaData extends JavaTimeParameterMetaData {
 
   /** Decimal (big decimal) parameter meta data */
   implicit object BigDecimalParameterMetaData
-      extends ParameterMetaData[BigDecimal] {
+    extends ParameterMetaData[BigDecimal] {
     val sqlType = "DECIMAL"
     val jdbcType = Types.DECIMAL
   }
@@ -150,7 +150,7 @@ object ParameterMetaData extends JavaTimeParameterMetaData {
 
   /** Timestamp parameter meta data */
   implicit object TimestampParameterMetaData
-      extends ParameterMetaData[Timestamp] {
+    extends ParameterMetaData[Timestamp] {
     val sqlType = "TIMESTAMP"
     val jdbcType = Types.TIMESTAMP
   }
@@ -173,7 +173,7 @@ object ParameterMetaData extends JavaTimeParameterMetaData {
     val jdbcType = StringParameterMetaData.jdbcType
   }
   implicit object CharacterStreamMetaData
-      extends ParameterMetaData[java.io.Reader] {
+    extends ParameterMetaData[java.io.Reader] {
     val sqlType = StringParameterMetaData.sqlType
     val jdbcType = StringParameterMetaData.jdbcType
   }
@@ -184,7 +184,7 @@ object ParameterMetaData extends JavaTimeParameterMetaData {
     val jdbcType = Types.CHAR
   }
   implicit object CharacterParameterMetaData
-      extends ParameterMetaData[Character] {
+    extends ParameterMetaData[Character] {
     val sqlType = CharParameterMetaData.sqlType
     val jdbcType = CharParameterMetaData.jdbcType
   }
@@ -201,7 +201,7 @@ sealed trait JavaTimeParameterMetaData {
 
   /** Parameter metadata for Java8 local date/time */
   implicit object LocalDateTimeParameterMetaData
-      extends ParameterMetaData[LocalDateTime] {
+    extends ParameterMetaData[LocalDateTime] {
 
     val sqlType = "TIMESTAMP"
     val jdbcType = Types.TIMESTAMP
@@ -209,7 +209,7 @@ sealed trait JavaTimeParameterMetaData {
 
   /** Parameter metadata for Java8 local date */
   implicit object LocalDateParameterMetaData
-      extends ParameterMetaData[LocalDate] {
+    extends ParameterMetaData[LocalDate] {
 
     val sqlType = "TIMESTAMP"
     val jdbcType = Types.TIMESTAMP
@@ -217,7 +217,7 @@ sealed trait JavaTimeParameterMetaData {
 
   /** Parameter metadata for Java8 zoned date/time */
   implicit object ZonedDateTimeParameterMetaData
-      extends ParameterMetaData[ZonedDateTime] {
+    extends ParameterMetaData[ZonedDateTime] {
 
     val sqlType = "TIMESTAMP"
     val jdbcType = Types.TIMESTAMP

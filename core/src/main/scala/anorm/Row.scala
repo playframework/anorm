@@ -1,6 +1,7 @@
 package anorm
 
 import scala.util.{ Try, Success => TrySuccess }
+import scala.collection.breakOut
 
 trait Row {
   private[anorm] def metaData: MetaData
@@ -37,7 +38,7 @@ trait Row {
   lazy val asMap: Map[String, Any] = (data, metaData.ms).zipped.map { (v, m) =>
     val k = m.column.qualified
     if (m.nullable) (k -> Option(v)) else k -> v
-  }.toMap
+  }(breakOut)
 
   /**
    * Returns row as `T`.
@@ -97,20 +98,20 @@ trait Row {
     unsafeGet(SqlParser.get(position)(c))
 
   @inline def unsafeGet[T](rowparser: => RowParser[T]): T =
-    (rowparser(this) match {
-      case Success(v) => Right(v)
-      case Error(err) => Left(err)
-    }).right.get // TODO: Safe alternative
+    rowparser(this) match {
+      case Success(v) => v
+      case Error(err) => throw err.toFailure.exception
+    }
 
   // Data per column name
   private lazy val columnsDictionary: Map[String, Any] =
     (metaData.ms, data).zipped.map((m, v) =>
-      m.column.qualified.toUpperCase -> v).toMap
+      m.column.qualified.toUpperCase -> v)(breakOut)
 
   // Data per column alias
   private lazy val aliasesDictionary: Map[String, Any] = {
     @annotation.tailrec
-    def loop(meta: List[MetaDataItem], dt: List[Any], r: Map[String, Any]): Map[String, Any] = (meta, dt) match {
+    def loop(meta: Seq[MetaDataItem], dt: List[Any], r: Map[String, Any]): Map[String, Any] = (meta, dt) match {
       case (m :: ms, d :: ds) => loop(ms, ds,
         m.column.alias.fold(r) { c => r + (c.toUpperCase -> d) })
       case _ => r

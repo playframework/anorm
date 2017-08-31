@@ -40,7 +40,8 @@ object AkkaStream {
    * def resultSource(implicit m: Materializer, con: Connection): Source[String, NotUsed] = AkkaStream.source(SQL"SELECT * FROM Test", SqlParser.scalar[String], ColumnAliaser.empty)
    * }}}
    */
-  def source[T](sql: => Sql, parser: RowParser[T], as: ColumnAliaser)(implicit m: Materializer, con: Connection): Source[T, Future[Int]] = {
+  @SuppressWarnings(Array("UnusedMethodParameter"))
+  def source[T](sql: => Sql, parser: RowParser[T], as: ColumnAliaser)(implicit @deprecated("No longer required (will be removed)", "2.5.4") m: Materializer, con: Connection): Source[T, Future[Int]] = {
     Source.fromGraph(new ResultSource[T](con, sql, as, parser))
   }
 
@@ -55,7 +56,8 @@ object AkkaStream {
    * @param m $materializerParam
    * @param connection $connectionParam
    */
-  def source[T](sql: => Sql, parser: RowParser[T])(implicit m: Materializer, con: Connection): Source[T, Future[Int]] = source[T](sql, parser, ColumnAliaser.empty)
+  @SuppressWarnings(Array("UnusedMethodParameter"))
+  def source[T](sql: => Sql, parser: RowParser[T])(implicit @deprecated("No longer required (will be removed)", "2.5.4") m: Materializer, con: Connection): Source[T, Future[Int]] = source[T](sql, parser, ColumnAliaser.empty)
 
   /**
    * Returns the result rows from the `sql` query as an enumerator.
@@ -91,12 +93,12 @@ object AkkaStream {
   import akka.stream.stage.{ GraphStageWithMaterializedValue, GraphStageLogic, OutHandler }
 
   private[anorm] class ResultSource[T](
-      connection: Connection,
-      sql: Sql,
-      as: ColumnAliaser,
-      parser: RowParser[T]) extends GraphStageWithMaterializedValue[SourceShape[T], Future[Int]] {
+    connection: Connection,
+    sql: Sql,
+    as: ColumnAliaser,
+    parser: RowParser[T]) extends GraphStageWithMaterializedValue[SourceShape[T], Future[Int]] {
 
-    private[anorm] var resultSet: ResultSet = null
+    private[anorm] var resultSet: ResultSet = _
 
     override val toString = "AnormQueryResult"
     val out: Outlet[T] = Outlet(s"${toString}.out")

@@ -40,7 +40,7 @@ object Cursor {
       def next = apply(rs, meta, columns)
     })
   } catch {
-    case _: Throwable => Option.empty[Cursor]
+    case scala.util.control.NonFatal(_) => Option.empty[Cursor]
   }
 
   /** Returns a cursor with already parsed metadata. */
@@ -60,7 +60,7 @@ object Cursor {
 
   /** Result row to be parsed. */
   private case class ResultRow(
-      metaData: MetaData, data: List[Any]) extends Row {
+    metaData: MetaData, data: List[Any]) extends Row {
 
     override lazy val toString = "Row(" + (metaData.ms, data).zipped.map((m, v) => s"'${m.column}': ${v} as ${m.clazz}").mkString(", ") + ")"
   }

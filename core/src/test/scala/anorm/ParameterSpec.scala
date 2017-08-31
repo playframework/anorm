@@ -29,7 +29,7 @@ import acolyte.jdbc.AcolyteDSL.{ connection, handleStatement }
 import acolyte.jdbc.Implicits._
 
 class ParameterSpec
-    extends org.specs2.mutable.Specification with JodaParameterSpec {
+  extends org.specs2.mutable.Specification with JodaParameterSpec {
 
   "Parameter" title
 
@@ -635,7 +635,7 @@ class ParameterSpec
         /*
        http://docs.oracle.com/javase/6/docs/api/java/sql/PreparedStatement.html#setObject%28int,%20java.lang.Object%29
        -> Note: Not all databases allow for a non-typed Null to be sent to the backend. For maximum portability, the setNull or the setObject(int parameterIndex, Object x, int sqlType) method should be used instead of setObject(int parameterIndex, Object x).
-       -> Note: This method throws an exception if there is an ambiguity, for example, if the object is of a class implementing more than one of the interfaces named above. 
+       -> Note: This method throws an exception if there is an ambiguity, for example, if the object is of a class implementing more than one of the interfaces named above.
        */
         SQL("set-none {p}").on("p" -> None).
           execute() aka "execution" must beFalse

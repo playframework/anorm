@@ -2,7 +2,7 @@ import AnormGeneration.{ generateFunctionAdapter => GFA }
 import Common._
 import com.typesafe.tools.mima.core._
 import com.typesafe.tools.mima.plugin.MimaKeys.{
-  binaryIssueFilters, previousArtifacts
+  mimaBinaryIssueFilters, mimaPreviousArtifacts
 }
 
 val specs2Test = Seq(
@@ -10,13 +10,13 @@ val specs2Test = Seq(
   "specs2-junit"
 ).map("org.specs2" %% _ % "3.9.4" % Test)
 
-lazy val acolyteVersion = "1.0.43-j7p"
+lazy val acolyteVersion = "1.0.46"
 lazy val acolyte = "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test
 
 lazy val `anorm-tokenizer` = project
   .in(file("tokenizer"))
   .enablePlugins(PlayLibrary, CopyPasteDetector)
-  .settings(scalariformSettings ++ Seq(
+  .settings(scalariformSettings(autoformat = true) ++ Seq(
     libraryDependencies ++= Seq(
       "org.scala-lang" % "scala-reflect" % scalaVersion.value
     )
@@ -25,45 +25,68 @@ lazy val `anorm-tokenizer` = project
 lazy val anorm = project
   .in(file("core"))
   .enablePlugins(Playdoc, PlayLibrary, CopyPasteDetector)
-  .settings(scalariformSettings ++ Seq(
-    sourceGenerators in Compile <+= (
-      sourceManaged in Compile).map(m => Seq(GFA(m / "anorm"))),
+  .settings(scalariformSettings(autoformat = true) ++ Seq(
+    sourceGenerators in Compile += Def.task {
+      Seq(GFA((sourceManaged in Compile).value / "anorm"))
+    }.taskValue,
     scalacOptions += "-Xlog-free-terms",
-    binaryIssueFilters ++= Seq(
+    mimaBinaryIssueFilters ++= Seq(
       ProblemFilters.exclude[MissingClassProblem]("anorm.MayErr"),
       ProblemFilters.exclude[MissingClassProblem]("anorm.MayErr$"),
+      // was sealed:
+      ProblemFilters.exclude[FinalClassProblem]("anorm.TupleFlattener"),
+      ProblemFilters.exclude[FinalClassProblem]("anorm.NamedParameter"),
       // was deprecated:
       missMeth("anorm.Row.get"),
       missMeth("anorm.Row.getIndexed"),
-      ProblemFilters.exclude[IncompatibleResultTypeProblem]("anorm.Cursor#ResultRow.get"),
-      ProblemFilters.exclude[IncompatibleResultTypeProblem]("anorm.Cursor#ResultRow.getIndexed"),
+      incoRet("anorm.Cursor#ResultRow.get"),
+      incoRet("anorm.Cursor#ResultRow.getIndexed"),
       // was private:
+      incoMeth("anorm.package.tokenize"),
       ProblemFilters.exclude[FinalClassProblem]("anorm.Sql$MissingParameter"),
       missMeth("anorm.DefaultParameterValue.stringValue"/* deprecated */),
       missMeth("anorm.ParameterValue.stringValue"/* deprecated */),
       missMeth("anorm.BatchSql.apply"/* was deprecated */),
+      ProblemFilters.exclude[DirectMissingMethodProblem]( // was deprecated
+        "anorm.BatchSql.apply$default$2"),
       missMeth("anorm.SqlQuery.getFilledStatement"/* deprecated 2.3.6 */),
+      ProblemFilters.exclude[DirectMissingMethodProblem]( // deprecated 2.3.6
+        "anorm.SqlQuery.getFilledStatement$default$2"),
       missMeth("anorm.SqlQuery.fetchSize"/* new field */),
       missMeth("anorm.SqlQuery.withFetchSize"/* new function */),
       missMeth("anorm.SqlQuery.prepare"/* private */),
       missMeth("anorm.SqlQuery.copy"/* private */),
       missMeth("anorm.SqlQuery.copy$default$4"/* private */),
+      incoRet( // private
+        "anorm.SqlQuery.prepare$default$2"),
       missMeth("anorm.Sql.getFilledStatement"/* deprecated 2.3.6 */),
+      ProblemFilters.exclude[DirectMissingMethodProblem]( // deprecated 2.3.6
+        "anorm.Sql.getFilledStatement$default$2"),
       missMeth("anorm.Sql.executeInsert1"/* new function */),
       missMeth("anorm.Sql.preparedStatement"/* new function */),
-      missMeth("anorm.Sql.asTry"/* private */),
-      missMeth("anorm.WithResult.asTry$default$2"/* private */),
-      missMeth("anorm.Sql.withResult"/* private */),
-      missMeth("anorm.Sql.executeInsert1$default$3"/* new default */),
+      // private:
+      incoMeth("anorm.Sql.asTry"),
+      missMeth("anorm.WithResult.asTry$default$2"),
+      missMeth("anorm.Sql.withResult"),
+      // new default:
+      missMeth("anorm.Sql.executeInsert1$default$3"),
+      missMeth("anorm.Sql.executeInsert2$default$3"),
       missMeth("anorm.Sql.executeInsert2"/* new function */),
-      missMeth("anorm.Sql.executeInsert2$default$3"/* new default */),
-      missMeth("anorm.Cursor.onFirstRow"/* private */),
-      missMeth("anorm.Cursor.apply"/* private */),
-      ProblemFilters.exclude[MissingTypesProblem](
-        "anorm.MetaData$"/* private */),
+      // private:
+      missMeth("anorm.Cursor.onFirstRow"),
+      missMeth("anorm.Cursor.apply"),
+      ProblemFilters.exclude[MissingTypesProblem]("anorm.MetaData$"),
+      incoRet("anorm.MetaData.ms"),
+      incoMeth("anorm.MetaData.this"),
+      incoMeth("anorm.MetaData.apply"),
+      incoMeth("anorm.MetaData.copy"),
+      incoRet("anorm.MetaData.availableColumns"),
+      incoRet("anorm.MetaData.copy$default$1"),
       missMeth("anorm.BatchSql.withFetchSize"/* new function */),
       missMeth("anorm.SqlQueryResult.apply"/* deprecated 2.4 */),
       missMeth("anorm.SimpleSql.getFilledStatement"/* deprecated 2.3.6 */),
+      ProblemFilters.exclude[DirectMissingMethodProblem]( // deprecated 2.3
+        "anorm.SimpleSql.getFilledStatement$default$2"),
       missMeth("anorm.SimpleSql.list"/* deprecated 2.3.5 */),
       missMeth("anorm.SimpleSql.single"/* deprecated 2.3.5 */),
       missMeth("anorm.SimpleSql.singleOpt"/* deprecated 2.3.5 */),
@@ -94,8 +117,8 @@ lazy val anorm = project
 
 lazy val `anorm-iteratee` = (project in file("iteratee"))
   .enablePlugins(PlayLibrary, CopyPasteDetector)
-  .settings(scalariformSettings ++ Seq(
-    previousArtifacts := Set.empty,
+  .settings(scalariformSettings(autoformat = true) ++ Seq(
+    mimaPreviousArtifacts := Set.empty,
     libraryDependencies ++= Seq(
       "com.typesafe.play" %% "play-iteratees" % "2.6.1",
       "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test
@@ -105,8 +128,8 @@ lazy val `anorm-iteratee` = (project in file("iteratee"))
 val akkaVer = "2.4.17"
 lazy val `anorm-akka` = (project in file("akka"))
   .enablePlugins(PlayLibrary, CopyPasteDetector)
-  .settings(scalariformSettings ++ Seq(
-    previousArtifacts := Set.empty,
+  .settings(scalariformSettings(autoformat = true) ++ Seq(
+    mimaPreviousArtifacts := Set.empty,
     resolvers ++= Seq(
       // For Akka Stream Contrib TestKit (see akka/akka-stream-contrib/pull/51)
       "Tatami Releases".at(
@@ -123,11 +146,11 @@ lazy val pgVer = sys.env.get("POSTGRES_VERSION").getOrElse("9.4.1212")
 
 lazy val `anorm-postgres` = (project in file("postgres"))
   .enablePlugins(PlayLibrary, CopyPasteDetector)
-  .settings(scalariformSettings ++ Seq(
-    previousArtifacts := Set.empty,
+  .settings(scalariformSettings(autoformat = true) ++ Seq(
+    mimaPreviousArtifacts := Set.empty,
     libraryDependencies ++= Seq(
       "org.postgresql" % "postgresql" % pgVer,
-      "com.typesafe.play" %% "play-json" % "2.6.0"
+      "com.typesafe.play" %% "play-json" % "2.6.1"
     ) ++ specs2Test :+ acolyte
   )).dependsOn(anorm)
 
@@ -135,15 +158,17 @@ lazy val `anorm-parent` = (project in file("."))
   .enablePlugins(PlayRootProject)
   .aggregate(`anorm-tokenizer`, anorm, `anorm-iteratee`, `anorm-akka`)
   .settings(
-  scalaVersion in ThisBuild := "2.12.2",
-    crossScalaVersions in ThisBuild := Seq("2.11.11", "2.12.2"),
-    previousArtifacts := Set.empty)
+  scalaVersion in ThisBuild := "2.12.3",
+    crossScalaVersions in ThisBuild := Seq("2.11.11", "2.12.3"),
+    mimaPreviousArtifacts := Set.empty)
 
 lazy val docs = project
   .in(file("docs"))
   .enablePlugins(PlayDocsPlugin)
   .settings(
-  scalaVersion := "2.12.2"
+  scalaVersion := "2.12.3"
 ).dependsOn(anorm)
+
+Scapegoat.settings
 
 playBuildRepoName in ThisBuild := "anorm"

@@ -9,6 +9,7 @@ import java.util.{ Date, UUID }
 import java.sql.Timestamp
 
 import scala.util.{ Failure, Success => TrySuccess, Try }
+import scala.util.control.NonFatal
 
 import resource.managed
 
@@ -69,7 +70,7 @@ trait Column[A] extends ((Any, MetaDataItem) => Either[SqlRequestError, A]) { pa
     try {
       Right(f(a))
     } catch {
-      case cause: Exception => Left(SqlRequestError(cause))
+      case NonFatal(cause) => Left(SqlRequestError(cause))
     }
   }
 }
@@ -115,19 +116,24 @@ object Column extends JodaColumn with JavaTimeColumn {
   }
 
   @inline private[anorm] def className(that: Any): String =
-    if (that == null) "<null>" else that.getClass.getName
+    if (that == (null: Any)) "<null>" else that.getClass.getName
 
+  @SuppressWarnings(Array("AsInstanceOf"))
   private[anorm] def string[T](s: String)(f: String => T): Either[SqlRequestError, T] = Right(if (s == null) null.asInstanceOf[T] else f(s))
 
   implicit val columnToString: Column[String] =
     nonNull[String] { (value, meta) =>
       val MetaDataItem(qualified, _, _) = meta
-      value match {
+
+      @SuppressWarnings(Array("AsInstanceOf"))
+      def unsafe = value match {
         case string: String => Right(string)
         case clob: java.sql.Clob => Right(clob.getSubString(1, clob.length.asInstanceOf[Int]))
         case StringWrapper2(s) => string(s)(identity)
         case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to String for column $qualified"))
       }
+
+      unsafe
     }
 
   /**
@@ -264,6 +270,7 @@ object Column extends JodaColumn with JavaTimeColumn {
     }
   }
 
+  @SuppressWarnings(Array("AsInstanceOf"))
   private[anorm] def timestamp[T](ts: Timestamp)(f: Timestamp => T): Either[SqlRequestError, T] = Right(if (ts == null) null.asInstanceOf[T] else f(ts))
 
   implicit val columnToLong: Column[Long] = nonNull { (value, meta) =>
@@ -330,7 +337,7 @@ object Column extends JodaColumn with JavaTimeColumn {
       case d: UUID => Right(d)
       case s: String => Try { UUID.fromString(s) } match {
         case TrySuccess(v) => Right(v)
-        case Failure(ex) => Left(TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to UUID for column $qualified"))
+        case Failure(ex) => Left(TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to UUID for column $qualified: ${ex.getMessage}"))
       }
       case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to UUID for column $qualified"))
     }
@@ -438,27 +445,30 @@ object Column extends JodaColumn with JavaTimeColumn {
       case Left(cause) => Left(typeNotMatch(value, "list", cause))
     }
 
-    value match {
+    @SuppressWarnings(Array("AsInstanceOf"))
+    def unsafe = value match {
       case sql: java.sql.Array => try {
         transf(sql.getArray.asInstanceOf[Array[_]], Array.empty[T])
       } catch {
-        case cause: Exception => Left(typeNotMatch(value, "array", cause))
+        case NonFatal(cause) => Left(typeNotMatch(value, "array", cause))
       }
 
       case arr: Array[_] => try {
         transf(arr, Array.empty[T])
       } catch {
-        case cause: Exception => Left(typeNotMatch(value, "list", cause))
+        case NonFatal(cause) => Left(typeNotMatch(value, "list", cause))
       }
 
       case it: java.lang.Iterable[_] => try {
         jiter(it.iterator, Array.empty[T])
       } catch {
-        case cause: Exception => Left(typeNotMatch(value, "list", cause))
+        case NonFatal(cause) => Left(typeNotMatch(value, "list", cause))
       }
 
       case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to array for column $qualified"))
     }
+
+    unsafe
   }
 
   /**
@@ -468,7 +478,7 @@ object Column extends JodaColumn with JavaTimeColumn {
    *   SQL"SELECT str_arr FROM tbl".as(scalar[List[String]])
    * }}}
    */
-  implicit def columnToList[T](implicit transformer: Column[T], t: scala.reflect.ClassTag[T]): Column[List[T]] = Column.nonNull[List[T]] { (value, meta) =>
+  implicit def columnToList[T](implicit transformer: Column[T], @deprecated("Unused", "2.5.4") t: scala.reflect.ClassTag[T]): Column[List[T]] = Column.nonNull[List[T]] { (value, meta) =>
     val MetaDataItem(qualified, _, _) = meta
 
     @inline def typeNotMatch(value: Any, target: String, cause: Any) = TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to $target for column $qualified: $cause")
@@ -477,40 +487,44 @@ object Column extends JodaColumn with JavaTimeColumn {
     def transf(a: Array[_], p: List[T]): Either[SqlRequestError, List[T]] =
       a.headOption match {
         case Some(r) => transformer(r, meta) match {
-          case Right(v) => transf(a.tail, p :+ v)
+          case Right(v) => transf(a.tail, v :: p)
           case Left(cause) => Left(typeNotMatch(value, "list", cause))
         }
-        case _ => Right(p)
+
+        case _ => Right(p.reverse)
       }
 
     @annotation.tailrec
-    def jiter(i: java.util.Iterator[_], p: List[T]): Either[SqlRequestError, List[T]] = if (!i.hasNext) Right(p)
+    def jiter(i: java.util.Iterator[_], p: List[T]): Either[SqlRequestError, List[T]] = if (!i.hasNext) Right(p.reverse)
     else transformer(i.next, meta) match {
-      case Right(v) => jiter(i, p :+ v)
+      case Right(v) => jiter(i, v :: p)
       case Left(cause) => Left(typeNotMatch(value, "list", cause))
     }
 
-    value match {
+    @SuppressWarnings(Array("AsInstanceOf"))
+    def unsafe = value match {
       case sql: java.sql.Array => try {
         transf(sql.getArray.asInstanceOf[Array[_]], Nil)
       } catch {
-        case cause: Exception => Left(typeNotMatch(value, "list", cause))
+        case NonFatal(cause) => Left(typeNotMatch(value, "list", cause))
       }
 
       case arr: Array[_] => try {
         transf(arr, Nil)
       } catch {
-        case cause: Exception => Left(typeNotMatch(value, "list", cause))
+        case NonFatal(cause) => Left(typeNotMatch(value, "list", cause))
       }
 
       case it: java.lang.Iterable[_] => try {
         jiter(it.iterator, Nil)
       } catch {
-        case cause: Exception => Left(typeNotMatch(value, "list", cause))
+        case NonFatal(cause) => Left(typeNotMatch(value, "list", cause))
       }
 
       case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to list for column $qualified"))
     }
+
+    unsafe
   }
 
   @inline private def streamBytes(in: InputStream): Either[SqlRequestError, Array[Byte]] = managed(in).acquireFor(streamToBytes(_)).fold({ errs =>
@@ -593,7 +607,9 @@ sealed trait JodaColumn {
   implicit val columnToJodaDateTime: Column[DateTime] =
     nonNull { (value, meta) =>
       val MetaDataItem(qualified, _, _) = meta
-      value match {
+
+      @SuppressWarnings(Array("AsInstanceOf"))
+      def unsafe = value match {
         case date: Date => Right(new DateTime(date.getTime))
         case time: Long => Right(new DateTime(time))
         case TimestampWrapper1(ts) =>
@@ -605,6 +621,8 @@ sealed trait JodaColumn {
 
         case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to DateTime for column $qualified"))
       }
+
+      unsafe
     }
 
   /**

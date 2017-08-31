@@ -32,7 +32,8 @@ class BatchSqlSpec extends org.specs2.mutable.Specification with H2Database {
 
   "Appending list of parameter values" should {
     "be successful with first parameter map" in {
-      val b1 = BatchSql("SELECT * FROM tbl WHERE a = {a}, b = {b}",
+      val b1 = BatchSql(
+        "SELECT * FROM tbl WHERE a = {a}, b = {b}",
         Seq[NamedParameter]("a" -> 0, "b" -> 1), Nil)
       lazy val b2 = b1.addBatchParams(2, 3)
       lazy val expectedMaps = Seq(
@@ -45,7 +46,8 @@ class BatchSqlSpec extends org.specs2.mutable.Specification with H2Database {
     }
 
     "fail with missing argument" in {
-      val b1 = BatchSql("SELECT * FROM tbl WHERE a = {a}, b = {b}",
+      val b1 = BatchSql(
+        "SELECT * FROM tbl WHERE a = {a}, b = {b}",
         Seq[NamedParameter]("a" -> 0, "b" -> 1), Nil)
 
       lazy val b2 = b1.addBatchParams(2)
@@ -55,7 +57,8 @@ class BatchSqlSpec extends org.specs2.mutable.Specification with H2Database {
     }
 
     "be successful" in {
-      val b1 = BatchSql("SELECT * FROM tbl WHERE a = {a}, b = {b}",
+      val b1 = BatchSql(
+        "SELECT * FROM tbl WHERE a = {a}, b = {b}",
         Seq[NamedParameter]("a" -> 0, "b" -> 1), Nil)
 
       lazy val b2 = b1.addBatchParams(2, 3)
@@ -71,7 +74,8 @@ class BatchSqlSpec extends org.specs2.mutable.Specification with H2Database {
 
   "Appending list of list of parameter values" should {
     "be successful with first parameter map" in {
-      val b1 = BatchSql("SELECT * FROM tbl WHERE a = {a}, b = {b}",
+      val b1 = BatchSql(
+        "SELECT * FROM tbl WHERE a = {a}, b = {b}",
         Seq[NamedParameter]("a" -> 0, "b" -> 1), Nil)
 
       lazy val b2 = b1.addBatchParamsList(Seq(Seq(2, 3)))
@@ -85,7 +89,8 @@ class BatchSqlSpec extends org.specs2.mutable.Specification with H2Database {
     }
 
     "fail with missing argument" in {
-      val b1 = BatchSql("SELECT * FROM tbl WHERE a = {a}, b = {b}",
+      val b1 = BatchSql(
+        "SELECT * FROM tbl WHERE a = {a}, b = {b}",
         Seq[NamedParameter]("a" -> 0, "b" -> 1), Nil)
 
       lazy val b2 = b1.addBatchParamsList(Seq(Seq(2)))
@@ -95,7 +100,8 @@ class BatchSqlSpec extends org.specs2.mutable.Specification with H2Database {
     }
 
     "be successful" in {
-      val b1 = BatchSql("SELECT * FROM tbl WHERE a = {a}, b = {b}",
+      val b1 = BatchSql(
+        "SELECT * FROM tbl WHERE a = {a}, b = {b}",
         Seq[NamedParameter]("a" -> 0, "b" -> 1), Nil)
 
       lazy val b2 = b1.addBatchParamsList(Seq(Seq(2, 3), Seq(4, 5)))

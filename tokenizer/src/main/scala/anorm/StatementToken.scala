@@ -24,19 +24,23 @@ private[anorm] object StatementToken {
  * @param placeholder Optional placeholder (name), after already prepared tokens
  */
 private[anorm] class TokenGroup(
-    val prepared: List[StatementToken],
-    val placeholder: Option[String]) extends Product with Serializable {
+  val prepared: List[StatementToken],
+  val placeholder: Option[String]) extends Product with Serializable {
 
   def copy(prepared: List[StatementToken] = this.prepared, placeholder: Option[String] = this.placeholder): TokenGroup = new TokenGroup(prepared, placeholder)
 
   val productArity = 2
 
+  @SuppressWarnings(Array("MethodReturningAny"))
   def productElement(n: Int): Any = n match {
     case 1 => prepared
     case 2 => placeholder
   }
 
-  def canEqual(that: Any): Boolean = that.isInstanceOf[TokenGroup]
+  def canEqual(that: Any): Boolean = that match {
+    case _: TokenGroup => true
+    case _ => false
+  }
 
   override def equals(that: Any): Boolean = that match {
     case other: TokenGroup =>

@@ -27,6 +27,7 @@ package object anorm {
   object TimestampWrapper1 {
     import scala.language.reflectiveCalls
 
+    @SuppressWarnings(Array("AsInstanceOf"))
     def unapply(that: Any): Option[java.sql.Timestamp] = try {
       Some(that.asInstanceOf[TimestampWrapper1].getTimestamp)
     } catch {
@@ -40,6 +41,7 @@ package object anorm {
   object TimestampWrapper2 {
     import scala.language.reflectiveCalls
 
+    @SuppressWarnings(Array("AsInstanceOf"))
     def unapply(that: Any): Option[java.sql.Timestamp] = try {
       Some(that.asInstanceOf[TimestampWrapper2].timestampValue)
     } catch {
@@ -54,6 +56,7 @@ package object anorm {
   object StringWrapper2 {
     import scala.language.reflectiveCalls
 
+    @SuppressWarnings(Array("AsInstanceOf"))
     def unapply(that: Any): Option[String] = try {
       Some(that.asInstanceOf[StringWrapper2].stringValue)
     } catch {
@@ -62,7 +65,7 @@ package object anorm {
     }
   }
 
-  // TODO: Review implicit usage there 
+  // TODO: Review implicit usage there
   // (add explicit functions on SqlQuery?)
   implicit def sqlToSimple(sql: SqlQuery): SimpleSql[Row] = sql.asSimple
 
@@ -74,8 +77,9 @@ package object anorm {
    * val query = SQL("SELECT * FROM Country")
    * }}}
    */
-  def SQL(stmt: String): SqlQuery =
-    SqlStatementParser.parse(stmt).map(ts => SqlQuery.prepare(ts, ts.names)).get
+  @SuppressWarnings(Array("TryGet" /* TODO: Make it safer */ ))
+  def SQL(stmt: String): SqlQuery = SqlStatementParser.parse(stmt).
+    map(ts => SqlQuery.prepare(ts, ts.names)).get
 
   /**
    * Creates an SQL query using String Interpolation feature.
@@ -99,7 +103,7 @@ package object anorm {
   }
 
   @annotation.tailrec
-  private[anorm] def tokenize(ti: Iterator[Any], tks: List[StatementToken], parts: Seq[String], ps: Seq[ParameterValue], gs: List[TokenGroup], ns: List[String], m: Map[String, ParameterValue]): (TokenizedStatement, Map[String, ParameterValue]) = if (ti.hasNext) ti.next match {
+  private[anorm] def tokenize(ti: Iterator[Any], tks: List[StatementToken], parts: Seq[String], ps: Seq[ParameterValue], gs: Seq[TokenGroup], ns: Seq[String], m: Map[String, ParameterValue]): (TokenizedStatement, Map[String, ParameterValue]) = if (ti.hasNext) ti.next match {
     case "%" => tokenize(ti, PercentToken :: tks, parts, ps, gs, ns, m)
     case s: String =>
       tokenize(ti, StringToken(s) :: tks, parts, ps, gs, ns, m)
@@ -126,7 +130,7 @@ package object anorm {
               val n = '_'.toString + ns.size
               tokenize(ti, tks.tail, parts, ps.tail,
                 (ng :: prev.copy(placeholder = Some(n)) :: groups),
-                (n :: ns), m + (n -> v))
+                (n +: ns), m + (n -> v))
           }
           case _ =>
             sys.error(s"No parameter value for placeholder: ${gs.size}")
@@ -156,13 +160,20 @@ package object anorm {
 
   // Optimized resource typeclass not using reflection
   object StatementResource
-      extends resource.Resource[java.sql.PreparedStatement] {
+    extends resource.Resource[java.sql.PreparedStatement] {
+
     def close(stmt: java.sql.PreparedStatement) = stmt.close()
+
+    @deprecated("Deprecated by Scala-ARM upgrade", "2.5.4")
+    def fatalExceptions = Seq[Class[_]](classOf[Exception])
   }
 
   // Optimized resource typeclass not using reflection
   object ResultSetResource extends resource.Resource[java.sql.ResultSet] {
     def close(rs: java.sql.ResultSet) = rs.close()
+
+    @deprecated("Deprecated by Scala-ARM upgrade", "2.5.4")
+    def fatalExceptions = Seq[Class[_]](classOf[Exception])
   }
 
   /** Activable features */

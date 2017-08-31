@@ -9,7 +9,7 @@ import acolyte.jdbc.AcolyteDSL.{ connection, handleStatement }
 import acolyte.jdbc.Implicits._
 
 class `ParameterSpec 2.12`
-    extends org.specs2.mutable.Specification {
+  extends org.specs2.mutable.Specification {
 
   "Parameter (2.12)" title
 
