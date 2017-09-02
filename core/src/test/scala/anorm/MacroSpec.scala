@@ -104,7 +104,7 @@ class MacroSpec extends org.specs2.mutable.Specification {
     }
 
     "support self reference" in {
-      val parser = Macro.namedParser[Self]
+      val parser = Macro.namedParser[Self] // check compile is ok
 
       ok // TODO: Supports aliasing to make it really usable (see #124)
     }
