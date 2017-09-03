@@ -10,6 +10,8 @@ import acolyte.jdbc.Implicits._
 
 import Macro.ColumnNaming
 
+import org.specs2.specification.core.Fragments
+
 class MacroSpec extends org.specs2.mutable.Specification {
   "Macro" title
 
@@ -198,6 +200,9 @@ class MacroSpec extends org.specs2.mutable.Specification {
     // from the implicit scope
     shapeless.test.illTyped("Macro.sealedParser[Family]")
 
+    // No subclass
+    shapeless.test.illTyped("Macro.sealedParser[EmptyFamily]")
+
     "be successful for the Family trait" >> {
       "with the default discrimination" in {
         val barRow2 = RowLists.rowList2(
@@ -236,6 +241,82 @@ class MacroSpec extends org.specs2.mutable.Specification {
     }
   }
 
+  "Generated parameter encoders" should {
+    import Macro.{ ParameterProjection => proj }
+    import NamedParameter.{ namedWithString => named }
+
+    // No ToParameterList[Bar] so compilation error is expected
+    shapeless.test.illTyped("anorm.Macro.toParameters[Goo[Bar]]")
+
+    "be successful for Bar" >> {
+      val fixture = Bar(1)
+
+      Fragments.foreach(Seq[(ToParameterList[Bar], List[NamedParameter])](
+        Macro.toParameters[Bar]() -> List(named("v" -> 1)),
+        Macro.toParameters[Bar](proj("v", "w")) -> List(named("w" -> 1))).zipWithIndex) {
+        case ((encoder, params), index) => s"using encoder #${index}" in {
+          encoder(fixture) must_== params
+        }
+      }
+    }
+
+    "be successful for Goo[Int]" >> {
+      val fixture = Goo(1, Some(2L), None)
+
+      Fragments.foreach(Seq[(ToParameterList[Goo[Int]], List[NamedParameter])](
+        Macro.toParameters[Goo[Int]]() -> List(
+          named("loremIpsum" -> 1),
+          named("opt" -> Some(2L)),
+          named("x" -> Option.empty[Boolean])),
+        Macro.toParameters[Goo[Int]](
+          proj("loremIpsum", "value")) -> List(
+            named("value" -> 1))).zipWithIndex) {
+        case ((encoder, params), index) => s"using encoder #${index}" in {
+          encoder(fixture) must_== params
+        }
+      }
+    }
+
+    "be successful for sealed family" >> {
+      implicit def familyParams: ToParameterList[Family] = {
+        implicit val barToParams: ToParameterList[Bar] = Macro.toParameters[Bar]
+        implicit val caseObjParam = ToParameterList.empty[CaseObj.type]
+
+        Macro.toParameters[Family]
+      }
+
+      Fragments.foreach(Seq[(Family, List[NamedParameter])](
+        Bar(1) -> List(named("v" -> 1)),
+        CaseObj -> List.empty[NamedParameter])) {
+        case (i, params) => s"for $i" in {
+          ToParameterList.toParameters(i) must_== params
+        }
+      }
+    }
+
+    "be successful for Goo[Bar]" >> {
+      implicit def barToParams: ToParameterList[Bar] =
+        Macro.toParameters[Bar]()
+
+      val fixture = Goo(Bar(1), None, Some(false))
+
+      Fragments.foreach(Seq[(ToParameterList[Goo[Bar]], List[NamedParameter])](
+        Macro.toParameters[Goo[Bar]](
+          proj("loremIpsum", "foo"), proj("opt", "bar")) -> List(
+            named("foo_v" -> 1 /* Bar.v as Goo.{lorem=>foo} */ ),
+            named("bar" -> Option.empty[Long])),
+        Macro.toParameters[Goo[Bar]]("#") -> List(
+          named("loremIpsum#v" -> 1),
+          named("opt" -> Option.empty[Long]),
+          named("x" -> Some(false)))).zipWithIndex) {
+        case ((encoder, params), index) =>
+          s"using encoder #${index}" in {
+            encoder(fixture) must_== params
+          }
+      }
+    }
+  }
+
   // Avoid implicit conversions
   lazy val nullBoolean = null.asInstanceOf[JBool]
   lazy val nullLong = null.asInstanceOf[JLong]
@@ -243,10 +324,14 @@ class MacroSpec extends org.specs2.mutable.Specification {
   sealed trait NoSubclass
   object NotFamilly
 
+  // Sealed family
   sealed trait Family
   case class Bar(v: Int) extends Family
   case object CaseObj extends Family
   object NotCase extends Family
+
+  sealed trait EmptyFamily
+
   case class Foo[T](r: Float, bar: String = "Default")(
     loremIpsum: T, opt: Option[Long] = None)(x: Option[Boolean])
     extends Family {
@@ -257,5 +342,6 @@ class MacroSpec extends org.specs2.mutable.Specification {
     override lazy val toString = s"Goo($loremIpsum, $opt, $x)"
   }
 
+  // TODO: Supports aliasing to make it really usable (see #124)
   case class Self(id: String, next: Self)
 }

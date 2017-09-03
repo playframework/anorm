@@ -12,6 +12,8 @@ package anorm
  * @define discriminatorNamingParam the naming function for the discriminator column
  * @define discriminateParam the discriminating function applied to each name of the family type
  * @define familyTParam the type of the type family (either a sealed trait or abstract class)
+ * @define separatorParam the separator used with nested properties
+ * @define projectionParam The optional projection for the properties as parameters; If none, using the all the class properties.
  */
 object Macro {
   import scala.language.experimental.macros
@@ -43,6 +45,11 @@ object Macro {
 
   /** Naming companion */
   object ColumnNaming {
+    /** Keep the original property name. */
+    object Identity extends ColumnNaming {
+      def apply(property: String) = property
+    }
+
     /**
      * For each class property, use the snake case equivalent
      * to name its column (e.g. fooBar -> foo_bar).
@@ -321,6 +328,98 @@ object Macro {
    */
   @SuppressWarnings(Array("UnusedMethodParameter" /* macro */ ))
   def sealedParser[T](naming: Macro.DiscriminatorNaming, discriminate: Macro.Discriminate): RowParser[T] = macro sealedParserImpl[T]
+
+  import anorm.macros.ToParameterListImpl
+
+  /**
+   * @param separator $separatorParam
+   * @tparam T $caseTParam
+   *
+   * {{{
+   * import anorm.{ Macro, ToParameterList }
+   *
+   * // Bar must be a case class, or a sealed trait with known subclasses
+   * implicit val toParams: ToParameterList[Bar] = Macro.toParameters[Bar]
+   * }}}
+   */
+  def toParameters[T]: ToParameterList[T] = macro defaultParameters[T]
+
+  def defaultParameters[T: c.WeakTypeTag](c: whitebox.Context): c.Expr[ToParameterList[T]] = {
+    val tpe = c.weakTypeTag[T].tpe
+    val tpeSym = tpe.typeSymbol.asClass
+
+    @inline def abort(msg: String) = c.abort(c.enclosingPosition, msg)
+
+    if (tpeSym.isSealed && tpeSym.isAbstract) {
+      ToParameterListImpl.sealedTrait[T](c)
+    } else if (!tpeSym.isClass || !tpeSym.asClass.isCaseClass) {
+      abort(s"Either a sealed trait or a case class expected: $tpe")
+    } else {
+      ToParameterListImpl.caseClass[T](c)(
+        Seq.empty[c.Expr[Macro.ParameterProjection]], c.universe.reify("_"))
+    }
+  }
+
+  /**
+   * @param separator $separatorParam
+   * @tparam T $caseTParam
+   *
+   * {{{
+   * import anorm.{ Macro, ToParameterList }
+   *
+   * // Bar must be a case class
+   * implicit val toParams: ToParameterList[Bar] =
+   *   Macro.toParameters[Bar](separator = "_")
+   * }}}
+   */
+  def toParameters[T](separator: String): ToParameterList[T] = macro parametersDefaultNames[T]
+
+  def parametersDefaultNames[T: c.WeakTypeTag](c: whitebox.Context)(separator: c.Expr[String]): c.Expr[ToParameterList[T]] = ToParameterListImpl.caseClass[T](c)(Seq.empty[c.Expr[Macro.ParameterProjection]], separator)
+
+  /**
+   * @param projection $projectionParam
+   * @tparam T $caseTParam
+   *
+   * {{{
+   * import anorm.{ Macro, ToParameterList }
+   *
+   * // Bar must be a case class
+   * implicit val toParams: ToParameterList[Bar] =
+   *   Macro.toParameters[Bar]()
+   * }}}
+   */
+  def toParameters[T](projection: Macro.ParameterProjection*): ToParameterList[T] = macro configuredParameters[T]
+
+  def configuredParameters[T: c.WeakTypeTag](c: whitebox.Context)(projection: c.Expr[Macro.ParameterProjection]*): c.Expr[ToParameterList[T]] = {
+    import c.universe.reify
+
+    ToParameterListImpl.caseClass[T](c)(projection, reify("_"))
+  }
+
+  /**
+   * @param separator $separatorParam
+   * @param projection $projectionParam
+   * @tparam T $caseTParam
+   */
+  def toParameters[T](separator: String, projection: Macro.ParameterProjection*): ToParameterList[T] = macro parametersWithSeparator[T]
+
+  def parametersWithSeparator[T: c.WeakTypeTag](c: whitebox.Context)(separator: c.Expr[String], projection: c.Expr[Macro.ParameterProjection]*): c.Expr[ToParameterList[T]] = ToParameterListImpl.caseClass[T](c)(projection, separator)
+
+  /**
+   * @param propertyName the name of the class property
+   * @param parameterName the name of for the parameter,
+   * if different from the property one, otherwise `None`
+   */
+  case class ParameterProjection(
+    propertyName: String,
+    parameterName: Option[String] = None)
+
+  object ParameterProjection {
+    def apply(
+      propertyName: String,
+      parameterName: String): ParameterProjection =
+      ParameterProjection(propertyName, Option(parameterName))
+  }
 
   private[anorm] lazy val debugEnabled =
     Option(System.getProperty("anorm.macro.debug")).

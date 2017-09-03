@@ -3,7 +3,11 @@ package anorm
 import java.sql.{ Connection, PreparedStatement }
 
 /** Simple/plain SQL. */
-case class SimpleSql[T](sql: SqlQuery, params: Map[String, ParameterValue], defaultParser: RowParser[T], resultSetOnFirstRow: Boolean = false) extends Sql {
+case class SimpleSql[T](
+  sql: SqlQuery,
+  params: Map[String, ParameterValue],
+  defaultParser: RowParser[T],
+  resultSetOnFirstRow: Boolean = false) extends Sql {
 
   /**
    * Returns query prepared with named parameters.
@@ -12,7 +16,7 @@ case class SimpleSql[T](sql: SqlQuery, params: Map[String, ParameterValue], defa
    * import anorm.toParameterValue
    *
    * val baseSql = SQL("SELECT * FROM table WHERE id = {id}") // one named param
-   * val preparedSql = baseSql.withParams("id" -> "value")
+   * val preparedSql = baseSql.on("id" -> "value")
    * }}}
    */
   def on(args: NamedParameter*): SimpleSql[T] =
