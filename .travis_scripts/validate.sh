@@ -9,4 +9,4 @@ EOF
     false
 )
 
-sbt +mimaReportBinaryIssues +test docs/test
+sbt ++$TRAVIS_SCALA_VERSION mimaReportBinaryIssues test docs/test

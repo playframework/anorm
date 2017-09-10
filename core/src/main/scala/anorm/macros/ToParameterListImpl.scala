@@ -80,7 +80,16 @@ private[anorm] object ToParameterListImpl {
     }
 
     val compiledProj: Seq[ParameterProjection] = projection.map { expr =>
-      c.eval(c.Expr[ParameterProjection](c.untypecheck(expr.tree)))
+      @inline def eval() =
+        c.eval(c.Expr[ParameterProjection](c.untypecheck(expr.tree)))
+
+      try {
+        eval()
+      } catch {
+        case scala.util.control.NonFatal(_) =>
+          // workaround for Eval issue in 2.11
+          eval()
+      }
     }
 
     // All supported class properties

@@ -379,6 +379,30 @@ val familyParser = Macro.sealedParser[Family](naming, discriminate)
 
 > The `anorm.macro.debug` system property can be set to `true` (e.g. `sbt -Danorm.macro.debug=true ...`) to debug the generated parsers.
 
+## Generated parameter conversions
+
+Anorm also provides utility to generate parameter conversions for case classes.
+
+@[caseClassToParameters1](code/MacroToParameters.scala)
+
+Using `Macro.ParameterProjection` is possible to customize the parameter names, instead of using the names of the class properties by default.
+
+@[caseClassToParameters2](code/MacroToParameters.scala)
+
+For a property `bar` of a case class `Foo` which whose type is itself a case class `Bar`, the appropriate instance of `ToParameterList[Bar]` will be resolved from the implicit scope to be able to generate `ToParameterList[Foo]`.
+
+@[caseClassToParameters3](code/MacroToParameters.scala)
+
+By default, the nested properties (e.g. `Bar.w`) are represented using `_` as separator, as for `bar_w` in the previous example. A custom separator can be specified.
+
+@[caseClassToParameters4](code/MacroToParameters.scala)
+
+A sealed trait with some known subclasses can also be supported.
+
+@[sealedFamily1](code/MacroToParameters.scala)
+
+> The `anorm.macro.debug` system property can be set to `true` (e.g. `sbt -Danorm.macro.debug=true ...`) to debug the generated parsers.
+
 ## Streaming results
 
 Query results can be processed row per row, not having all loaded in memory.
