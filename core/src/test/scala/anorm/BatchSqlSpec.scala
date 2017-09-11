@@ -78,7 +78,13 @@ class BatchSqlSpec extends org.specs2.mutable.Specification with H2Database {
         "SELECT * FROM tbl WHERE a = {a}, b = {b}",
         Seq[NamedParameter]("a" -> 0, "b" -> 1), Nil)
 
-      lazy val b2 = b1.addBatchParamsList(Seq(Seq(2, 3)))
+      implicit val toParams = ToParameterList[(Int, Int)] {
+        case (a, b) => List[NamedParameter](
+          NamedParameter.namedWithString("a" -> a),
+          NamedParameter.namedWithString("b" -> b))
+      }
+      lazy val b2 = b1.bind(2 -> 3)
+
       lazy val expectedMaps = Seq(
         Map[String, ParameterValue]("a" -> 0, "b" -> 1),
         Map.empty[String, ParameterValue],
@@ -91,7 +97,7 @@ class BatchSqlSpec extends org.specs2.mutable.Specification with H2Database {
     "fail with missing argument" in {
       val b1 = BatchSql(
         "SELECT * FROM tbl WHERE a = {a}, b = {b}",
-        Seq[NamedParameter]("a" -> 0, "b" -> 1), Nil)
+        Seq[NamedParameter]('a -> 0, 'b -> 1), Nil)
 
       lazy val b2 = b1.addBatchParamsList(Seq(Seq(2)))
 
@@ -122,11 +128,11 @@ class BatchSqlSpec extends org.specs2.mutable.Specification with H2Database {
       createTest1Table()
 
       lazy val batch = BatchSql(
-        "INSERT INTO test1(id, foo, bar) VALUES({i}, {f}, {b})",
-        Seq[NamedParameter]('i -> 1, 'f -> "foo #1", 'b -> 2),
-        Seq[NamedParameter]('i -> 2, 'f -> "foo_2", 'b -> 4))
+        "INSERT INTO test1(id, foo, bar) VALUES({id}, {foo}, {bar})",
+        ToParameterList.from(TestTable(1, "foo #1", 2)),
+        Seq[NamedParameter]("id" -> 2, "foo" -> "foo_2", "bar" -> 4))
 
-      val stmt = TokenizedStatement(List(TokenGroup(List(StringToken("INSERT INTO test1(id, foo, bar) VALUES(")), Some("i")), TokenGroup(List(StringToken(", ")), Some("f")), TokenGroup(List(StringToken(", ")), Some("b")), TokenGroup(List(StringToken(")")), None)), List("i", "f", "b"))
+      val stmt = TokenizedStatement(List(TokenGroup(List(StringToken("INSERT INTO test1(id, foo, bar) VALUES(")), Some("id")), TokenGroup(List(StringToken(", ")), Some("foo")), TokenGroup(List(StringToken(", ")), Some("bar")), TokenGroup(List(StringToken(")")), None)), List("id", "foo", "bar"))
 
       batch.sql.stmt aka "parsed statement" mustEqual stmt and (
         batch.execute() aka "batch result" mustEqual Array(1, 1))

@@ -403,6 +403,15 @@ A sealed trait with some known subclasses can also be supported.
 
 > The `anorm.macro.debug` system property can be set to `true` (e.g. `sbt -Danorm.macro.debug=true ...`) to debug the generated parsers.
 
+A type which is provided a `ToParameterList` instance can be used to bind a value as parameters.
+
+```scala
+import anorm._
+
+val query = SQL("INSERT INTO foo(id, bar) VALUES ({n}, {bar_v})").
+  bind(Foo(1, Bar(2)))
+```
+
 ## Streaming results
 
 Query results can be processed row per row, not having all loaded in memory.

@@ -17,6 +17,9 @@ trait H2Database {
 
   case class TestTable(id: Long, foo: String, bar: Int)
 
+  implicit val testToParams: ToParameterList[TestTable] =
+    Macro.toParameters[TestTable]
+
   /** Create a simple 'test1' table for testing with. */
   def createTest1Table()(implicit conn: Connection): Unit = createTable("test1", "id bigint", "foo varchar", "bar int")
 

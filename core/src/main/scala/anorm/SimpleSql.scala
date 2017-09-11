@@ -10,7 +10,7 @@ case class SimpleSql[T](
   resultSetOnFirstRow: Boolean = false) extends Sql {
 
   /**
-   * Returns query prepared with named parameters.
+   * Returns the query prepared with named parameters.
    *
    * {{{
    * import anorm.toParameterValue
@@ -23,7 +23,7 @@ case class SimpleSql[T](
     copy(params = this.params ++ args.map(_.tupled))
 
   /**
-   * Returns query prepared with parameters using initial order
+   * Returns the query prepared with parameters using initial order
    * of placeholder in statement.
    *
    * {{{
@@ -39,6 +39,17 @@ case class SimpleSql[T](
   def onParams(args: ParameterValue*): SimpleSql[T] =
     copy(params = this.params ++ Sql.zipParams(
       sql.paramsInitialOrder, args, Map.empty))
+
+  /**
+   * Returns the query prepared with the named parameters,
+   * provided by the appropriate `converter`.
+   *
+   * @param value the value to be converted as list of [[NamedParameter]]
+   * @param converter the function used to convert the `value`
+   * @tparam U the type of the value
+   */
+  def bind[U](value: U)(implicit converter: ToParameterList[U]): SimpleSql[T] =
+    on(converter(value): _*)
 
   private val prepareNoGeneratedKeys = { (con: Connection, sql: String) =>
     con.prepareStatement(sql)

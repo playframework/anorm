@@ -47,6 +47,7 @@ lazy val anorm = project
       missMeth("anorm.DefaultParameterValue.stringValue"/* deprecated */),
       missMeth("anorm.ParameterValue.stringValue"/* deprecated */),
       missMeth("anorm.BatchSql.apply"/* was deprecated */),
+      ProblemFilters.exclude[ReversedMissingMethodProblem]("anorm.BatchSql.bind"),
       ProblemFilters.exclude[DirectMissingMethodProblem]( // was deprecated
         "anorm.BatchSql.apply$default$2"),
       missMeth("anorm.SqlQuery.getFilledStatement"/* deprecated 2.3.6 */),

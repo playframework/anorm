@@ -289,7 +289,7 @@ class MacroSpec extends org.specs2.mutable.Specification {
         Bar(1) -> List(named("v" -> 1)),
         CaseObj -> List.empty[NamedParameter])) {
         case (i, params) => s"for $i" in {
-          ToParameterList.toParameters(i) must_== params
+          ToParameterList.from(i) must_== params
         }
       }
     }

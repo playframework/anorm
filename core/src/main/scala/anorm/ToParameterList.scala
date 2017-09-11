@@ -30,8 +30,7 @@ object ToParameterList {
   /**
    * Returns the list of [[NamedParameter]] of any `A` value.
    */
-  def toParameters[A](value: A)(implicit toParams: ToParameterList[A]) =
-    toParams(value)
+  def from[A](value: A)(implicit toParams: ToParameterList[A]): Seq[NamedParameter] = toParams(value)
 
   /**
    * Returns an instance producing an empty list of parameters.
