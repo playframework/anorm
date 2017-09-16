@@ -19,7 +19,7 @@ object MacroToParameters {
   // --> List(v)
 
   val placeholders = names1.map { n => s"{$n}" } mkString ", "
-  // --> "{w}"
+  // --> "{v}"
 
   val generatedStmt = s"""INSERT INTO bar(${names1 mkString ", "}) VALUES ($placeholders)"""
   val generatedSql1 = SQL(generatedStmt).on(params1: _*)
@@ -32,6 +32,9 @@ object MacroToParameters {
 
   toParams2(bar1)
   // --> List(NamedParameter(w,ParameterValue(1)))
+  
+  val insert1 = SQL("INSERT INTO table(col_w) VALUES ({w})").
+    bind(bar1) // bind bar1 as params implicit toParams2
   //#caseClassToParameters2
 
   //#caseClassToParameters3
