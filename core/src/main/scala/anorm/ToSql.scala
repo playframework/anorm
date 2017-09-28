@@ -32,8 +32,7 @@ object ToSql {
    * // "?, ?, ?"
    * }}}
    */
-  implicit def listToSql[A](implicit conv: ToSql[A] = ToSql.missing[A]): ToSql[List[A]] =
-    traversableToSql[A, List[A]]
+  implicit def listToSql[A](implicit conv: ToSql[A] = ToSql.missing[A]): ToSql[List[A]] = traversableToSql[A, List[A]]
 
   /**
    * Returns fragment for each value, separated by ", ".
@@ -43,8 +42,7 @@ object ToSql {
    * // "?, ?, ?"
    * }}}
    */
-  implicit def seqToSql[A](implicit conv: ToSql[A] = ToSql.missing[A]): ToSql[Seq[A]] =
-    traversableToSql[A, Seq[A]]
+  implicit def seqToSql[A](implicit conv: ToSql[A] = ToSql.missing[A]): ToSql[Seq[A]] = traversableToSql[A, Seq[A]]
 
   /**
    * Returns fragment for each value, separated by ", ".
@@ -54,8 +52,7 @@ object ToSql {
    * // "?, ?, ?"
    * }}}
    */
-  implicit def setToSql[A](implicit conv: ToSql[A] = ToSql.missing[A]): ToSql[Set[A]] =
-    traversableToSql[A, Set[A]]
+  implicit def setToSql[A](implicit conv: ToSql[A] = ToSql.missing[A]): ToSql[Set[A]] = traversableToSql[A, Set[A]]
 
   /**
    * Returns fragment for each value, separated by ", ".

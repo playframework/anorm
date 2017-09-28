@@ -202,24 +202,22 @@ class AnormSpec extends Specification with H2Database with AnormTest {
     "be parsed using convience parsers with column names" in withH2Database {
       implicit c =>
         createTest1Table()
-        val uc =
+
+        val fixture = TestTable(11L, "World", 21)
+
+        def uc =
           SQL("insert into test1(id, foo, bar) values ({id}, {foo}, {bar})")
-            .on('id -> 11L, 'foo -> "World", 'bar -> 21)
-            .executeUpdate()
+            .bind(fixture).executeUpdate()
 
         uc aka "update count" must_== 1 and {
           SQL("select * from test1 where id = {id}")
             .on('id -> 11L).as(fooBarParser1.singleOpt)
-            .aka("instance") must beSome(TestTable(11L, "World", 21))
+            .aka("instance") must beSome(fixture)
         }
     }
 
     "be parsed using raw 'get' parser with column names" in withQueryResult(
       fooBarTable :+ (11L, "World", 21)) { implicit c =>
-        SQL("insert into test1(id, foo, bar) values ({id}, {foo}, {bar})")
-          .on('id -> 11L, 'foo -> "World", 'bar -> 21)
-          .execute()
-
         SQL("select * from test1 where id = {id}")
           .on('id -> 11L).as(fooBarParser2.singleOpt)
           .aka("instance") must beSome(TestTable(11L, "World", 21))

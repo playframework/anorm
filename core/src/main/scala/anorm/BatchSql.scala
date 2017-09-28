@@ -66,6 +66,13 @@ sealed trait BatchSql {
     }
   }
 
+  /**
+   * Adds arguments of type `T` that can be converted as query parameters.
+   */
+  @throws[IllegalArgumentException](BatchSqlErrors.MissingParameter)
+  @throws[IllegalArgumentException](BatchSqlErrors.ParameterNamesNotMatchingPlaceholders)
+  def bind[T](args: T*)(implicit converter: ToParameterList[T]): BatchSql = addBatchParamsList(args.map { converter(_).map(_.value) })
+
   @SuppressWarnings(Array("NullParameter"))
   def getFilledStatement(connection: Connection, getGeneratedKeys: Boolean = false) = fill(connection, null, getGeneratedKeys, params)
 

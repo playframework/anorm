@@ -3,23 +3,27 @@ package anorm
 import java.sql.{ Connection, PreparedStatement }
 
 /** Simple/plain SQL. */
-case class SimpleSql[T](sql: SqlQuery, params: Map[String, ParameterValue], defaultParser: RowParser[T], resultSetOnFirstRow: Boolean = false) extends Sql {
+case class SimpleSql[T](
+  sql: SqlQuery,
+  params: Map[String, ParameterValue],
+  defaultParser: RowParser[T],
+  resultSetOnFirstRow: Boolean = false) extends Sql {
 
   /**
-   * Returns query prepared with named parameters.
+   * Returns the query prepared with named parameters.
    *
    * {{{
    * import anorm.toParameterValue
    *
    * val baseSql = SQL("SELECT * FROM table WHERE id = {id}") // one named param
-   * val preparedSql = baseSql.withParams("id" -> "value")
+   * val preparedSql = baseSql.on("id" -> "value")
    * }}}
    */
   def on(args: NamedParameter*): SimpleSql[T] =
     copy(params = this.params ++ args.map(_.tupled))
 
   /**
-   * Returns query prepared with parameters using initial order
+   * Returns the query prepared with parameters using initial order
    * of placeholder in statement.
    *
    * {{{
@@ -35,6 +39,17 @@ case class SimpleSql[T](sql: SqlQuery, params: Map[String, ParameterValue], defa
   def onParams(args: ParameterValue*): SimpleSql[T] =
     copy(params = this.params ++ Sql.zipParams(
       sql.paramsInitialOrder, args, Map.empty))
+
+  /**
+   * Returns the query prepared with the named parameters,
+   * provided by the appropriate `converter`.
+   *
+   * @param value the value to be converted as list of [[NamedParameter]]
+   * @param converter the function used to convert the `value`
+   * @tparam U the type of the value
+   */
+  def bind[U](value: U)(implicit converter: ToParameterList[U]): SimpleSql[T] =
+    on(converter(value): _*)
 
   private val prepareNoGeneratedKeys = { (con: Connection, sql: String) =>
     con.prepareStatement(sql)

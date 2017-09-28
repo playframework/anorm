@@ -28,7 +28,7 @@ class ScalaAnorm extends org.specs2.mutable.Specification {
   }
 }
 
-object MacroFixtures {
+object MacroParsers {
   //#macroSealedParser
   import anorm._
 
@@ -49,14 +49,14 @@ object MacroFixtures {
   val generated: RowParser[Family] =
     SqlParser.str("classname").flatMap { discriminator: String =>
       discriminator match {
-        case "scalaguide.sql.MacroFixtures.Bar" =>
+        case "scalaguide.sql.MacroParsers.Bar" =>
           implicitly[RowParser[Bar]]
 
-        case "scalaguide.sql.MacroFixtures.Lorem" =>
+        case "scalaguide.sql.MacroParsers.Lorem" =>
           implicitly[RowParser[Lorem.type]]
 
         case (d) => RowParser.failed[Family](Error(SqlMappingError(
-          "unexpected row type \'%s\'; expected: %s".format(d, "scalaguide.sql.MacroFixtures.Bar, scalaguide.sql.MacroFixtures.Lorem"))))
+          "unexpected row type \'%s\'; expected: %s".format(d, "scalaguide.sql.MacroParsers.Bar, scalaguide.sql.MacroParsers.Lorem"))))
       }
     }
   //#macroSealedParser
