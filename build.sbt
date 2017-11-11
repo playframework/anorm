@@ -159,15 +159,15 @@ lazy val `anorm-parent` = (project in file("."))
   .enablePlugins(PlayRootProject)
   .aggregate(`anorm-tokenizer`, anorm, `anorm-iteratee`, `anorm-akka`)
   .settings(
-  scalaVersion in ThisBuild := "2.12.3",
-    crossScalaVersions in ThisBuild := Seq("2.11.11", "2.12.3"),
+  scalaVersion in ThisBuild := "2.12.4",
+    crossScalaVersions in ThisBuild := Seq("2.11.11", "2.12.4"),
     mimaPreviousArtifacts := Set.empty)
 
 lazy val docs = project
   .in(file("docs"))
   .enablePlugins(PlayDocsPlugin)
   .settings(
-  scalaVersion := "2.12.3"
+  scalaVersion := "2.12.4"
 ).dependsOn(anorm)
 
 Scapegoat.settings
