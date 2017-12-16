@@ -127,6 +127,7 @@ object Macro {
   }
 
   @deprecated("Use [[namedParserImpl2]]", "2.5.2")
+  @SuppressWarnings(Array("MethodNames" /*deprecated*/ ))
   def namedParserImpl_[T: c.WeakTypeTag](c: whitebox.Context)(names: c.Expr[String]*): c.Expr[T] = namedParserImpl2[T](c)(names: _*)
 
   def namedParserImpl2[T: c.WeakTypeTag](c: whitebox.Context)(names: c.Expr[String]*): c.Expr[T] = {
@@ -148,7 +149,10 @@ object Macro {
     val ctor = tpe.decl(termNames.CONSTRUCTOR).asMethod
     val params = ctor.paramLists.flatten
 
-    if (names.size < params.size) {
+    @SuppressWarnings(Array("ListSize"))
+    def psz = params.size
+
+    if (names.size < psz) {
       c.abort(
         c.enclosingPosition,
         s"no column name for parameters: ${show(names)} < $params")
@@ -372,6 +376,7 @@ object Macro {
    *   Macro.toParameters[Bar](separator = "_")
    * }}}
    */
+  @SuppressWarnings(Array("UnusedMethodParameter" /*macro*/ ))
   def toParameters[T](separator: String): ToParameterList[T] = macro parametersDefaultNames[T]
 
   def parametersDefaultNames[T: c.WeakTypeTag](c: whitebox.Context)(separator: c.Expr[String]): c.Expr[ToParameterList[T]] = ToParameterListImpl.caseClass[T](c)(Seq.empty[c.Expr[Macro.ParameterProjection]], separator)
@@ -388,6 +393,7 @@ object Macro {
    *   Macro.toParameters[Bar]()
    * }}}
    */
+  @SuppressWarnings(Array("UnusedMethodParameter" /*macro*/ ))
   def toParameters[T](projection: Macro.ParameterProjection*): ToParameterList[T] = macro configuredParameters[T]
 
   def configuredParameters[T: c.WeakTypeTag](c: whitebox.Context)(projection: c.Expr[Macro.ParameterProjection]*): c.Expr[ToParameterList[T]] = {
@@ -401,6 +407,7 @@ object Macro {
    * @param projection $projectionParam
    * @tparam T $caseTParam
    */
+  @SuppressWarnings(Array("UnusedMethodParameter" /*macro*/ ))
   def toParameters[T](separator: String, projection: Macro.ParameterProjection*): ToParameterList[T] = macro parametersWithSeparator[T]
 
   def parametersWithSeparator[T: c.WeakTypeTag](c: whitebox.Context)(separator: c.Expr[String], projection: c.Expr[Macro.ParameterProjection]*): c.Expr[ToParameterList[T]] = ToParameterListImpl.caseClass[T](c)(projection, separator)

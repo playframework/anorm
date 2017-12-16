@@ -22,6 +22,7 @@ object Common extends AutoPlugin {
       "-Ywarn-unused-import", "-Ywarn-unused", "-Ywarn-dead-code",
       "-Ywarn-numeric-widen"),
     fork in Test := true,
+    autoAPIMappings := true,
     mimaPreviousArtifacts := {
       if (scalaVersion.value startsWith "2.12.") Set.empty else {
         if (crossPaths.value) {
@@ -65,7 +66,7 @@ private[anorm] trait FunctionAdapter {
           val values = (1 to i).map(j => s"c$j")
           val types = (1 to i).map(j => s"T$j")
 
-          w.append("""
+          w.append(s"""
 
   /**
    * Returns function applicable with a $i-column tuple-like.""")

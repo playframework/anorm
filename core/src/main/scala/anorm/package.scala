@@ -77,7 +77,7 @@ package object anorm {
    * val query = SQL("SELECT * FROM Country")
    * }}}
    */
-  @SuppressWarnings(Array("TryGet" /* TODO: Make it safer */ ))
+  @SuppressWarnings(Array("MethodNames", "TryGet" /* TODO: Make it safer */ ))
   def SQL(stmt: String): SqlQuery = SqlStatementParser.parse(stmt).
     map(ts => SqlQuery.prepare(ts, ts.names)).get
 

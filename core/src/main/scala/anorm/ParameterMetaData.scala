@@ -19,14 +19,12 @@ import java.sql.{ Types, Timestamp }
 @annotation.implicitNotFound("Meta data not found for parameter of type ${T}: `anorm.ParameterMetaData[${T}]` required; See https://github.com/playframework/anorm/blob/master/docs/manual/working/scalaGuide/main/sql/ScalaAnorm.md#parameters")
 trait ParameterMetaData[T] {
   /**
-   * Name of SQL type
-   * @see [[java.sql.Types]]
+   * Name of SQL type (see `java.sql.Types`)
    */
   def sqlType: String
 
   /**
-   * JDBC type
-   * @see [[java.sql.Types]]
+   * JDBC type (see `java.sql.Types`)
    */
   def jdbcType: Int
 }
@@ -49,6 +47,7 @@ object ParameterMetaData extends JavaTimeParameterMetaData {
     val sqlType = "LONGVARBINARY"
     val jdbcType = Types.LONGVARBINARY
   }
+
   implicit object InputStreamParameterMetaData
     extends ParameterMetaData[java.io.InputStream] {
     val sqlType = ByteArrayParameterMetaData.sqlType
@@ -60,6 +59,7 @@ object ParameterMetaData extends JavaTimeParameterMetaData {
     val sqlType = "BOOLEAN"
     val jdbcType = Types.BOOLEAN
   }
+
   implicit object JBooleanParameterMetaData extends ParameterMetaData[JBool] {
     val sqlType = BooleanParameterMetaData.sqlType
     val jdbcType = BooleanParameterMetaData.jdbcType
@@ -77,6 +77,7 @@ object ParameterMetaData extends JavaTimeParameterMetaData {
     val sqlType = "DOUBLE PRECISION"
     val jdbcType = Types.DOUBLE
   }
+
   implicit object JDoubleParameterMetaData extends ParameterMetaData[JDouble] {
     val sqlType = DoubleParameterMetaData.sqlType
     val jdbcType = DoubleParameterMetaData.jdbcType
@@ -87,6 +88,7 @@ object ParameterMetaData extends JavaTimeParameterMetaData {
     val sqlType = "FLOAT"
     val jdbcType = Types.FLOAT
   }
+
   implicit object JFloatParameterMetaData extends ParameterMetaData[JFloat] {
     val sqlType = FloatParameterMetaData.sqlType
     val jdbcType = FloatParameterMetaData.jdbcType
@@ -97,22 +99,27 @@ object ParameterMetaData extends JavaTimeParameterMetaData {
     val sqlType = "INTEGER"
     val jdbcType = Types.INTEGER
   }
+
   implicit object ByteParameterMetaData extends ParameterMetaData[Byte] {
     val sqlType = IntParameterMetaData.sqlType
     val jdbcType = Types.TINYINT
   }
+
   implicit object JByteParameterMetaData extends ParameterMetaData[JByte] {
     val sqlType = IntParameterMetaData.sqlType
     val jdbcType = ByteParameterMetaData.jdbcType
   }
+
   implicit object IntegerParameterMetaData extends ParameterMetaData[Integer] {
     val sqlType = IntParameterMetaData.sqlType
     val jdbcType = IntParameterMetaData.jdbcType
   }
+
   implicit object ShortParameterMetaData extends ParameterMetaData[Short] {
     val sqlType = IntParameterMetaData.sqlType
     val jdbcType = Types.SMALLINT
   }
+
   implicit object JShortParameterMetaData extends ParameterMetaData[JShort] {
     val sqlType = IntParameterMetaData.sqlType
     val jdbcType = ShortParameterMetaData.jdbcType
@@ -123,15 +130,18 @@ object ParameterMetaData extends JavaTimeParameterMetaData {
     val sqlType = "NUMERIC"
     val jdbcType = Types.BIGINT
   }
+
   implicit object BigIntegerParameterMetaData
     extends ParameterMetaData[BigInteger] {
     val sqlType = BigIntParameterMetaData.sqlType
     val jdbcType = BigIntParameterMetaData.jdbcType
   }
+
   implicit object LongParameterMetaData extends ParameterMetaData[Long] {
     val sqlType = BigIntParameterMetaData.sqlType
     val jdbcType = BigIntParameterMetaData.jdbcType
   }
+
   implicit object JLongParameterMetaData extends ParameterMetaData[JLong] {
     val sqlType = BigIntParameterMetaData.sqlType
     val jdbcType = BigIntParameterMetaData.jdbcType
@@ -143,6 +153,7 @@ object ParameterMetaData extends JavaTimeParameterMetaData {
     val sqlType = "DECIMAL"
     val jdbcType = Types.DECIMAL
   }
+
   implicit object JBigDecParameterMetaData extends ParameterMetaData[JBigDec] {
     val sqlType = BigDecimalParameterMetaData.sqlType
     val jdbcType = BigDecimalParameterMetaData.jdbcType
@@ -154,10 +165,13 @@ object ParameterMetaData extends JavaTimeParameterMetaData {
     val sqlType = "TIMESTAMP"
     val jdbcType = Types.TIMESTAMP
   }
+
   implicit object DateParameterMetaData extends ParameterMetaData[Date] {
     val sqlType = TimestampParameterMetaData.sqlType
     val jdbcType = TimestampParameterMetaData.jdbcType
   }
+
+  @SuppressWarnings(Array("MethodNames"))
   implicit def TimestampWrapper1MetaData[T <: TimestampWrapper1]: ParameterMetaData[T] = new ParameterMetaData[T] {
     val sqlType = TimestampParameterMetaData.sqlType
     val jdbcType = TimestampParameterMetaData.jdbcType
@@ -168,10 +182,12 @@ object ParameterMetaData extends JavaTimeParameterMetaData {
     val sqlType = "VARCHAR"
     val jdbcType = Types.VARCHAR
   }
+
   implicit object UUIDParameterMetaData extends ParameterMetaData[JUUID] {
     val sqlType = StringParameterMetaData.sqlType
     val jdbcType = StringParameterMetaData.jdbcType
   }
+
   implicit object CharacterStreamMetaData
     extends ParameterMetaData[java.io.Reader] {
     val sqlType = StringParameterMetaData.sqlType
@@ -183,6 +199,7 @@ object ParameterMetaData extends JavaTimeParameterMetaData {
     val sqlType = "CHAR"
     val jdbcType = Types.CHAR
   }
+
   implicit object CharacterParameterMetaData
     extends ParameterMetaData[Character] {
     val sqlType = CharParameterMetaData.sqlType

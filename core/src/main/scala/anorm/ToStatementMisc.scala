@@ -341,12 +341,14 @@ sealed trait ToStatementPriority0 {
    * SQL"SELECT * FROM Test WHERE nullable_int = \\${Option.empty[Int]}"
    * }}}
    */
-  implicit def optionToStatement[A >: Nothing](implicit c: ToStatement[A], meta: ParameterMetaData[A]) =
-    new ToStatement[Option[A]] with NotNullGuard {
-      def set(s: PreparedStatement, index: Int, o: Option[A]) = {
-        o.fold[Unit](s.setNull(index, meta.jdbcType))(c.set(s, index, _))
-      }
+  implicit def optionToStatement[A](
+    implicit
+    c: ToStatement[A],
+    meta: ParameterMetaData[A]) = new ToStatement[Option[A]] with NotNullGuard {
+    def set(s: PreparedStatement, index: Int, o: Option[A]) = {
+      o.fold[Unit](s.setNull(index, meta.jdbcType))(c.set(s, index, _))
     }
+  }
 
   /**
    * Sets Java big integer on statement.
@@ -477,7 +479,7 @@ sealed trait ToStatementPriority0 {
 
   /**
    * Sets opaque value as statement parameter.
-   * UNSAFE: It's set using [[java.sql.PreparedStatement.setObject]].
+   * UNSAFE: It's set using `java.sql.PreparedStatement.setObject`.
    *
    * {{{
    * SQL("EXEC indexed_at {d}").on('d -> anorm.Object(new java.util.Date()))
@@ -550,7 +552,7 @@ sealed trait ToStatementPriority0 {
 
   /**
    * Sets multi-value parameter on statement, with custom formatting
-   * (using [[anorm.SeqParameter]]).
+   * (using [[SeqParameter]]).
    *
    * {{{
    * import anorm.SeqParameter
@@ -574,8 +576,7 @@ sealed trait ToStatementPriority0 {
   }
 
   /**
-   * Sets an array parameter on statement.
-   * @see [[java.sql.Array]]
+   * Sets an array parameter on statement (see `java.sql.Array`).
    *
    * {{{
    * SQL("INSERT INTO Table(arr) VALUES {a}").on("a" -> Array("A", "2", "C"))
@@ -749,6 +750,8 @@ sealed trait ToStatementPriority1 extends ToStatementPriority0 {
    */
   implicit object byteArrayToStatement extends ToStatement[Array[Byte]] {
     val jdbcType = implicitly[ParameterMetaData[Array[Byte]]].jdbcType
+
+    @SuppressWarnings(Array("ArrayEquals" /*null check*/ ))
     def set(s: PreparedStatement, i: Int, bin: Array[Byte]) =
       if (bin == (null: Array[Byte])) s.setNull(i, jdbcType)
       else s.setBytes(i, bin)

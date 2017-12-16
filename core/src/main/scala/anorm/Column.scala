@@ -39,7 +39,7 @@ trait Column[A] extends ((Any, MetaDataItem) => Either[SqlRequestError, A]) { pa
    * }
    *
    * def find(id: String) =
-   *   SQL"SELECT enum_code FROM my_table WHERE id = $id".
+   *   SQL"SELECT enum_code FROM my_table WHERE id = \$id".
    *     as(SqlParser.scalar(myEnumCol).single)
    * }}}
    */
@@ -62,7 +62,7 @@ trait Column[A] extends ((Any, MetaDataItem) => Either[SqlRequestError, A]) { pa
    * }
    *
    * def find(id: String) =
-   *   SQL"SELECT enum_code FROM my_table WHERE id = $id".
+   *   SQL"SELECT enum_code FROM my_table WHERE id = \$id".
    *     as(SqlParser.scalar(myEnumCol).single)
    * }}}
    */
@@ -392,7 +392,7 @@ object Column extends JodaColumn with JavaTimeColumn {
   /**
    * Parses column as Java Date.
    * Time zone offset is the one of default JVM time zone
-   * (see [[java.util.TimeZone#getDefault TimeZone.getDefault]]).
+   * (see `java.util.TimeZone.getDefault`).
    *
    * {{{
    * import java.util.Date
@@ -478,6 +478,7 @@ object Column extends JodaColumn with JavaTimeColumn {
    *   SQL"SELECT str_arr FROM tbl".as(scalar[List[String]])
    * }}}
    */
+  @SuppressWarnings(Array("UnusedMethodParameter" /* deprecated */ ))
   implicit def columnToList[T](implicit transformer: Column[T], @deprecated("Unused", "2.5.4") t: scala.reflect.ClassTag[T]): Column[List[T]] = Column.nonNull[List[T]] { (value, meta) =>
     val MetaDataItem(qualified, _, _) = meta
 
@@ -548,7 +549,7 @@ sealed trait JodaColumn {
   /**
    * Parses column as Joda local date.
    * Time zone is the one of default JVM time zone
-   * (see [[org.joda.time.DateTimeZone#getDefault DateTimeZone.getDefault]]).
+   * (see `org.joda.time.DateTimeZone.getDefault`).
    *
    * {{{
    * import org.joda.time.LocalDate
@@ -573,7 +574,7 @@ sealed trait JodaColumn {
   /**
    * Parses column as Joda local date/time.
    * Time zone is the one of default JVM time zone
-   * (see [[org.joda.time.DateTimeZone#getDefault DateTimeZone.getDefault]]).
+   * (see `org.joda.time.DateTimeZone.getDefault`).
    *
    * {{{
    * import org.joda.time.LocalDateTime
@@ -654,7 +655,7 @@ sealed trait JavaTimeColumn {
   /**
    * Parses column as Java8 instant.
    * Time zone offset is the one of default JVM time zone
-   * (see [[java.time.ZoneId#systemDefault ZoneId.systemDefault]]).
+   * (see `java.time.ZoneId.systemDefault`).
    *
    * {{{
    * import java.time.Instant
@@ -688,7 +689,7 @@ sealed trait JavaTimeColumn {
   /**
    * Parses column as Java8 local date/time.
    * Time zone offset is the one of default JVM time zone
-   * (see [[java.time.ZoneId#systemDefault ZoneId.systemDefault]]).
+   * (see `java.time.ZoneId.systemDefault`).
    *
    * {{{
    * import java.time.LocalDateTime
@@ -706,7 +707,7 @@ sealed trait JavaTimeColumn {
   /**
    * Parses column as Java8 local date.
    * Time zone offset is the one of default JVM time zone
-   * (see [[java.time.ZoneId#systemDefault ZoneId.systemDefault]]).
+   * (see `java.time.ZoneId.systemDefault`).
    *
    * {{{
    * import java.time.LocalDateTime
@@ -725,7 +726,7 @@ sealed trait JavaTimeColumn {
   /**
    * Parses column as Java8 zoned date/time.
    * Time zone offset is the one of default JVM time zone
-   * (see [[java.time.ZoneId#systemDefault ZoneId.systemDefault]]).
+   * (see `java.time.ZoneId.systemDefault`).
    *
    * {{{
    * import java.time.ZonedDateTime

@@ -12,7 +12,6 @@ import resource.ManagedResource
  * @param resultSet Result set from executed query
  */
 final case class SqlQueryResult(
-  /** Underlying result set */
   resultSet: ManagedResource[java.sql.ResultSet],
   resultSetOnFirstRow: Boolean = false) extends WithResult {
 

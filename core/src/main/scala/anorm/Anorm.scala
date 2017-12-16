@@ -19,7 +19,7 @@ import resource.{ managed, ManagedResource }
 case class Object(value: Any)
 
 /**
- * Wrapper to use [[Seq]] as SQL parameter, with custom formatting.
+ * Wrapper to use a value sequence as SQL parameter, with custom formatting.
  *
  * {{{
  * SQL("SELECT * FROM t WHERE %s").

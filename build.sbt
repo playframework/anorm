@@ -10,7 +10,7 @@ val specs2Test = Seq(
   "specs2-junit"
 ).map("org.specs2" %% _ % "3.9.4" % Test)
 
-lazy val acolyteVersion = "1.0.46"
+lazy val acolyteVersion = "1.0.47"
 lazy val acolyte = "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test
 
 lazy val `anorm-tokenizer` = project
@@ -157,7 +157,7 @@ lazy val `anorm-postgres` = (project in file("postgres"))
 
 lazy val `anorm-parent` = (project in file("."))
   .enablePlugins(PlayRootProject)
-  .aggregate(`anorm-tokenizer`, anorm, `anorm-iteratee`, `anorm-akka`)
+  .aggregate(`anorm-tokenizer`, anorm, `anorm-iteratee`, `anorm-akka`, `anorm-postgres`)
   .settings(
   scalaVersion in ThisBuild := "2.12.4",
     crossScalaVersions in ThisBuild := Seq("2.11.11", "2.12.4"),
