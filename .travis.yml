@@ -1,9 +1,10 @@
 language: scala
 jdk:
   - oraclejdk8
+  - oraclejdk9
 scala:
 - 2.12.4
-- 2.11.11
+- 2.11.12
 sudo: false
 cache:
   directories:

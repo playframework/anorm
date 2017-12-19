@@ -15,13 +15,13 @@ It can feel strange to return to plain old SQL to access an SQL database these d
 
 Although we agree that these tools are almost required in Java, we think that they are not needed at all when you have the power of a higher-level programming language like Scala. On the contrary, they will quickly become counter-productive.
 
-#### Using JDBC is a pain, but we provide a better API
+### Using JDBC is a pain, but we provide a better API
 
 We agree that using the JDBC API directly is tedious, particularly in Java. You have to deal with checked exceptions everywhere and iterate over and over around the ResultSet to transform this raw dataset into your own data structure.
 
 We provide a simpler API for JDBC; using Scala you don’t need to bother with exceptions, and transforming data is really easy with a functional language. In fact, the goal of the Play Scala SQL access layer is to provide several APIs to effectively transform JDBC data into other Scala structures.
 
-#### You don’t need another DSL to access relational databases
+### You don’t need another DSL to access relational databases
 
 SQL is already the best DSL for accessing relational databases. We don’t need to invent something new. Moreover the SQL syntax and features can differ from one database vendor to another. 
 
@@ -29,13 +29,13 @@ If you try to abstract this point with another proprietary SQL like DSL you will
 
 Play will sometimes provide you with pre-filled SQL statements, but the idea is not to hide the fact that we use SQL under the hood. Play just saves typing a bunch of characters for trivial queries, and you can always fall back to plain old SQL.
 
-#### A type safe DSL to generate SQL is a mistake
+### A type safe DSL to generate SQL is a mistake
 
 Some argue that a type safe DSL is better since all your queries are checked by the compiler. Unfortunately the compiler checks your queries based on a meta-model definition that you often write yourself by ‘mapping’ your data structure to the database schema. 
 
 There are no guarantees that this meta-model is correct. Even if the compiler says that your code and your queries are correctly typed, it can still miserably fail at runtime because of a mismatch in your actual database definition.
 
-#### Take Control of your SQL code
+### Take Control of your SQL code
 
 Object Relational Mapping works well for trivial cases, but when you have to deal with complex schemas or existing databases, you will spend most of your time fighting with your ORM to make it generate the SQL queries you want.
 
@@ -48,7 +48,7 @@ You will need to add Anorm and JDBC plugin to your dependencies :
 ```scala
 libraryDependencies ++= Seq(
   jdbc,
-  "com.typesafe.play" %% "anorm" % "2.5.1"
+  "org.playframework" %% "anorm" % "2.5.1"
 )
 ```
 
@@ -73,7 +73,7 @@ If you are inserting data that has an auto-generated `Long` primary key, you can
 ```scala
 val id: Option[Long] = 
   SQL("insert into City(name, country) values ({name}, {country})")
-  .on('name -> "Cambridge", 'country -> "New Zealand").executeInsert()
+  .on("name" -> "Cambridge", "country" -> "New Zealand").executeInsert()
 ```
 
 When key generated on insertion is not a single `Long`, `executeInsert` can be passed a `ResultSetParser` to return the correct key.
@@ -83,7 +83,7 @@ import anorm.SqlParser.str
 
 val id: List[String] = 
   SQL("insert into City(name, country) values ({name}, {country})")
-  .on('name -> "Cambridge", 'country -> "New Zealand")
+  .on("name" -> "Cambridge", "country" -> "New Zealand")
   .executeInsert(str(1).+) // insertion returns a list of at least one string keys
 ```
 
@@ -169,7 +169,7 @@ val parser =
   }
 
 val product: (String, Float) = SQL("SELECT * FROM prod WHERE id = {id}").
-  on('id -> "p").as(parser.single)
+  on("id" -> "p").as(parser.single)
 ```
 
 If the columns are not strictly defined (e.g. with types that can vary), the `SqlParser.folder` can be used to fold each row in a custom way.
@@ -185,7 +185,7 @@ val parser: RowParser[Map[String, Any]] =
 val result: List[Map[String, Any]] = SQL"SELECT * FROM dyn_table".as(parser.*)
 ```
 
-#### Table alias
+### Table alias
 
 With some databases, it's possible to define aliases for table (or for sub-query), as in the following example.
 
@@ -213,7 +213,7 @@ res.foreach {
 }
 ```
 
-### SQL queries using String Interpolation
+### String Interpolation
 
 Since Scala 2.10 supports custom String Interpolation there is also a 1-step alternative to `SQL(queryString).on(params)` seen before. You can abbreviate the code as: 
 
@@ -491,17 +491,17 @@ books match {
 
 ### Akka Stream
 
-The query result from Anorm can be processed as [Source](doc.akka.io/api/akka/2.4.4/#akka.stream.javadsl.Source) with [Akka Stream](http://doc.akka.io/docs/akka/2.4.4/scala/stream/index.html).
+The query result from Anorm can be processed as [Source](doc.akka.io/api/akka/2.4.12/#akka.stream.javadsl.Source) with [Akka Stream](http://doc.akka.io/docs/akka/2.4.12/scala/stream/index.html).
 
 To do so, the Anorm Akka module must be used.
 
 ```scala
 libraryDependencies ++= Seq(
-  "com.typesafe.play" %% "anorm-akka" % "ANORM_VERSION",
-  "com.typesafe.akka" %% "akka-stream" % "2.4.4")
+  "org.playframework" %% "anorm-akka" % "ANORM_VERSION",
+  "com.typesafe.akka" %% "akka-stream" % "2.4.12")
 ```
 
-> This module is tested with Akka Stream 2.4.4.
+> This module is tested with Akka Stream 2.4.12.
 
 Once this library is available, the query can be used as streaming source.
 
@@ -548,7 +548,7 @@ It's possible to use Anorm along with [Play Iteratees](https://www.playframework
 
 ```scala
 libraryDependencies ++= Seq(
-  "com.typesafe.play" %% "anorm-iteratee" % "ANORM_VERSION",
+  "org.playframework" %% "anorm-iteratee" % "ANORM_VERSION",
   "com.typesafe.play" %% "play-iteratees" % "ITERATEES_VERSION")
 ```
 
@@ -574,13 +574,13 @@ In such case, values will be prepared to be passed to JDBC.
 ```scala
 // With default formatting (", " as separator)
 SQL("SELECT * FROM Test WHERE cat IN ({categories})").
-  on('categories -> Seq("a", "b", "c")
+  on("categories" -> Seq("a", "b", "c")
 // -> SELECT * FROM Test WHERE cat IN ('a', 'b', 'c')
 
 // With custom formatting
 import anorm.SeqParameter
 SQL("SELECT * FROM Test t WHERE {categories}").
-  on('categories -> SeqParameter(
+  on("categories" -> SeqParameter(
     values = Seq("a", "b", "c"), separator = " OR ", 
     pre = "EXISTS (SELECT NULL FROM j WHERE t.id=j.id AND name=",
     post = ")"))
@@ -660,23 +660,23 @@ Using value as `Any`, explicitly or due to erasure, leads to compilation error `
 // Wrong #1
 val p: Any = "strAsAny"
 SQL("SELECT * FROM test WHERE id={id}").
-  on('id -> p) // Erroneous - No conversion Any => ParameterValue
+  on("id" -> p) // Erroneous - No conversion Any => ParameterValue
 
 // Right #1
 val p = "strAsString"
-SQL("SELECT * FROM test WHERE id={id}").on('id -> p)
+SQL("SELECT * FROM test WHERE id={id}").on("id" -> p)
 
 // Wrong #2
 val ps = Seq("a", "b", 3) // inferred as Seq[Any]
 SQL("SELECT * FROM test WHERE (a={a} AND b={b}) OR c={c}").
-  on('a -> ps(0), // ps(0) - No conversion Any => ParameterValue
-    'b -> ps(1), 
-    'c -> ps(2))
+  on("a" -> ps(0), // ps(0) - No conversion Any => ParameterValue
+    "b" -> ps(1), 
+    "c" -> ps(2))
 
 // Right #2
 val ps = Seq[anorm.ParameterValue]("a", "b", 3) // Seq[ParameterValue]
 SQL("SELECT * FROM test WHERE (a={a} AND b={b}) OR c={c}").
-  on('a -> ps(0), 'b -> ps(1), 'c -> ps(2))
+  on("a" -> ps(0), "b" -> ps(1), "c" -> ps(2))
 
 // Wrong #3
 val ts = Seq( // Seq[(String -> Any)] due to _2
@@ -761,7 +761,7 @@ Way to get context information along with query data is to use `executeQuery()`:
 import anorm.SqlQueryResult
 
 val res: SqlQueryResult = SQL("EXEC stored_proc {code}").
-  on('code -> code).executeQuery()
+  on("code" -> code).executeQuery()
 
 // Check execution context (there warnings) before going on
 val str: Option[String] =
@@ -935,9 +935,9 @@ val Int = SQL("SELECT * FROM test").as((int("id") <~ str("val")).single)
   // keeping only 'id' in result
 ```
 
-### A more complicated example
+#### Complete example
 
-Now let’s try with a more complicated example. How to parse the result of the following query to retrieve the country name and all spoken languages for a country code?
+Now let’s try with a complete example. How to parse the result of the following query to retrieve the country name and all spoken languages for a country code?
 
 ```sql
 select c.name, l.language from Country c 
@@ -1048,6 +1048,8 @@ $ spokenLanguages("FRA")
 
 As already seen in this documentation, Anorm provides builtins converters between JDBC and JVM types.
 
+*Also see the additional [module for PostgreSQL](AnormPostgres.html)*.
+
 ### Column parsers
 
 Following table describes which JDBC numeric types (getters on `java.sql.ResultSet`, first column) can be parsed to which Java/Scala types (e.g. integer column can be read as double value).
@@ -1082,8 +1084,6 @@ UUID                 | No                   | No   | No               | No     |
 - 4. Type `java.util.UUID`.
 - 5. Type `java.sql.Array`.
 - 6. Type `java.lang.Iterable[_]`.
-
-> When an instance of `java.util.UUID` is used as a parameter, its string value is passed to statement. If the underlying database offers a specific SQL datatype for ID, it's possible to cast the stringified value; e.g. Working with PostgreSQL `uuid` type: `SQL"SELECT * FROM table WHERE anPostgreSQLuuid = ${aJavaUUID}::uuid"`
 
 Optional column can be parsed as `Option[T]`, as soon as `T` is supported.
 
@@ -1284,7 +1284,7 @@ In this case at your own risk, `setObject` will be used on statement.
 
 ```scala
 val anyVal: Any = myVal
-SQL("UPDATE t SET v = {opaque}").on('opaque -> anorm.Object(anyVal))
+SQL("UPDATE t SET v = {opaque}").on("opaque" -> anorm.Object(anyVal))
 ```
 
 ## Troubleshooting

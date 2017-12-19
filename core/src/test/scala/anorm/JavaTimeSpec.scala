@@ -10,8 +10,10 @@ import org.specs2.mutable.Specification
 class JavaTimeColumnSpec extends Specification {
   import SqlParser.scalar
 
-  "Column mapped as Java8 instant" should {
-    val instant = Instant.now
+  "Column mapped as Java8+ instant" should {
+    val instant = Instant.now.`with`( // As sql.Data is not nano precision
+      java.time.temporal.ChronoField.NANO_OF_SECOND, 0)
+
     val time = instant.toEpochMilli
 
     "be parsed from date" in withQueryResult(
@@ -56,7 +58,9 @@ class JavaTimeColumnSpec extends Specification {
   }
 
   "Column mapped as Java8 local date/time" should {
-    val instant = Instant.now
+    val instant = Instant.now.`with`( // As sql.Data is not nano precision
+      java.time.temporal.ChronoField.NANO_OF_SECOND, 0)
+
     val date = LocalDateTime.ofInstant(instant, ZoneId.systemDefault)
     val time = instant.toEpochMilli
 
@@ -148,7 +152,9 @@ class JavaTimeColumnSpec extends Specification {
   }
 
   "Column mapped as Java8 zoned date/time" should {
-    val instant = Instant.now
+    val instant = Instant.now.`with`( // As sql.Data is not nano precision
+      java.time.temporal.ChronoField.NANO_OF_SECOND, 0)
+
     val date = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault)
     val time = instant.toEpochMilli
 
