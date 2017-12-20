@@ -56,6 +56,28 @@ libraryDependencies ++= Seq(
 )
 {% endhighlight %}
 
+<strong id="toc">Table of contents:</strong>
+
+- [Executing SQL queries](#executing-sql-queries)
+    - [Table alias](#table-alias)
+    - [String Interpolation](#sql-queries-using-string-interpolation)
+- [Generated parsers](#generated-parsers)
+- [Streaming results](#streaming-results)
+    - [Akka Stream](#akka-stream)
+    - [Iteratee](#iteratee)
+- [Multi-value support](#multi-value-support)
+- [Using Pattern Matching](#using-pattern-matching)
+- [Using for-comprehension](#using-for-comprehension)
+- [Retrieving data along with execution context](#retrieving-data-along-with-execution-context)
+- [Working with optional/nullable values](#working-with-optionalnullable-values)
+- [Using the Parser API](#using-the-parser-api)
+    - [Getting a single result](#getting-a-single-result)
+    - [Getting a single optional result](#getting-a-single-optional-result)
+    - [Getting a more complex result](#getting-a-more-complex-result)
+- [JDBC mappings](#jdbc-mappings)
+  - [Column parsers](#column-parsers)
+  - [Parameters](#parameters)
+
 *See [release notes](Highlights.html)*
 
 ## Executing SQL queries

@@ -72,7 +72,10 @@ awk -v "tmpd=$TMPD" 'BEGIN { h = 0; } { \
       h = 0;\
     }\
   } else if (index($0, "## Executing SQL queries") == 1) {\
-    printf("*See [release notes](Highlights.html)*\n\n%s\n", $0)\
+    while ((getline line<"_toc") > 0) {\
+      print line\
+    }\
+    printf("\n*See [release notes](Highlights.html)*\n\n%s\n", $0)\
   } else { print($0); }\
 }' "$SRCDIR/ScalaAnorm.md" | sed -e 's/@\[/[/;s/{% highlight[ \t]*%}/{% highlight text %}/;s/"com.typesafe.play" %% "anorm" % "[^"]*"/"com.typesafe.play" %% "anorm" % "2.5.3"/' | grep -v '<!---' | sed -e 's#\[\[on the Scala database page \| ScalaDatabase\]\]#[on the Scala database page](https://playframework.com/documentation/latest/ScalaDatabase)#' >> index.md
 
