@@ -8,7 +8,7 @@ You will need to add this module to your dependencies (along with Anorm core and
 
 ```scala
 libraryDependencies ++= Seq(
-  "org.playframework" %% "anorm-postgres" % "{site.latest_release}"
+  "org.playframework.anorm" %% "anorm-postgres" % "{site.latest_release}"
 )
 ```
 

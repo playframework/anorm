@@ -14,15 +14,5 @@ object Publish {
       Seq("Apache 2.0" ->
         url("http://www.apache.org/licenses/LICENSE-2.0"))
     },
-    homepage := Some(url(siteUrl)),
-    scmInfo := Some(
-      ScmInfo(
-        url("https://github.com/playframework/anorm"),
-        "scm:git://github.com/playframework/anorm.git")),
-    developers := List(
-      Developer(
-        id = "playframework",
-        name = "playframework",
-        email = "",
-        url = url("https://www.playframework.org"))))
+    homepage := Some(url(siteUrl)))
 }

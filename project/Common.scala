@@ -14,7 +14,7 @@ object Common extends AutoPlugin {
   val previousVersion = "2.5.0"
 
   override def projectSettings = mimaDefaultSettings ++ Seq(
-    organization := "org.playframework",
+    organization := "org.playframework.anorm",
     resolvers += "Scalaz Bintray Repo" at {
       "http://dl.bintray.com/scalaz/releases" // specs2 depends on scalaz-stream
     },

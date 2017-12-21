@@ -2,7 +2,7 @@
 
 This is a guide for migrating from Anorm 2.5 to Anorm 2.6. If you need to migrate from an earlier version of Anorm then you must first follow the [Anorm 2.5 Migration Guide](https://github.com/playframework/anorm/blob/master/Migration25.md#anorm-25-migration-guide).
 
-**Note:** The dependency group has been updated from `com.typesafe.play` to `org.playframework`.
+**Note:** The dependency group has been updated from `com.typesafe.play` to `org.playframework.anorm`.
 
 ## Streaming
 
@@ -16,7 +16,7 @@ To do so, the Anorm Akka module must be used.
 
 ```scala
 libraryDependencies ++= Seq(
-  "org.playframework" %% "anorm-akka" % "ANORM_VERSION",
+  "org.playframework.anorm" %% "anorm-akka" % "ANORM_VERSION",
   "com.typesafe.akka" %% "akka-stream" % "2.4.12")
 ```
 
@@ -44,7 +44,7 @@ It can be added to your project using the following dependencies.
 
 ```
 libraryDependencies ++= Seq(
-  "org.playframework" %% "anorm-iteratee" % "ANORM_VERSION",
+  "org.playframework.anorm" %% "anorm-iteratee" % "ANORM_VERSION",
   "com.typesafe.play" %% "play-iteratees" % "ITERATEES_VERSION")
 ```
 

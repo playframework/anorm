@@ -48,7 +48,7 @@ You will need to add Anorm and JDBC plugin to your dependencies :
 ```scala
 libraryDependencies ++= Seq(
   jdbc,
-  "org.playframework" %% "anorm" % "2.5.1"
+  "org.playframework.anorm" %% "anorm" % "2.5.1"
 )
 ```
 
@@ -497,7 +497,7 @@ To do so, the Anorm Akka module must be used.
 
 ```scala
 libraryDependencies ++= Seq(
-  "org.playframework" %% "anorm-akka" % "ANORM_VERSION",
+  "org.playframework.anorm" %% "anorm-akka" % "ANORM_VERSION",
   "com.typesafe.akka" %% "akka-stream" % "2.4.12")
 ```
 
@@ -548,7 +548,7 @@ It's possible to use Anorm along with [Play Iteratees](https://www.playframework
 
 ```scala
 libraryDependencies ++= Seq(
-  "org.playframework" %% "anorm-iteratee" % "ANORM_VERSION",
+  "org.playframework.anorm" %% "anorm-iteratee" % "ANORM_VERSION",
   "com.typesafe.play" %% "play-iteratees" % "ITERATEES_VERSION")
 ```
 
