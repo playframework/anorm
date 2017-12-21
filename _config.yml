@@ -6,7 +6,7 @@ theme: jekyll-theme-cayman
 
 exclude: [README.md, jekyll.sh, anorm]
 baseUrl: "/anorm"
-latest_major_release: 2.5
-latest_release: 2.5.3
+latest_major_release: 2.6
+latest_release: 2.6.0
 
-_2_5_latest_minor: 2.5.3
+_2_6_latest_minor: 2.6.0

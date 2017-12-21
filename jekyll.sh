@@ -77,9 +77,13 @@ awk -v "tmpd=$TMPD" 'BEGIN { h = 0; } { \
     }\
     printf("\n*See [release notes](Highlights.html)*\n\n%s\n", $0)\
   } else { print($0); }\
-}' "$SRCDIR/ScalaAnorm.md" | sed -e 's/@\[/[/;s/{% highlight[ \t]*%}/{% highlight text %}/;s/"com.typesafe.play" %% "anorm" % "[^"]*"/"com.typesafe.play" %% "anorm" % "2.5.3"/' | grep -v '<!---' | sed -e 's#\[\[on the Scala database page \| ScalaDatabase\]\]#[on the Scala database page](https://playframework.com/documentation/latest/ScalaDatabase)#' >> index.md
+}' "$SRCDIR/ScalaAnorm.md" | sed -e 's/@\[/[/;s/{% highlight[ \t]*%}/{% highlight text %}/;s/"org.playframework.anorm" %% "anorm" % "[^"]*"/"org.playframework.anorm" %% "anorm" % "2.6.0"/' | grep -v '<!---' | sed -e 's#\[\[on the Scala database page \| ScalaDatabase\]\]#[on the Scala database page](https://playframework.com/documentation/latest/ScalaDatabase)#' >> index.md
 
 rm -rf code && cp -R "$SRCDIR/code" code
+
+# PostgreSQL
+cp "$SRCDIR/AnormPostgres.md" .
+git add AnormPostgres.md
 
 # Contributing page
 cp anorm/CONTRIBUTING.md .
@@ -88,16 +92,11 @@ git add CONTRIBUTING.md
 # Highlights
 rm -f Highlights.md
 
-I=0
 for MD in `ls -v -1 anorm/Highlights*.md | sort -n -r`; do
-  if [ $I -gt 0 ]; then
-    # Skip latest (0 with reverse)
-    perl -pe 's/\[\[([^|]+)\|([^\]]+)\]\]/[\1](\2.html)/g' < $MD >> Highlights.md
+  # Skip latest (0 with reverse)
+  perl -pe 's/\[\[([^|]+)\|([^\]]+)\]\]/[\1](\2.html)/g' < $MD >> Highlights.md
 
-    echo '' >> Highlights.md
-  fi
-
-  I=`expr $I + 1`
+  echo '' >> Highlights.md
 done
 
 git add Highlights.md
