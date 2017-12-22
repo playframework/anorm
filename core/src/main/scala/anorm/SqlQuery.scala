@@ -4,21 +4,6 @@ package anorm
 sealed trait SqlQuery {
   private[anorm] def stmt: TokenizedStatement
 
-  /** SQL statement */
-  @deprecated(message = "Will be made private", since = "2.3.8")
-  final def statement: String = stmt.tokens match {
-    case TokenGroup(_, Some(pl)) :: _ =>
-      throw new IllegalStateException(s"Placeholder not prepared: $pl")
-
-    case TokenGroup(pr, None) :: Nil => pr.foldLeft(new StringBuilder()) {
-      case (sql, StringToken(t)) => sql ++= t
-      case (sql, PercentToken) => sql += '%'
-      case (sql, _) => sql
-    }.toString
-
-    case _ => throw new IllegalStateException(s"Unexpected statement: $stmt")
-  }
-
   /** Names of parameters in initial order */
   def paramsInitialOrder: List[String]
 

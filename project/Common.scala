@@ -11,7 +11,7 @@ object Common extends AutoPlugin {
   override def trigger = allRequirements
   override def requires = JvmPlugin
 
-  val previousVersion = "2.5.0"
+  val previousVersion = "2.5.3"
 
   override def projectSettings = mimaDefaultSettings ++ Seq(
     organization := "org.playframework.anorm",
