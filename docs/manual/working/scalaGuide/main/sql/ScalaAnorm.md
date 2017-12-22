@@ -292,7 +292,7 @@ OR EXISTS (SELECT NULL FROM j WHERE t.id=j.id AND name='c')
 */
 ```
 
-On purpose multi-value parameter must strictly be declared with one of supported types (`List`, 'Seq`, `Set`, `SortedSet`, `Stream`, `Vector`  and `SeqParameter`). Value of a subtype must be passed as parameter with supported:
+On purpose multi-value parameter must strictly be declared with one of supported types (`List`, `Seq`, `Set`, `SortedSet`, `Stream`, `Vector`  and `SeqParameter`). Value of a subtype must be passed as parameter with supported:
 
 ```scala
 val seq = IndexedSeq("a", "b", "c")
