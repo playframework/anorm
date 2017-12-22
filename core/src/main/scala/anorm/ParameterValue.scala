@@ -30,8 +30,12 @@ final class DefaultParameterValue[A](
   val value: A, s: ToSql[A], toStmt: ToStatement[A])
   extends ParameterValue with ParameterValue.Wrapper[A] {
 
-  lazy val toSql: (String, Int) =
-    if (s == null) ("?" -> 1) else s.fragment(value)
+  lazy val toSql: (String, Int) = {
+    @SuppressWarnings(Array("NullParameter"))
+    def to = if (s == null) ("?" -> 1) else s.fragment(value)
+
+    to
+  }
 
   def set(s: PreparedStatement, i: Int) = toStmt.set(s, i, value)
 

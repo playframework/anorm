@@ -32,7 +32,7 @@ object MacroToParameters {
 
   toParams2(bar1)
   // --> List(NamedParameter(w,ParameterValue(1)))
-  
+
   val insert1 = SQL("INSERT INTO table(col_w) VALUES ({w})").
     bind(bar1) // bind bar1 as params implicit toParams2
   //#caseClassToParameters2

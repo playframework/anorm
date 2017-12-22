@@ -32,6 +32,12 @@ sealed trait PGJson {
     s.setObject(i, pgObject, JsValueParameterMetaData.jdbcType)
   }
 
+  implicit object JsObjectParameterMetaData
+    extends ParameterMetaData[JsObject] {
+    val sqlType = "JSONB"
+    val jdbcType = java.sql.Types.OTHER
+  }
+
   /**
    * @tparam the type of value to be written as JSON
    * @param value the value to be passed as a JSON parameter
@@ -45,23 +51,13 @@ sealed trait PGJson {
    * implicit val w: Writes[Foo] = Json.writes[Foo]
    *
    * val value = Foo("lorem")
-   * SQL"INSERT INTO test(id, json) VALUES(${"bar"}, ${value})".executeUpdate()
+   * SQL"INSERT INTO test(id, json) VALUES(\${"bar"}, \${value})".executeUpdate()
    * }}}
    */
-  def asJson[T](value: T)(implicit w: Writes[T]): ParameterValue = {
-    implicit val writeJsonToStatement: ToStatement[T] =
-      jsValueToStatement[JsValue].contramap(w.writes)
-
-    ParameterValue from value
-  }
+  def asJson[T](value: T)(implicit w: Writes[T]): ParameterValue =
+    anorm.postgresql.PGUtil.asJson[T](value)(w)
 
   implicit object JsValueParameterMetaData extends ParameterMetaData[JsValue] {
-    val sqlType = "JSONB"
-    val jdbcType = java.sql.Types.OTHER
-  }
-
-  implicit object JsObjectParameterMetaData
-    extends ParameterMetaData[JsObject] {
     val sqlType = "JSONB"
     val jdbcType = java.sql.Types.OTHER
   }
@@ -92,7 +88,7 @@ sealed trait PGJson {
           case NonFatal(cause) => Left(SqlRequestError(cause))
         }
 
-        case _ => Left(TypeDoesNotMatch(s"Cannot convert $value:${value.asInstanceOf[AnyRef].getClass} to JsValue for column ${meta.column}"))
+        case _ => Left(TypeDoesNotMatch(s"Cannot convert $value:${value.getClass} to JsValue for column ${meta.column}"))
       }
     }
 

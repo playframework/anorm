@@ -68,7 +68,9 @@ private[anorm] object SealedRowParserImpl {
 
     val discriminatorTerm = TermName(c.freshName("discriminator"))
     val colTerm = TermName(c.freshName("column"))
-    val matching = Match(
+
+    @SuppressWarnings(Array("ListAppend" /* only once*/ ))
+    def matching = Match(
       q"$discriminatorTerm", cases.map(_._3) :+ cq"d => $mappingError")
 
     val parser = q"""new anorm.RowParser[$tpe] {

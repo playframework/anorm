@@ -10,13 +10,24 @@ val specs2Test = Seq(
   "specs2-junit"
 ).map("org.specs2" %% _ % "3.9.4" % Test)
 
-lazy val acolyteVersion = "1.0.46"
+lazy val acolyteVersion = "1.0.47"
 lazy val acolyte = "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test
 
 lazy val `anorm-tokenizer` = project
   .in(file("tokenizer"))
-  .enablePlugins(PlayLibrary, CopyPasteDetector)
-  .settings(scalariformSettings(autoformat = true) ++ Seq(
+  .enablePlugins(PlayLibrary)
+  .settings(Seq(
+    scalariformAutoformat := true,
+    mimaBinaryIssueFilters ++= Seq( // private[anorm]
+      ProblemFilters.exclude[IncompatibleMethTypeProblem]("anorm.TokenizedStatement.apply"),
+      ProblemFilters.exclude[IncompatibleMethTypeProblem]("anorm.TokenizedStatement.tokenize"),
+      ProblemFilters.exclude[IncompatibleResultTypeProblem]("anorm.TokenizedStatement.tokens"),
+      ProblemFilters.exclude[IncompatibleResultTypeProblem]("anorm.TokenizedStatement.names"),
+      ProblemFilters.exclude[IncompatibleResultTypeProblem]("anorm.TokenizedStatement.copy$default$2"),
+      ProblemFilters.exclude[IncompatibleMethTypeProblem]("anorm.TokenizedStatement.copy"),
+      ProblemFilters.exclude[IncompatibleResultTypeProblem]("anorm.TokenizedStatement.copy$default$1"),
+      ProblemFilters.exclude[IncompatibleMethTypeProblem]("anorm.TokenizedStatement.this")
+    ),
     libraryDependencies ++= Seq(
       "org.scala-lang" % "scala-reflect" % scalaVersion.value
     )
@@ -24,8 +35,9 @@ lazy val `anorm-tokenizer` = project
 
 lazy val anorm = project
   .in(file("core"))
-  .enablePlugins(Playdoc, PlayLibrary, CopyPasteDetector)
-  .settings(scalariformSettings(autoformat = true) ++ Seq(
+  .enablePlugins(Playdoc, PlayLibrary)
+  .settings(Seq(
+    scalariformAutoformat := true,
     sourceGenerators in Compile += Def.task {
       Seq(GFA((sourceManaged in Compile).value / "anorm"))
     }.taskValue,
@@ -117,8 +129,9 @@ lazy val anorm = project
   )).dependsOn(`anorm-tokenizer`)
 
 lazy val `anorm-iteratee` = (project in file("iteratee"))
-  .enablePlugins(PlayLibrary, CopyPasteDetector)
-  .settings(scalariformSettings(autoformat = true) ++ Seq(
+  .enablePlugins(PlayLibrary)
+  .settings(Seq(
+    scalariformAutoformat := true,
     mimaPreviousArtifacts := Set.empty,
     libraryDependencies ++= Seq(
       "com.typesafe.play" %% "play-iteratees" % "2.6.1",
@@ -126,18 +139,19 @@ lazy val `anorm-iteratee` = (project in file("iteratee"))
     ) ++ specs2Test
   )).dependsOn(anorm)
 
-val akkaVer = "2.4.17"
+val akkaVer = "2.4.12"
 lazy val `anorm-akka` = (project in file("akka"))
-  .enablePlugins(PlayLibrary, CopyPasteDetector)
-  .settings(scalariformSettings(autoformat = true) ++ Seq(
+  .enablePlugins(PlayLibrary)
+  .settings(Seq(
+    scalariformAutoformat := true,
     mimaPreviousArtifacts := Set.empty,
     resolvers ++= Seq(
       // For Akka Stream Contrib TestKit (see akka/akka-stream-contrib/pull/51)
       "Tatami Releases".at(
         "https://raw.github.com/cchantep/tatami/master/snapshots")),
     libraryDependencies ++= Seq(
-      "com.typesafe.akka" %% "akka-testkit" % akkaVer % "provided",
-      "com.typesafe.akka" %% "akka-stream" % akkaVer % "provided",
+      "com.typesafe.akka" %% "akka-testkit" % akkaVer % Provided,
+      "com.typesafe.akka" %% "akka-stream" % akkaVer % Provided,
       "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test
     ) ++ specs2Test ++ Seq(
       "com.typesafe.akka" %% "akka-stream-contrib" % "0.6" % Test)
@@ -146,8 +160,9 @@ lazy val `anorm-akka` = (project in file("akka"))
 lazy val pgVer = sys.env.get("POSTGRES_VERSION").getOrElse("9.4.1212")
 
 lazy val `anorm-postgres` = (project in file("postgres"))
-  .enablePlugins(PlayLibrary, CopyPasteDetector)
-  .settings(scalariformSettings(autoformat = true) ++ Seq(
+  .enablePlugins(PlayLibrary)
+  .settings(Seq(
+    scalariformAutoformat := true,
     mimaPreviousArtifacts := Set.empty,
     libraryDependencies ++= Seq(
       "org.postgresql" % "postgresql" % pgVer,
@@ -156,11 +171,11 @@ lazy val `anorm-postgres` = (project in file("postgres"))
   )).dependsOn(anorm)
 
 lazy val `anorm-parent` = (project in file("."))
-  .enablePlugins(PlayRootProject)
-  .aggregate(`anorm-tokenizer`, anorm, `anorm-iteratee`, `anorm-akka`)
+  .enablePlugins(PlayRootProject, ScalaUnidocPlugin)
+  .aggregate(`anorm-tokenizer`, anorm, `anorm-iteratee`, `anorm-akka`, `anorm-postgres`)
   .settings(
   scalaVersion in ThisBuild := "2.12.4",
-    crossScalaVersions in ThisBuild := Seq("2.11.11", "2.12.4"),
+    crossScalaVersions in ThisBuild := Seq("2.11.12", "2.12.4"),
     mimaPreviousArtifacts := Set.empty)
 
 lazy val docs = project

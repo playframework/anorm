@@ -2,44 +2,25 @@
 
 This is a guide for migrating from Anorm 2.5 to Anorm 2.6. If you need to migrate from an earlier version of Anorm then you must first follow the [Anorm 2.5 Migration Guide](https://github.com/playframework/anorm/blob/master/Migration25.md#anorm-25-migration-guide).
 
-## Operations
+**Note:** The dependency group has been updated from `com.typesafe.play` to `org.playframework.anorm`.
 
-The new operation `.executeInsert1` allows to select columns among the generated keys.
+## Streaming
 
-```scala
-// Choose 'generatedCol' and 'colB' from the generatedKeys
-val keys1 = SQL("INSERT INTO Test(x) VALUES ({x})").
-  on("x" -> "y").executeInsert1("generatedCol", "colB")()
-
-val keys2 = SQL("INSERT INTO Test(x) VALUES ({x})").
-  on("x" -> "y").executeInsert1("generatedCol")(scalar[String].singleOpt)
-```
-
-## Deprecation
-
-The deprecated type `MayErr` is no longer part of the API.
-
-The former `Column.nonNull` is updated from `nonNull[A](transformer: ((Any, MetaDataItem) => MayErr[SqlRequestError, A])): Column[A]` to `def nonNull[A](transformer: ((Any, MetaDataItem) => Either[SqlRequestError, A])): Column[A] = Column[A]`.
-
-The deprecated operations `.list()`, `.single()` and `.singleOpt()` on SQL result (e.g. `SQL("...").list()`) are now removed, and must be respectively replaced by `.as(parser.*)`, `.as(parser.single)` and `.as(parser.singleOpt)`.
-
-The `.getFilledStatement` has been removed.
-
-The former streaming operation `.apply()` is now removed, and must be replaced by either `.fold`, `.foldWhile` or `.withResult`.
+The streaming support has been improved for a reactive processing of the results, with new modules.
 
 ### Akka Stream module
 
-A new [Akka](http://doc.akka.io/docs/akka/2.4.2/scala/stream/index.html) module is available to process DB results as [Sources](doc.akka.io/api/akka/2.4.2/#akka.stream.javadsl.Source).
+A new [Akka](http://doc.akka.io/docs/akka/2.4.12/scala/stream/index.html) module is available to process DB results as [Sources](doc.akka.io/api/akka/2.4.12/#akka.stream.javadsl.Source).
 
 To do so, the Anorm Akka module must be used.
 
 ```scala
 libraryDependencies ++= Seq(
-  "com.typesafe.play" %% "anorm-akka" % "ANORM_VERSION",
-  "com.typesafe.akka" %% "akka-stream" % "2.4.4")
+  "org.playframework.anorm" %% "anorm-akka" % "ANORM_VERSION",
+  "com.typesafe.akka" %% "akka-stream" % "2.4.12")
 ```
 
-> This module is tested with Akka Stream 2.4.4.
+> This module is tested with Akka Stream 2.4.12.
 
 Once this library is available, the query can be used as streaming source.
 
@@ -55,7 +36,7 @@ import anorm._
 def resultSource(implicit m: Materializer, con: Connection): Source[String, NotUsed] = AkkaStream.source(SQL"SELECT * FROM Test", SqlParser.scalar[String], ColumnAliaser.empty)
 ```
 
-## Iteratees module
+### Iteratees module
 
 A new Anorm module is available to ease the integration with [Play Iteratees](https://www.playframework.com/documentation/latest/Iteratees).
 
@@ -63,7 +44,7 @@ It can be added to your project using the following dependencies.
 
 ```
 libraryDependencies ++= Seq(
-  "com.typesafe.play" %% "anorm-iteratee" % "ANORM_VERSION",
+  "org.playframework.anorm" %% "anorm-iteratee" % "ANORM_VERSION",
   "com.typesafe.play" %% "play-iteratees" % "ITERATEES_VERSION")
 ```
 
@@ -166,3 +147,53 @@ val result: Foo = SQL"""SELECT f.name, age, bar_lorem, bar_ipsum
   FROM foo f JOIN bar b ON f.name=b.name WHERE f.name=${"Foo"}""".
   as(fooBar.single)
 ```
+
+## ToParameterList
+
+The new typeclass `ToParameterList` has been introduced to define more complete encoders for parameters, for example encoder for a case case.
+
+It comes with useful macros to easily generate such parameter conversions.
+
+```scala
+import anorm.{ Macro, SQL, ToParameterList }
+import anorm.NamedParameter, NamedParameter.{ namedWithString => named }
+
+case class Bar(v: Int)
+case class Foo(n: Int, bar: Bar)
+
+// Convert all supported properties as parameters 
+implicit val barToParams: ToParameterList[Bar] = Macro.toParameters()
+
+// Custom-manual statement using-knowing class properties order
+SQL("INSERT INTO table(col_w) VALUES({v})").
+  bind(Bar(1)) // bind as param using implicit barToParams
+```
+
+## PostgreSQL
+
+A new module dedicated to PostgreSQL provides parameter and column conversions improved for this database, for JSON values and UUID.
+
+## Operations
+
+The new operation `.executeInsert1` allows to select columns among the generated keys.
+
+```scala
+// Choose 'generatedCol' and 'colB' from the generatedKeys
+val keys1 = SQL("INSERT INTO Test(x) VALUES ({x})").
+  on("x" -> "y").executeInsert1("generatedCol", "colB")()
+
+val keys2 = SQL("INSERT INTO Test(x) VALUES ({x})").
+  on("x" -> "y").executeInsert1("generatedCol")(scalar[String].singleOpt)
+```
+
+## Deprecation
+
+The deprecated type `MayErr` is no longer part of the API.
+
+The former `Column.nonNull` is updated from `nonNull[A](transformer: ((Any, MetaDataItem) => MayErr[SqlRequestError, A])): Column[A]` to `def nonNull[A](transformer: ((Any, MetaDataItem) => Either[SqlRequestError, A])): Column[A] = Column[A]`.
+
+The deprecated operations `.list()`, `.single()` and `.singleOpt()` on SQL result (e.g. `SQL("...").list()`) are now removed, and must be respectively replaced by `.as(parser.*)`, `.as(parser.single)` and `.as(parser.singleOpt)`.
+
+The `.getFilledStatement` has been removed.
+
+The former streaming operation `.apply()` is now removed, and must be replaced by either `.fold`, `.foldWhile` or `.withResult`.
