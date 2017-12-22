@@ -127,7 +127,7 @@ private[anorm] object ToParameterListImpl {
     val bufName = TermName(c.freshName("buf"))
     val namedAppends = Map.newBuilder[String, (TermName, Tree)]
 
-    if (ctor.paramLists.size > 1) {
+    if (ctor.paramLists.tail.nonEmpty) {
       c.echo(c.enclosingPosition, s"${tpe} constructor has multiple list of parameters. As for unapply, only for the first one will be considered: ${ctor.paramLists.headOption.mkString}")
     }
 

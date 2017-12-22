@@ -6,7 +6,7 @@ trait ToParameterList[A] extends (A => List[NamedParameter]) {
   def apply(value: A): List[NamedParameter]
 }
 
-/** Companion/factory for [[ToParameter]]. */
+/** Companion/factory for [[ToParameterList]]. */
 object ToParameterList {
   private class FunctionalToParameterList[A](
     f: A => List[NamedParameter]) extends ToParameterList[A] {

@@ -5,7 +5,7 @@ package anorm
 trait ToSql[A] {
   /**
    * Prepares SQL fragment for value,
-   * using [[java.sql.PreparedStatement]] syntax (with '?').
+   * using `java.sql.PreparedStatement` syntax (with '?').
    *
    * @return SQL fragment and count of "?" placeholders in it
    */
@@ -104,6 +104,7 @@ object ToSql {
       sql._1.toString -> sql._2
     }
 
+  @SuppressWarnings(Array("UnusedMethodParameter" /* deprecated */ ))
   @inline private def traversableToSql[A, T <: Traversable[A]](implicit conv: ToSql[A] = ToSql.missing[A]) = ToSql[T] { values =>
     val c: A => (String, Int) =
       if (conv == null) _ => ("?" -> 1) else conv.fragment
