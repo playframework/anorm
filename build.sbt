@@ -8,7 +8,7 @@ import com.typesafe.tools.mima.plugin.MimaKeys.{
 val specs2Test = Seq(
   "specs2-core",
   "specs2-junit"
-).map("org.specs2" %% _ % "3.9.4" % Test)
+).map("org.specs2" %% _ % "4.0.1" % Test)
 
 lazy val acolyteVersion = "1.0.47"
 lazy val acolyte = "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test
@@ -60,32 +60,18 @@ lazy val anorm = project
       missMeth("anorm.ParameterValue.stringValue"/* deprecated */),
       missMeth("anorm.BatchSql.apply"/* was deprecated */),
       ProblemFilters.exclude[ReversedMissingMethodProblem]("anorm.BatchSql.bind"),
-      ProblemFilters.exclude[DirectMissingMethodProblem]( // was deprecated
-        "anorm.BatchSql.apply$default$2"),
-      missMeth("anorm.SqlQuery.getFilledStatement"/* deprecated 2.3.6 */),
-      ProblemFilters.exclude[DirectMissingMethodProblem]( // deprecated 2.3.6
-        "anorm.SqlQuery.getFilledStatement$default$2"),
-      missMeth("anorm.SqlQuery.fetchSize"/* new field */),
-      missMeth("anorm.SqlQuery.withFetchSize"/* new function */),
       missMeth("anorm.SqlQuery.prepare"/* private */),
+      ProblemFilters.exclude[IncompatibleMethTypeProblem]( // private
+        "anorm.SqlQuery.prepare"),
       missMeth("anorm.SqlQuery.copy"/* private */),
       missMeth("anorm.SqlQuery.copy$default$4"/* private */),
-      incoRet( // private
-        "anorm.SqlQuery.prepare$default$2"),
-      missMeth("anorm.Sql.getFilledStatement"/* deprecated 2.3.6 */),
-      ProblemFilters.exclude[DirectMissingMethodProblem]( // deprecated 2.3.6
-        "anorm.Sql.getFilledStatement$default$2"),
-      missMeth("anorm.Sql.executeInsert1"/* new function */),
-      missMeth("anorm.Sql.preparedStatement"/* new function */),
+      incoRet("anorm.SqlQuery.prepare$default$2"/* private */),
+      ProblemFilters.exclude[DirectMissingMethodProblem]( // deprecated 2.3.8
+        "anorm.SqlQuery.statement"),
       // private:
       incoMeth("anorm.Sql.asTry"),
       missMeth("anorm.WithResult.asTry$default$2"),
       missMeth("anorm.Sql.withResult"),
-      // new default:
-      missMeth("anorm.Sql.executeInsert1$default$3"),
-      missMeth("anorm.Sql.executeInsert2$default$3"),
-      missMeth("anorm.Sql.executeInsert2"/* new function */),
-      // private:
       missMeth("anorm.Cursor.onFirstRow"),
       missMeth("anorm.Cursor.apply"),
       ProblemFilters.exclude[MissingTypesProblem]("anorm.MetaData$"),
@@ -95,27 +81,17 @@ lazy val anorm = project
       incoMeth("anorm.MetaData.copy"),
       incoRet("anorm.MetaData.availableColumns"),
       incoRet("anorm.MetaData.copy$default$1"),
-      missMeth("anorm.BatchSql.withFetchSize"/* new function */),
-      missMeth("anorm.SqlQueryResult.apply"/* deprecated 2.4 */),
-      missMeth("anorm.SimpleSql.getFilledStatement"/* deprecated 2.3.6 */),
-      ProblemFilters.exclude[DirectMissingMethodProblem]( // deprecated 2.3
-        "anorm.SimpleSql.getFilledStatement$default$2"),
-      missMeth("anorm.SimpleSql.list"/* deprecated 2.3.5 */),
-      missMeth("anorm.SimpleSql.single"/* deprecated 2.3.5 */),
-      missMeth("anorm.SimpleSql.singleOpt"/* deprecated 2.3.5 */),
-      missMeth("anorm.SimpleSql.apply"/* deprecated 2.4 */),
-      missMeth("anorm.WithResult.withResult"/* new function */),
-      missMeth("anorm.WithResult.foldWhile"/* new function */),
-      missMeth("anorm.WithResult.fold"/* new function */),
-      missMeth("anorm.WithResult.apply"/* deprecated 2.4 */),
-      missMeth("anorm.WithResult.asTry"/*new function */),
-      // New functions
-      missMeth("anorm.Sql.unsafeStatement$default$2"),
-      missMeth("anorm.Sql.unsafeResultSet"),
-      missMeth("anorm.Sql.unsafeStatement"),
       //missMeth("anorm.ToStatement.contramap"),
       missMeth("anorm.Column.mapResult"),
-      missMeth("anorm.Column.map")
+      missMeth("anorm.Column.map"),
+      ProblemFilters.exclude[MissingClassProblem]( // macro
+        "anorm.Macro$ImplicitResolver$2$ImplicitTransformer$"),
+      ProblemFilters.exclude[MissingClassProblem]( // macro
+        "anorm.Macro$ImplicitResolver$2$Implicit$"),
+      ProblemFilters.exclude[MissingClassProblem]( // macro
+        "anorm.Macro$ImplicitResolver$2$Implicit"),
+      ProblemFilters.exclude[DirectMissingMethodProblem]( // private
+        "anorm.Sql.asTry")
     ),
     libraryDependencies ++= Seq(
       "com.jsuereth" %% "scala-arm" % "2.0",
@@ -166,7 +142,7 @@ lazy val `anorm-postgres` = (project in file("postgres"))
     mimaPreviousArtifacts := Set.empty,
     libraryDependencies ++= Seq(
       "org.postgresql" % "postgresql" % pgVer,
-      "com.typesafe.play" %% "play-json" % "2.6.1"
+      "com.typesafe.play" %% "play-json" % "2.6.6"
     ) ++ specs2Test :+ acolyte
   )).dependsOn(anorm)
 
