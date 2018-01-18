@@ -213,7 +213,10 @@ object Sql { // TODO: Rename to SQL
   @SuppressWarnings(Array("IncorrectlyNamedExceptions"))
   final class MissingParameter(after: String, placeholder: String)
     extends java.util.NoSuchElementException(
-      s"Missing parameter value for '$placeholder' after: $after") with NoStackTrace {}
+      s"Missing parameter value for '$placeholder' after: $after") with NoStackTrace {
+    @deprecated("Create this exception while supplying the missing placeholder value", "2.6.1")
+    def this(after: String) = this(after, "")
+  }
 
   object NoMorePlaceholder extends Exception("No more placeholder")
     with NoStackTrace {}
