@@ -106,7 +106,7 @@ class StatementParserSpec extends org.specs2.mutable.Specification {
         like {
           case err: Sql.MissingParameter =>
             err.getMessage must startWith(
-              """Missing parameter value after: "SELECT""")
+              """Missing parameter value for 'id' after: "SELECT""")
         }
     }
 

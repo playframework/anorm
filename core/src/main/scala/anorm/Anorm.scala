@@ -211,9 +211,12 @@ object Sql { // TODO: Rename to SQL
   }
 
   @SuppressWarnings(Array("IncorrectlyNamedExceptions"))
-  final class MissingParameter(after: String)
+  final class MissingParameter(after: String, placeholder: String)
     extends java.util.NoSuchElementException(
-      s"Missing parameter value after: $after") with NoStackTrace {}
+      s"Missing parameter value for '$placeholder' after: $after") with NoStackTrace {
+    @deprecated("Create this exception while supplying the missing placeholder value", "2.6.1")
+    def this(after: String) = this(after, "<unknown>")
+  }
 
   object NoMorePlaceholder extends Exception("No more placeholder")
     with NoStackTrace {}
@@ -231,8 +234,8 @@ object Sql { // TODO: Rename to SQL
         query(tok.tail, ns.tail, ps, i + c, prepared, (i, p) :: vs)
       }
 
-      case (Some(TokenGroup(pr, Some(_))), _) =>
-        Failure(new MissingParameter(pr mkString ", "))
+      case (Some(TokenGroup(pr, Some(placeholder))), _) =>
+        Failure(new MissingParameter(pr mkString ", ", placeholder))
 
       case (Some(TokenGroup(pr, None)), _) =>
         query(tok.tail, ns, ps, i, toSql(pr, buf), vs)
