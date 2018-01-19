@@ -1,6 +1,6 @@
 package scalaGuide.sql.anorm
 
-object MacroToParameters {
+object MacroToParameters1 {
   //#caseClassToParameters1
   import anorm.{ Macro, SQL, ToParameterList }
   import anorm.NamedParameter
@@ -74,3 +74,14 @@ object MacroToParameters {
   }
   //#sealedFamily1
 }
+
+//#valueClass1
+final class ValueClassType(val underlying: Double) extends AnyVal
+
+object MacroToParameters2 {
+  import anorm.{ Macro, ToStatement }
+
+  implicit val valueClassToStatement: ToStatement[ValueClassType] =
+    Macro.valueToStatement[ValueClassType]
+}
+//#valueClass1
