@@ -14,6 +14,7 @@ package anorm
  * @define familyTParam the type of the type family (either a sealed trait or abstract class)
  * @define separatorParam the separator used with nested properties
  * @define projectionParam The optional projection for the properties as parameters; If none, using the all the class properties.
+ * @define valueClassTParam the type of the value class
  */
 object Macro {
   import scala.language.experimental.macros
@@ -332,6 +333,15 @@ object Macro {
    */
   @SuppressWarnings(Array("UnusedMethodParameter" /* macro */ ))
   def sealedParser[T](naming: Macro.DiscriminatorNaming, discriminate: Macro.Discriminate): RowParser[T] = macro sealedParserImpl[T]
+
+  /**
+   * Returns a column parser for specified value class.
+   *
+   * @tparam T $valueClassTParam
+   */
+  def valueColumn[T <: AnyVal]: Column[T] = macro anorm.macros.ValueColumnImpl[T]
+
+  // --- ToParameter ---
 
   import anorm.macros.ToParameterListImpl
 

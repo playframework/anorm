@@ -9,6 +9,7 @@ import acolyte.jdbc.RowLists
 import acolyte.jdbc.Implicits._
 
 import Macro.ColumnNaming
+import SqlParser.scalar
 
 import org.specs2.specification.core.Fragments
 
@@ -317,6 +318,22 @@ class MacroSpec extends org.specs2.mutable.Specification {
     }
   }
 
+  "Generated column" should {
+    shapeless.test.illTyped("anorm.Macro.valueColumn[InvalidValueClass]")
+
+    "be successful for a supported ValueClass" in {
+      implicit val generated: Column[ValidValueClass] =
+        Macro.valueColumn[ValidValueClass]
+
+      withQueryResult(RowLists.doubleList :+ 1.2d) { implicit con =>
+        SQL("SELECT d").as(scalar[ValidValueClass].single).
+          aka("parsed column") must_=== new ValidValueClass(1.2d)
+      }
+    }
+  }
+
+  // ---
+
   // Avoid implicit conversions
   lazy val nullBoolean = null.asInstanceOf[JBool]
   lazy val nullLong = null.asInstanceOf[JLong]
@@ -344,4 +361,10 @@ class MacroSpec extends org.specs2.mutable.Specification {
 
   // TODO: Supports aliasing to make it really usable (see #124)
   case class Self(id: String, next: Self)
+}
+
+final class ValidValueClass(val foo: Double) extends AnyVal
+
+final class InvalidValueClass(val foo: MacroSpec) extends AnyVal {
+  // No support as `foo` is not itself a ValueClass
 }
