@@ -2,6 +2,8 @@ package anorm
 
 import java.sql.{ Connection, PreparedStatement }
 
+import resource.managed
+
 private[anorm] object BatchSqlErrors {
   val HeterogeneousParameterMaps = "if each map hasn't same parameter names"
   val ParameterNamesNotMatchingPlaceholders =
@@ -76,8 +78,10 @@ sealed trait BatchSql {
   @SuppressWarnings(Array("NullParameter"))
   def getFilledStatement(connection: Connection, getGeneratedKeys: Boolean = false) = fill(connection, null, getGeneratedKeys, params)
 
-  def execute()(implicit connection: Connection): Array[Int] =
-    getFilledStatement(connection).executeBatch()
+  def execute()(implicit connection: Connection): Array[Int] = {
+    implicit val res = StatementResource
+    managed(getFilledStatement(connection)).acquireAndGet(_.executeBatch())
+  }
 
   /** Add batch parameters to given statement. */
   private def addBatchParams(stmt: PreparedStatement, ps: Seq[(Int, ParameterValue)]): PreparedStatement = {
