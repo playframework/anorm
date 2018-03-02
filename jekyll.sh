@@ -77,7 +77,7 @@ awk -v "tmpd=$TMPD" 'BEGIN { h = 0; } { \
     }\
     printf("\n*See [release notes](Highlights.html)*\n\n%s\n", $0)\
   } else { print($0); }\
-}' "$SRCDIR/ScalaAnorm.md" | sed -e 's/@\[/[/;s/{% highlight[ \t]*%}/{% highlight text %}/;s/"org.playframework.anorm" %% "anorm" % "[^"]*"/"org.playframework.anorm" %% "anorm" % "2.6.0"/' | grep -v '<!---' | sed -e 's#\[\[on the Scala database page \| ScalaDatabase\]\]#[on the Scala database page](https://playframework.com/documentation/latest/ScalaDatabase)#' >> index.md
+}' "$SRCDIR/ScalaAnorm.md" | sed -e 's/@\[/[/;s/{% highlight[ \t]*%}/{% highlight text %}/;s/"org.playframework.anorm" %% "anorm" % "[^"]*"/"org.playframework.anorm" %% "anorm" % "2.6.1"/' | grep -v '<!---' | sed -e 's#\[\[on the Scala database page \| ScalaDatabase\]\]#[on the Scala database page](https://playframework.com/documentation/latest/ScalaDatabase)#' >> index.md
 
 rm -rf code && cp -R "$SRCDIR/code" code
 

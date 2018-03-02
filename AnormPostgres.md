@@ -68,7 +68,7 @@ def selectJsObject(implicit con: Connection) =
 
 As for the typeclass `Writes`, the `Reads` one to decode JSON is supported using `anorm.postgresql.fromJson`.
 
-```
+```scala
 import java.sql._
 import anorm._, postgresql._
 import play.api.libs.json._
@@ -94,10 +94,10 @@ def selectFromJson(implicit con: Connection) =
 
 The Java type `java.util.UUID` is provided parameter and column conversions for PostgreSQL.
 
-```
+```scala
 import java.util.UUID
 import java.sql._
-import anorm._
+import anorm._, postgresql._
 
 def insertUUID(implicit con: Connection) = {
   SQL"INSERT INTO test_seq VALUES(${UUID.randomUUID()})".executeUpdate()

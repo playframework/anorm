@@ -52,7 +52,7 @@ You will need to add Anorm and JDBC plugin to your dependencies :
 {% highlight scala %}
 libraryDependencies ++= Seq(
   jdbc,
-  "org.playframework.anorm" %% "anorm" % "2.6.0"
+  "org.playframework.anorm" %% "anorm" % "2.6.1"
 )
 {% endhighlight %}
 
@@ -506,6 +506,19 @@ val sealedToParams: ToParameterList[Family] = {
 }
 {% endhighlight %}
 
+The [value classes](https://docs.scala-lang.org/overviews/core/value-classes.html) can be supported, if the underlying value itself `<: Any`.
+
+{% highlight scala %}
+lueClassType(val underlying: Double) extends AnyVal
+
+Parameters2 {
+.{ Macro, ToStatement }
+
+ valueClassToStatement: ToStatement[ValueClassType] =
+eToStatement[ValueClassType]
+
+{% endhighlight %}
+
 > The `anorm.macro.debug` system property can be set to `true` (e.g. `sbt -Danorm.macro.debug=true ...`) to debug the generated parsers.
 
 A type which is provided a `ToParameterList` instance can be used to bind a value as parameters.
@@ -673,6 +686,17 @@ val naming = DiscriminatorNaming(_ => "foo")
 val discriminate = Discriminate { t => s"type:$t" }
 
 val familyParser = Macro.sealedParser[Family](naming, discriminate)
+{% endhighlight %}
+
+The [value classes](https://docs.scala-lang.org/overviews/core/value-classes.html) are also supported, by generated instances of `anorm.Column`.
+
+{% highlight scala %}
+import anorm._
+
+final class ValueClassType(underlying: Double) extends AnyVal
+
+implicit val valueClassColumn: Column[ValueClassType] =
+  Macro.valueColumn[ValueClassType]
 {% endhighlight %}
 
 > The `anorm.macro.debug` system property can be set to `true` (e.g. `sbt -Danorm.macro.debug=true ...`) to debug the generated parsers.
