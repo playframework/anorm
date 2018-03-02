@@ -4,11 +4,17 @@ import java.lang.{ Boolean => JBool, Long => JLong }
 
 import java.sql.Connection
 
-import acolyte.jdbc.AcolyteDSL.withQueryResult
+import acolyte.jdbc.{
+  DefinedParameter => DParam,
+  ParameterMetaData => ParamMeta,
+  UpdateExecution
+}
+import acolyte.jdbc.AcolyteDSL.{ connection, handleStatement, withQueryResult }
 import acolyte.jdbc.RowLists
 import acolyte.jdbc.Implicits._
 
 import Macro.ColumnNaming
+import SqlParser.scalar
 
 import org.specs2.specification.core.Fragments
 
@@ -317,6 +323,47 @@ class MacroSpec extends org.specs2.mutable.Specification {
     }
   }
 
+  "Generated column" should {
+    shapeless.test.illTyped("anorm.Macro.valueColumn[Bar]") // case class
+
+    shapeless.test.illTyped("anorm.Macro.valueColumn[InvalidValueClass]")
+
+    "be generated for a supported ValueClass" in {
+      implicit val generated: Column[ValidValueClass] =
+        Macro.valueColumn[ValidValueClass]
+
+      withQueryResult(RowLists.doubleList :+ 1.2d) { implicit con =>
+        SQL("SELECT d").as(scalar[ValidValueClass].single).
+          aka("parsed column") must_=== new ValidValueClass(1.2d)
+      }
+    }
+  }
+
+  "ToStatement" should {
+    shapeless.test.illTyped("anorm.Macro.valueToStatement[Bar]") // case class
+
+    val SqlDouble3s = ParamMeta.Double(23.456D)
+
+    def withConnection[A](ps: (String, String)*)(f: java.sql.Connection => A): A = f(connection(handleStatement withUpdateHandler {
+      case UpdateExecution("set-double ?",
+        DParam(23.456D, SqlDouble3s) :: Nil) => 1 /* case ok */
+
+      case x => sys.error(s"Unexpected: $x")
+    }))
+
+    "be generated for a ValueClass" in {
+      implicit val generated: ToStatement[ValidValueClass] =
+        Macro.valueToStatement[ValidValueClass]
+
+      withConnection() { implicit c =>
+        (SQL("set-double {p}").on("p" -> new ValidValueClass(23.456D)).
+          execute() must beFalse)
+      }
+    }
+  }
+
+  // ---
+
   // Avoid implicit conversions
   lazy val nullBoolean = null.asInstanceOf[JBool]
   lazy val nullLong = null.asInstanceOf[JLong]
@@ -344,4 +391,10 @@ class MacroSpec extends org.specs2.mutable.Specification {
 
   // TODO: Supports aliasing to make it really usable (see #124)
   case class Self(id: String, next: Self)
+}
+
+final class ValidValueClass(val foo: Double) extends AnyVal
+
+final class InvalidValueClass(val foo: MacroSpec) extends AnyVal {
+  // No support as `foo` is not itself a ValueClass
 }

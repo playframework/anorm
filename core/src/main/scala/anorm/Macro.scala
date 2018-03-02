@@ -14,6 +14,7 @@ package anorm
  * @define familyTParam the type of the type family (either a sealed trait or abstract class)
  * @define separatorParam the separator used with nested properties
  * @define projectionParam The optional projection for the properties as parameters; If none, using the all the class properties.
+ * @define valueClassTParam the type of the value class
  */
 object Macro {
   import scala.language.experimental.macros
@@ -333,6 +334,22 @@ object Macro {
   @SuppressWarnings(Array("UnusedMethodParameter" /* macro */ ))
   def sealedParser[T](naming: Macro.DiscriminatorNaming, discriminate: Macro.Discriminate): RowParser[T] = macro sealedParserImpl[T]
 
+  /**
+   * Returns a column parser for specified value class.
+   *
+   * {{{
+   * import anorm._
+   *
+   * implicit val column: Column[ValueClassType] =
+   *   Macro.valueColumn[ValueClassType]
+   * }}}
+   *
+   * @tparam T $valueClassTParam
+   */
+  def valueColumn[T <: AnyVal]: Column[T] = macro anorm.macros.ValueColumnImpl[T]
+
+  // --- ToParameter ---
+
   import anorm.macros.ToParameterListImpl
 
   /**
@@ -411,6 +428,22 @@ object Macro {
   def toParameters[T](separator: String, projection: Macro.ParameterProjection*): ToParameterList[T] = macro parametersWithSeparator[T]
 
   def parametersWithSeparator[T: c.WeakTypeTag](c: whitebox.Context)(separator: c.Expr[String], projection: c.Expr[Macro.ParameterProjection]*): c.Expr[ToParameterList[T]] = ToParameterListImpl.caseClass[T](c)(projection, separator)
+
+  /**
+   * Returns a `ToStatement` for the specified ValueClass.
+   *
+   * {{{
+   * import anorm._
+   *
+   * implicit val instance: ToStatement[ValueClassType] =
+   *   Macro.valueToStatement[ValueClassType]
+   * }}}
+   *
+   * @tparam T $valueClassTParam
+   */
+  def valueToStatement[T <: AnyVal]: ToStatement[T] = macro anorm.macros.ValueToStatement[T]
+
+  // ---
 
   /**
    * @param propertyName the name of the class property

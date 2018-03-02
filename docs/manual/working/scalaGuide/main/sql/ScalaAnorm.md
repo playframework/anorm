@@ -404,6 +404,10 @@ A sealed trait with some known subclasses can also be supported.
 
 @[sealedFamily1](code/MacroToParameters.scala)
 
+The [value classes](https://docs.scala-lang.org/overviews/core/value-classes.html) can be supported, if the underlying value itself `<: Any`.
+
+@[valueClass1](code/MacroToParameters.scala)
+
 > The `anorm.macro.debug` system property can be set to `true` (e.g. `sbt -Danorm.macro.debug=true ...`) to debug the generated parsers.
 
 A type which is provided a `ToParameterList` instance can be used to bind a value as parameters.
@@ -541,6 +545,17 @@ val naming = DiscriminatorNaming(_ => "foo")
 val discriminate = Discriminate { t => s"type:$t" }
 
 val familyParser = Macro.sealedParser[Family](naming, discriminate)
+```
+
+The [value classes](https://docs.scala-lang.org/overviews/core/value-classes.html) are also supported, by generated instances of `anorm.Column`.
+
+```scala
+import anorm._
+
+final class ValueClassType(underlying: Double) extends AnyVal
+
+implicit val valueClassColumn: Column[ValueClassType] =
+  Macro.valueColumn[ValueClassType]
 ```
 
 > The `anorm.macro.debug` system property can be set to `true` (e.g. `sbt -Danorm.macro.debug=true ...`) to debug the generated parsers.
