@@ -688,14 +688,14 @@ sealed trait JodaToStatement {
 }
 
 sealed trait JavaTimeToStatement {
-  import java.time.{ Instant, LocalDateTime, ZonedDateTime }
+  import java.time.{ Instant, LocalDate, LocalDateTime, ZonedDateTime }
 
   /**
    * Sets a temporal instant on statement.
    *
    * {{{
    * import java.time.Instant
-   * import anorm.Java8._
+   * import anorm._
    *
    * SQL("SELECT * FROM Test WHERE time < {b}").on('b -> Instant.now)
    * }}}
@@ -711,7 +711,7 @@ sealed trait JavaTimeToStatement {
    *
    * {{{
    * import java.time.LocalDateTime
-   * import anorm.Java8._
+   * import anorm._
    *
    * SQL("SELECT * FROM Test WHERE time < {b}").on('b -> LocalDateTime.now)
    * }}}
@@ -723,11 +723,27 @@ sealed trait JavaTimeToStatement {
   }
 
   /**
+   * Sets a local date on statement.
+   *
+   * {{{
+   * import java.time.LocalTime
+   * import anorm._
+   *
+   * SQL("SELECT * FROM Test WHERE time < {b}").on('b -> LocalDate.now)
+   * }}}
+   */
+  implicit def localDateToStatement(implicit meta: ParameterMetaData[LocalDate]): ToStatement[LocalDate] = new ToStatement[LocalDate] {
+    def set(s: PreparedStatement, i: Int, t: LocalDate): Unit =
+      if (t == (null: LocalDate)) s.setNull(i, meta.jdbcType)
+      else s.setTimestamp(i, Timestamp valueOf t.atStartOfDay())
+  }
+
+  /**
    * Sets a zoned date/time on statement.
    *
    * {{{
    * import java.time.ZonedDateTime
-   * import anorm.Java8._
+   * import anorm._
    *
    * SQL("SELECT * FROM Test WHERE time < {b}").on('b -> ZonedDateTime.now)
    * }}}

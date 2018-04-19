@@ -91,7 +91,8 @@ lazy val anorm = project
       ProblemFilters.exclude[MissingClassProblem]( // macro
         "anorm.Macro$ImplicitResolver$2$Implicit"),
       ProblemFilters.exclude[DirectMissingMethodProblem]( // private
-        "anorm.Sql.asTry")
+        "anorm.Sql.asTry"),
+      ProblemFilters.exclude[ReversedMissingMethodProblem]("anorm.JavaTimeToStatement.localDateToStatement")
     ),
     libraryDependencies ++= Seq(
       "com.jsuereth" %% "scala-arm" % "2.0",

@@ -242,6 +242,8 @@ object JavaTimeParameterSpec extends Specification {
   val Instant1 = Instant.ofEpochSecond(123456789)
   val LocalDateTime1 = LocalDateTime.ofInstant(Instant1, ZoneId.of("UTC"))
   val LocalDateTime1Epoch = LocalDateTime1.atZone(ZoneId.systemDefault()).toEpochSecond * 1000
+  val LocalDate1 = LocalDate.of(2017, 1, 9)
+  val LocalDate1Epoch = LocalDate1.atStartOfDay(ZoneId.systemDefault()).toEpochSecond * 1000
   val ZonedDateTime1 = ZonedDateTime.ofInstant(Instant1, ZoneId.of("UTC"))
   val SqlTimestamp = ParamMeta.Timestamp
 
@@ -253,6 +255,10 @@ object JavaTimeParameterSpec extends Specification {
     case UpdateExecution("set-local-date-time ?",
       DParam(t: java.sql.Timestamp, SqlTimestamp) :: Nil) if t.getTime == LocalDateTime1Epoch => 1 /* case ok */
     case UpdateExecution("set-null-local-date-time ?",
+      DParam(null, SqlTimestamp) :: Nil) => 1 /* case ok */
+    case UpdateExecution("set-local-date ?",
+      DParam(t: java.sql.Timestamp, SqlTimestamp) :: Nil) if t.getTime == LocalDate1Epoch => 1 /* case ok */
+    case UpdateExecution("set-null-local-date ?",
       DParam(null, SqlTimestamp) :: Nil) => 1 /* case ok */
     case UpdateExecution("set-zoned-date-time ?",
       DParam(t: java.sql.Timestamp, SqlTimestamp) :: Nil) if t.getTime == 123456789000L => 1 /* case ok */
@@ -290,6 +296,21 @@ object JavaTimeParameterSpec extends Specification {
         on("p" -> Option.empty[LocalDateTime]).execute() must beFalse
     }
 
+    "be local date" in withJavaTimeConnection() { implicit c =>
+      SQL("set-local-date {p}").on("p" -> LocalDate1).
+        execute() must beFalse
+    }
+
+    "be null local date" in withJavaTimeConnection() { implicit c =>
+      SQL("set-null-local-date {p}").
+        on("p" -> null.asInstanceOf[LocalDate]).execute() must beFalse
+    }
+
+    "be undefined local date" in withJavaTimeConnection() { implicit c =>
+      SQL("set-null-local-date {p}").
+        on("p" -> Option.empty[LocalDate]).execute() must beFalse
+    }
+
     "be zoned date/time" in withJavaTimeConnection() { implicit c =>
       SQL("set-zoned-date-time {p}").on("p" -> ZonedDateTime1).
         execute() must beFalse
@@ -314,6 +335,11 @@ object JavaTimeParameterSpec extends Specification {
     "be one local date/time" in withJavaTimeConnection() { implicit c =>
       SQL("set-local-date-time {p}").onParams(
         pv(LocalDateTime1)).execute() must beFalse
+    }
+
+    "be one local date" in withJavaTimeConnection() { implicit c =>
+      SQL("set-local-date {p}").onParams(
+        pv(LocalDate1)).execute() must beFalse
     }
 
     "be one zoned date/time" in withJavaTimeConnection() { implicit c =>
