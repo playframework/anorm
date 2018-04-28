@@ -18,10 +18,30 @@ object Common extends AutoPlugin {
     resolvers += "Scalaz Bintray Repo" at {
       "http://dl.bintray.com/scalaz/releases" // specs2 depends on scalaz-stream
     },
+    scalacOptions ++= Seq(
+      "-encoding", "UTF-8",
+      "-target:jvm-1.8",
+      "-unchecked",
+      "-deprecation",
+      "-feature",
+      "-Xfatal-warnings",
+      "-Xlint",
+      "-Ywarn-numeric-widen",
+      "-Ywarn-infer-any",
+      "-Ywarn-dead-code",
+      "-Ywarn-unused",
+      "-Ywarn-unused-import",
+      "-Ywarn-value-discard",
+      "-g:vars"
+    ),
+    scalacOptions in (Compile, console) ~= {
+      _.filterNot { opt => opt.startsWith("-X") || opt.startsWith("-Y") }
+    },
+    scalacOptions in (Test, console) ~= {
+      _.filterNot { opt => opt.startsWith("-X") || opt.startsWith("-Y") }
+    },
+    scalacOptions in Test ++= Seq("-Yrangepos"),
     scalacOptions ~= (_.filterNot(_ == "-Xfatal-warnings")),
-    scalacOptions ++= Seq("-unchecked", "-deprecation", "-Xlint",
-      "-Ywarn-unused-import", "-Ywarn-unused", "-Ywarn-dead-code",
-      "-Ywarn-numeric-widen"),
     fork in Test := true,
     mimaPreviousArtifacts := {
       if (scalaVersion.value startsWith "2.12.") Set.empty else {
