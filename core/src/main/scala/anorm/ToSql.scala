@@ -104,8 +104,8 @@ object ToSql {
       sql._1.toString -> sql._2
     }
 
-  @SuppressWarnings(Array("UnusedMethodParameter" /* deprecated */ ))
-  @inline private def traversableToSql[A, T <: Traversable[A]](implicit conv: ToSql[A] = ToSql.missing[A]) = ToSql[T] { values =>
+  //@SuppressWarnings(Array("UnusedMethodParameter" /* deprecated */ ))
+  @inline private def traversableToSql[A, T <: Traversable[A]](implicit conv: ToSql[A]) = ToSql[T] { values =>
     val c: A => (String, Int) =
       if (conv == null) _ => ("?" -> 1) else conv.fragment
 

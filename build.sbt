@@ -43,6 +43,10 @@ lazy val anorm = project
     }.taskValue,
     scalacOptions += "-Xlog-free-terms",
     mimaBinaryIssueFilters ++= Seq(
+      ProblemFilters.exclude[FinalMethodProblem](
+        "anorm.SimpleSql.preparedStatement"),
+      ProblemFilters.exclude[FinalMethodProblem](
+        "anorm.SimpleSql.preparedStatement$default$2"),
       ProblemFilters.exclude[MissingClassProblem]("anorm.MayErr"),
       ProblemFilters.exclude[MissingClassProblem]("anorm.MayErr$"),
       // was sealed:

@@ -572,7 +572,10 @@ sealed trait ToStatementPriority0 {
   @inline private def traversableToStatement[A, T <: Traversable[A]](implicit c: ToStatement[A]) = new ToStatement[T] with NotNullGuard {
     def set(s: PreparedStatement, offset: Int, ps: T) =
       if (ps == (null: Traversable[A])) throw new IllegalArgumentException()
-      else ps.foldLeft(offset) { (i, p) => c.set(s, i, p); i + 1 }
+      else {
+        ps.foldLeft(offset) { (i, p) => c.set(s, i, p); i + 1 }
+        ()
+      }
   }
 
   /**
