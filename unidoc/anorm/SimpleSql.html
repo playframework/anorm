@@ -1119,6 +1119,22 @@ of placeholder in statement.</p><pre><span class="kw">import</span> anorm.toPara
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Sql</dd></dl></div>
+    </li><li name="anorm.Sql#preparedStatement" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="preparedStatement(connection:java.sql.Connection,getGeneratedKeys:Boolean):resource.ManagedResource[java.sql.PreparedStatement]"></a><a id="preparedStatement(Connection,Boolean):ManagedResource[PreparedStatement]"></a>
+      <span class="permalink">
+      <a href="../anorm/SimpleSql.html#preparedStatement(connection:java.sql.Connection,getGeneratedKeys:Boolean):resource.ManagedResource[java.sql.PreparedStatement]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">preparedStatement</span><span class="params">(<span name="connection">connection: <span class="extype" name="java.sql.Connection">Connection</span></span>, <span name="getGeneratedKeys">getGeneratedKeys: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a> = <span class="symbol">false</span></span>)</span><span class="result">: <span class="extype" name="resource.ManagedResource">ManagedResource</span>[<span class="extype" name="java.sql.PreparedStatement">PreparedStatement</span>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Sql</dd></dl></div>
     </li><li name="anorm.Sql#resultSet" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="resultSet(connection:java.sql.Connection):resource.ManagedResource[java.sql.ResultSet]"></a><a id="resultSet(Connection):ManagedResource[ResultSet]"></a>
       <span class="permalink">
@@ -1423,25 +1439,6 @@ using the specified operator.
                 <span class="name">@deprecated</span>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2.5.1)</i> Use <code>foldWhile</code> with empty <a href="ColumnAliaser.html" class="extype" name="anorm.ColumnAliaser">ColumnAliaser</a></p></dd><dt>See also</dt><dd><span class="cmt"><p>#withResult</p></span></dd></dl></div>
-    </li><li name="anorm.Sql#preparedStatement" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="preparedStatement(connection:java.sql.Connection,getGeneratedKeys:Boolean):resource.ManagedResource[java.sql.PreparedStatement]"></a><a id="preparedStatement(Connection,Boolean):ManagedResource[PreparedStatement]"></a>
-      <span class="permalink">
-      <a href="../anorm/SimpleSql.html#preparedStatement(connection:java.sql.Connection,getGeneratedKeys:Boolean):resource.ManagedResource[java.sql.PreparedStatement]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 2.5.2) Do not override. Will be made final">preparedStatement</span><span class="params">(<span name="connection">connection: <span class="extype" name="java.sql.Connection">Connection</span></span>, <span name="getGeneratedKeys">getGeneratedKeys: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a> = <span class="symbol">false</span></span>)</span><span class="result">: <span class="extype" name="resource.ManagedResource">ManagedResource</span>[<span class="extype" name="java.sql.PreparedStatement">PreparedStatement</span>]</span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Sql</dd><dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2.5.2)</i> Do not override. Will be made final</p></dd></dl></div>
     </li><li name="anorm.SimpleSql#using" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="using[U](p:anorm.RowParser[U]):anorm.SimpleSql[U]"></a><a id="using[U](RowParser[U]):SimpleSql[U]"></a>
       <span class="permalink">

@@ -815,7 +815,7 @@ For <code>null</code> value, <code>setNull</code> with <code>VARCHAR</code> is c
       </span>
       
       <p class="shortcomment cmt">Sets a temporal instant on statement.</p><div class="fullcomment"><div class="comment cmt"><p>Sets a temporal instant on statement.</p><pre><span class="kw">import</span> java.time.Instant
-<span class="kw">import</span> anorm.Java8._
+<span class="kw">import</span> anorm._
 
 SQL(<span class="lit">"SELECT * FROM Test WHERE time < {b}"</span>).on('b -&gt; Instant.now)</pre></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="JavaTimeToStatement.html" class="extype" name="anorm.JavaTimeToStatement">JavaTimeToStatement</a></dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -941,9 +941,28 @@ SQL(<span class="lit">"SELECT * FROM Test WHERE time < {b}"</span>).on('b -&gt; 
       </span>
       
       <p class="shortcomment cmt">Sets a local date/time on statement.</p><div class="fullcomment"><div class="comment cmt"><p>Sets a local date/time on statement.</p><pre><span class="kw">import</span> java.time.LocalDateTime
-<span class="kw">import</span> anorm.Java8._
+<span class="kw">import</span> anorm._
 
 SQL(<span class="lit">"SELECT * FROM Test WHERE time < {b}"</span>).on('b -&gt; LocalDateTime.now)</pre></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="JavaTimeToStatement.html" class="extype" name="anorm.JavaTimeToStatement">JavaTimeToStatement</a></dd></dl></div>
+    </li><li name="anorm.JavaTimeToStatement#localDateToStatement" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="localDateToStatement(implicitmeta:anorm.ParameterMetaData[java.time.LocalDate]):anorm.ToStatement[java.time.LocalDate]"></a><a id="localDateToStatement(ParameterMetaData[LocalDate]):ToStatement[LocalDate]"></a>
+      <span class="permalink">
+      <a href="../anorm/ToStatement$.html#localDateToStatement(implicitmeta:anorm.ParameterMetaData[java.time.LocalDate]):anorm.ToStatement[java.time.LocalDate]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">localDateToStatement</span><span class="params">(<span class="implicit">implicit </span><span name="meta">meta: <a href="ParameterMetaData.html" class="extype" name="anorm.ParameterMetaData">ParameterMetaData</a>[<span class="extype" name="java.time.LocalDate">LocalDate</span>]</span>)</span><span class="result">: <a href="ToStatement.html" class="extype" name="anorm.ToStatement">ToStatement</a>[<span class="extype" name="java.time.LocalDate">LocalDate</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Sets a local date on statement.</p><div class="fullcomment"><div class="comment cmt"><p>Sets a local date on statement.</p><pre><span class="kw">import</span> java.time.LocalTime
+<span class="kw">import</span> anorm._
+
+SQL(<span class="lit">"SELECT * FROM Test WHERE time < {b}"</span>).on('b -&gt; LocalDate.now)</pre></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="JavaTimeToStatement.html" class="extype" name="anorm.JavaTimeToStatement">JavaTimeToStatement</a></dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -1298,7 +1317,7 @@ SQL(<span class="lit">"UPDATE tbl SET modified = {ts}"</span>).on('ts -&gt; wrap
       </span>
       
       <p class="shortcomment cmt">Sets a zoned date/time on statement.</p><div class="fullcomment"><div class="comment cmt"><p>Sets a zoned date/time on statement.</p><pre><span class="kw">import</span> java.time.ZonedDateTime
-<span class="kw">import</span> anorm.Java8._
+<span class="kw">import</span> anorm._
 
 SQL(<span class="lit">"SELECT * FROM Test WHERE time < {b}"</span>).on('b -&gt; ZonedDateTime.now)</pre></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="JavaTimeToStatement.html" class="extype" name="anorm.JavaTimeToStatement">JavaTimeToStatement</a></dd></dl></div>
     </li><li name="anorm.ToStatementPriority0.booleanToStatement" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">

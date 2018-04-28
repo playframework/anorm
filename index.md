@@ -52,7 +52,7 @@ You will need to add Anorm and JDBC plugin to your dependencies :
 {% highlight scala %}
 libraryDependencies ++= Seq(
   jdbc,
-  "org.playframework.anorm" %% "anorm" % "2.6.1"
+  "org.playframework.anorm" %% "anorm" % "2.6.2"
 )
 {% endhighlight %}
 
