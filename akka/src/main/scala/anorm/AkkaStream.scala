@@ -110,14 +110,14 @@ object AkkaStream {
         private var cursor: Option[Cursor] = None
         private var counter: Int = 0
 
-        override def preStart() {
+        override def preStart(): Unit = {
           resultSet = sql.unsafeResultSet(connection)
           nextCursor()
         }
 
         override def postStop() = release()
 
-        private def release() {
+        private def release(): Unit = {
           val stmt: Option[java.sql.Statement] = {
             if (resultSet != null && !resultSet.isClosed) {
               val s = resultSet.getStatement
@@ -131,7 +131,7 @@ object AkkaStream {
           }
         }
 
-        private def nextCursor() {
+        private def nextCursor(): Unit = {
           cursor = Sql.unsafeCursor(resultSet, sql.resultSetOnFirstRow, as)
         }
 
