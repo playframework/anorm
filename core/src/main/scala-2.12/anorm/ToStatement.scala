@@ -29,7 +29,7 @@ trait ToStatement[A] extends ToStatementBase[A] { self =>
 object ToStatement extends ToStatementConversions {
   private class FunctionalToStatement[T](
     f: (PreparedStatement, Int, T) => Unit) extends ToStatement[T] {
-    def set(s: PreparedStatement, index: Int, v: T) { f(s, index, v) }
+    def set(s: PreparedStatement, index: Int, v: T): Unit = { f(s, index, v) }
   }
 
   /** Functional factory */
