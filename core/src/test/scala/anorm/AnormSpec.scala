@@ -142,6 +142,53 @@ class AnormSpec extends Specification with H2Database with AnormTest {
         }
     }
 
+    "handle nullable columns" >> {
+      "return instance with defined option" in withQueryResult(rowList2(
+        classOf[Int] -> "id", classOf[String] -> "val") :+ (2, "str")) {
+        implicit c =>
+
+          SQL("SELECT * FROM test").as(
+            SqlParser.int("id") ~ SqlParser.str("val").nullable map {
+              case id ~ v => (id -> v)
+            } single) aka "mapped data" must_== (2 -> Some("str"))
+
+      }
+
+      "return instance with None for null value found" in withQueryResult(
+        rowList2(classOf[Long] -> "id", classOf[String] -> "val") :+ (2, null)) { implicit c =>
+
+          SQL("SELECT * FROM test").as(
+            SqlParser.long("id") ~ SqlParser.str("val").nullable map {
+              case id ~ v => (id -> v)
+            } single) aka "mapped data" must_== (2 -> None)
+
+        }
+
+      "throw exception when column dosen't exist" in withQueryResult(
+        rowList1(classOf[Long] -> "id") :+ 123l) { implicit c =>
+
+          SQL("SELECT * FROM test").as(
+            SqlParser.long("id") ~ SqlParser.str("val").nullable map {
+              case id ~ v => (id -> v)
+            } single) aka "parser" must throwA[Exception].like {
+              case e: Exception => e.getMessage aka "error" must startWith(
+                "'val' not found, available columns: id, id")
+            }
+        }
+
+      "throw exception when type doesn't match" in withQueryResult(
+        fooBarTable :+ (1l, "str", 3)) { implicit c =>
+
+          SQL("SELECT * FROM test").as(
+            SqlParser.long("id") ~ SqlParser.int("foo").nullable map {
+              case id ~ v => (id -> v)
+            } single) aka "parser" must throwA[Exception].like {
+              case e: Exception => e.getMessage aka "error" must startWith(
+                "TypeDoesNotMatch(Cannot convert str:")
+            }
+        }
+    }
+
     "throw exception when type doesn't match" in withQueryResult("str") {
       implicit c =>
         SQL("SELECT * FROM test").as(scalar[Int].single).
