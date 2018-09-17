@@ -621,6 +621,19 @@ trait RowParser[+A] extends (Row => SqlResult[A]) { parent =>
     }
   }
 
+  /**
+   * Returns a row parser for nullable column,
+   * that will turn null into None.
+   */
+  def nullable: RowParser[Option[A]] = RowParser {
+    parent(_) match {
+      case Success(a) => Success(Some(a))
+      case Error(UnexpectedNullableFound(_)) =>
+        Success(None)
+      case e @ Error(_) => e
+    }
+  }
+
   /** Alias for [[flatMap]] */
   def >>[B](f: A => RowParser[B]): RowParser[B] = flatMap(f)
 
