@@ -16,14 +16,17 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    * val count = SQL("select count(*) from Country").as(scalar[Long].single)
    * }}}
    */
-  def scalar[T](implicit transformer: Column[T]): RowParser[T] =
+  def scalar[T](implicit @deprecatedName('transformer) c: Column[T]): RowParser[T] =
     new ScalarRowParser[T] {
       def apply(row: Row): SqlResult[T] = {
         ((for {
           m <- row.metaData.ms.headOption
           v <- row.data.headOption
-        } yield v -> m) toRight NoColumnsInReturnedResult).right.
-          flatMap(transformer.tupled).fold(Error(_), Success(_))
+        } yield v -> m) toRight NoColumnsInReturnedResult).right.flatMap {
+          case in @ (_, m) =>
+            parseColumn(row, m.column.qualified, c, in)
+
+        }.fold(Error(_), Success(_))
       }
     }
 
@@ -442,11 +445,11 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    *   as(get[String]("title").single)
    * }}}
    */
-  def get[T](name: String)(implicit extractor: Column[T]): RowParser[T] =
+  def get[T](name: String)(implicit @deprecatedName('extractor) c: Column[T]): RowParser[T] =
     RowParser { row =>
       (for {
-        col <- row.get(name).right
-        res <- extractor.tupled(col).right
+        in <- row.get(name).right
+        res <- parseColumn(row, name, c, in).right
       } yield res).fold(Error(_), Success(_))
     }
 
@@ -464,12 +467,12 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    *   } *)
    * }}}
    */
-  def get[T](position: Int)(implicit extractor: Column[T]): RowParser[T] =
+  def get[T](position: Int)(implicit @deprecatedName('extractor) c: Column[T]): RowParser[T] =
     RowParser { row =>
       (for {
-        col <- row.getIndexed(position - 1).right
-        result <- extractor.tupled(col).right
-      } yield result).fold(e => Error(e), a => Success(a))
+        in <- row.getIndexed(position - 1).right
+        res <- parseColumn(row, in._2.column.qualified, c, in).right
+      } yield res).fold(Error(_), Success(_))
     }
 
   /**
@@ -488,6 +491,13 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    */
   def matches[T: Column](column: String, value: T): RowParser[Boolean] =
     get[T](column).?.map(_.fold(false) { _ == value })
+
+  @inline private def parseColumn[T](row: Row, name: String, c: Column[T], input: (Any, MetaDataItem)): Either[SqlRequestError, T] = c.tupled(input).left.map {
+    case UnexpectedNullableFound(_) =>
+      ColumnNotFound(name, row)
+
+    case cause => cause
+  }
 }
 
 @deprecated("Do not use these combinators", "2.5.4")
@@ -615,8 +625,9 @@ trait RowParser[+A] extends (Row => SqlResult[A]) { parent =>
   def ? : RowParser[Option[A]] = RowParser {
     parent(_) match {
       case Success(a) => Success(Some(a))
-      case Error(UnexpectedNullableFound(_)) | Error(ColumnNotFound(_, _)) =>
+      case Error(ColumnNotFound(_, _)) =>
         Success(None)
+
       case e @ Error(_) => e
     }
   }

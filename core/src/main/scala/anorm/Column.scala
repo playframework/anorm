@@ -35,7 +35,7 @@ trait Column[A] extends ((Any, MetaDataItem) => Either[SqlRequestError, A]) { pa
    * val myEnumCol: Column[MyEnum] = Column.of[Int].mapResult {
    *   case 1 => Right(Foo) // `Right` means successful
    *   case 2 => Right(Bar)
-   *   case _ => Left(SqlMappingError("Unexpected"))
+   *   case _ => Left(TypeDoesNotMatch("Unexpected"))
    * }
    *
    * def find(id: String) =
@@ -529,7 +529,7 @@ object Column extends JodaColumn with JavaTimeColumn {
   }
 
   @inline private def streamBytes(in: InputStream): Either[SqlRequestError, Array[Byte]] = managed(in).acquireFor(streamToBytes(_)).fold({ errs =>
-    Left(SqlMappingError(errs.headOption.
+    Left(TypeDoesNotMatch(errs.headOption.
       fold("Fails to read binary stream")(_.getMessage)))
   }, Right(_))
 
