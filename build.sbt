@@ -18,6 +18,13 @@ lazy val `anorm-tokenizer` = project
   .enablePlugins(PlayLibrary)
   .settings(Seq(
     scalariformAutoformat := true,
+    mimaPreviousArtifacts := {
+      if (scalaVersion.value startsWith "2.13") {
+        Set.empty
+      } else {
+        mimaPreviousArtifacts.value
+      }
+    },
     mimaBinaryIssueFilters ++= Seq( // private[anorm]
       ProblemFilters.exclude[IncompatibleMethTypeProblem]("anorm.TokenizedStatement.apply"),
       ProblemFilters.exclude[IncompatibleMethTypeProblem]("anorm.TokenizedStatement.tokenize"),
@@ -42,7 +49,18 @@ lazy val anorm = project
       Seq(GFA((sourceManaged in Compile).value / "anorm"))
     }.taskValue,
     scalacOptions += "-Xlog-free-terms",
+    mimaPreviousArtifacts := {
+      if (scalaVersion.value startsWith "2.13") {
+        Set.empty
+      } else {
+        mimaPreviousArtifacts.value
+      }
+    },
     mimaBinaryIssueFilters ++= Seq(
+      ProblemFilters.exclude[ReversedMissingMethodProblem](
+        "anorm.ToStatementPriority0.urlToStatement"),
+      ProblemFilters.exclude[ReversedMissingMethodProblem](
+        "anorm.ToStatementPriority0.uriToStatement"),
       ProblemFilters.exclude[FinalMethodProblem](
         "anorm.SimpleSql.preparedStatement"),
       ProblemFilters.exclude[FinalMethodProblem](
@@ -155,15 +173,15 @@ lazy val `anorm-parent` = (project in file("."))
   .enablePlugins(PlayRootProject, ScalaUnidocPlugin)
   .aggregate(`anorm-tokenizer`, anorm, `anorm-iteratee`, `anorm-akka`, `anorm-postgres`)
   .settings(
-  scalaVersion in ThisBuild := "2.12.4",
-    crossScalaVersions in ThisBuild := Seq("2.11.12", "2.12.4"),
+  scalaVersion in ThisBuild := "2.12.7",
+    crossScalaVersions in ThisBuild := Seq("2.11.12", "2.12.7"),
     mimaPreviousArtifacts := Set.empty)
 
 lazy val docs = project
   .in(file("docs"))
   .enablePlugins(PlayDocsPlugin)
   .settings(
-  scalaVersion := "2.12.4"
+  scalaVersion := "2.12.7"
 ).dependsOn(anorm)
 
 Scapegoat.settings

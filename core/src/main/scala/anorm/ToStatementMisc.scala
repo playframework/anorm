@@ -11,6 +11,8 @@ import java.lang.{
 
 import java.util.{ UUID => JUUID }
 
+import java.net.{ URI, URL }
+
 import java.math.{ BigDecimal => JBigDec, BigInteger }
 
 import java.sql.{ PreparedStatement, Timestamp }
@@ -474,6 +476,38 @@ sealed trait ToStatementPriority0 {
     val jdbcType = implicitly[ParameterMetaData[JUUID]].jdbcType
     def set(s: PreparedStatement, index: Int, id: JUUID): Unit =
       if (id != (null: JUUID)) s.setString(index, id.toString)
+      else s.setNull(index, jdbcType)
+  }
+
+  /**
+   * Sets URI as statement parameter.
+   * For `null` value, `setNull` with `VARCHAR` is called on statement.
+   *
+   * {{{
+   * SQL("INSERT INTO lang_tbl(id, name) VALUE ({i}, {n})").
+   *   on("i" -> new URI("https://github.com/playframework/"), "n" -> "lang")
+   * }}}
+   */
+  implicit object uriToStatement extends ToStatement[URI] {
+    val jdbcType = implicitly[ParameterMetaData[URI]].jdbcType
+    def set(s: PreparedStatement, index: Int, uri: URI): Unit =
+      if (uri != (null: URI)) s.setString(index, uri.toString)
+      else s.setNull(index, jdbcType)
+  }
+
+  /**
+   * Sets URL as statement parameter.
+   * For `null` value, `setNull` with `VARCHAR` is called on statement.
+   *
+   * {{{
+   * SQL("INSERT INTO lang_tbl(id, name) VALUE ({i}, {n})").
+   *   on("i" -> new URL("https://github.com/playframework/"), "n" -> "lang")
+   * }}}
+   */
+  implicit object urlToStatement extends ToStatement[URL] {
+    val jdbcType = implicitly[ParameterMetaData[URL]].jdbcType
+    def set(s: PreparedStatement, index: Int, url: URL): Unit =
+      if (url != (null: URL)) s.setString(index, url.toString)
       else s.setNull(index, jdbcType)
   }
 

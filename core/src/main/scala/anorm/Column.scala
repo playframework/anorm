@@ -4,9 +4,14 @@
 package anorm
 
 import java.io.{ ByteArrayInputStream, InputStream }
+
 import java.math.{ BigDecimal => JBigDec, BigInteger }
+
 import java.util.{ Date, UUID }
+
 import java.sql.Timestamp
+
+import java.net.{ URL, URI }
 
 import scala.util.{ Failure, Success => TrySuccess, Try }
 import scala.util.control.NonFatal
@@ -340,6 +345,22 @@ object Column extends JodaColumn with JavaTimeColumn {
         case Failure(ex) => Left(TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to UUID for column $qualified: ${ex.getMessage}"))
       }
       case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to UUID for column $qualified"))
+    }
+  }
+
+  implicit val columnToURI: Column[URI] = columnToString.mapResult { str =>
+    try {
+      Right(new URI(str))
+    } catch {
+      case NonFatal(cause) => Left(SqlRequestError(cause))
+    }
+  }
+
+  implicit val columnToURL: Column[URL] = columnToString.mapResult { str =>
+    try {
+      Right(new URL(str))
+    } catch {
+      case NonFatal(cause) => Left(SqlRequestError(cause))
     }
   }
 

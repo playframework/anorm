@@ -13,6 +13,8 @@ import java.lang.{
 
 import java.util.{ Date => JDate, UUID => JUUID }
 
+import java.net.{ URI, URL }
+
 import java.math.{ BigDecimal => JBigDec, BigInteger }
 
 import java.sql.Timestamp
@@ -161,6 +163,16 @@ class ParameterMetaDataSpec extends org.specs2.mutable.Specification {
 
       "of type UUID" in {
         Option(implicitly[ParameterMetaData[JUUID]].sqlType).
+          aka("SQL type") must beSome
+      }
+
+      "of type URI" in {
+        Option(implicitly[ParameterMetaData[URI]].sqlType).
+          aka("SQL type") must beSome
+      }
+
+      "of type URL" in {
+        Option(implicitly[ParameterMetaData[URL]].sqlType).
           aka("SQL type") must beSome
       }
 
