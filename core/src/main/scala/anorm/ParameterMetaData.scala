@@ -15,6 +15,8 @@ import java.math.{ BigDecimal => JBigDec, BigInteger }
 
 import java.sql.{ Types, Timestamp }
 
+import java.net.{ URI, URL }
+
 /** Parameter meta data for type `T` */
 @annotation.implicitNotFound("Meta data not found for parameter of type ${T}: `anorm.ParameterMetaData[${T}]` required; See https://github.com/playframework/anorm/blob/master/docs/manual/working/scalaGuide/main/sql/ScalaAnorm.md#parameters")
 trait ParameterMetaData[T] {
@@ -184,6 +186,16 @@ object ParameterMetaData extends JavaTimeParameterMetaData {
   }
 
   implicit object UUIDParameterMetaData extends ParameterMetaData[JUUID] {
+    val sqlType = StringParameterMetaData.sqlType
+    val jdbcType = StringParameterMetaData.jdbcType
+  }
+
+  implicit object URIParameterMetaData extends ParameterMetaData[URI] {
+    val sqlType = StringParameterMetaData.sqlType
+    val jdbcType = StringParameterMetaData.jdbcType
+  }
+
+  implicit object URLParameterMetaData extends ParameterMetaData[URL] {
     val sqlType = StringParameterMetaData.sqlType
     val jdbcType = StringParameterMetaData.jdbcType
   }

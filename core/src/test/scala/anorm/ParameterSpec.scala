@@ -53,6 +53,10 @@ class ParameterSpec
   val Timestamp1 = { val ts = new Timestamp(123l); ts.setNanos(123456789); ts }
   val TsWrapper1 = new { val getTimestamp = Timestamp1 }
   val uuid1 = java.util.UUID.randomUUID; val Uuid1str = uuid1.toString
+  val uri1 = new java.net.URI("https://github.com/playframework/")
+  val Uri1str = uri1.toString
+  val url1 = new java.net.URL("https://github.com/playframework/")
+  val Url1str = url1.toString
   val SqlArr = ParamMeta.Array
   val SqlStr = ParamMeta.Str
   val SqlBool = ParamMeta.Bool
@@ -187,10 +191,22 @@ class ParameterSpec
       DParam(null, SqlStr) :: Nil) => 1 /* ok */
     case UpdateExecution("set-seqp cat = ? OR cat = ? OR cat = ?",
       DParam(1.2f, _) :: DParam(23.4f, _) :: DParam(5.6f, _) :: Nil) => 1 // ok
+
     case UpdateExecution("set-uuid ?",
       DParam(Uuid1str, SqlStr) :: Nil) => 1 /* case ok */
     case UpdateExecution("set-null-uuid ?",
       DParam(null, SqlStr) :: Nil) => 1 /* case ok */
+
+    case UpdateExecution("set-uri ?",
+      DParam(Uri1str, SqlStr) :: Nil) => 1 /* case ok */
+    case UpdateExecution("set-null-uri ?",
+      DParam(null, SqlStr) :: Nil) => 1 /* case ok */
+
+    case UpdateExecution("set-url ?",
+      DParam(Url1str, SqlStr) :: Nil) => 1 /* case ok */
+    case UpdateExecution("set-null-url ?",
+      DParam(null, SqlStr) :: Nil) => 1 /* case ok */
+
     case UpdateExecution("set-array ?", DParam(
       a: JdbcArray, SqlArr) :: Nil) if (
       a.getArray.asInstanceOf[Array[_]].toList == List("a", "b", "c")) => 1 // ok
@@ -525,18 +541,52 @@ class ParameterSpec
       }
     }
 
-    "be UUID" in withConnection() { implicit c =>
-      SQL("set-uuid {p}").on("p" -> uuid1).execute() must beFalse
+    "be UUID" >> {
+      "with some value" in withConnection() { implicit c =>
+        SQL("set-uuid {p}").on("p" -> uuid1).execute() must beFalse
+      }
+
+      "with null value" in withConnection() { implicit c =>
+        SQL("set-null-uuid {p}").
+          on("p" -> null.asInstanceOf[java.util.UUID]).execute() must beFalse
+      }
+
+      "with undefined value" in withConnection() { implicit c =>
+        SQL("set-null-uuid {p}").
+          on("p" -> Option.empty[java.util.UUID]).execute() must beFalse
+      }
     }
 
-    "be null UUID" in withConnection() { implicit c =>
-      SQL("set-null-uuid {p}").
-        on("p" -> null.asInstanceOf[java.util.UUID]).execute() must beFalse
+    "be URI" >> {
+      "with some value" in withConnection() { implicit c =>
+        SQL("set-uri {p}").on("p" -> uri1).execute() must beFalse
+      }
+
+      "with null value" in withConnection() { implicit c =>
+        SQL("set-null-uri {p}").
+          on("p" -> null.asInstanceOf[java.net.URI]).execute() must beFalse
+      }
+
+      "with undefined value" in withConnection() { implicit c =>
+        SQL("set-null-uri {p}").
+          on("p" -> Option.empty[java.net.URI]).execute() must beFalse
+      }
     }
 
-    "be undefined UUID" in withConnection() { implicit c =>
-      SQL("set-null-uuid {p}").
-        on("p" -> Option.empty[java.util.UUID]).execute() must beFalse
+    "be URL" >> {
+      "with some value" in withConnection() { implicit c =>
+        SQL("set-url {p}").on("p" -> url1).execute() must beFalse
+      }
+
+      "with null value" in withConnection() { implicit c =>
+        SQL("set-null-url {p}").
+          on("p" -> null.asInstanceOf[java.net.URL]).execute() must beFalse
+      }
+
+      "with undefined value" in withConnection() { implicit c =>
+        SQL("set-null-url {p}").
+          on("p" -> Option.empty[java.net.URL]).execute() must beFalse
+      }
     }
 
     "be multiple (string, Java big decimal)" in withConnection() {

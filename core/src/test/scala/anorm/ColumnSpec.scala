@@ -3,8 +3,12 @@ package anorm
 import java.io.{ ByteArrayInputStream, InputStream }
 import java.sql.{ Array => SqlArray }
 import javax.sql.rowset.serial.{ SerialBlob, SerialClob }
+
 import java.math.BigInteger
+
 import java.util.UUID
+
+import java.net.{ URL, URI }
 
 import scala.util.Random
 
@@ -697,6 +701,48 @@ class ColumnSpec
       SQL("SELECT uuid").as(scalar[UUID].single).
         aka("parsed uuid") must throwA[Exception](message =
           "TypeDoesNotMatch\\(Cannot convert.*Boolean to UUID")
+    }
+  }
+
+  "Column mapped as URI" should {
+    val uri = new URI("https://github.com/playframework/")
+    val uriStr = uri.toString
+
+    "be parsed from a valid string" in withQueryResult(stringList :+ uriStr) { implicit con =>
+      SQL("SELECT uri").as(scalar[URI].single).
+        aka("parsed uri") must_== uri
+    }
+
+    "not be parsed from an invalid string" in withQueryResult(stringList :+ " *invalid") { implicit con =>
+      SQL("SELECT uri").as(scalar[URI].single).
+        aka("parsed uri") must throwA[Exception]("Illegal character.*")
+    }
+
+    "not be mapped from an unknown type" in withQueryResult(booleanList :+ false) { implicit con =>
+      SQL("SELECT uri").as(scalar[URI].single).
+        aka("parsed uri") must throwA[Exception](message =
+          "TypeDoesNotMatch\\(Cannot convert.*Boolean.*")
+    }
+  }
+
+  "Column mapped as URL" should {
+    val uri = new URL("https://github.com/playframework/")
+    val uriStr = uri.toString
+
+    "be parsed from a valid string" in withQueryResult(stringList :+ uriStr) { implicit con =>
+      SQL("SELECT uri").as(scalar[URL].single).
+        aka("parsed uri") must_== uri
+    }
+
+    "not be parsed from an invalid string" in withQueryResult(stringList :+ " *invalid") { implicit con =>
+      SQL("SELECT uri").as(scalar[URL].single).
+        aka("parsed uri") must throwA[Exception]("no protocol:.*")
+    }
+
+    "not be mapped from an unknown type" in withQueryResult(booleanList :+ false) { implicit con =>
+      SQL("SELECT uri").as(scalar[URL].single).
+        aka("parsed uri") must throwA[Exception](message =
+          "TypeDoesNotMatch\\(Cannot convert.*Boolean.*")
     }
   }
 
