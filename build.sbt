@@ -5,12 +5,17 @@ import com.typesafe.tools.mima.plugin.MimaKeys.{
   mimaBinaryIssueFilters, mimaPreviousArtifacts
 }
 
+scalaVersion in ThisBuild := "2.12.6"
+
+crossScalaVersions in ThisBuild := Seq(
+  "2.11.12", (scalaVersion in ThisBuild).value)
+
 val specs2Test = Seq(
   "specs2-core",
   "specs2-junit"
-).map("org.specs2" %% _ % "4.0.1" % Test)
+).map("org.specs2" %% _ % "4.3.2" % Test)
 
-lazy val acolyteVersion = "1.0.47"
+lazy val acolyteVersion = "1.0.49"
 lazy val acolyte = "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test
 
 lazy val `anorm-tokenizer` = project
@@ -147,7 +152,7 @@ lazy val `anorm-postgres` = (project in file("postgres"))
     mimaPreviousArtifacts := Set.empty,
     libraryDependencies ++= Seq(
       "org.postgresql" % "postgresql" % pgVer,
-      "com.typesafe.play" %% "play-json" % "2.6.6"
+      "com.typesafe.play" %% "play-json" % "2.6.7"
     ) ++ specs2Test :+ acolyte
   )).dependsOn(anorm)
 
@@ -155,15 +160,13 @@ lazy val `anorm-parent` = (project in file("."))
   .enablePlugins(PlayRootProject, ScalaUnidocPlugin)
   .aggregate(`anorm-tokenizer`, anorm, `anorm-iteratee`, `anorm-akka`, `anorm-postgres`)
   .settings(
-  scalaVersion in ThisBuild := "2.12.4",
-    crossScalaVersions in ThisBuild := Seq("2.11.12", "2.12.4"),
     mimaPreviousArtifacts := Set.empty)
 
 lazy val docs = project
   .in(file("docs"))
   .enablePlugins(PlayDocsPlugin)
   .settings(
-  scalaVersion := "2.12.4"
+  scalaVersion := "2.12.6"
 ).dependsOn(anorm)
 
 Scapegoat.settings

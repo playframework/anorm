@@ -60,6 +60,7 @@ object ColumnNotFound {
     ColumnNotFound(column, possibilities.toSeq)
 }
 
+// TODO: No longer be SqlRequestError, but a ColumnError (new hierarchy)
 case class UnexpectedNullableFound(reason: String) extends SqlRequestError {
   lazy val message = s"UnexpectedNullableFound($reason)"
   override lazy val toString = message
@@ -70,6 +71,7 @@ case class SqlMappingError(reason: String) extends SqlRequestError {
   override lazy val toString = message
 }
 
+// TODO: No longer be SqlRequestError, but a ColumnError (new hierarchy)
 case class TypeDoesNotMatch(reason: String) extends SqlRequestError {
   lazy val message = s"TypeDoesNotMatch($reason)"
   override lazy val toString = message
