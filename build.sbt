@@ -170,7 +170,7 @@ lazy val `anorm-postgres` = (project in file("postgres"))
     mimaPreviousArtifacts := Set.empty,
     libraryDependencies ++= Seq(
       "org.postgresql" % "postgresql" % pgVer,
-      "com.typesafe.play" %% "play-json" % "2.6.7" changing()
+      "com.typesafe.play" %% "play-json" % "2.6.7"
     ) ++ specs2Test :+ acolyte
   )).dependsOn(anorm)
 
