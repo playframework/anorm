@@ -6,7 +6,7 @@ jdk:
 scala:
 - 2.12.7
 - 2.11.12
-sudo: false
+sudo: required
 cache:
   directories:
   - $HOME/.ivy2
