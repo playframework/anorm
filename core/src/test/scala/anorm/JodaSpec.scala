@@ -2,19 +2,13 @@ package anorm
 
 import java.sql.{ Date, Timestamp }
 
-import org.joda.time.{ DateTime, LocalDate, LocalDateTime, Instant }
+import acolyte.jdbc.AcolyteDSL.withQueryResult
+import acolyte.jdbc.Implicits._
+import acolyte.jdbc.RowLists.{ dateList, longList, rowList1, timeList, timestampList }
 
 import org.specs2.mutable.Specification
 
-import acolyte.jdbc.RowLists.{
-  dateList,
-  longList,
-  rowList1,
-  timestampList,
-  timeList
-}
-import acolyte.jdbc.AcolyteDSL.withQueryResult
-import acolyte.jdbc.Implicits._
+import org.joda.time.{ DateTime, Instant, LocalDate, LocalDateTime }
 
 import SqlParser.scalar
 
@@ -25,28 +19,28 @@ trait JodaColumnSpec { specs: Specification =>
     "be parsed from date" in withQueryResult(
       dateList :+ new Date(time.getMillis)) { implicit con =>
         SQL("SELECT d").as(scalar[Instant].single).
-          aka("parsed instant") must_== time
+          aka("parsed instant") must_=== time
       }
 
     "be parsed from timestamp" in withQueryResult(
       timestampList :+ new Timestamp(time.getMillis)) { implicit con =>
         SQL("SELECT ts").as(scalar[Instant].single).
           aka("parsed instant") must beLike {
-            case d => d aka "time" must_== time
+            case d => d aka "time" must_=== time
           }
       }
 
     "be parsed from time" in withQueryResult(longList :+ time.getMillis) {
       implicit con =>
         SQL("SELECT time").as(scalar[Instant].single).
-          aka("parsed instant") must_== time
+          aka("parsed instant") must_=== time
     }
 
     "be parsed from timestamp wrapper" >> {
       "with not null value" in withQueryResult(
         rowList1(classOf[TWrapper]) :+ tsw1(time.getMillis)) { implicit con =>
           SQL("SELECT ts").as(scalar[Instant].single).
-            aka("parsed instant") must_== time
+            aka("parsed instant") must_=== time
         }
 
       "with null value" in withQueryResult(
@@ -65,25 +59,25 @@ trait JodaColumnSpec { specs: Specification =>
     "be parsed from date" in withQueryResult(
       dateList :+ new java.sql.Date(time)) { implicit con =>
         SQL("SELECT d").as(scalar[DateTime].single).
-          aka("parsed local date/time") must_== date
+          aka("parsed local date/time") must_=== date
       }
 
     "be parsed from time" in withQueryResult(
       timeList :+ new java.sql.Time(time)) { implicit con =>
         SQL("SELECT ts").as(scalar[DateTime].single).
-          aka("parsed local date/time") must_== date
+          aka("parsed local date/time") must_=== date
       }
 
     "be parsed from timestamp" in withQueryResult(
       timestampList :+ new java.sql.Timestamp(time)) { implicit con =>
         SQL("SELECT ts").as(scalar[DateTime].single).
-          aka("parsed local date/time") must_== date
+          aka("parsed local date/time") must_=== date
       }
 
     "be parsed from numeric time" in withQueryResult(longList :+ time) {
       implicit con =>
         SQL("SELECT time").as(scalar[DateTime].single).
-          aka("parsed local date/time") must_== date
+          aka("parsed local date/time") must_=== date
 
     }
 
@@ -91,7 +85,7 @@ trait JodaColumnSpec { specs: Specification =>
       "with not null value" in withQueryResult(
         rowList1(classOf[TWrapper]) :+ tsw1(time)) { implicit con =>
           SQL("SELECT ts").as(scalar[DateTime].single).
-            aka("parsed local date/time") must_== date
+            aka("parsed local date/time") must_=== date
         }
 
       "with null value" in withQueryResult(
@@ -110,25 +104,25 @@ trait JodaColumnSpec { specs: Specification =>
     "be parsed from date" in withQueryResult(
       dateList :+ new java.sql.Date(time)) { implicit con =>
         SQL("SELECT d").as(scalar[LocalDateTime].single).
-          aka("parsed local date/time") must_== date
+          aka("parsed local date/time") must_=== date
       }
 
     "be parsed from time" in withQueryResult(
       timeList :+ new java.sql.Time(time)) { implicit con =>
         SQL("SELECT ts").as(scalar[LocalDateTime].single).
-          aka("parsed local date/time") must_== date
+          aka("parsed local date/time") must_=== date
       }
 
     "be parsed from timestamp" in withQueryResult(
       timestampList :+ new java.sql.Timestamp(time)) { implicit con =>
         SQL("SELECT ts").as(scalar[LocalDateTime].single).
-          aka("parsed local date/time") must_== date
+          aka("parsed local date/time") must_=== date
       }
 
     "be parsed from numeric time" in withQueryResult(longList :+ time) {
       implicit con =>
         SQL("SELECT time").as(scalar[LocalDateTime].single).
-          aka("parsed local date/time") must_== date
+          aka("parsed local date/time") must_=== date
 
     }
 
@@ -136,7 +130,7 @@ trait JodaColumnSpec { specs: Specification =>
       "with not null value" in withQueryResult(
         rowList1(classOf[TWrapper]) :+ tsw1(time)) { implicit con =>
           SQL("SELECT ts").as(scalar[LocalDateTime].single).
-            aka("parsed local date/time") must_== date
+            aka("parsed local date/time") must_=== date
         }
 
       "with null value" in withQueryResult(
@@ -155,25 +149,25 @@ trait JodaColumnSpec { specs: Specification =>
     "be parsed from date" in withQueryResult(
       dateList :+ new java.sql.Date(time)) { implicit con =>
         SQL("SELECT d").as(scalar[LocalDate].single).
-          aka("parsed local date/time") must_== date
+          aka("parsed local date/time") must_=== date
       }
 
     "be parsed from time" in withQueryResult(
       timeList :+ new java.sql.Time(time)) { implicit con =>
         SQL("SELECT ts").as(scalar[LocalDate].single).
-          aka("parsed local date/time") must_== date
+          aka("parsed local date/time") must_=== date
       }
 
     "be parsed from timestamp" in withQueryResult(
       timestampList :+ new java.sql.Timestamp(time)) { implicit con =>
         SQL("SELECT ts").as(scalar[LocalDate].single).
-          aka("parsed local date/time") must_== date
+          aka("parsed local date/time") must_=== date
       }
 
     "be parsed from numeric time" in withQueryResult(longList :+ time) {
       implicit con =>
         SQL("SELECT time").as(scalar[LocalDate].single).
-          aka("parsed local date/time") must_== date
+          aka("parsed local date/time") must_=== date
 
     }
 
@@ -181,7 +175,7 @@ trait JodaColumnSpec { specs: Specification =>
       "with not null value" in withQueryResult(
         rowList1(classOf[TWrapper]) :+ tsw1(time)) { implicit con =>
           SQL("SELECT ts").as(scalar[LocalDate].single).
-            aka("parsed local date/time") must_== date
+            aka("parsed local date/time") must_=== date
         }
 
       "with null value" in withQueryResult(

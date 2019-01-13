@@ -1,7 +1,7 @@
 package anorm
 
-import acolyte.jdbc.RowLists.rowList3
 import acolyte.jdbc.Implicits._
+import acolyte.jdbc.RowLists.rowList3
 
 class MetaDataSpec extends org.specs2.mutable.Specification {
   "Meta-data" title
@@ -39,7 +39,7 @@ class MetaDataSpec extends org.specs2.mutable.Specification {
 
       "without aliaser" in {
         MetaData.parse(rs, ColumnAliaser.empty).
-          aka("metadata") must_== MetaData(List(item1, item2, item3))
+          aka("metadata") must_=== MetaData(List(item1, item2, item3))
       }
 
       "with partial aliaser" in {
@@ -51,7 +51,7 @@ class MetaDataSpec extends org.specs2.mutable.Specification {
         MetaData.parse(rs, ColumnAliaser({
           case (1, _) => "my_id"
           case (_, ColumnName(".foo", _)) => "prefix.foo"
-        })) must_== MetaData(List(itemA, itemB, item3))
+        })) must_=== MetaData(List(itemA, itemB, item3))
       }
 
       "with positional aliaser" in {
@@ -63,7 +63,7 @@ class MetaDataSpec extends org.specs2.mutable.Specification {
         MetaData.parse(rs, ColumnAliaser.perPositions((2 to 3).toSet) {
           case (2, _) => "prefix.foo"
           case _ => "barbar"
-        }) must_== MetaData(List(item1, itemB, itemC))
+        }) must_=== MetaData(List(item1, itemB, itemC))
       }
 
       "with pattern aliaser #1" in {
@@ -73,7 +73,7 @@ class MetaDataSpec extends org.specs2.mutable.Specification {
           item3.column.copy(alias = Some("prefix.bar")))
 
         MetaData.parse(rs, ColumnAliaser.
-          withPattern((2 to 3).toSet, "prefix.")) must_== MetaData(
+          withPattern((2 to 3).toSet, "prefix.")) must_=== MetaData(
           List(item1, itemB, itemC))
       }
 
@@ -82,7 +82,7 @@ class MetaDataSpec extends org.specs2.mutable.Specification {
           item2.column.copy(alias = Some("prefix.foo")))
 
         MetaData.parse(rs, ColumnAliaser.
-          withPattern1("prefix.")(2, 2)) must_== MetaData(
+          withPattern1("prefix.")(2, 2)) must_=== MetaData(
           List(item1, itemB, item3))
       }
     }

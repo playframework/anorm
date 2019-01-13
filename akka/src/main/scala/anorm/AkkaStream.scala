@@ -3,6 +3,7 @@ package anorm
 import java.sql.Connection
 
 import scala.concurrent.{ Future, Promise }
+
 import akka.stream.Materializer
 import akka.stream.scaladsl.{ Source }
 

@@ -1,10 +1,10 @@
 package anorm
 
-import SqlParser.{ bool, str, int, long, get }
-
-import acolyte.jdbc.RowLists._
 import acolyte.jdbc.AcolyteDSL.withQueryResult
 import acolyte.jdbc.Implicits._
+import acolyte.jdbc.RowLists._
+
+import SqlParser.{ bool, str, int, long, get }
 
 class TupleFlattenerSpec extends org.specs2.mutable.Specification {
   "Tuple flattener" title
@@ -16,7 +16,7 @@ class TupleFlattenerSpec extends org.specs2.mutable.Specification {
       withQueryResult(schema :+ ("A", 2)) { implicit c =>
         SQL("SELECT * FROM test").as(
           str("A") ~ int("B") map (SqlParser.flatten) single).
-          aka("flatten columns") must_== Tuple2("A", 2)
+          aka("flatten columns") must_=== Tuple2("A", 2)
 
       }
     }
@@ -27,7 +27,7 @@ class TupleFlattenerSpec extends org.specs2.mutable.Specification {
       withQueryResult(schema :+ ("A", 2, 3L)) { implicit c =>
         SQL("SELECT * FROM test").as(
           str("A") ~ int("B") ~ long("C") map (SqlParser.flatten) single).
-          aka("flatten columns") must_== Tuple3("A", 2, 3L)
+          aka("flatten columns") must_=== Tuple3("A", 2, 3l)
 
       }
     }
@@ -35,10 +35,10 @@ class TupleFlattenerSpec extends org.specs2.mutable.Specification {
     "be flatten from 4 columns to Tuple4" in {
       val schema = rowList4(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D")
 
-      withQueryResult(schema :+ ("A", 2, 3L, 4.56D)) { implicit c =>
+      withQueryResult(schema :+ ("A", 2, 3L, 4.56d)) { implicit c =>
         SQL("SELECT * FROM test").as(
           str("A") ~ int("B") ~ long("C") ~ get[Double]("D") map (SqlParser.flatten) single).
-          aka("flatten columns") must_== Tuple4("A", 2, 3L, 4.56D)
+          aka("flatten columns") must_=== Tuple4("A", 2, 3L, 4.56d)
 
       }
     }
@@ -49,7 +49,7 @@ class TupleFlattenerSpec extends org.specs2.mutable.Specification {
       withQueryResult(schema :+ ("A", 2, 3L, 4.56D, 9.toShort)) { implicit c =>
         SQL("SELECT * FROM test").as(
           str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") map (SqlParser.flatten) single).
-          aka("flatten columns") must_== Tuple5("A", 2, 3L, 4.56D, 9.toShort)
+          aka("flatten columns") must_=== Tuple5("A", 2, 3L, 4.56D, 9.toShort)
 
       }
     }
@@ -60,7 +60,7 @@ class TupleFlattenerSpec extends org.specs2.mutable.Specification {
       withQueryResult(schema :+ ("A", 2, 3L, 4.56D, 9.toShort, 10.toByte)) { implicit c =>
         SQL("SELECT * FROM test").as(
           str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") map (SqlParser.flatten) single).
-          aka("flatten columns") must_== Tuple6("A", 2, 3L, 4.56D, 9.toShort, 10.toByte)
+          aka("flatten columns") must_=== Tuple6("A", 2, 3L, 4.56D, 9.toShort, 10.toByte)
 
       }
     }
@@ -71,7 +71,7 @@ class TupleFlattenerSpec extends org.specs2.mutable.Specification {
       withQueryResult(schema :+ ("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true)) { implicit c =>
         SQL("SELECT * FROM test").as(
           str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") map (SqlParser.flatten) single).
-          aka("flatten columns") must_== Tuple7("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true)
+          aka("flatten columns") must_=== Tuple7("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true)
 
       }
     }
@@ -82,7 +82,7 @@ class TupleFlattenerSpec extends org.specs2.mutable.Specification {
       withQueryResult(schema :+ ("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B")) { implicit c =>
         SQL("SELECT * FROM test").as(
           str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") map (SqlParser.flatten) single).
-          aka("flatten columns") must_== Tuple8("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B")
+          aka("flatten columns") must_=== Tuple8("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B")
 
       }
     }
@@ -93,7 +93,7 @@ class TupleFlattenerSpec extends org.specs2.mutable.Specification {
       withQueryResult(schema :+ ("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3)) { implicit c =>
         SQL("SELECT * FROM test").as(
           str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") map (SqlParser.flatten) single).
-          aka("flatten columns") must_== Tuple9("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3)
+          aka("flatten columns") must_=== Tuple9("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3)
 
       }
     }
@@ -101,10 +101,10 @@ class TupleFlattenerSpec extends org.specs2.mutable.Specification {
     "be flatten from 10 columns to Tuple10" in {
       val schema = rowList10(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D", classOf[Short] -> "E", classOf[Byte] -> "F", classOf[Boolean] -> "G", classOf[String] -> "H", classOf[Int] -> "I", classOf[Long] -> "J")
 
-      withQueryResult(schema :+ ("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L)) { implicit c =>
+      withQueryResult(schema :+ ("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4l)) { implicit c =>
         SQL("SELECT * FROM test").as(
           str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") map (SqlParser.flatten) single).
-          aka("flatten columns") must_== Tuple10("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L)
+          aka("flatten columns") must_=== Tuple10("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4l)
 
       }
     }
@@ -112,10 +112,10 @@ class TupleFlattenerSpec extends org.specs2.mutable.Specification {
     "be flatten from 11 columns to Tuple11" in {
       val schema = rowList11(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D", classOf[Short] -> "E", classOf[Byte] -> "F", classOf[Boolean] -> "G", classOf[String] -> "H", classOf[Int] -> "I", classOf[Long] -> "J", classOf[Double] -> "K")
 
-      withQueryResult(schema :+ ("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D)) { implicit c =>
+      withQueryResult(schema :+ ("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67d)) { implicit c =>
         SQL("SELECT * FROM test").as(
           str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") map (SqlParser.flatten) single).
-          aka("flatten columns") must_== Tuple11("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D)
+          aka("flatten columns") must_=== Tuple11("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67d)
 
       }
     }
@@ -126,7 +126,7 @@ class TupleFlattenerSpec extends org.specs2.mutable.Specification {
       withQueryResult(schema :+ ("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort)) { implicit c =>
         SQL("SELECT * FROM test").as(
           str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") map (SqlParser.flatten) single).
-          aka("flatten columns") must_== Tuple12("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort)
+          aka("flatten columns") must_=== Tuple12("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort)
 
       }
     }
@@ -137,7 +137,7 @@ class TupleFlattenerSpec extends org.specs2.mutable.Specification {
       withQueryResult(schema :+ ("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte)) { implicit c =>
         SQL("SELECT * FROM test").as(
           str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") map (SqlParser.flatten) single).
-          aka("flatten columns") must_== Tuple13("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte)
+          aka("flatten columns") must_=== Tuple13("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte)
 
       }
     }
@@ -148,7 +148,7 @@ class TupleFlattenerSpec extends org.specs2.mutable.Specification {
       withQueryResult(schema :+ ("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte, false)) { implicit c =>
         SQL("SELECT * FROM test").as(
           str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N") map (SqlParser.flatten) single).
-          aka("flatten columns") must_== Tuple14("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte, false)
+          aka("flatten columns") must_=== Tuple14("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte, false)
 
       }
     }
@@ -159,7 +159,7 @@ class TupleFlattenerSpec extends org.specs2.mutable.Specification {
       withQueryResult(schema :+ ("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte, false, "C")) { implicit c =>
         SQL("SELECT * FROM test").as(
           str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N") ~ str("O") map (SqlParser.flatten) single).
-          aka("flatten columns") must_== Tuple15("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte, false, "C")
+          aka("flatten columns") must_=== Tuple15("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte, false, "C")
 
       }
     }
@@ -170,7 +170,7 @@ class TupleFlattenerSpec extends org.specs2.mutable.Specification {
       withQueryResult(schema :+ ("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte, false, "C", 3)) { implicit c =>
         SQL("SELECT * FROM test").as(
           str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N") ~ str("O") ~ int("P") map (SqlParser.flatten) single).
-          aka("flatten columns") must_== Tuple16("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte, false, "C", 3)
+          aka("flatten columns") must_=== Tuple16("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte, false, "C", 3)
 
       }
     }
@@ -178,10 +178,10 @@ class TupleFlattenerSpec extends org.specs2.mutable.Specification {
     "be flatten from 17 columns to Tuple17" in {
       val schema = rowList17(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D", classOf[Short] -> "E", classOf[Byte] -> "F", classOf[Boolean] -> "G", classOf[String] -> "H", classOf[Int] -> "I", classOf[Long] -> "J", classOf[Double] -> "K", classOf[Short] -> "L", classOf[Byte] -> "M", classOf[Boolean] -> "N", classOf[String] -> "O", classOf[Int] -> "P", classOf[Long] -> "Q")
 
-      withQueryResult(schema :+ ("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte, false, "C", 3, 4L)) { implicit c =>
+      withQueryResult(schema :+ ("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte, false, "C", 3, 4l)) { implicit c =>
         SQL("SELECT * FROM test").as(
           str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N") ~ str("O") ~ int("P") ~ long("Q") map (SqlParser.flatten) single).
-          aka("flatten columns") must_== Tuple17("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte, false, "C", 3, 4L)
+          aka("flatten columns") must_=== Tuple17("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte, false, "C", 3, 4l)
 
       }
     }
@@ -189,10 +189,10 @@ class TupleFlattenerSpec extends org.specs2.mutable.Specification {
     "be flatten from 18 columns to Tuple18" in {
       val schema = rowList18(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D", classOf[Short] -> "E", classOf[Byte] -> "F", classOf[Boolean] -> "G", classOf[String] -> "H", classOf[Int] -> "I", classOf[Long] -> "J", classOf[Double] -> "K", classOf[Short] -> "L", classOf[Byte] -> "M", classOf[Boolean] -> "N", classOf[String] -> "O", classOf[Int] -> "P", classOf[Long] -> "Q", classOf[Double] -> "R")
 
-      withQueryResult(schema :+ ("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte, false, "C", 3, 4L, 5.678D)) { implicit c =>
+      withQueryResult(schema :+ ("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte, false, "C", 3, 4L, 5.678d)) { implicit c =>
         SQL("SELECT * FROM test").as(
           str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N") ~ str("O") ~ int("P") ~ long("Q") ~ get[Double]("R") map (SqlParser.flatten) single).
-          aka("flatten columns") must_== Tuple18("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte, false, "C", 3, 4L, 5.678D)
+          aka("flatten columns") must_=== Tuple18("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte, false, "C", 3, 4L, 5.678d)
 
       }
     }
@@ -203,7 +203,7 @@ class TupleFlattenerSpec extends org.specs2.mutable.Specification {
       withQueryResult(schema :+ ("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte, false, "C", 3, 4L, 5.678D, 16.toShort)) { implicit c =>
         SQL("SELECT * FROM test").as(
           str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N") ~ str("O") ~ int("P") ~ long("Q") ~ get[Double]("R") ~ get[Short]("S") map (SqlParser.flatten) single).
-          aka("flatten columns") must_== Tuple19("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte, false, "C", 3, 4L, 5.678D, 16.toShort)
+          aka("flatten columns") must_=== Tuple19("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte, false, "C", 3, 4L, 5.678D, 16.toShort)
 
       }
     }
@@ -214,7 +214,7 @@ class TupleFlattenerSpec extends org.specs2.mutable.Specification {
       withQueryResult(schema :+ ("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte, false, "C", 3, 4L, 5.678D, 16.toShort, "D")) { implicit c =>
         SQL("SELECT * FROM test").as(
           str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N") ~ str("O") ~ int("P") ~ long("Q") ~ get[Double]("R") ~ get[Short]("S") ~ str("T") map (SqlParser.flatten) single).
-          aka("flatten columns") must_== Tuple20("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte, false, "C", 3, 4L, 5.678D, 16.toShort, "D")
+          aka("flatten columns") must_=== Tuple20("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte, false, "C", 3, 4L, 5.678D, 16.toShort, "D")
 
       }
     }
@@ -225,7 +225,7 @@ class TupleFlattenerSpec extends org.specs2.mutable.Specification {
       withQueryResult(schema :+ ("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte, false, "C", 3, 4L, 5.678D, 16.toShort, "D", 4)) { implicit c =>
         SQL("SELECT * FROM test").as(
           str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N") ~ str("O") ~ int("P") ~ long("Q") ~ get[Double]("R") ~ get[Short]("S") ~ str("T") ~ int("U") map (SqlParser.flatten) single).
-          aka("flatten columns") must_== Tuple21("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte, false, "C", 3, 4L, 5.678D, 16.toShort, "D", 4)
+          aka("flatten columns") must_=== Tuple21("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte, false, "C", 3, 4L, 5.678D, 16.toShort, "D", 4)
 
       }
     }
@@ -233,10 +233,10 @@ class TupleFlattenerSpec extends org.specs2.mutable.Specification {
     "be flatten from 22 columns to Tuple22" in {
       val schema = rowList22(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D", classOf[Short] -> "E", classOf[Byte] -> "F", classOf[Boolean] -> "G", classOf[String] -> "H", classOf[Int] -> "I", classOf[Long] -> "J", classOf[Double] -> "K", classOf[Short] -> "L", classOf[Byte] -> "M", classOf[Boolean] -> "N", classOf[String] -> "O", classOf[Int] -> "P", classOf[Long] -> "Q", classOf[Double] -> "R", classOf[Short] -> "S", classOf[String] -> "T", classOf[Int] -> "U", classOf[Long] -> "V")
 
-      withQueryResult(schema :+ ("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte, false, "C", 3, 4L, 5.678D, 16.toShort, "D", 4, 5L)) { implicit c =>
+      withQueryResult(schema :+ ("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte, false, "C", 3, 4L, 5.678D, 16.toShort, "D", 4, 5l)) { implicit c =>
         SQL("SELECT * FROM test").as(
           str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N") ~ str("O") ~ int("P") ~ long("Q") ~ get[Double]("R") ~ get[Short]("S") ~ str("T") ~ int("U") ~ long("V") map (SqlParser.flatten) single).
-          aka("flatten columns") must_== Tuple22("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte, false, "C", 3, 4L, 5.678D, 16.toShort, "D", 4, 5L)
+          aka("flatten columns") must_=== Tuple22("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte, false, "C", 3, 4L, 5.678D, 16.toShort, "D", 4, 5l)
 
       }
     }

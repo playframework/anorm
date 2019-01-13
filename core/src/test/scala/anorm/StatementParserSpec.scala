@@ -1,13 +1,9 @@
 package anorm
 
-import acolyte.jdbc.{
-  QueryExecution,
-  DefinedParameter => DParam,
-  ParameterMetaData => ParamMeta
-}
-import acolyte.jdbc.RowLists.stringList
+import acolyte.jdbc.{ DefinedParameter => DParam, ParameterMetaData => ParamMeta, QueryExecution }
 import acolyte.jdbc.AcolyteDSL.{ connection, handleQuery, withQueryResult }
 import acolyte.jdbc.Implicits._
+import acolyte.jdbc.RowLists.stringList
 
 class StatementParserSpec extends org.specs2.mutable.Specification {
   "SQL statement parser" title
@@ -56,16 +52,16 @@ class StatementParserSpec extends org.specs2.mutable.Specification {
       Option(c).fold("?" -> 1)(_.fragment(v))
 
     "give single-value '?' SQL fragment" in {
-      frag("str").aka("SQL fragment") mustEqual ("?" -> 1)
+      frag("str").aka("SQL fragment") must_=== ("?" -> 1)
     }
 
     "give multi-value '?, ?, ?' SQL fragment" in {
-      frag(Seq("A", "B", "C")) aka "SQL fragment" mustEqual ("?, ?, ?" -> 3)
+      frag(Seq("A", "B", "C")) aka "SQL fragment" must_=== ("?, ?, ?" -> 3)
     }
 
     "give multi-value 'x=? OR x=? OR x=?' SQL fragment" in {
       frag(SeqParameter(Seq("A", "B", "C"), " OR ", "x=")).
-        aka("SQL fragment") mustEqual ("x=? OR x=? OR x=?" -> 3)
+        aka("SQL fragment") must_=== ("x=? OR x=? OR x=?" -> 3)
     }
   }
 
@@ -81,19 +77,19 @@ class StatementParserSpec extends org.specs2.mutable.Specification {
 
       Sql.query(stmt1.tokens, stmt1.names.toList, Map[String, ParameterValue]("cs" -> List("a", "b"), "id" -> 3), 0, new StringBuilder(), List.empty[(Int, ParameterValue)]) must beSuccessfulTry.like {
         case prepared1 =>
-          prepared1._2 aka "parameters #1" must_== List[(Int, ParameterValue)](
+          prepared1._2 aka "parameters #1" must_=== List[(Int, ParameterValue)](
             0 -> List("a", "b"), 2 -> 3) and {
               Sql.query(stmt2.tokens, stmt2.names.toList, Map[String, ParameterValue]("cs_1" -> "a", "cs_2" -> "b", "id" -> 3), 0, new StringBuilder(), List.empty[(Int, ParameterValue)]) must beSuccessfulTry.like {
                 case prepared2 =>
-                  prepared1._1 aka "sql" must_== prepared2._1 and (
-                    prepared2._2 aka "parameters #2" must_== (
+                  prepared1._1 aka "sql" must_=== prepared2._1 and (
+                    prepared2._2 aka "parameters #2" must_=== (
                       List[(Int, ParameterValue)](0 -> "a", 1 -> "b", 2 -> 3)))
               }
             } and {
               Sql.query(stmt3.tokens, stmt3.names.toList, Map[String, ParameterValue]("cs" -> List("a", "b"), "id" -> 3), 0, new StringBuilder(), List.empty[(Int, ParameterValue)]) must beSuccessfulTry.like {
                 case prepared3 =>
-                  prepared3._1 aka "sql" must_== prepared1._1 and (
-                    prepared3._2 aka "parameters #3" must_== prepared1._2)
+                  prepared3._1 aka "sql" must_=== prepared1._1 and (
+                    prepared3._2 aka "parameters #3" must_=== prepared1._2)
               }
             }
       }
@@ -113,8 +109,8 @@ class StatementParserSpec extends org.specs2.mutable.Specification {
     "properly written as prepared SQL" in {
       Sql.query(stmt.tokens, stmt.names.toList, Map[String, ParameterValue]("id" -> "foo"), 0, new StringBuilder(), List.empty[(Int, ParameterValue)]) must beSuccessfulTry.like {
         case (sql, (0, pv) :: Nil) =>
-          sql must_== "SELECT * FROM name LIKE '%strange' AND id = ?" and (
-            pv must_== implicitly[ParameterValue]("foo"))
+          sql must_=== "SELECT * FROM name LIKE '%strange' AND id = ?" and (
+            pv must_=== ParameterValue.toParameterValue("foo"))
       }
     }
   }
@@ -126,14 +122,14 @@ class StatementParserSpec extends org.specs2.mutable.Specification {
          SELECT * FROM (SELECT 'Hello' AS COL1, 'World' AS COL2) AS MY_TABLE WHERE COL1 LIKE $hell + '{foo} %'
       """
 
-      query.sql.stmt aka "tokenized" must_== TokenizedStatement(List(
+      query.sql.stmt aka "tokenized" must_=== TokenizedStatement(List(
         TokenGroup(List(StringToken("""
          SELECT * FROM (SELECT 'Hello' AS COL1, 'World' AS COL2) AS MY_TABLE WHERE COL1 LIKE """)), Some("_0")),
         TokenGroup(List(StringToken(""" + '{foo} %'
       """)), None)), List("_0")) and {
-        query.sql.paramsInitialOrder aka "parameter names" must_== List("_0")
+        query.sql.paramsInitialOrder aka "parameter names" must_=== List("_0")
       } and {
-        query.params aka "parameters" must_== Map[String, ParameterValue](
+        query.params aka "parameters" must_=== Map[String, ParameterValue](
           "_0" -> "sinki")
       }
     }
@@ -153,7 +149,7 @@ class StatementParserSpec extends org.specs2.mutable.Specification {
 
       lazy val query = SQL"""#$cmd * #$clause #$table WHERE id = ${"id1"} AND code IN (${Seq(2, 5)})"""
 
-      query.sql.stmt aka "tokenized statement" must_== TokenizedStatement(List(TokenGroup(List(StringToken("SELECT"), StringToken(" * "), StringToken("FROM"), StringToken(" "), StringToken("Test"), StringToken(" WHERE id = ")), Some("_0")), TokenGroup(List(StringToken(" AND code IN (")), Some("_1")), TokenGroup(List(StringToken(")")), None)), List("_0", "_1")) and (query.as(SqlParser.scalar[String].single) must_== "ok")
+      query.sql.stmt aka "tokenized statement" must_=== TokenizedStatement(List(TokenGroup(List(StringToken("SELECT"), StringToken(" * "), StringToken("FROM"), StringToken(" "), StringToken("Test"), StringToken(" WHERE id = ")), Some("_0")), TokenGroup(List(StringToken(" AND code IN (")), Some("_1")), TokenGroup(List(StringToken(")")), None)), List("_0", "_1")) and (query.as(SqlParser.scalar[String].single) must_=== "ok")
     }
   }
 }

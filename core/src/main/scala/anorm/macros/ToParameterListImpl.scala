@@ -2,9 +2,8 @@ package anorm.macros
 
 import scala.reflect.macros.whitebox
 
-import anorm.{ Compat, ToSql, ToStatement, ToParameterList }
-import anorm.Macro.{ ParameterProjection, debugEnabled }
-
+import anorm.{ Compat, ToParameterList, ToSql, ToStatement }
+import anorm.Macro.{ debugEnabled, ParameterProjection }
 import anorm.macros.Inspect.pretty
 
 private[anorm] object ToParameterListImpl {

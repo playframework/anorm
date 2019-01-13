@@ -6,6 +6,22 @@ import com.typesafe.tools.mima.plugin.MimaKeys.{
   mimaBinaryIssueFilters, mimaPreviousArtifacts
 }
 
+ThisBuild / scalaVersion := "2.12.12"
+
+ThisBuild / crossScalaVersions := Seq(
+  "2.11.12", (scalaVersion in ThisBuild).value, "2.13.3")
+
+// Scalafix
+inThisBuild(
+  List(
+    //scalaVersion := "2.13.3",
+    semanticdbEnabled := true,
+    semanticdbVersion := scalafixSemanticdb.revision,
+    scalafixDependencies ++= Seq(
+      "com.github.liancheng" %% "organize-imports" % "0.4.2")
+  )
+)
+
 val specs2Test = Seq(
   "specs2-core",
   "specs2-junit"
@@ -155,20 +171,20 @@ lazy val `anorm-core` = project.in(file("core"))
 lazy val `anorm-iteratee` = (project in file("iteratee"))
   .settings(
     sourceDirectory := {
-      if (scalaVersion.value startsWith "2.13.") new java.io.File("/no/sources")
+      if (scalaBinaryVersion.value == "2.13") new java.io.File("/no/sources")
       else sourceDirectory.value
     },
     scalariformAutoformat := true,
     mimaPreviousArtifacts := {
-      if (scalaVersion.value startsWith "2.13.") Set.empty[ModuleID]
+      if (scalaBinaryVersion.value startsWith "2.13") Set.empty[ModuleID]
       else Set(organization.value %% name.value % "2.6.0")
     },
     publish := (Def.taskDyn {
       val p = publish.value
-      val ver = scalaVersion.value
+      val ver = scalaBinaryVersion.value
 
       Def.task[Unit] {
-        if (ver startsWith "2.13.") ({})
+        if (ver == "2.13") ({})
         else p
       }
     }).value,
@@ -182,7 +198,7 @@ lazy val `anorm-iteratee` = (project in file("iteratee"))
       }
     }).value,
     libraryDependencies ++= {
-      if (scalaVersion.value startsWith "2.13.") Seq.empty[ModuleID]
+      if (scalaBinaryVersion.value == "2.13") Seq.empty[ModuleID]
       else Seq(
         "com.typesafe.play" %% "play-iteratees" % "2.6.1",
         acolyte
@@ -194,7 +210,7 @@ lazy val `anorm-iteratee` = (project in file("iteratee"))
 
 lazy val akkaVer = Def.setting[String] {
   sys.env.get("AKKA_VERSION").getOrElse {
-    if (scalaVersion.value startsWith "2.11.") "2.4.10"
+    if (scalaBinaryVersion.value == "2.11") "2.4.10"
     else "2.5.23"
   }
 }
@@ -230,7 +246,7 @@ lazy val `anorm-postgres` = (project in file("postgres"))
     mimaPreviousArtifacts := Set.empty,
     libraryDependencies ++= {
       val playJsonVer = {
-        if (scalaVersion.value startsWith "2.13") "2.7.4"
+        if (scalaBinaryVersion.value == "2.13") "2.7.4"
         else "2.6.7"
       }
 

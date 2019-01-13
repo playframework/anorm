@@ -1,9 +1,9 @@
 package anorm
 
-import acolyte.jdbc.QueryResult
 import acolyte.jdbc.AcolyteDSL.{ connection, handleQuery, withQueryResult }
-import acolyte.jdbc.RowLists.{ rowList1, rowList2, stringList }
 import acolyte.jdbc.Implicits._
+import acolyte.jdbc.QueryResult
+import acolyte.jdbc.RowLists.{ rowList1, rowList2, stringList }
 
 final class SqlResultSpec
   extends org.specs2.mutable.Specification with H2Database {

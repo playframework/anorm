@@ -5,13 +5,13 @@ package anorm
 
 import java.io.{ ByteArrayInputStream, InputStream }
 
-import java.math.{ BigDecimal => JBigDec, BigInteger }
-
 import java.util.{ Date, UUID }
 
-import java.sql.Timestamp
+import java.math.{ BigDecimal => JBigDec, BigInteger }
 
-import java.net.{ URL, URI }
+import java.net.{ URI, URL }
+
+import java.sql.Timestamp
 
 import scala.util.{ Failure, Success => TrySuccess, Try }
 import scala.util.control.NonFatal

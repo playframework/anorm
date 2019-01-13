@@ -2,9 +2,8 @@ package anorm.macros
 
 import scala.reflect.macros.whitebox
 
-import anorm.ToStatement
 import anorm.Macro.debugEnabled
-
+import anorm.ToStatement
 import anorm.macros.Inspect.pretty
 
 private[anorm] object ValueToStatement {

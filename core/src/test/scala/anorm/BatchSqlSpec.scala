@@ -26,7 +26,7 @@ class BatchSqlSpec extends org.specs2.mutable.Specification with H2Database {
 
       (batch aka "creation" must not(throwA[IllegalArgumentException](
         message = "Unexpected parameter names: a, b != expected a"))).
-        and(batch.params aka "parameters" must_== expectedMaps)
+        and(batch.params aka "parameters" must_=== expectedMaps)
     }
   }
 
@@ -42,7 +42,7 @@ class BatchSqlSpec extends org.specs2.mutable.Specification with H2Database {
         Map[String, ParameterValue]("a" -> 2, "b" -> 3))
 
       (b2 aka "append" must not(throwA[Throwable])).
-        and(b2.params aka "parameters" must_== expectedMaps)
+        and(b2.params aka "parameters" must_=== expectedMaps)
     }
 
     "fail with missing argument" in {
@@ -68,7 +68,7 @@ class BatchSqlSpec extends org.specs2.mutable.Specification with H2Database {
         Map[String, ParameterValue]("a" -> 2, "b" -> 3))
 
       (b2 aka "append" must not(throwA[Throwable])).
-        and(b2.params aka "parameters" must_== expectedMaps)
+        and(b2.params aka "parameters" must_=== expectedMaps)
     }
   }
 
@@ -91,7 +91,7 @@ class BatchSqlSpec extends org.specs2.mutable.Specification with H2Database {
         Map[String, ParameterValue]("a" -> 2, "b" -> 3))
 
       (b2 aka "append" must not(throwA[Throwable])).
-        and(b2.params aka "parameters" must_== expectedMaps)
+        and(b2.params aka "parameters" must_=== expectedMaps)
     }
 
     "fail with missing argument" in {
@@ -119,7 +119,7 @@ class BatchSqlSpec extends org.specs2.mutable.Specification with H2Database {
         Map[String, ParameterValue]("a" -> 4, "b" -> 5))
 
       (b2 aka "append" must not(throwA[Throwable])).
-        and(b2.params aka "parameters" must_== expectedMaps)
+        and(b2.params aka "parameters" must_=== expectedMaps)
     }
   }
 
@@ -134,8 +134,8 @@ class BatchSqlSpec extends org.specs2.mutable.Specification with H2Database {
 
       val stmt = TokenizedStatement(List(TokenGroup(List(StringToken("INSERT INTO test1(id, foo, bar) VALUES(")), Some("id")), TokenGroup(List(StringToken(", ")), Some("foo")), TokenGroup(List(StringToken(", ")), Some("bar")), TokenGroup(List(StringToken(")")), None)), List("id", "foo", "bar"))
 
-      batch.sql.stmt aka "parsed statement" mustEqual stmt and (
-        batch.execute() aka "batch result" mustEqual Array(1, 1))
+      batch.sql.stmt aka "parsed statement" must_=== stmt and (
+        batch.execute() aka "batch result" must_=== Array(1, 1))
     }
   }
 }

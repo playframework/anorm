@@ -1,5 +1,11 @@
 package anorm
 
+import java.util.{ Date, UUID => JUUID }
+
+import java.math.{ BigDecimal => JBigDec, BigInteger }
+
+import java.net.{ URI, URL }
+
 import java.lang.{
   Boolean => JBool,
   Byte => JByte,
@@ -8,14 +14,7 @@ import java.lang.{
   Long => JLong,
   Short => JShort
 }
-
-import java.util.{ Date, UUID => JUUID }
-
-import java.math.{ BigDecimal => JBigDec, BigInteger }
-
-import java.sql.{ Types, Timestamp }
-
-import java.net.{ URI, URL }
+import java.sql.{ Timestamp, Types }
 
 /** Parameter meta data for type `T` */
 @annotation.implicitNotFound("Meta data not found for parameter of type ${T}: `anorm.ParameterMetaData[${T}]` required; See https://github.com/playframework/anorm/blob/master/docs/manual/working/scalaGuide/main/sql/ScalaAnorm.md#parameters")

@@ -2,8 +2,9 @@
  * Copyright (C) 2009-2013 Typesafe Inc. <http://www.typesafe.com>
  */
 
-import java.sql.SQLException
 import java.util.StringTokenizer
+
+import java.sql.SQLException
 
 /**
  * Anorm API
@@ -113,7 +114,7 @@ package object anorm {
   }
 
   @annotation.tailrec
-  private[anorm] def tokenize(ti: Iterator[Any], tks: List[StatementToken], parts: Seq[String], ps: Seq[ParameterValue], gs: Seq[TokenGroup], ns: Seq[String], m: Map[String, ParameterValue]): (TokenizedStatement, Map[String, ParameterValue]) = if (ti.hasNext) ti.next match {
+  private[anorm] def tokenize(ti: Iterator[Any], tks: List[StatementToken], parts: Seq[String], ps: Seq[ParameterValue], gs: Seq[TokenGroup], ns: Seq[String], m: Map[String, ParameterValue]): (TokenizedStatement, Map[String, ParameterValue]) = if (ti.hasNext) ti.next() match {
     case "%" => tokenize(ti, PercentToken :: tks, parts, ps, gs, ns, m)
     case s: String =>
       tokenize(ti, StringToken(s) :: tks, parts, ps, gs, ns, m)

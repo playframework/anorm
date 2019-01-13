@@ -24,7 +24,7 @@ private[anorm] object TokenizedStatement {
       params.splice, Nil, Nil, Map.empty[String, T]))
 
   @annotation.tailrec
-  private[anorm] def tokenize[T](ti: Iterator[String], tks: List[StatementToken], parts: Seq[String], ps: Seq[T with Show], gs: Seq[TokenGroup], ns: Seq[String], m: Map[String, T]): (TokenizedStatement, Map[String, T]) = if (ti.hasNext) ti.next match {
+  private[anorm] def tokenize[T](ti: Iterator[String], tks: List[StatementToken], parts: Seq[String], ps: Seq[T with Show], gs: Seq[TokenGroup], ns: Seq[String], m: Map[String, T]): (TokenizedStatement, Map[String, T]) = if (ti.hasNext) ti.next() match {
     case s: String =>
       tokenize(ti, StringToken(s) :: tks, parts, ps, gs, ns, m)
     case _ => /* should not occur */ tokenize(ti, tks, parts, ps, gs, ns, m)

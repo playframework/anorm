@@ -1,6 +1,7 @@
 package anorm
 
-import java.sql.{ DriverManager, Connection }
+import java.sql.{ Connection, DriverManager }
+
 import scala.util.Random
 
 trait H2Database {

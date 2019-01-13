@@ -1,7 +1,6 @@
 package anorm
 
-import org.specs2.mutable.Specification
-
+import acolyte.jdbc.{ ExecutedParameter, QueryResult, RowLists, UpdateExecution }
 import acolyte.jdbc.AcolyteDSL.{
   connection,
   handleQuery,
@@ -9,15 +8,11 @@ import acolyte.jdbc.AcolyteDSL.{
   updateResult,
   withQueryResult
 }
-import acolyte.jdbc.{
-  UpdateExecution,
-  QueryResult,
-  ExecutedParameter
-}
-import acolyte.jdbc.RowLists
-import RowLists.{ stringList, longList, rowList1, rowList2, rowList3 }
 import acolyte.jdbc.Implicits._
 
+import org.specs2.mutable.Specification
+
+import RowLists.{ stringList, longList, rowList1, rowList2, rowList3 }
 import SqlParser.scalar
 
 final class AnormSpec extends Specification with H2Database with AnormTest {
@@ -37,7 +32,7 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
         SQL("select * from test1 where id = {id}").on(Symbol("id") -> 10L)
           .as(RowParser({ row =>
             Success(row[String]("foo") -> row[Int]("bar"))
-          }).single) must_== ("Hello" -> 20)
+          }).single) must_=== ("Hello" -> 20)
       }
     }
 
@@ -53,8 +48,8 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
     "handle scalar result" >> {
       "return single value" in withQueryResult(20) { implicit c =>
         (SQL("SELECT * FROM test").as(scalar[Int].single).
-          aka("single value #1") must_== 20).
-          and(SQL("SELECT * FROM test").as(scalar[Int].single) must_== 20)
+          aka("single value #1") must_=== 20).
+          and(SQL("SELECT * FROM test").as(scalar[Int].single) must_=== 20)
 
       }
 
@@ -76,7 +71,7 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
 
         SQL("SELECT * FROM test").as(fooBarParser1.single).
           aka("mapping") must throwA[Exception].like {
-            case e: Exception => e.getMessage aka "error" mustEqual (
+            case e: Exception => e.getMessage aka "error" must_=== (
               "SqlMappingError(No rows when expecting a single one)")
           }
       }
@@ -87,11 +82,11 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
 
           (sql.as(scalar[String].single)
             .aka("single parser") must throwA[Exception].like {
-              case e: Exception => e.getMessage aka "error" mustEqual (
+              case e: Exception => e.getMessage aka "error" must_=== (
                 "SqlMappingError(too many rows when expecting a single one)")
             }).and(sql.as(scalar[String].singleOpt)
               .aka("singleOpt parser") must throwA[Exception].like {
-                case e: Exception => e.getMessage aka "error" mustEqual (
+                case e: Exception => e.getMessage aka "error" must_=== (
                   "SqlMappingError(too many rows when expecting a single one)")
               })
         }
@@ -103,7 +98,7 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
           SQL("EXEC stored_proc({param})")
             .on("param" -> "test-proc-1").executeQuery()
             .as(scalar[String].single)
-            .aka("single string") must_== "Result for test-proc-1"
+            .aka("single string") must_=== "Result for test-proc-1"
         }
     }
 
@@ -115,7 +110,7 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
           SQL("SELECT * FROM test").as(
             SqlParser.int("id") ~ SqlParser.str("val").? map {
               case id ~ v => (id -> v)
-            } single) aka "mapped data" must_== (2 -> Some("str"))
+            } single) aka "mapped data" must_=== (2 -> Some("str"))
 
       }
 
@@ -125,7 +120,7 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
           SQL("SELECT * FROM test").as(
             SqlParser.long("id") ~ SqlParser.str("val").? map {
               case id ~ v => (id -> v)
-            } single) aka "mapped data" must_== (123L -> None)
+            } single) aka "mapped data" must_=== (123L -> None)
 
         }
 
@@ -158,7 +153,7 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
         implicit c =>
           SQL("SELECT * FROM test").as(
             (SqlParser.int("id") ~> SqlParser.str("val")).single).
-            aka("mapped data") must_== "str"
+            aka("mapped data") must_=== "str"
 
       }
 
@@ -166,7 +161,7 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
         implicit c =>
           SQL("SELECT * FROM test").as(
             (SqlParser.int("id").? ~> SqlParser.str("val")).single).
-            aka("mapped data") must_== "str"
+            aka("mapped data") must_=== "str"
 
       }
     }
@@ -176,7 +171,7 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
         implicit c =>
           SQL("SELECT * FROM test").as(
             (SqlParser.int("id") <~ SqlParser.str("val")).single).
-            aka("mapped data") must_== 2
+            aka("mapped data") must_=== 2
 
       }
 
@@ -184,7 +179,7 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
         implicit c =>
           SQL("SELECT * FROM test").as(
             (SqlParser.str("val") <~ SqlParser.int("id").?).single).
-            aka("mapped data") must_== "str"
+            aka("mapped data") must_=== "str"
 
       }
     }
@@ -209,7 +204,7 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
           SQL("insert into test1(id, foo, bar) values ({id}, {foo}, {bar})")
             .bind(fixture).executeUpdate()
 
-        uc aka "update count" must_== 1 and {
+        uc aka "update count" must_=== 1 and {
           SQL("select * from test1 where id = {id}")
             .on(Symbol("id") -> 11L).as(fooBarParser1.singleOpt)
             .aka("instance") must beSome(fixture)
@@ -257,7 +252,7 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
         withLabel(2, "named") :+ ("a", "b", "c")) { implicit con =>
 
         SQL("SELECT *").as(mixedParser1.single).
-          aka("parsed mixed result") mustEqual (("a", "b", "c"))
+          aka("parsed mixed result") must_=== (("a", "b", "c"))
 
       }
   }
@@ -265,7 +260,7 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
   "List" should {
     "be Nil when there is no result" in withQueryResult(QueryResult.Nil) {
       implicit c =>
-        SQL("EXEC test").as(scalar[Int].*) aka "list" must_== Nil
+        SQL("EXEC test").as(scalar[Int].*) aka "list" must_=== Nil
     }
 
     "raise error when non-empty one is required and there is no result" in {
@@ -281,7 +276,7 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
 
         SQL("SELECT * FROM test").as(RowParser({ row =>
           Success(row[String]("foo") -> row[Int]("bar"))
-        }).*) aka "tuple list" must_== List("row1" -> 100, "row2" -> 200)
+        }).*) aka "tuple list" must_=== List("row1" -> 100, "row2" -> 200)
       }
 
     "be parsed from class mapping" in withQueryResult(
@@ -291,8 +286,8 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
             List(TestTable(12L, "World", 101), TestTable(14L, "Mondo", 3210))
           val q = SQL("SELECT * FROM test")
 
-          (q.as(fooBarParser1.*) aka "list" must_== exp).
-            and(q.as(fooBarParser1.+) aka "non-empty list" must_== exp)
+          (q.as(fooBarParser1.*) aka "list" must_=== exp).
+            and(q.as(fooBarParser1.+) aka "non-empty list" must_=== exp)
 
       }
 
@@ -303,7 +298,7 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
       SQL("SELECT * FROM test").as(
         SqlParser.int("id") ~ SqlParser.str("val").? map {
           case id ~ v => (id -> v)
-        } *) aka "parsed list" must_== List(9 -> None, 2 -> Some("str"))
+        } *) aka "parsed list" must_=== List(9 -> None, 2 -> Some("str"))
     }
 
     "include scalar values" in withQueryResult(
@@ -312,16 +307,15 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
         val exp = List("A", "B", "C", "D")
         val q = SQL("SELECT c FROM letters")
 
-        (q.as(scalar[String].*) aka "list" must_== exp).
-          and(q.as(scalar[String].+) aka "non-empty list" must_== exp)
+        (q.as(scalar[String].*) aka "list" must_=== exp).
+          and(q.as(scalar[String].+) aka "non-empty list" must_=== exp)
       }
   }
 
   "Aggregation over all rows" should {
     "be empty when there is no result" in withQueryResult(QueryResult.Nil) {
       implicit c =>
-        SQL"EXEC test".fold(
-          Option.empty[Int], ColumnAliaser.empty)({ (_, _) => Some(0) }).
+        SQL"EXEC test".fold[Option[Int]](None)({ (_, _) => Some(0) }).
           aka("aggregated value") must beRight(Option.empty[Int])
 
     }
@@ -330,24 +324,21 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
       rowList2(classOf[String] -> "foo", classOf[Int] -> "bar").
         append("row1", 100) :+ ("row2", 200)) { implicit c =>
 
-        SQL"SELECT * FROM test".fold(
-          List.empty[(String, Int)], ColumnAliaser.empty)(
-            { (l, row) => l :+ (row[String]("foo") -> row[Int]("bar")) }).
-            aka("tuple stream") must_== Right(List("row1" -> 100, "row2" -> 200))
+        SQL"SELECT * FROM test".fold(List[(String, Int)]())(
+          { (l, row) => l :+ (row[String]("foo") -> row[Int]("bar")) }).
+          aka("tuple stream") must_=== Right(List("row1" -> 100, "row2" -> 200))
 
       }
 
     "handle failure" in withQueryResult(
       rowList1(classOf[String] -> "foo") :+ "A" :+ "B") { implicit c =>
         var i = 0
+        SQL"SELECT str".fold(Set[String]()) { (l, row) =>
+          if (i == 0) { i = i + 1; l + row[String]("foo") } else sys.error("Failure")
 
-        SQL"SELECT str".fold(
-          Set.empty[String], ColumnAliaser.empty) { (l, row) =>
-            if (i == 0) { i = i + 1; l + row[String]("foo") } else sys.error("Failure")
-
-          } aka "aggregate on failure" must beLike {
-            case Left(err :: Nil) => err.getMessage aka "failure" must_== "Failure"
-          } and (i aka "row count" must_== 1)
+        } aka "aggregate on failure" must beLike {
+          case Left(err :: Nil) => err.getMessage aka "failure" must_=== "Failure"
+        } and (i aka "row count" must_=== 1)
       }
   }
 
@@ -364,36 +355,31 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
       rowList2(classOf[String] -> "foo", classOf[Int] -> "bar").
         append("row1", 100) :+ ("row2", 200)) { implicit c =>
 
-        SQL"SELECT * FROM test".
-          foldWhile(List.empty[(String, Int)], ColumnAliaser.empty)({ (l, row) =>
-            (l :+ (row[String]("foo") -> row[Int]("bar"))) -> true
-          }) aka "tuple stream" must_== Right(List("row1" -> 100, "row2" -> 200))
+        SQL"SELECT * FROM test".foldWhile(List[(String, Int)]())({ (l, row) =>
+          (l :+ (row[String]("foo") -> row[Int]("bar"))) -> true
+        }) aka "tuple stream" must_=== Right(List("row1" -> 100, "row2" -> 200))
       }
 
     "handle failure" in withQueryResult(
       rowList1(classOf[String] -> "foo") :+ "A" :+ "B") { implicit c =>
         var i = 0
+        SQL"SELECT str".foldWhile(Set[String]()) { (l, row) =>
+          if (i == 0) { i = i + 1; (l + row[String]("foo")) -> true }
+          else sys.error("Failure")
 
-        SQL"SELECT str".foldWhile(
-          Set.empty[String], ColumnAliaser.empty) { (l, row) =>
-            if (i == 0) { i = i + 1; (l + row[String]("foo")) -> true }
-            else sys.error("Failure")
-
-          } aka "aggregate on failure" must beLike {
-            case Left(err :: Nil) => err.getMessage aka "failure" must_== "Failure"
-          } and (i aka "row count" must_== 1)
+        } aka "aggregate on failure" must beLike {
+          case Left(err :: Nil) => err.getMessage aka "failure" must_=== "Failure"
+        } and (i aka "row count" must_=== 1)
       }
 
     "stop after first row" in withQueryResult(
       rowList1(classOf[String] -> "foo") :+ "A" :+ "B") { implicit c =>
         var i = 0
+        SQL"SELECT str".foldWhile(Set[String]()) { (l, row) =>
+          if (i == 0) { i = i + 1; (l + row[String]("foo")) -> true }
+          else (l, false)
 
-        SQL"SELECT str".foldWhile(
-          Set.empty[String], ColumnAliaser.empty) { (l, row) =>
-            if (i == 0) { i = i + 1; (l + row[String]("foo")) -> true }
-            else (l, false)
-
-          } aka "partial aggregate" must_== Right(Set("A"))
+        } aka "partial aggregate" must_=== Right(Set("A"))
       }
   }
 
@@ -433,7 +419,7 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
             first = true; sys.error("Failure")
           case _ => sys.error("Unexpected")
         } aka "processing with failure" must beLeft.like {
-          case err :: Nil => err.getMessage aka "failure" must_== "Failure"
+          case err :: Nil => err.getMessage aka "failure" must_=== "Failure"
         } and (first aka "first read" must beTrue)
       }
 
@@ -445,7 +431,7 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
             first = true; sys.error("Failure")
           case _ => sys.error("Unexpected")
         } aka "processing with failure" must beLeft.like {
-          case err :: Nil => err.getMessage aka "failure" must_== "Failure"
+          case err :: Nil => err.getMessage aka "failure" must_=== "Failure"
         } and (first aka "first read" must beTrue)
       }
 
@@ -454,7 +440,7 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
         SQL"SELECT str" withResult {
           case Some(first) => Set(first.row[String]("foo"))
           case _ => Set.empty[String]
-        } aka "partial processing" must_== Right(Set("A"))
+        } aka "partial processing" must_=== Right(Set("A"))
       }
 
     "stop after first row without failure (with degraded result set)" in {
@@ -462,7 +448,7 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
         SQL"SELECT str".withResultSetOnFirstRow(true) withResult {
           case Some(first) => Set(first.row[String]("foo"))
           case _ => Set.empty[String]
-        } aka "partial processing" must_== Right(Set("A"))
+        } aka "partial processing" must_=== Right(Set("A"))
       }
     }
   }
@@ -533,7 +519,7 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
       "using parser" in {
         Show.mkString(
           SQL("insert into test1(id, foo, bar) values ({id}, {foo}, {bar})")).
-          aka("representation") must_== "SqlQuery(insert into test1(id, foo, bar) values ({id}, {foo}, {bar}), timeout = None, fetchSize = None)"
+          aka("representation") must_=== "SqlQuery(insert into test1(id, foo, bar) values ({id}, {foo}, {bar}), timeout = None, fetchSize = None)"
       }
 
       "using interpolation" in {
@@ -543,7 +529,7 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
 
         Show.mkString(
           SQL"insert into test1(id, foo, bar) values ($id, $foo, $bar)").
-          aka("representation") must_== "SimpleSql(SqlQuery(insert into test1(id, foo, bar) values ({_0}, {_1}, {_2}), timeout = None, fetchSize = None))"
+          aka("representation") must_=== "SimpleSql(SqlQuery(insert into test1(id, foo, bar) values ({_0}, {_1}, {_2}), timeout = None, fetchSize = None))"
 
       }
     }
