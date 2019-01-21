@@ -5,7 +5,7 @@ import com.typesafe.tools.mima.plugin.MimaKeys.{
   mimaBinaryIssueFilters, mimaPreviousArtifacts
 }
 
-scalaVersion in ThisBuild := "2.12.6"
+scalaVersion in ThisBuild := "2.12.7"
 
 crossScalaVersions in ThisBuild := Seq(
   "2.11.12", (scalaVersion in ThisBuild).value)
@@ -13,7 +13,7 @@ crossScalaVersions in ThisBuild := Seq(
 val specs2Test = Seq(
   "specs2-core",
   "specs2-junit"
-).map("org.specs2" %% _ % "4.3.5" % Test)
+).map("org.specs2" %% _ % "4.3.6" % Test)
 
 lazy val acolyteVersion = "1.0.51"
 lazy val acolyte = "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test

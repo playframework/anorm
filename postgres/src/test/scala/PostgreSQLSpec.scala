@@ -67,7 +67,7 @@ class PostgreSQLSpec extends org.specs2.mutable.Specification {
 
       "using JSON writer" in {
         withPgo("foo", "2") { implicit con =>
-          SQL"""INSERT INTO test(id, json) VALUES (${"foo"}, ${asJson(Lorem)})""".executeUpdate() must_== 1
+          SQL"""INSERT INTO test(id, json) VALUES (${"foo"}, ${asJson[TestEnum](Lorem)})""".executeUpdate() must_== 1
         }
       }
     }
