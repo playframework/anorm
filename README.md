@@ -38,6 +38,6 @@ To test the documentation code samples, run:
 
 ## Support
 
-The Play Mailer library is *[Community Driven][]*.
+The Anorm library is *[Community Driven][]*.
 
 [Community Driven]: https://developer.lightbend.com/docs/reactive-platform/2.0/support-terminology/index.html#community-driven
