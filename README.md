@@ -35,3 +35,9 @@ To run the documentation server, run:
 To test the documentation code samples, run:
 
     sbt docs/test
+
+## Support
+
+The Anorm library is *[Community Driven][]*.
+
+[Community Driven]: https://developer.lightbend.com/docs/reactive-platform/2.0/support-terminology/index.html#community-driven
