@@ -955,7 +955,7 @@ books match {
 
 #### Akka Stream
 
-The query result from Anorm can be processed as [Source](doc.akka.io/api/akka/2.4.12/#akka.stream.javadsl.Source) with [Akka Stream](http://doc.akka.io/docs/akka/2.4.12/scala/stream/index.html).
+The query result from Anorm can be processed as [Source](https://doc.akka.io/api/akka/current/akka/stream/scaladsl/Source.html) with [Akka Stream](https://doc.akka.io/docs/akka/current/stream/index.html).
 
 To do so, the Anorm Akka module must be used.
 
