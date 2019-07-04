@@ -6,7 +6,7 @@ addSbtPlugin("com.typesafe.play" % "interplay" % sys.props.get("interplay.versio
 
 addSbtPlugin("com.typesafe.play" % "play-docs-sbt-plugin" % sys.props.getOrElse("play.version", "2.6.15"))
 
-addSbtPlugin("com.typesafe" % "sbt-mima-plugin" % "0.1.15")
+addSbtPlugin("com.typesafe" % "sbt-mima-plugin" % "0.1.18")
 
 addSbtPlugin("org.scalariform" % "sbt-scalariform" % "1.8.2")
 
