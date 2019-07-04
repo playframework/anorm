@@ -128,7 +128,7 @@ lazy val anorm = project
       "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4",
       "com.h2database" % "h2" % "1.4.193" % Test,
       acolyte,
-      "com.chuusai" %% "shapeless" % "2.3.2" % Test
+      "com.chuusai" %% "shapeless" % "2.3.3" % Test
     ) ++ specs2Test
   )).dependsOn(`anorm-tokenizer`)
 
