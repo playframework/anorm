@@ -8,7 +8,7 @@ addSbtPlugin("com.typesafe.play" % "play-docs-sbt-plugin" % sys.props.getOrElse(
 
 addSbtPlugin("com.typesafe" % "sbt-mima-plugin" % "0.3.0")
 
-addSbtPlugin("org.scalariform" % "sbt-scalariform" % "1.8.2")
+addSbtPlugin("org.scalariform" % "sbt-scalariform" % "1.8.3")
 
 addSbtPlugin("com.sksamuel.scapegoat" %% "sbt-scapegoat" % "1.0.9")
 
