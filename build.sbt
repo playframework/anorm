@@ -123,7 +123,7 @@ lazy val anorm = project
     ),
     libraryDependencies ++= Seq(
       "com.jsuereth" %% "scala-arm" % "2.0",
-      "joda-time" % "joda-time" % "2.9.7",
+      "joda-time" % "joda-time" % "2.9.9",
       "org.joda" % "joda-convert" % "1.8.1",
       "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4",
       "com.h2database" % "h2" % "1.4.193" % Test,
