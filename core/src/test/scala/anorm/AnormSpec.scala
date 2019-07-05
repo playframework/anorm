@@ -20,7 +20,7 @@ import acolyte.jdbc.Implicits._
 
 import SqlParser.scalar
 
-class AnormSpec extends Specification with H2Database with AnormTest {
+final class AnormSpec extends Specification with H2Database with AnormTest {
   "Anorm" title
 
   lazy val fooBarTable = rowList3(
@@ -320,8 +320,9 @@ class AnormSpec extends Specification with H2Database with AnormTest {
   "Aggregation over all rows" should {
     "be empty when there is no result" in withQueryResult(QueryResult.Nil) {
       implicit c =>
-        SQL"EXEC test".fold[Option[Int]](None)({ (_, _) => Some(0) }).
-          aka("aggregated value") must beRight(None)
+        SQL"EXEC test".fold(
+          Option.empty[Int], ColumnAliaser.empty)({ (_, _) => Some(0) }).
+          aka("aggregated value") must beRight(Option.empty[Int])
 
     }
 
@@ -329,30 +330,33 @@ class AnormSpec extends Specification with H2Database with AnormTest {
       rowList2(classOf[String] -> "foo", classOf[Int] -> "bar").
         append("row1", 100) :+ ("row2", 200)) { implicit c =>
 
-        SQL"SELECT * FROM test".fold(List[(String, Int)]())(
-          { (l, row) => l :+ (row[String]("foo") -> row[Int]("bar")) }).
-          aka("tuple stream") must_== Right(List("row1" -> 100, "row2" -> 200))
+        SQL"SELECT * FROM test".fold(
+          List.empty[(String, Int)], ColumnAliaser.empty)(
+            { (l, row) => l :+ (row[String]("foo") -> row[Int]("bar")) }).
+            aka("tuple stream") must_== Right(List("row1" -> 100, "row2" -> 200))
 
       }
 
     "handle failure" in withQueryResult(
       rowList1(classOf[String] -> "foo") :+ "A" :+ "B") { implicit c =>
         var i = 0
-        SQL"SELECT str".fold(Set[String]()) { (l, row) =>
-          if (i == 0) { i = i + 1; l + row[String]("foo") } else sys.error("Failure")
 
-        } aka "aggregate on failure" must beLike {
-          case Left(err :: Nil) => err.getMessage aka "failure" must_== "Failure"
-        } and (i aka "row count" must_== 1)
+        SQL"SELECT str".fold(
+          Set.empty[String], ColumnAliaser.empty) { (l, row) =>
+            if (i == 0) { i = i + 1; l + row[String]("foo") } else sys.error("Failure")
+
+          } aka "aggregate on failure" must beLike {
+            case Left(err :: Nil) => err.getMessage aka "failure" must_== "Failure"
+          } and (i aka "row count" must_== 1)
       }
   }
 
   "Aggregation over variable number of rows" should {
     "be empty when there is no result" in withQueryResult(QueryResult.Nil) {
       implicit c =>
-        SQL"EXEC test".foldWhile[Option[Int]](None)(
+        SQL"EXEC test".foldWhile(Option.empty[Int], ColumnAliaser.empty)(
           { (_, _) => Some(0) -> true }).
-          aka("aggregated value") must beRight(None)
+          aka("aggregated value") must beRight(Option.empty[Int])
 
     }
 
@@ -360,31 +364,36 @@ class AnormSpec extends Specification with H2Database with AnormTest {
       rowList2(classOf[String] -> "foo", classOf[Int] -> "bar").
         append("row1", 100) :+ ("row2", 200)) { implicit c =>
 
-        SQL"SELECT * FROM test".foldWhile(List[(String, Int)]())({ (l, row) =>
-          (l :+ (row[String]("foo") -> row[Int]("bar"))) -> true
-        }) aka "tuple stream" must_== Right(List("row1" -> 100, "row2" -> 200))
+        SQL"SELECT * FROM test".
+          foldWhile(List.empty[(String, Int)], ColumnAliaser.empty)({ (l, row) =>
+            (l :+ (row[String]("foo") -> row[Int]("bar"))) -> true
+          }) aka "tuple stream" must_== Right(List("row1" -> 100, "row2" -> 200))
       }
 
     "handle failure" in withQueryResult(
       rowList1(classOf[String] -> "foo") :+ "A" :+ "B") { implicit c =>
         var i = 0
-        SQL"SELECT str".foldWhile(Set[String]()) { (l, row) =>
-          if (i == 0) { i = i + 1; (l + row[String]("foo")) -> true }
-          else sys.error("Failure")
 
-        } aka "aggregate on failure" must beLike {
-          case Left(err :: Nil) => err.getMessage aka "failure" must_== "Failure"
-        } and (i aka "row count" must_== 1)
+        SQL"SELECT str".foldWhile(
+          Set.empty[String], ColumnAliaser.empty) { (l, row) =>
+            if (i == 0) { i = i + 1; (l + row[String]("foo")) -> true }
+            else sys.error("Failure")
+
+          } aka "aggregate on failure" must beLike {
+            case Left(err :: Nil) => err.getMessage aka "failure" must_== "Failure"
+          } and (i aka "row count" must_== 1)
       }
 
     "stop after first row" in withQueryResult(
       rowList1(classOf[String] -> "foo") :+ "A" :+ "B") { implicit c =>
         var i = 0
-        SQL"SELECT str".foldWhile(Set[String]()) { (l, row) =>
-          if (i == 0) { i = i + 1; (l + row[String]("foo")) -> true }
-          else (l, false)
 
-        } aka "partial aggregate" must_== Right(Set("A"))
+        SQL"SELECT str".foldWhile(
+          Set.empty[String], ColumnAliaser.empty) { (l, row) =>
+            if (i == 0) { i = i + 1; (l + row[String]("foo")) -> true }
+            else (l, false)
+
+          } aka "partial aggregate" must_== Right(Set("A"))
       }
   }
 
@@ -497,15 +506,16 @@ class AnormSpec extends Specification with H2Database with AnormTest {
 
         createTable(tableName, "id bigint auto_increment", "name varchar")
 
-        @inline def insert(n: String, ns: String*) =
+        @inline def insert(n: String) =
           SQL"insert into #${tableName}(name) values(${c.toString})".
-            executeInsert1(n, ns: _*)()
+            executeInsert1(n)()
 
-        insert("id") must beSuccessfulTry(Some(1L)) and (
-          insert("id") must beSuccessfulTry(Some(2L))) and (
-            insert("value") aka "ignore invalid key" must beSuccessfulTry(
-              Some(3L)))
-
+        insert("id") must beSuccessfulTry(Some(1L)) and {
+          insert("id") must beSuccessfulTry(Some(2L))
+        } and {
+          insert("invalid").
+            aka("ignore invalid key") must beSuccessfulTry(Option.empty[Long])
+        }
       }
     }
   }

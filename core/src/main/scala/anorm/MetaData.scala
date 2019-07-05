@@ -1,7 +1,5 @@
 package anorm
 
-import scala.collection.breakOut
-
 /**
  * @param qualified the qualified column name
  * @param alias the column alias
@@ -19,22 +17,25 @@ private[anorm] case class MetaData(ms: Seq[MetaDataItem]) {
   /** Returns meta data for specified column. */
   def get(columnName: String): Option[MetaDataItem] = {
     val key = columnName.toUpperCase
+
     aliasedDictionary.get(key).
       orElse(dictionary2 get key).orElse(dictionary get key)
   }
 
   private lazy val dictionary: Map[String, MetaDataItem] =
-    ms.map(m => m.column.qualified.toUpperCase() -> m).toMap
+    Compat.toMap(ms) { m => m.column.qualified.toUpperCase() -> m }
 
-  private lazy val dictionary2: Map[String, MetaDataItem] = ms.map { m =>
-    val column = m.column.qualified.split('.').last;
-    column.toUpperCase() -> m
-  }(breakOut)
+  private lazy val dictionary2: Map[String, MetaDataItem] =
+    Compat.toMap(ms) { m =>
+      val column = m.column.qualified.split('.').last
+
+      column.toUpperCase() -> m
+    }
 
   private lazy val aliasedDictionary: Map[String, MetaDataItem] =
-    ms.flatMap { m =>
+    Compat.toFlatMap(ms) { m =>
       m.column.alias.map(a => Map(a.toUpperCase() -> m)).getOrElse(Map.empty)
-    }(breakOut)
+    }
 
   lazy val columnCount = ms.size
 
