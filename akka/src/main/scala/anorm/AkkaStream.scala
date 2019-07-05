@@ -41,9 +41,7 @@ object AkkaStream {
    * }}}
    */
   @SuppressWarnings(Array("UnusedMethodParameter"))
-  def source[T](sql: => Sql, parser: RowParser[T], as: ColumnAliaser)(implicit @deprecated("No longer required (will be removed)", "2.5.4") m: Materializer, con: Connection): Source[T, Future[Int]] = {
-    Source.fromGraph(new ResultSource[T](con, sql, as, parser))
-  }
+  def source[T](sql: => Sql, parser: RowParser[T], as: ColumnAliaser)(implicit @deprecated("No longer required (will be removed)", "2.5.4") m: Materializer, con: Connection): Source[T, Future[Int]] = Source.fromGraph(new ResultSource[T](con, sql, as, parser))
 
   /**
    * Returns the rows parsed from the `sql` query as a reactive source.

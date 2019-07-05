@@ -5,7 +5,7 @@ class SqlRequestErrorSpec extends org.specs2.mutable.Specification {
 
   "ColumnNotFound" should {
     "be converted to Failure" in {
-      ColumnNotFound("foo", List("bar")).toFailure must beFailedTry.
+      ColumnNotFound("foo", available = List("bar")).toFailure must beFailedTry.
         withThrowable[AnormException]("'foo' not found, available columns: bar")
     }
   }

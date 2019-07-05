@@ -1,10 +1,8 @@
 package anorm.macros
 
-import scala.collection.breakOut
-
 import scala.reflect.macros.whitebox
 
-import anorm.{ ToSql, ToStatement, ToParameterList }
+import anorm.{ Compat, ToSql, ToStatement, ToParameterList }
 import anorm.Macro.{ ParameterProjection, debugEnabled }
 
 import anorm.macros.Inspect.pretty
@@ -196,19 +194,19 @@ private[anorm] object ToParameterListImpl {
     // applies/call of the functions according the projection
     val effectiveProj: Map[String, String] = {
       if (compiledProj.nonEmpty) {
-        compiledProj.map {
+        Compat.toMap(compiledProj) {
           case ParameterProjection(propName, Some(paramName)) =>
             propName -> paramName
 
           case ParameterProjection(propName, _) =>
             propName -> propName
-        }(breakOut)
-      } else properties.collect {
+        }
+      } else Compat.collectToMap(properties) {
         case term: TermSymbol => {
           val propName = term.name.toString
           propName -> propName
         }
-      }(breakOut)
+      }
     }
 
     val appendCalls = effectiveProj.flatMap {
