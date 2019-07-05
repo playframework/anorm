@@ -176,19 +176,24 @@ lazy val `anorm-akka` = (project in file("akka"))
 
 lazy val pgVer = sys.env.get("POSTGRES_VERSION").getOrElse("42.2.6")
 
+val playVer = Def.setting[String] {
+  if (scalaVersion.value startsWith "2.13") "2.7.3"
+  else "2.6.7"
+}
+
 lazy val `anorm-postgres` = (project in file("postgres"))
   .settings(
     scalariformAutoformat := true,
     mimaPreviousArtifacts := Set.empty,
     libraryDependencies ++= {
-      val playVer = {
+      val playJsonVer = {
         if (scalaVersion.value startsWith "2.13") "2.7.4"
         else "2.6.7"
       }
 
       Seq(
         "org.postgresql" % "postgresql" % pgVer,
-        "com.typesafe.play" %% "play-json" % playVer
+        "com.typesafe.play" %% "play-json" % playJsonVer
       ) ++ specs2Test :+ acolyte
     }
   ).dependsOn(`anorm-core`)
@@ -202,9 +207,23 @@ lazy val `anorm-parent` = (project in file("."))
   .settings(
     mimaPreviousArtifacts := Set.empty)
 
-lazy val docs = project
-  .in(file("docs"))
-  .enablePlugins(PlayDocsPlugin)
+lazy val docs = project.in(file("docs"))
+  .enablePlugins(Playdoc)
+  .configs(Docs)
+  .settings(
+    name := "anorm-docs",
+    unmanagedSourceDirectories in Test ++= {
+      val manualDir = baseDirectory.value / "manual" / "working"
+
+      (manualDir / "javaGuide" ** "code").get ++ (
+        manualDir / "scalaGuide" ** "code").get
+    },
+    libraryDependencies ++= Seq(
+      "com.typesafe.play" %% "play-jdbc" % playVer.value % Test,
+      "com.typesafe.play" %% "play-specs2" % playVer.value % Test,
+      "com.h2database" % "h2" % "1.4.199"
+    )
+  )
   .dependsOn(`anorm-core`)
 
 Scapegoat.settings

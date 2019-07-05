@@ -506,15 +506,16 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
 
         createTable(tableName, "id bigint auto_increment", "name varchar")
 
-        @inline def insert(n: String, ns: String*) =
+        @inline def insert(n: String) =
           SQL"insert into #${tableName}(name) values(${c.toString})".
-            executeInsert1(n, ns: _*)()
+            executeInsert1(n)()
 
-        insert("id") must beSuccessfulTry(Some(1L)) and (
-          insert("id") must beSuccessfulTry(Some(2L))) and (
-            insert("value") aka "ignore invalid key" must beSuccessfulTry(
-              Some(3L)))
-
+        insert("id") must beSuccessfulTry(Some(1L)) and {
+          insert("id") must beSuccessfulTry(Some(2L))
+        } and {
+          insert("invalid").
+            aka("ignore invalid key") must beSuccessfulTry(Option.empty[Long])
+        }
       }
     }
   }
