@@ -15,8 +15,28 @@ object Common extends AutoPlugin {
 
   override def projectSettings = mimaDefaultSettings ++ Seq(
     organization := "org.playframework.anorm",
+    scalaVersion := "2.12.8",
+    crossScalaVersions := Seq(
+      "2.11.12", scalaVersion.value, "2.13.0"),
     resolvers += "Scalaz Bintray Repo" at {
       "http://dl.bintray.com/scalaz/releases" // specs2 depends on scalaz-stream
+    },
+    unmanagedSourceDirectories in Compile ++= {
+      val sv = scalaVersion.value
+
+      Seq(
+        scala2Unmanaged(sv, 12, (sourceDirectory in Compile).value),
+        scala2Unmanaged(sv, 13, (sourceDirectory in Compile).value))
+    },
+    unmanagedSourceDirectories in Test += scala2Unmanaged(
+      scalaVersion.value, 12,
+      (sourceDirectory in Test).value),
+    libraryDependencies ++= {
+      val silencerVer = "1.4.1"
+
+      Seq(
+        compilerPlugin("com.github.ghik" %% "silencer-plugin" % silencerVer),
+        "com.github.ghik" %% "silencer-lib" % silencerVer % Provided)
     },
     scalacOptions ++= Seq(
       "-encoding", "UTF-8",
@@ -26,14 +46,27 @@ object Common extends AutoPlugin {
       "-feature",
       "-Xfatal-warnings",
       "-Xlint",
-      "-Ywarn-numeric-widen",
-      "-Ywarn-infer-any",
-      "-Ywarn-dead-code",
-      "-Ywarn-unused",
-      "-Ywarn-unused-import",
-      "-Ywarn-value-discard",
       "-g:vars"
     ),
+    scalacOptions ++= {
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, n)) if n < 12 => Seq.empty[String]
+        case _ => Seq("-Ywarn-macros:after")
+      }
+    },
+    scalacOptions in Compile ++= {
+      if ((scalaVersion in Compile).value startsWith "2.12.") {
+        Seq(
+          "-Ywarn-numeric-widen",
+          "-Ywarn-infer-any",
+          "-Ywarn-dead-code",
+          "-Ywarn-unused",
+          "-Ywarn-unused-import",
+          "-Ywarn-value-discard")
+      } else {
+        Seq.empty[String]
+      }
+    },
     scalacOptions in (Compile, console) ~= {
       _.filterNot { opt => opt.startsWith("-X") || opt.startsWith("-Y") }
     },
@@ -44,13 +77,13 @@ object Common extends AutoPlugin {
     scalacOptions ~= (_.filterNot(_ == "-Xfatal-warnings")),
     fork in Test := true,
     mimaPreviousArtifacts := {
-      if (scalaVersion.value startsWith "2.12.") Set.empty else {
+      if (scalaVersion.value startsWith "2.11.") {
         if (crossPaths.value) {
           Set("com.typesafe.play" % s"${moduleName.value}_${scalaBinaryVersion.value}" % previousVersion)
         } else {
           Set("com.typesafe.play" % moduleName.value % previousVersion)
         }
-      }
+      } else Set.empty[ModuleID]
     }) ++ Publish.settings
 
   @inline def missMeth(n: String) =
@@ -61,6 +94,12 @@ object Common extends AutoPlugin {
 
   @inline def incoRet(n: String) =
     ProblemFilters.exclude[IncompatibleResultTypeProblem](n)
+
+  def scala2Unmanaged(ver: String, minor: Int, base: File): File = 
+    CrossVersion.partialVersion(ver) match {
+      case Some((2, n)) if n >= minor => base / s"scala-2.${minor}+"
+      case _                          => base / s"scala-2.${minor}-"
+    }
 
 }
 

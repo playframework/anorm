@@ -5,7 +5,9 @@ import acolyte.jdbc.AcolyteDSL.{ connection, handleQuery, withQueryResult }
 import acolyte.jdbc.RowLists.{ rowList1, rowList2, stringList }
 import acolyte.jdbc.Implicits._
 
-class SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
+final class SqlResultSpec
+  extends org.specs2.mutable.Specification with H2Database {
+
   "SQL result" title
 
   "For-comprehension over result" should {
@@ -27,7 +29,7 @@ class SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
             b <- SqlParser.int("b")
           } yield (a -> b)
 
-          SQL("SELECT * FROM test") as parser.single must_== ("str" -> 2)
+          SQL("SELECT * FROM test") as parser.single must_=== ("str" -> 2)
       }
 
     "fail with sub-parser when there is no data" >> {
@@ -90,7 +92,7 @@ class SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
           bc <- sub.?
         } yield (a -> bc)
 
-        SQL("SELECT * FROM test") as parser.single must_== ("str" -> None)
+        SQL("SELECT * FROM test") as parser.single must_=== ("str" -> None)
       }
   }
 
@@ -149,12 +151,12 @@ class SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
 
     "return Xa object" in withQueryResult(stringList :+ "XA") { implicit c =>
       SQL"SELECT str".as(SqlParser.str(1).collect("ERR")(pf).single).
-        aka("collected") must_== Xa
+        aka("collected") must_=== Xa
     }
 
     "return Xb object" in withQueryResult(stringList :+ "XB") { implicit c =>
       SQL"SELECT str".as(SqlParser.str(1).collect("ERR")(pf).single).
-        aka("collected") must_== Xb
+        aka("collected") must_=== Xb
     }
 
     "fail" in withQueryResult(stringList :+ "XC") { implicit c =>
@@ -173,14 +175,17 @@ class SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
           new java.io.Closeable { def close() = closed = true })
 
         var i = 0
-        lazy val agg = res.copy(resultSet =
-          res.resultSet.and(probe).map(_._1)).fold(List[Int]()) {
-          (l, x) => i = i + 1; l :+ i
+        def sqlResult = res.copy(resultSet =
+          res.resultSet.and(probe).map(_._1))
+
+        // .fold w/o ColumnAliaser is deprecated
+        @com.github.ghik.silencer.silent def agg = sqlResult.fold(List[Int]()) {
+          (l, _) => i = i + 1; l :+ i
         }
 
-        agg aka "aggregation" must_== Right(List(1, 2, 3)) and (
+        agg aka "aggregation" must beRight(List(1, 2, 3)) and (
           closed aka "resource release" must beTrue) and (
-            i aka "row count" must_== 3)
+            i aka "row count" must_=== 3)
 
       }
 
@@ -194,13 +199,14 @@ class SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
 
         var i = 0
         lazy val agg = res.copy(resultSet =
-          res.resultSet.and(probe).map(_._1)).fold(List[Int]()) {
-          (l, _) => i = i + 1; l :+ i
-        }
+          res.resultSet.and(probe).map(_._1)).
+          fold(List.empty[Int], ColumnAliaser.empty) {
+            (l, _) => i = i + 1; l :+ i
+          }
 
-        agg aka "aggregation" must_== Right(List(1, 2, 3)) and (
+        agg aka "aggregation" must beRight(List(1, 2, 3)) and (
           closed aka "resource release" must beTrue) and (
-            i aka "row count" must_== 3)
+            i aka "row count" must_=== 3)
 
       }
 
@@ -216,15 +222,15 @@ class SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
 
         var i = 0
         lazy val agg = res.copy(resultSet = res.resultSet.and(probe).map(_._1)).
-          fold(List[Int]()) { (l, _) =>
+          fold(List.empty[Int], ColumnAliaser.empty) { (l, _) =>
             if (i == 1) sys.error("Unexpected") else { i = i + 1; l :+ i }
           }
 
         agg aka "aggregation" must beLike {
           case Left(err :: Nil) =>
-            err.getMessage aka "failure" must_== "Unexpected"
+            err.getMessage aka "failure" must_=== "Unexpected"
         } and (closed aka ("resource release") must beTrue) and (
-          i aka "row count" must_== 1)
+          i aka "row count" must_=== 1)
 
       }
     }
@@ -263,13 +269,14 @@ class SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
 
         var i = 0
         lazy val agg = res.copy(resultSet =
-          res.resultSet.and(probe).map(_._1)).foldWhile(List[Int]()) {
-          (l, _) => i = i + 1; (l :+ i) -> true
-        }
+          res.resultSet.and(probe).map(_._1)).
+          foldWhile(List.empty[Int], ColumnAliaser.empty) {
+            (l, _) => i = i + 1; (l :+ i) -> true
+          }
 
-        agg aka "aggregation" must_== Right(List(1, 2, 3)) and (
+        agg aka "aggregation" must beRight(List(1, 2, 3)) and (
           closed aka "resource release" must beTrue) and (
-            i aka "row count" must_== 3)
+            i aka "row count" must_=== 3)
 
       }
 
@@ -283,7 +290,7 @@ class SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
 
         var i = 0
         lazy val agg = res.copy(resultSet = res.resultSet.and(probe).map(_._1)).
-          foldWhile(List[Int]()) { (l, _) =>
+          foldWhile(List.empty[Int], ColumnAliaser.empty) { (l, _) =>
             if (i == 1) sys.error("Unexpected") else {
               i = i + 1; (l :+ i) -> true
             }
@@ -291,9 +298,9 @@ class SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
 
         agg aka "aggregation" must beLike {
           case Left(err :: Nil) =>
-            err.getMessage aka "failure" must_== "Unexpected"
+            err.getMessage aka "failure" must_=== "Unexpected"
         } and (closed aka "resource release" must beTrue) and (
-          i aka "row count" must_== 1)
+          i aka "row count" must_=== 1)
 
       }
 
@@ -307,13 +314,13 @@ class SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
 
         var i = 0
         lazy val agg = res.copy(resultSet = res.resultSet.and(probe).map(_._1)).
-          foldWhile(List[Int]()) { (l, _) =>
+          foldWhile(List.empty[Int], ColumnAliaser.empty) { (l, _) =>
             if (i == 2) (l, false) else { i = i + 1; (l :+ i) -> true }
           }
 
-        agg aka "aggregation" must_== Right(List(1, 2)) and (
+        agg aka "aggregation" must beRight(List(1, 2)) and (
           closed aka "resource release" must beTrue) and (
-            i aka "row count" must_== 2)
+            i aka "row count" must_=== 2)
 
       }
   }
@@ -339,7 +346,7 @@ class SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
             first = true; sys.error("Failure")
           case _ => sys.error("Unexpected")
         } aka "processing with failure" must beLeft.like {
-          case err :: Nil => err.getMessage aka "failure" must_== "Failure"
+          case err :: Nil => err.getMessage aka "failure" must_=== "Failure"
         } and (first aka "first read" must beTrue)
       }
 
@@ -348,7 +355,9 @@ class SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
         SQL"SELECT str".executeQuery() withResult {
           case Some(first) => Set(first.row[String]("foo"))
           case _ => Set.empty[String]
-        } aka "partial processing" must_== Right(Set("A"))
+        } aka "partial processing" must beRight.which { r =>
+          r must_=== Set("A")
+        }
       }
   }
 
@@ -367,7 +376,7 @@ class SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
         SQL("EXEC stored_proc({param})")
           .on("param" -> "test-proc-2").executeQuery()
           .statementWarning aka "statement warning" must beSome.which {
-            _.getMessage aka "message" must_== "Warning for test-proc-2"
+            _.getMessage aka "message" must_=== "Warning for test-proc-2"
           }
       }
   }
@@ -378,14 +387,14 @@ class SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
 
     "be found by name" in withTestDB(v1) { implicit c =>
       SQL"SELECT foo AS AL, bar FROM test1".as(SqlParser.str("foo").single).
-        aka("by name") must_== v1
+        aka("by name") must_=== v1
 
     }
 
     "be found by alias" in withTestDB(v2) { implicit c =>
       SQL"SELECT foo AS AL, bar FROM test1".as(SqlParser.str("foo").single).
-        aka("by name") must_== v2 and (SQL"SELECT foo AS AL, bar FROM test1".
-          as(SqlParser.str("AL").single).aka("by alias") must_== v2)
+        aka("by name") must_=== v2 and (SQL"SELECT foo AS AL, bar FROM test1".
+          as(SqlParser.str("AL").single).aka("by alias") must_=== v2)
 
     }
 
@@ -404,7 +413,7 @@ class SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
         SQL"""SELECT a.foo AS ali, b.foo, b.foo AS ias FROM test1 a
               JOIN test1 b ON a.bar <> b.bar WHERE a.id = $id1 LIMIT 1""".as(
           (SqlParser.str("ali") ~ SqlParser.str("foo") ~ SqlParser.str("ias")).
-            map(SqlParser.flatten).single) must_== (("Lorem", "Ipsum", "Ipsum"))
+            map(SqlParser.flatten).single) must_=== (("Lorem", "Ipsum", "Ipsum"))
       }
     }
 

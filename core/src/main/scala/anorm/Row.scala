@@ -1,7 +1,6 @@
 package anorm
 
 import scala.util.{ Try, Success => TrySuccess }
-import scala.collection.breakOut
 
 trait Row {
   private[anorm] def metaData: MetaData
@@ -20,9 +19,9 @@ trait Row {
    *
    * @see #as
    */
-  lazy val asList: List[Any] = (data, metaData.ms).zipped.map { (v, m) =>
+  lazy val asList: List[Any] = Compat.lazyZip(data, metaData.ms).map { (v, m) =>
     if (m.nullable) Option(v) else v
-  }
+  }.toList
 
   /**
    * Returns row as dictionary of value per column name
@@ -35,10 +34,13 @@ trait Row {
    *
    * @see #as
    */
-  lazy val asMap: Map[String, Any] = (data, metaData.ms).zipped.map { (v, m) =>
-    val k = m.column.qualified
-    if (m.nullable) (k -> Option(v)) else k -> v
-  }(breakOut)
+  lazy val asMap: Map[String, Any] =
+    Compat.toMap(Compat.lazyZip(data, metaData.ms)) {
+      case (v, m) =>
+        val k = m.column.qualified
+
+        if (m.nullable) (k -> Option(v)) else k -> v
+    }
 
   /**
    * Returns row as `T`.
@@ -105,8 +107,9 @@ trait Row {
 
   // Data per column name
   private lazy val columnsDictionary: Map[String, Any] =
-    (metaData.ms, data).zipped.map((m, v) =>
-      m.column.qualified.toUpperCase -> v)(breakOut)
+    Compat.toMap(Compat.lazyZip(metaData.ms, data)) {
+      case (m, v) => m.column.qualified.toUpperCase -> v
+    }
 
   // Data per column alias
   private lazy val aliasesDictionary: Map[String, Any] = {

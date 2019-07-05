@@ -1,14 +1,23 @@
 language: scala
-jdk:
-  - oraclejdk8
-  - oraclejdk9
-  - openjdk11
-scala:
-- 2.12.7
-- 2.11.12
-sudo: false
+sudo: true
+dist: trusty
+
 cache:
   directories:
   - $HOME/.ivy2
   - $HOME/.sbt
+
+matrix:
+  include:
+  - jdk: openjdk8
+    scala: 2.11.12
+  - jdk: openjdk8
+    scala: 2.12.8
+  - jdk: openjdk8
+    scala: 2.13.0
+  - jdk: openjdk9
+    scala: 2.12.8
+  - jdk: openjdk11
+    scala: 2.13.0
+
 script: ./.travis_scripts/validate.sh

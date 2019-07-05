@@ -1,5 +1,7 @@
 package anorm
 
+import com.github.ghik.silencer.silent
+
 /**
  * @define caseTParam the type of case class
  * @define namingParam the column naming, to resolve the column name for each case class property
@@ -185,13 +187,18 @@ object Macro {
   def indexedParserImpl[T: c.WeakTypeTag](c: whitebox.Context): c.Expr[T] = {
     import c.universe._
 
-    offsetParserImpl[T](c)(reify(0))
+    @silent def p = reify(0)
+
+    offsetParserImpl[T](c)(p)
   }
 
   def sealedParserImpl1[T: c.WeakTypeTag](c: whitebox.Context): c.Expr[RowParser[T]] = {
     import c.universe.reify
-    sealedParserImpl(c)(
-      reify(DiscriminatorNaming.Default), reify(Discriminate.Identity))
+
+    @silent def discriminator = reify(DiscriminatorNaming.Default)
+    @silent def discriminate = reify(Discriminate.Identity)
+
+    sealedParserImpl(c)(discriminator, discriminate)
   }
 
   def sealedParserImpl2[T: c.WeakTypeTag](c: whitebox.Context)(naming: c.Expr[DiscriminatorNaming]): c.Expr[RowParser[T]] = sealedParserImpl(c)(naming, c.universe.reify(Discriminate.Identity))
@@ -376,8 +383,10 @@ object Macro {
     } else if (!tpeSym.isClass || !tpeSym.asClass.isCaseClass) {
       abort(s"Either a sealed trait or a case class expected: $tpe")
     } else {
+      @silent def p = c.universe.reify("_")
+
       ToParameterListImpl.caseClass[T](c)(
-        Seq.empty[c.Expr[Macro.ParameterProjection]], c.universe.reify("_"))
+        Seq.empty[c.Expr[Macro.ParameterProjection]], p)
     }
   }
 
@@ -416,7 +425,9 @@ object Macro {
   def configuredParameters[T: c.WeakTypeTag](c: whitebox.Context)(projection: c.Expr[Macro.ParameterProjection]*): c.Expr[ToParameterList[T]] = {
     import c.universe.reify
 
-    ToParameterListImpl.caseClass[T](c)(projection, reify("_"))
+    @silent def p = reify("_")
+
+    ToParameterListImpl.caseClass[T](c)(projection, p)
   }
 
   /**
