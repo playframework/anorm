@@ -34,7 +34,7 @@ case class ColumnNotFound(
   @deprecatedName('possibilities) available: Seq[String]) extends SqlRequestError {
   @deprecated("Use constructor with `available` sequence", "2.5.4")
   def this(column: String, possibilities: List[String]) =
-    this(column, possibilities.toSeq)
+    this(column, available = possibilities.toSeq)
 
   lazy val message = s"'$column' not found, available columns: " +
     available.map(_.dropWhile(_ == '.')).mkString(", ")

@@ -1,5 +1,7 @@
 package anorm.macros
 
+import anorm.Compat
+
 import scala.reflect.macros.whitebox
 
 private[anorm] object Inspect {
@@ -64,10 +66,13 @@ private[anorm] object Inspect {
     if (tpeArgs.isEmpty) Map.empty else {
       // Need apply rather than ctor to resolve parameter symbols
 
-      if (apply.paramLists.isEmpty) Map.empty
-      else (apply.typeParams -> tpeArgs).zipped.map {
-        case (sym, ty) => sym.fullName -> ty
-      }(scala.collection.breakOut)
+      if (apply.paramLists.isEmpty) {
+        Map.empty
+      } else {
+        Compat.toMap(Compat.lazyZip(apply.typeParams, tpeArgs)) {
+          case (sym, ty) => sym.fullName -> ty
+        }
+      }
     }
   }
 

@@ -20,6 +20,8 @@ import java.sql.{
 
 import scala.collection.immutable.SortedSet
 
+import com.github.ghik.silencer.silent
+
 import acolyte.jdbc.{
   DefinedParameter => DParam,
   ParameterMetaData => ParamMeta,
@@ -643,14 +645,13 @@ class ParameterSpec
     }
 
     "be null string option as Option[String]" in withConnection(
-      "acolyte.parameter.untypedNull" -> "true") {
-        implicit c =>
-          (SQL("set-null-str-opt {p}").
-            on("p" -> null.asInstanceOf[Some[String]]).
-            aka("parameter conversion") must throwA[IllegalArgumentException]).
-            and(SQL("set-null-str-opt {p}").
-              on("p" -> null.asInstanceOf[Option[String]]).
-              aka("conversion") must throwA[IllegalArgumentException])
+      "acolyte.parameter.untypedNull" -> "true") { _ =>
+        (SQL("set-null-str-opt {p}").
+          on("p" -> null.asInstanceOf[Some[String]]).
+          aka("parameter conversion") must throwA[IllegalArgumentException]).
+          and(SQL("set-null-str-opt {p}").
+            on("p" -> null.asInstanceOf[Option[String]]).
+            aka("conversion") must throwA[IllegalArgumentException])
       }
 
     "be defined Java big decimal option" in withConnection() { implicit c =>
@@ -686,9 +687,12 @@ class ParameterSpec
        http://docs.oracle.com/javase/6/docs/api/java/sql/PreparedStatement.html#setObject%28int,%20java.lang.Object%29
        -> Note: Not all databases allow for a non-typed Null to be sent to the backend. For maximum portability, the setNull or the setObject(int parameterIndex, Object x, int sqlType) method should be used instead of setObject(int parameterIndex, Object x).
        -> Note: This method throws an exception if there is an ambiguity, for example, if the object is of a class implementing more than one of the interfaces named above.
-       */
-        SQL("set-none {p}").on("p" -> None).
-          execute() aka "execution" must beFalse
+         */
+        val s = SQL("set-none {p}")
+
+        @silent def bind = s.on("p" -> None) // None binding is deprecated
+
+        bind.execute() aka "execution" must beFalse
       }
 
     "set null parameter from empty option" in withConnection(
@@ -697,7 +701,7 @@ class ParameterSpec
           execute() aka "execution" must beFalse
       }
 
-    withConnection() { implicit c =>
+    withConnection() { _ =>
       // Do not accept untyped name when feature enabled
       shapeless.test.illTyped("""
 val name: Any = "untyped"
@@ -705,7 +709,7 @@ SQL("set-old {untyped}").on(name -> 2l)
 """)
     }
 
-    withConnection() { implicit c =>
+    withConnection() { _ =>
       // Do not accept untyped value when feature enabled
       shapeless.test.illTyped("""
 val d: Any = new java.util.Date()
@@ -795,38 +799,38 @@ val params: Seq[NamedParameter] = Seq("mod" -> d, "id" -> "idv")
     }
 
     "refuse multi-value" >> {
-      "for List" in withConnection() { implicit c =>
+      "for List" in withConnection() { _ =>
         SQL("set-null-seq {list}").on('list -> null.asInstanceOf[List[String]]).
           aka("parameter conversion") must throwA[IllegalArgumentException]
 
       }
 
-      "for Seq" in withConnection() { implicit c =>
+      "for Seq" in withConnection() { _ =>
         SQL("set-null-seq {seq}").on('seq -> null.asInstanceOf[Seq[String]]).
           aka("parameter conversion") must throwA[IllegalArgumentException]
 
       }
 
-      "for Set" in withConnection() { implicit c =>
+      "for Set" in withConnection() { _ =>
         SQL("set-null-seq {set}").on('set -> null.asInstanceOf[Set[String]]).
           aka("parameter conversion") must throwA[IllegalArgumentException]
 
       }
 
-      "for SortedSet" in withConnection() { implicit c =>
+      "for SortedSet" in withConnection() { _ =>
         SQL("sortedSet-null-seq {sortedSet}").on('sortedSet -> null.asInstanceOf[SortedSet[String]]).
           aka("parameter conversion") must throwA[IllegalArgumentException]
 
       }
 
-      "for Stream" in withConnection() { implicit c =>
+      "for Stream" in withConnection() { _ =>
         SQL("stream-null-seq {stream}").on(
           'stream -> null.asInstanceOf[Stream[String]]).
           aka("parameter conversion") must throwA[IllegalArgumentException]
 
       }
 
-      "for Vector" in withConnection() { implicit c =>
+      "for Vector" in withConnection() { _ =>
         SQL("vector-null-seq {vector}").on(
           'vector -> null.asInstanceOf[Vector[String]]).
           aka("parameter conversion") must throwA[IllegalArgumentException]
@@ -1011,8 +1015,11 @@ val params: Seq[NamedParameter] = Seq("mod" -> d, "id" -> "idv")
       "acolyte.parameter.untypedNull" -> "true") { implicit c =>
         /*
        http://docs.oracle.com/javase/6/docs/api/java/sql/PreparedStatement.html#setObject%28int,%20java.lang.Object%29
-       */
-        SQL("set-none {p}").onParams(pv(None)).
+         */
+
+        @silent def noneParam = pv(None)
+
+        SQL("set-none {p}").onParams(noneParam).
           execute() aka "execution" must beFalse
       }
 
