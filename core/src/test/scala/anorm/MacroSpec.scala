@@ -4,6 +4,8 @@ import java.lang.{ Boolean => JBool, Long => JLong }
 
 import java.sql.Connection
 
+import com.github.ghik.silencer.silent
+
 import acolyte.jdbc.{
   DefinedParameter => DParam,
   ParameterMetaData => ParamMeta,
@@ -112,7 +114,7 @@ class MacroSpec extends org.specs2.mutable.Specification {
     }
 
     "support self reference" in {
-      val parser = Macro.namedParser[Self] // check compile is ok
+      val _ = Macro.namedParser[Self] // check compile is ok
 
       ok // TODO: Supports aliasing to make it really usable (see #124)
     }
@@ -221,7 +223,9 @@ class MacroSpec extends org.specs2.mutable.Specification {
               RowParser[CaseObj.type] { _ => Success(CaseObj) }
 
             implicit val barParser = Macro.namedParser[Bar]
-            val familyParser = Macro.sealedParser[Family]
+
+            // cannot handle object anorm.MacroSpec.NotCase: no case accessor
+            @silent def familyParser = Macro.sealedParser[Family]
 
             SQL"TEST".as(familyParser.*) must_== List(Bar(1), CaseObj)
         }
@@ -237,7 +241,9 @@ class MacroSpec extends org.specs2.mutable.Specification {
               RowParser[CaseObj.type] { _ => Success(CaseObj) }
 
             implicit val barParser = Macro.namedParser[Bar]
-            val familyParser = Macro.sealedParser[Family](
+
+            // cannot handle object anorm.MacroSpec.NotCase: no case accessor
+            @silent def familyParser = Macro.sealedParser[Family](
               Macro.DiscriminatorNaming(_ => "foo"),
               Macro.Discriminate(_.split("\\.").last))
 
@@ -284,7 +290,8 @@ class MacroSpec extends org.specs2.mutable.Specification {
     }
 
     "be successful for sealed family" >> {
-      implicit def familyParams: ToParameterList[Family] = {
+      // cannot handle object anorm.MacroSpec.NotCase: no case accessor
+      @silent implicit def familyParams: ToParameterList[Family] = {
         implicit val barToParams: ToParameterList[Bar] = Macro.toParameters[Bar]
         implicit val caseObjParam = ToParameterList.empty[CaseObj.type]
 
@@ -344,7 +351,7 @@ class MacroSpec extends org.specs2.mutable.Specification {
 
     val SqlDouble3s = ParamMeta.Double(23.456D)
 
-    def withConnection[A](ps: (String, String)*)(f: java.sql.Connection => A): A = f(connection(handleStatement withUpdateHandler {
+    def withConnection[A](f: java.sql.Connection => A): A = f(connection(handleStatement withUpdateHandler {
       case UpdateExecution("set-double ?",
         DParam(23.456D, SqlDouble3s) :: Nil) => 1 /* case ok */
 
@@ -355,7 +362,7 @@ class MacroSpec extends org.specs2.mutable.Specification {
       implicit val generated: ToStatement[ValidValueClass] =
         Macro.valueToStatement[ValidValueClass]
 
-      withConnection() { implicit c =>
+      withConnection { implicit c =>
         (SQL("set-double {p}").on("p" -> new ValidValueClass(23.456D)).
           execute() must beFalse)
       }

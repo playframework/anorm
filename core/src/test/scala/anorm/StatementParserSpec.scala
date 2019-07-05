@@ -114,7 +114,7 @@ class StatementParserSpec extends org.specs2.mutable.Specification {
       Sql.query(stmt.tokens, stmt.names.toList, Map[String, ParameterValue]("id" -> "foo"), 0, new StringBuilder(), List.empty[(Int, ParameterValue)]) must beSuccessfulTry.like {
         case (sql, (0, pv) :: Nil) =>
           sql must_== "SELECT * FROM name LIKE '%strange' AND id = ?" and (
-            pv must_== ParameterValue.toParameterValue("foo"))
+            pv must_== implicitly[ParameterValue]("foo"))
       }
     }
   }
