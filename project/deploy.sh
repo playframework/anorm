@@ -42,7 +42,7 @@ EOF
 }
 
 SCALA_MODULES="core:anorm tokenizer:anorm-tokenizer akka:anorm-akka iteratee:anorm-iteratee postgres:anorm-postgres"
-SCALA_VERSIONS="2.11 2.12"
+SCALA_VERSIONS="2.11 2.12 2.13"
 BASES=""
 
 for V in $SCALA_VERSIONS; do

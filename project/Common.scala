@@ -17,7 +17,7 @@ object Common extends AutoPlugin {
     organization := "org.playframework.anorm",
     scalaVersion := "2.12.8",
     crossScalaVersions := Seq(
-      "2.11.12", (scalaVersion in ThisBuild).value, "2.13.0"),
+      "2.11.12", scalaVersion.value, "2.13.0"),
     resolvers += "Scalaz Bintray Repo" at {
       "http://dl.bintray.com/scalaz/releases" // specs2 depends on scalaz-stream
     },

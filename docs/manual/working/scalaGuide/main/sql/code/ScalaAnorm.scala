@@ -20,7 +20,7 @@ class ScalaAnorm extends org.specs2.mutable.Specification {
       import anorm._
 
       database.withConnection { implicit c =>
-        val result: Boolean = SQL("Select 1").execute()
+        val _: Boolean = SQL("Select 1").execute()
       }
       //#playdb
       ok
@@ -40,7 +40,7 @@ object MacroParsers {
   // either by macros or by custom parsers
   implicit val barParser = Macro.namedParser[Bar]
   implicit val loremParser = RowParser[Lorem.type] {
-    anyRowDiscriminatedAsLorem => Success(Lorem)
+    _ /*anyRowDiscriminatedAsLorem*/ => Success(Lorem)
   }
 
   val familyParser = Macro.sealedParser[Family]
