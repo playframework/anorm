@@ -8,7 +8,7 @@ import com.typesafe.tools.mima.plugin.MimaKeys.{
 val specs2Test = Seq(
   "specs2-core",
   "specs2-junit"
-).map("org.specs2" %% _ % "4.5.1" % Test)
+).map("org.specs2" %% _ % "4.6.0" % Test)
 
 lazy val acolyteVersion = "1.0.52"
 lazy val acolyte = "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test
@@ -121,7 +121,7 @@ lazy val `anorm-core` = project.in(file("core"))
     ),
     libraryDependencies ++= Seq(
       "com.jsuereth" %% "scala-arm" % "2.1-SNAPSHOT",
-      "joda-time" % "joda-time" % "2.9.9",
+      "joda-time" % "joda-time" % "2.10.3",
       "org.joda" % "joda-convert" % "1.9.2",
       "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2",
       "com.h2database" % "h2" % "1.4.199" % Test,
