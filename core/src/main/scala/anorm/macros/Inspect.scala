@@ -12,7 +12,7 @@ private[anorm] object Inspect {
     val tpeSym = tpe.typeSymbol.asClass
 
     @annotation.tailrec
-    def allSubclasses(path: Traversable[Symbol], subclasses: Set[Type]): Set[Type] = path.headOption match {
+    def allSubclasses(path: Compat.Trav[Symbol], subclasses: Set[Type]): Set[Type] = path.headOption match {
       case Some(cls: ClassSymbol) if (
         tpeSym != cls && cls.selfType.baseClasses.contains(tpeSym)) => {
         val newSub: Set[Type] = if (!cls.isCaseClass) {
@@ -28,7 +28,7 @@ private[anorm] object Inspect {
 
       case Some(o: ModuleSymbol) if (
         o.companion == NoSymbol && // not a companion object
-        tpeSym != c && o.typeSignature.baseClasses.contains(tpeSym)) => {
+        o.typeSignature.baseClasses.contains(tpeSym)) => {
         val newSub: Set[Type] = if (!o.moduleClass.asClass.isCaseClass) {
           c.warning(c.enclosingPosition, s"cannot handle object ${o.fullName}: no case accessor")
           Set.empty

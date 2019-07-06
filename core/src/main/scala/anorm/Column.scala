@@ -49,7 +49,9 @@ trait Column[A] extends ((Any, MetaDataItem) => Either[SqlRequestError, A]) { pa
    * }}}
    */
   final def mapResult[B](f: A => Either[SqlRequestError, B]): Column[B] =
-    Column[B] { (v: Any, m: MetaDataItem) => parent(v, m).right.flatMap(f) }
+    Column[B] { (v: Any, m: MetaDataItem) =>
+      Compat.rightFlatMap(parent(v, m))(f)
+    }
 
   /**
    * $mapDescription
@@ -333,8 +335,9 @@ object Column extends JodaColumn with JavaTimeColumn {
    *   SQL("SELECT COUNT(*) FROM tbl").as(scalar[BigInt].single)
    * }}}
    */
-  implicit val columnToBigInt: Column[BigInt] =
-    nonNull((value, meta) => anyToBigInteger(value, meta).right.map(BigInt(_)))
+  implicit val columnToBigInt: Column[BigInt] = nonNull { (value, meta) =>
+    Compat.rightMap(anyToBigInteger(value, meta))(BigInt(_))
+  }
 
   implicit val columnToUUID: Column[UUID] = nonNull { (value, meta) =>
     val MetaDataItem(qualified, _, _) = meta
@@ -408,7 +411,7 @@ object Column extends JodaColumn with JavaTimeColumn {
    */
   implicit val columnToScalaBigDecimal: Column[BigDecimal] =
     nonNull((value, meta) =>
-      anyToBigDecimal(value, meta).right.map(BigDecimal(_)))
+      Compat.rightMap(anyToBigDecimal(value, meta))(BigDecimal(_)))
 
   /**
    * Parses column as Java Date.
@@ -433,8 +436,9 @@ object Column extends JodaColumn with JavaTimeColumn {
   }
 
   implicit def columnToOption[T](implicit transformer: Column[T]): Column[Option[T]] = Column { (value, meta) =>
-    if (value != null) transformer(value, meta).right.map(Some(_))
-    else Right[SqlRequestError, Option[T]](None)
+    if (value != null) {
+      Compat.rightMap(transformer(value, meta))(Some(_))
+    } else Right[SqlRequestError, Option[T]](None)
   }
 
   /**

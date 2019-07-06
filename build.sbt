@@ -50,7 +50,7 @@ lazy val `anorm-core` = project.in(file("core"))
     }.taskValue,
     scalacOptions += "-Xlog-free-terms",
     scalacOptions += { // Silencer
-      "-P:silencer:globalFilters=missing\\ in\\ object\\ ToSql\\ is\\ deprecated;possibilities\\ in\\ class\\ ColumnNotFound\\ is\\ deprecated;DeprecatedSqlParser\\ in\\ package\\ anorm\\ is\\ deprecated"
+      "-P:silencer:globalFilters=missing\\ in\\ object\\ ToSql\\ is\\ deprecated;possibilities\\ in\\ class\\ ColumnNotFound\\ is\\ deprecated;DeprecatedSqlParser\\ in\\ package\\ anorm\\ is\\ deprecated;constructor\\ deprecatedName\\ in\\ class\\ deprecatedName\\ is\\ deprecated"
     },
     mimaPreviousArtifacts := {
       if (scalaVersion.value startsWith "2.13") {

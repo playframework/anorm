@@ -97,7 +97,7 @@ class BatchSqlSpec extends org.specs2.mutable.Specification with H2Database {
     "fail with missing argument" in {
       val b1 = BatchSql(
         "SELECT * FROM tbl WHERE a = {a}, b = {b}",
-        Seq[NamedParameter]('a -> 0, 'b -> 1), Nil)
+        Seq[NamedParameter](Symbol("a") -> 0, Symbol("b") -> 1), Nil)
 
       lazy val b2 = b1.addBatchParamsList(Seq(Seq(2)))
 

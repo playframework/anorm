@@ -62,6 +62,6 @@ object Cursor {
   private case class ResultRow(
     metaData: MetaData, data: List[Any]) extends Row {
 
-    override lazy val toString = "Row(" + (metaData.ms, data).zipped.map((m, v) => s"'${m.column}': ${v} as ${m.clazz}").mkString(", ") + ")"
+    override lazy val toString = "Row(" + Compat.lazyZip(metaData.ms, data).map((m, v) => s"'${m.column}': ${v} as ${m.clazz}").mkString(", ") + ")"
   }
 }

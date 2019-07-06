@@ -16,17 +16,20 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    * val count = SQL("select count(*) from Country").as(scalar[Long].single)
    * }}}
    */
-  def scalar[T](implicit @deprecatedName('transformer) c: Column[T]): RowParser[T] =
+  def scalar[T](implicit @deprecatedName(Symbol("transformer")) c: Column[T]): RowParser[T] =
     new ScalarRowParser[T] {
       def apply(row: Row): SqlResult[T] = {
-        ((for {
+        val input: Either[SqlMappingError, (Any, MetaDataItem)] = (for {
           m <- row.metaData.ms.headOption
           v <- row.data.headOption
-        } yield v -> m) toRight NoColumnsInReturnedResult).right.flatMap {
+        } yield v -> m) toRight NoColumnsInReturnedResult
+
+        val parsed = Compat.rightFlatMap[SqlMappingError, SqlRequestError, (Any, MetaDataItem), T](input) {
           case in @ (_, m) =>
             parseColumn(row, m.column.qualified, c, in)
+        }
 
-        }.fold(Error(_), Success(_))
+        parsed.fold(Error(_), Success(_))
       }
     }
 
@@ -445,13 +448,11 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    *   as(get[String]("title").single)
    * }}}
    */
-  def get[T](name: String)(implicit @deprecatedName('extractor) c: Column[T]): RowParser[T] =
-    RowParser { row =>
-      (for {
-        in <- row.get(name).right
-        res <- parseColumn(row, name, c, in).right
-      } yield res).fold(Error(_), Success(_))
-    }
+  def get[T](name: String)(implicit @deprecatedName(Symbol("extractor")) c: Column[T]): RowParser[T] = RowParser { row =>
+    (Compat.rightFlatMap(row get name) { in =>
+      parseColumn(row, name, c, in)
+    }).fold(Error(_), Success(_))
+  }
 
   /**
    * Returns row parser for column at given `position`.
@@ -467,12 +468,11 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    *   } *)
    * }}}
    */
-  def get[T](position: Int)(implicit @deprecatedName('extractor) c: Column[T]): RowParser[T] =
+  def get[T](position: Int)(implicit @deprecatedName(Symbol("extractor")) c: Column[T]): RowParser[T] =
     RowParser { row =>
-      (for {
-        in <- row.getIndexed(position - 1).right
-        res <- parseColumn(row, in._2.column.qualified, c, in).right
-      } yield res).fold(Error(_), Success(_))
+      (Compat.rightFlatMap(row.getIndexed(position - 1)) { in =>
+        parseColumn(row, in._2.column.qualified, c, in)
+      }).fold(Error(_), Success(_))
     }
 
   /**
