@@ -436,8 +436,9 @@ final class SqlResultSpec
   def withTestDB[T](foo: String)(f: java.sql.Connection => T): T =
     withH2Database { implicit c =>
       createTest1Table()
-      SQL("insert into test1(id, foo, bar) values ({id}, {foo}, {bar})").
-        on('id -> 10L, 'foo -> foo, 'bar -> 20).execute()
+
+      SQL("insert into test1(id, foo, bar) values ({id}, {foo}, {bar})").on(
+        Symbol("id") -> 10L, Symbol("foo") -> foo, Symbol("bar") -> 20).execute()
 
       f(c)
     }

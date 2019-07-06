@@ -34,7 +34,7 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
         values (${10L}, ${"Hello"}, ${20})""".execute()
 
       ex aka "update executed" must beFalse /*not query*/ and {
-        SQL("select * from test1 where id = {id}").on('id -> 10L)
+        SQL("select * from test1 where id = {id}").on(Symbol("id") -> 10L)
           .as(RowParser({ row =>
             Success(row[String]("foo") -> row[Int]("bar"))
           }).single) must_== ("Hello" -> 20)
@@ -120,17 +120,17 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
       }
 
       "return instance with None for column not found" in withQueryResult(
-        rowList1(classOf[Long] -> "id") :+ 123l) { implicit c =>
+        rowList1(classOf[Long] -> "id") :+ 123L) { implicit c =>
 
           SQL("SELECT * FROM test").as(
             SqlParser.long("id") ~ SqlParser.str("val").? map {
               case id ~ v => (id -> v)
-            } single) aka "mapped data" must_== (123l -> None)
+            } single) aka "mapped data" must_== (123L -> None)
 
         }
 
       "throw exception when type doesn't match" in withQueryResult(
-        fooBarTable :+ (1l, "str", 3)) { implicit c =>
+        fooBarTable :+ (1L, "str", 3)) { implicit c =>
 
           SQL("SELECT * FROM test").as(
             SqlParser.long("id") ~ SqlParser.int("foo").? map {
@@ -211,7 +211,7 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
 
         uc aka "update count" must_== 1 and {
           SQL("select * from test1 where id = {id}")
-            .on('id -> 11L).as(fooBarParser1.singleOpt)
+            .on(Symbol("id") -> 11L).as(fooBarParser1.singleOpt)
             .aka("instance") must beSome(fixture)
         }
     }
@@ -219,7 +219,7 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
     "be parsed using raw 'get' parser with column names" in withQueryResult(
       fooBarTable :+ (11L, "World", 21)) { implicit c =>
         SQL("select * from test1 where id = {id}")
-          .on('id -> 11L).as(fooBarParser2.singleOpt)
+          .on(Symbol("id") -> 11L).as(fooBarParser2.singleOpt)
           .aka("instance") must beSome(TestTable(11L, "World", 21))
 
       }
@@ -227,11 +227,11 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
     "be parsed using convience parsers with column positions" in {
       withQueryResult(fooBarTable :+ (11L, "World", 21)) { implicit c =>
         SQL("insert into test1(id, foo, bar) values ({id}, {foo}, {bar})")
-          .on('id -> 11L, 'foo -> "World", 'bar -> 21)
+          .on(Symbol("id") -> 11L, Symbol("foo") -> "World", Symbol("bar") -> 21)
           .execute()
 
         SQL("select * from test1 where id = {id}")
-          .on('id -> 11L).as(fooBarParser3.singleOpt)
+          .on(Symbol("id") -> 11L).as(fooBarParser3.singleOpt)
           .aka("instance") must beSome(TestTable(11L, "World", 21))
 
       }
@@ -240,11 +240,11 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
     "be parsed using raw 'get' parser with column positions" in {
       withQueryResult(fooBarTable :+ (11L, "World", 21)) { implicit c =>
         SQL("insert into test1(id, foo, bar) values ({id}, {foo}, {bar})")
-          .on('id -> 11L, 'foo -> "World", 'bar -> 21)
+          .on(Symbol("id") -> 11L, Symbol("foo") -> "World", Symbol("bar") -> 21)
           .execute()
 
         SQL("select * from test1 where id = {id}")
-          .on('id -> 11L).as(fooBarParser4.singleOpt)
+          .on(Symbol("id") -> 11L).as(fooBarParser4.singleOpt)
           .aka("instance") must beSome(TestTable(11L, "World", 21))
 
       }

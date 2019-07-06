@@ -5,8 +5,6 @@
 import java.sql.SQLException
 import java.util.StringTokenizer
 
-import scala.collection.JavaConverters.enumerationAsScalaIteratorConverter
-
 /**
  * Anorm API
  *
@@ -140,7 +138,8 @@ package object anorm {
       }
     } else parts.headOption match {
       case Some(part) =>
-        val it = new StringTokenizer(part, "%", true).asScala
+        val it = Compat.javaEnumIterator[java.lang.Object](
+          new StringTokenizer(part, "%", true))
 
         if (!it.hasNext /* empty */ ) {
           tokenize(it, List(StringToken("")), parts.tail, ps, gs, ns, m)

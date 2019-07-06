@@ -51,7 +51,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
 
       val schema = rowList4(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D")
 
-      withQueryResult(schema :+ ("A", 2, 3l, 4.56d)) { implicit c =>
+      withQueryResult(schema :+ ("A", 2, 3L, 4.56D)) { implicit c =>
         SQL("SELECT * FROM test").as(
           str("A") ~ int("B") ~ long("C") ~ get[Double]("D") map (SqlParser.to(foo _)) single).
           aka("function result") must_== "Fn4"
@@ -64,7 +64,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
 
       val schema = rowList5(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D", classOf[Short] -> "E")
 
-      withQueryResult(schema :+ ("A", 2, 3l, 4.56d, 9.toShort)) { implicit c =>
+      withQueryResult(schema :+ ("A", 2, 3L, 4.56D, 9.toShort)) { implicit c =>
         SQL("SELECT * FROM test").as(
           str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") map (SqlParser.to(foo _)) single).
           aka("function result") must_== "Fn5"
@@ -77,7 +77,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
 
       val schema = rowList6(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D", classOf[Short] -> "E", classOf[Byte] -> "F")
 
-      withQueryResult(schema :+ ("A", 2, 3l, 4.56d, 9.toShort, 10.toByte)) { implicit c =>
+      withQueryResult(schema :+ ("A", 2, 3L, 4.56D, 9.toShort, 10.toByte)) { implicit c =>
         SQL("SELECT * FROM test").as(
           str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") map (SqlParser.to(foo _)) single).
           aka("function result") must_== "Fn6"
@@ -90,7 +90,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
 
       val schema = rowList7(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D", classOf[Short] -> "E", classOf[Byte] -> "F", classOf[Boolean] -> "G")
 
-      withQueryResult(schema :+ ("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true)) { implicit c =>
+      withQueryResult(schema :+ ("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true)) { implicit c =>
         SQL("SELECT * FROM test").as(
           str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") map (SqlParser.to(foo _)) single).aka("function result") must_== "Fn7"
 
@@ -102,7 +102,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
 
       val schema = rowList8(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D", classOf[Short] -> "E", classOf[Byte] -> "F", classOf[Boolean] -> "G", classOf[String] -> "H")
 
-      withQueryResult(schema :+ ("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B")) { implicit c =>
+      withQueryResult(schema :+ ("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B")) { implicit c =>
         SQL("SELECT * FROM test").as(
           str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") map (SqlParser.to(foo _)) single).aka("function result") must_== "Fn8"
 
@@ -114,7 +114,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
 
       val schema = rowList9(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D", classOf[Short] -> "E", classOf[Byte] -> "F", classOf[Boolean] -> "G", classOf[String] -> "H", classOf[Int] -> "I")
 
-      withQueryResult(schema :+ ("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B", 3)) { implicit c =>
+      withQueryResult(schema :+ ("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3)) { implicit c =>
         SQL("SELECT * FROM test").as(
           str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") map (SqlParser.to(foo _)) single).aka("function result") must_== "Fn9"
 
@@ -126,7 +126,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
 
       val schema = rowList10(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D", classOf[Short] -> "E", classOf[Byte] -> "F", classOf[Boolean] -> "G", classOf[String] -> "H", classOf[Int] -> "I", classOf[Long] -> "J")
 
-      withQueryResult(schema :+ ("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4l)) { implicit c =>
+      withQueryResult(schema :+ ("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L)) { implicit c =>
         SQL("SELECT * FROM test").as(
           str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") map (SqlParser.to(foo _)) single).aka("function result") must_== "Fn10"
 
@@ -138,7 +138,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
 
       val schema = rowList11(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D", classOf[Short] -> "E", classOf[Byte] -> "F", classOf[Boolean] -> "G", classOf[String] -> "H", classOf[Int] -> "I", classOf[Long] -> "J", classOf[Double] -> "K")
 
-      withQueryResult(schema :+ ("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4l, 5.67d)) { implicit c =>
+      withQueryResult(schema :+ ("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D)) { implicit c =>
         SQL("SELECT * FROM test").as(
           str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") map (SqlParser.to(foo _)) single).aka("function result") must_== "Fn11"
 
@@ -150,7 +150,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
 
       val schema = rowList12(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D", classOf[Short] -> "E", classOf[Byte] -> "F", classOf[Boolean] -> "G", classOf[String] -> "H", classOf[Int] -> "I", classOf[Long] -> "J", classOf[Double] -> "K", classOf[Short] -> "L")
 
-      withQueryResult(schema :+ ("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4l, 5.67d, 10.toShort)) { implicit c =>
+      withQueryResult(schema :+ ("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort)) { implicit c =>
         SQL("SELECT * FROM test").as(
           str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") map (SqlParser.to(foo _)) single).aka("function result") must_== "Fn12"
 
@@ -162,7 +162,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
 
       val schema = rowList13(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D", classOf[Short] -> "E", classOf[Byte] -> "F", classOf[Boolean] -> "G", classOf[String] -> "H", classOf[Int] -> "I", classOf[Long] -> "J", classOf[Double] -> "K", classOf[Short] -> "L", classOf[Byte] -> "M")
 
-      withQueryResult(schema :+ ("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4l, 5.67d, 10.toShort, 11.toByte)) { implicit c =>
+      withQueryResult(schema :+ ("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte)) { implicit c =>
         SQL("SELECT * FROM test").as(
           str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") map (SqlParser.to(foo _)) single).
           aka("function result") must_== "Fn13"
@@ -175,7 +175,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
 
       val schema = rowList14(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D", classOf[Short] -> "E", classOf[Byte] -> "F", classOf[Boolean] -> "G", classOf[String] -> "H", classOf[Int] -> "I", classOf[Long] -> "J", classOf[Double] -> "K", classOf[Short] -> "L", classOf[Byte] -> "M", classOf[Boolean] -> "N")
 
-      withQueryResult(schema :+ ("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4l, 5.67d, 10.toShort, 11.toByte, false)) { implicit c =>
+      withQueryResult(schema :+ ("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte, false)) { implicit c =>
         SQL("SELECT * FROM test").as(
           str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N") map (SqlParser.to(foo _)) single).aka("function result") must_== "Fn14"
 
@@ -187,7 +187,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
 
       val schema = rowList15(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D", classOf[Short] -> "E", classOf[Byte] -> "F", classOf[Boolean] -> "G", classOf[String] -> "H", classOf[Int] -> "I", classOf[Long] -> "J", classOf[Double] -> "K", classOf[Short] -> "L", classOf[Byte] -> "M", classOf[Boolean] -> "N", classOf[String] -> "O")
 
-      withQueryResult(schema :+ ("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4l, 5.67d, 10.toShort, 11.toByte, false, "C")) { implicit c =>
+      withQueryResult(schema :+ ("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte, false, "C")) { implicit c =>
         SQL("SELECT * FROM test").as(
           str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N") ~ str("O") map (SqlParser.to(foo _)) single).aka("function result") must_== "Fn15"
 
@@ -199,7 +199,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
 
       val schema = rowList16(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D", classOf[Short] -> "E", classOf[Byte] -> "F", classOf[Boolean] -> "G", classOf[String] -> "H", classOf[Int] -> "I", classOf[Long] -> "J", classOf[Double] -> "K", classOf[Short] -> "L", classOf[Byte] -> "M", classOf[Boolean] -> "N", classOf[String] -> "O", classOf[Int] -> "P")
 
-      withQueryResult(schema :+ ("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4l, 5.67d, 10.toShort, 11.toByte, false, "C", 3)) { implicit c =>
+      withQueryResult(schema :+ ("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte, false, "C", 3)) { implicit c =>
         SQL("SELECT * FROM test").as(
           str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N") ~ str("O") ~ int("P") map (SqlParser.to(foo _)) single).aka("function result") must_== "Fn16"
 
@@ -211,7 +211,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
 
       val schema = rowList17(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D", classOf[Short] -> "E", classOf[Byte] -> "F", classOf[Boolean] -> "G", classOf[String] -> "H", classOf[Int] -> "I", classOf[Long] -> "J", classOf[Double] -> "K", classOf[Short] -> "L", classOf[Byte] -> "M", classOf[Boolean] -> "N", classOf[String] -> "O", classOf[Int] -> "P", classOf[Long] -> "Q")
 
-      withQueryResult(schema :+ ("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4l, 5.67d, 10.toShort, 11.toByte, false, "C", 3, 4l)) { implicit c =>
+      withQueryResult(schema :+ ("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte, false, "C", 3, 4L)) { implicit c =>
         SQL("SELECT * FROM test").as(
           str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N") ~ str("O") ~ int("P") ~ long("Q") map (SqlParser.to(foo _)) single).aka("function result") must_== "Fn17"
 
@@ -223,7 +223,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
 
       val schema = rowList18(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D", classOf[Short] -> "E", classOf[Byte] -> "F", classOf[Boolean] -> "G", classOf[String] -> "H", classOf[Int] -> "I", classOf[Long] -> "J", classOf[Double] -> "K", classOf[Short] -> "L", classOf[Byte] -> "M", classOf[Boolean] -> "N", classOf[String] -> "O", classOf[Int] -> "P", classOf[Long] -> "Q", classOf[Double] -> "R")
 
-      withQueryResult(schema :+ ("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4l, 5.67d, 10.toShort, 11.toByte, false, "C", 3, 4l, 5.678d)) { implicit c =>
+      withQueryResult(schema :+ ("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte, false, "C", 3, 4L, 5.678D)) { implicit c =>
         SQL("SELECT * FROM test").as(
           str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N") ~ str("O") ~ int("P") ~ long("Q") ~ get[Double]("R") map (SqlParser.to(foo _)) single).aka("function result") must_== "Fn18"
 
@@ -235,7 +235,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
 
       val schema = rowList19(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D", classOf[Short] -> "E", classOf[Byte] -> "F", classOf[Boolean] -> "G", classOf[String] -> "H", classOf[Int] -> "I", classOf[Long] -> "J", classOf[Double] -> "K", classOf[Short] -> "L", classOf[Byte] -> "M", classOf[Boolean] -> "N", classOf[String] -> "O", classOf[Int] -> "P", classOf[Long] -> "Q", classOf[Double] -> "R", classOf[Short] -> "S")
 
-      withQueryResult(schema :+ ("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4l, 5.67d, 10.toShort, 11.toByte, false, "C", 3, 4l, 5.678d, 16.toShort)) { implicit c =>
+      withQueryResult(schema :+ ("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte, false, "C", 3, 4L, 5.678D, 16.toShort)) { implicit c =>
         SQL("SELECT * FROM test").as(
           str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N") ~ str("O") ~ int("P") ~ long("Q") ~ get[Double]("R") ~ get[Short]("S") map (SqlParser.to(foo _)) single).aka("function result") must_== "Fn19"
 
@@ -247,7 +247,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
 
       val schema = rowList20(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D", classOf[Short] -> "E", classOf[Byte] -> "F", classOf[Boolean] -> "G", classOf[String] -> "H", classOf[Int] -> "I", classOf[Long] -> "J", classOf[Double] -> "K", classOf[Short] -> "L", classOf[Byte] -> "M", classOf[Boolean] -> "N", classOf[String] -> "O", classOf[Int] -> "P", classOf[Long] -> "Q", classOf[Double] -> "R", classOf[Short] -> "S", classOf[String] -> "T")
 
-      withQueryResult(schema :+ ("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4l, 5.67d, 10.toShort, 11.toByte, false, "C", 3, 4l, 5.678d, 16.toShort, "D")) { implicit c =>
+      withQueryResult(schema :+ ("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte, false, "C", 3, 4L, 5.678D, 16.toShort, "D")) { implicit c =>
         SQL("SELECT * FROM test").as(str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N") ~ str("O") ~ int("P") ~ long("Q") ~ get[Double]("R") ~ get[Short]("S") ~ str("T") map (SqlParser.to(foo _)) single).aka("function result") must_== "Fn20"
 
       }
@@ -258,7 +258,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
 
       val schema = rowList21(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D", classOf[Short] -> "E", classOf[Byte] -> "F", classOf[Boolean] -> "G", classOf[String] -> "H", classOf[Int] -> "I", classOf[Long] -> "J", classOf[Double] -> "K", classOf[Short] -> "L", classOf[Byte] -> "M", classOf[Boolean] -> "N", classOf[String] -> "O", classOf[Int] -> "P", classOf[Long] -> "Q", classOf[Double] -> "R", classOf[Short] -> "S", classOf[String] -> "T", classOf[Int] -> "U")
 
-      withQueryResult(schema :+ ("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4l, 5.67d, 10.toShort, 11.toByte, false, "C", 3, 4l, 5.678d, 16.toShort, "D", 4)) { implicit c =>
+      withQueryResult(schema :+ ("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte, false, "C", 3, 4L, 5.678D, 16.toShort, "D", 4)) { implicit c =>
         SQL("SELECT * FROM test").as(str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N") ~ str("O") ~ int("P") ~ long("Q") ~ get[Double]("R") ~ get[Short]("S") ~ str("T") ~ int("U") map (SqlParser.to(foo _)) single).aka("function result") must_== "Fn21"
 
       }
@@ -269,7 +269,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
 
       val schema = rowList22(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D", classOf[Short] -> "E", classOf[Byte] -> "F", classOf[Boolean] -> "G", classOf[String] -> "H", classOf[Int] -> "I", classOf[Long] -> "J", classOf[Double] -> "K", classOf[Short] -> "L", classOf[Byte] -> "M", classOf[Boolean] -> "N", classOf[String] -> "O", classOf[Int] -> "P", classOf[Long] -> "Q", classOf[Double] -> "R", classOf[Short] -> "S", classOf[String] -> "T", classOf[Int] -> "U", classOf[Long] -> "V")
 
-      withQueryResult(schema :+ ("A", 2, 3l, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4l, 5.67d, 10.toShort, 11.toByte, false, "C", 3, 4l, 5.678d, 16.toShort, "D", 4, 5l)) { implicit c =>
+      withQueryResult(schema :+ ("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte, false, "C", 3, 4L, 5.678D, 16.toShort, "D", 4, 5L)) { implicit c =>
         SQL("SELECT * FROM test").as(
           str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str("H") ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N") ~ str("O") ~ int("P") ~ long("Q") ~ get[Double]("R") ~ get[Short]("S") ~ str("T") ~ int("U") ~ long("V") map (SqlParser.to(foo _)) single).aka("function result") must_== "Fn22"
 

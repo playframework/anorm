@@ -189,7 +189,7 @@ private[anorm] object ToParameterListImpl {
     val bufVal = q"val ${bufName} = ${ImuList}.newBuilder[${NamedParamTpe}]"
 
     // def of functions to append named parameters to a local list buffer
-    val appendDefs = appendParameters.mapValues(_._2).values.toSeq
+    val appendDefs = Compat.mapValues(appendParameters)(_._2).values.toSeq
 
     // applies/call of the functions according the projection
     val effectiveProj: Map[String, String] = {

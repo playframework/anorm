@@ -127,9 +127,8 @@ trait Row {
    * Try to get data matching name.
    * @param a Column qualified name, or label/alias
    */
-  private[anorm] def get(a: String): Either[SqlRequestError, (Any, MetaDataItem)] = for {
-    m <- metaData.get(a.toUpperCase).toRight(ColumnNotFound(a, this)).right
-    data <- {
+  private[anorm] def get(a: String): Either[SqlRequestError, (Any, MetaDataItem)] = Compat.rightFlatMap(
+    metaData.get(a.toUpperCase).toRight(ColumnNotFound(a, this))) { m =>
       def d = if (a.indexOf(".") > 0) {
         // if expected to be a qualified (dotted) name
         columnsDictionary.get(m.column.qualified.toUpperCase).
@@ -140,21 +139,16 @@ trait Row {
           orElse(columnsDictionary.get(m.column.qualified.toUpperCase))
       }
 
-      d.toRight(
-        ColumnNotFound(m.column.qualified, metaData.availableColumns))
-    }.right
-  } yield (data, m)
+      Compat.rightMap(d.toRight(
+        ColumnNotFound(m.column.qualified, metaData.availableColumns))) { _ -> m }
+    }
 
   /** Try to get data matching index. */
-  private[anorm] def getIndexed(i: Int): Either[SqlRequestError, (Any, MetaDataItem)] =
-    for {
-      m <- metaData.ms.lift(i).toRight(
-        ColumnNotFound(s"#${i + 1}", metaData.availableColumns)).right
-
-      d <- data.lift(i).toRight(
-        ColumnNotFound(m.column.qualified, metaData.availableColumns)).right
-    } yield (d, m)
-
+  private[anorm] def getIndexed(i: Int): Either[SqlRequestError, (Any, MetaDataItem)] = Compat.rightFlatMap(metaData.ms.lift(i).toRight(
+    ColumnNotFound(s"#${i + 1}", metaData.availableColumns))) { m =>
+    Compat.rightMap(data.lift(i).toRight(ColumnNotFound(
+      m.column.qualified, metaData.availableColumns))) { _ -> m }
+  }
 }
 
 /** Companion object for row. */

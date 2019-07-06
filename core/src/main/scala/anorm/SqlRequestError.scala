@@ -31,7 +31,7 @@ object SqlRequestError {
  */
 case class ColumnNotFound(
   column: String,
-  @deprecatedName('possibilities) available: Seq[String]) extends SqlRequestError {
+  @deprecatedName(Symbol("possibilities")) available: Seq[String]) extends SqlRequestError {
   @deprecated("Use constructor with `available` sequence", "2.5.4")
   def this(column: String, possibilities: List[String]) =
     this(column, available = possibilities.toSeq)

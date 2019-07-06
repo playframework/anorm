@@ -36,7 +36,7 @@ class ParameterSpec
   "Parameter" title
 
   val jbi1 = new BigInteger("1234"); val Jbi1bd = new JBigDec("1234")
-  val Jbd1 = new JBigDec(1.234d)
+  val Jbd1 = JBigDec.valueOf(1.234D)
   val Sbd1 = BigDecimal(Jbd1)
   val sbi1 = BigInt(jbi1)
   val Date1 = new Date()
@@ -52,7 +52,7 @@ class ParameterSpec
 
     cal.getTime()
   }
-  val Timestamp1 = { val ts = new Timestamp(123l); ts.setNanos(123456789); ts }
+  val Timestamp1 = { val ts = new Timestamp(123L); ts.setNanos(123456789); ts }
   val TsWrapper1 = new { val getTimestamp = Timestamp1 }
   val uuid1 = java.util.UUID.randomUUID; val Uuid1str = uuid1.toString
   val uri1 = new java.net.URI("https://github.com/playframework/")
@@ -66,9 +66,9 @@ class ParameterSpec
   val SqlByte = ParamMeta.Byte
   val SqlShort = ParamMeta.Short
   val SqlLong = ParamMeta.Long
-  val SqlFloat = ParamMeta.Float(1.23f)
-  val SqlDouble3s = ParamMeta.Double(23.456d)
-  val SqlDouble2s = ParamMeta.Double(23.45d)
+  val SqlFloat = ParamMeta.Float(1.23F)
+  val SqlDouble3s = ParamMeta.Double(23.456D)
+  val SqlDouble2s = ParamMeta.Double(23.45D)
   val SqlTimestamp = ParamMeta.Timestamp
   val SqlInt1 = ParamMeta.Numeric(Jbi1bd)
   val SqlDec1 = ParamMeta.Numeric(Jbd1)
@@ -104,15 +104,15 @@ class ParameterSpec
     case UpdateExecution("set-null-byte ?",
       DParam(null, SqlByte) :: Nil) => 1 /* case ok */
     case UpdateExecution("set-long ?",
-      DParam(5l, SqlLong) :: Nil) => 1 /* case ok */
+      DParam(5L, SqlLong) :: Nil) => 1 /* case ok */
     case UpdateExecution("set-null-long ?",
       DParam(null, SqlLong) :: Nil) => 1 /* case ok */
     case UpdateExecution("set-float ?",
-      DParam(1.23f, SqlFloat) :: Nil) => 1 /* case ok */
+      DParam(1.23F, SqlFloat) :: Nil) => 1 /* case ok */
     case UpdateExecution("set-null-float ?",
       DParam(null, SqlFloat) :: Nil) => 1 /* case ok */
     case UpdateExecution("set-double ?",
-      DParam(23.456d, SqlDouble3s) :: Nil) => 1 /* case ok */
+      DParam(23.456D, SqlDouble3s) :: Nil) => 1 /* case ok */
     case UpdateExecution("set-null-double ?",
       DParam(null, SqlDouble2s) :: Nil) => 1 /* case ok */
     case UpdateExecution("set-jbi ?",
@@ -162,7 +162,7 @@ class ParameterSpec
     case UpdateExecution("no-param-placeholder", Nil) => 1 /* ok */
     case UpdateExecution("no-snd-placeholder ?",
       DParam("first", SqlStr) :: Nil) => 1 /* ok */
-    case UpdateExecution("set-old ?", DParam(2l, SqlLong) :: Nil) => 1 // ok
+    case UpdateExecution("set-old ?", DParam(2L, SqlLong) :: Nil) => 1 // ok
     case UpdateExecution("set-id-str ?",
       DParam("str", SqlStr) :: Nil) => 1 /* ok */
     case UpdateExecution("set-not-assigned ?",
@@ -192,7 +192,7 @@ class ParameterSpec
     case UpdateExecution("set-null-vector ?",
       DParam(null, SqlStr) :: Nil) => 1 /* ok */
     case UpdateExecution("set-seqp cat = ? OR cat = ? OR cat = ?",
-      DParam(1.2f, _) :: DParam(23.4f, _) :: DParam(5.6f, _) :: Nil) => 1 // ok
+      DParam(1.2F, _) :: DParam(23.4F, _) :: DParam(5.6F, _) :: Nil) => 1 // ok
 
     case UpdateExecution("set-uuid ?",
       DParam(Uuid1str, SqlStr) :: Nil) => 1 /* case ok */
@@ -249,7 +249,7 @@ class ParameterSpec
     }
 
     "be one string with symbol name" in withConnection() { implicit c =>
-      SQL("set-str {b}").on('b -> "string").
+      SQL("set-str {b}").on(Symbol("b") -> "string").
         aka("query") must beLike {
           case q @ SimpleSql( // check accross construction
             SqlQuery(TokenizedStatement(List(
@@ -312,14 +312,14 @@ class ParameterSpec
     }
 
     "be character 'x'" in withConnection() { implicit c =>
-      (SQL("set-char {b}").on('b -> new java.lang.Character('x')).
+      (SQL("set-char {b}").on(Symbol("b") -> java.lang.Character.valueOf('x')).
         aka("query") must beLike {
           case q @ SimpleSql( // check accross construction
             SqlQuery(TokenizedStatement(List(
               TokenGroup(List(StringToken("set-char ")), Some("b"))),
               List("b")), List("b"), _), ps, _, _) if (
             ps contains "b") => q.execute() aka "execution" must beFalse
-        }).and(SQL("set-char {b}").on('b -> Character.valueOf('x')).
+        }).and(SQL("set-char {b}").on(Symbol("b") -> Character.valueOf('x')).
           execute() aka "execution" must beFalse)
     }
 
@@ -344,18 +344,19 @@ class ParameterSpec
     }
 
     "be null boolean" in withConnection() { implicit c =>
-      SQL("set-null-bool {p}").on('p -> null.asInstanceOf[JBool]).execute().
+      SQL("set-null-bool {p}").on(Symbol("p") -> null.asInstanceOf[JBool]).execute().
         aka("execution") must beFalse
     }
 
     "be undefined boolean" in withConnection() { implicit c =>
-      SQL("set-null-bool {p}").on('p -> Option.empty[Boolean]).execute().
+      SQL("set-null-bool {p}").on(Symbol("p") -> Option.empty[Boolean]).execute().
         aka("execution") must beFalse
     }
 
     "be int" in withConnection() { implicit c =>
       (SQL("set-int {p}").on("p" -> 2).execute() must beFalse).
-        and(SQL("set-int {p}").on("p" -> new Integer(2)).execute() must beFalse)
+        and(SQL("set-int {p}").on(
+          "p" -> Integer.valueOf(2)).execute() must beFalse)
     }
 
     "be null int" in withConnection() { implicit c =>
@@ -371,7 +372,7 @@ class ParameterSpec
     "be short" in withConnection() { implicit c =>
       (SQL("set-short {p}").on("p" -> 3.toShort).execute() must beFalse).
         and(SQL("set-short {p}").on(
-          "p" -> new JShort("3")).execute() must beFalse)
+          "p" -> JShort.valueOf("3")).execute() must beFalse)
     }
 
     "be null short" in withConnection() { implicit c =>
@@ -387,7 +388,7 @@ class ParameterSpec
     "be byte" in withConnection() { implicit c =>
       (SQL("set-byte {p}").on("p" -> 4.toByte).execute() must beFalse).
         and(SQL("set-byte {p}").on(
-          "p" -> new JByte("4")).execute() must beFalse)
+          "p" -> JByte.valueOf("4")).execute() must beFalse)
     }
 
     "be null byte" in withConnection() { implicit c =>
@@ -401,9 +402,9 @@ class ParameterSpec
     }
 
     "be long" in withConnection() { implicit c =>
-      (SQL("set-long {p}").on("p" -> 5l).execute() must beFalse).
+      (SQL("set-long {p}").on("p" -> 5L).execute() must beFalse).
         and(SQL("set-long {p}").on(
-          "p" -> new JLong(5)).execute() must beFalse)
+          "p" -> JLong.valueOf(5)).execute() must beFalse)
     }
 
     "be null long" in withConnection() { implicit c =>
@@ -417,9 +418,9 @@ class ParameterSpec
     }
 
     "be float" in withConnection() { implicit c =>
-      (SQL("set-float {p}").on("p" -> 1.23f).execute() must beFalse).
+      (SQL("set-float {p}").on("p" -> 1.23F).execute() must beFalse).
         and(SQL("set-float {p}").on(
-          "p" -> new JFloat(1.23f)).execute() must beFalse)
+          "p" -> JFloat.valueOf(1.23F)).execute() must beFalse)
     }
 
     "be null float" in withConnection() { implicit c =>
@@ -433,9 +434,9 @@ class ParameterSpec
     }
 
     "be double" in withConnection() { implicit c =>
-      (SQL("set-double {p}").on("p" -> 23.456d).execute() must beFalse).
+      (SQL("set-double {p}").on("p" -> 23.456D).execute() must beFalse).
         and(SQL("set-double {p}").on(
-          "p" -> new JDouble(23.456D)).execute() must beFalse)
+          "p" -> JDouble.valueOf(23.456D)).execute() must beFalse)
     }
 
     "be null double" in withConnection() { implicit c =>
@@ -705,7 +706,7 @@ class ParameterSpec
       // Do not accept untyped name when feature enabled
       shapeless.test.illTyped("""
 val name: Any = "untyped"
-SQL("set-old {untyped}").on(name -> 2l)
+SQL("set-old {untyped}").on(name -> 2L)
 """)
     }
 
@@ -719,7 +720,7 @@ val params: Seq[NamedParameter] = Seq("mod" -> d, "id" -> "idv")
 
     "accept value wrapped as opaque parameter object" in withConnection() {
       implicit c =>
-        SQL("set-date {d}").on('d -> anorm.Object(new java.util.Date())).
+        SQL("set-date {d}").on(Symbol("d") -> anorm.Object(new java.util.Date())).
           execute aka "execution" must throwA[SQLFeatureNotSupportedException](
             message = "Unsupported parameter type: java.util.Date")
 
@@ -727,7 +728,7 @@ val params: Seq[NamedParameter] = Seq("mod" -> d, "id" -> "idv")
 
     "for multi-value without null" >> {
       "accept List" in withConnection() { implicit c =>
-        SQL("set-list {list}").on('list -> List(1, 3, 7)).
+        SQL("set-list {list}").on(Symbol("list") -> List(1, 3, 7)).
           aka("query") must beLike {
             case q @ SimpleSql(SqlQuery(
               TokenizedStatement(List(TokenGroup(List(StringToken("set-list ")), Some("list"))), List("list")), "list" :: Nil, _), ps, _, _) if (
@@ -738,7 +739,7 @@ val params: Seq[NamedParameter] = Seq("mod" -> d, "id" -> "idv")
 
       "accept Seq" in withConnection() { implicit c =>
         SQL("set-seq {seq}").
-          on('seq -> Seq("a", "b", "c")) aka "query" must beLike {
+          on(Symbol("seq") -> Seq("a", "b", "c")) aka "query" must beLike {
             case q @ SimpleSql(SqlQuery(
               TokenizedStatement(List(TokenGroup(List(StringToken("set-seq ")), Some("seq"))), List("seq")), "seq" :: Nil, _), ps, _, _) if (
               ps.size == 1 && ps.contains("seq")) =>
@@ -747,7 +748,7 @@ val params: Seq[NamedParameter] = Seq("mod" -> d, "id" -> "idv")
       }
 
       "accept Set" in withConnection() { implicit c =>
-        SQL("set-set {set}").on('set -> Set(1, 3, 7)).
+        SQL("set-set {set}").on(Symbol("set") -> Set(1, 3, 7)).
           aka("query") must beLike {
             case q @ SimpleSql(
               SqlQuery(TokenizedStatement(List(TokenGroup(List(StringToken("set-set ")), Some("set"))), List("set")), "set" :: Nil, _), ps, _, _) if (
@@ -758,7 +759,7 @@ val params: Seq[NamedParameter] = Seq("mod" -> d, "id" -> "idv")
 
       "accept SortedSet" in withConnection() { implicit c =>
         SQL("set-sortedset {sortedset}").
-          on('sortedset -> SortedSet("a", "b", "c")) aka "query" must beLike {
+          on(Symbol("sortedset") -> SortedSet("a", "b", "c")) aka "query" must beLike {
             case q @ SimpleSql(
               SqlQuery(TokenizedStatement(List(TokenGroup(List(StringToken("set-sortedset ")), Some("sortedset"))), List("sortedset")), "sortedset" :: Nil, _), ps, _, _) if (
               ps.size == 1 && ps.contains("sortedset")) =>
@@ -767,7 +768,8 @@ val params: Seq[NamedParameter] = Seq("mod" -> d, "id" -> "idv")
       }
 
       "accept Stream" in withConnection() { implicit c =>
-        SQL("set-stream {stream}").on('stream -> Stream(1, 3, 7)).
+        SQL("set-stream {stream}").on(
+          Symbol("stream") -> Compat.LazyLst(1, 3, 7)).
           aka("query") must beLike {
             case q @ SimpleSql(SqlQuery(TokenizedStatement(List(TokenGroup(
               List(StringToken("set-stream ")), Some("stream"))),
@@ -779,7 +781,7 @@ val params: Seq[NamedParameter] = Seq("mod" -> d, "id" -> "idv")
 
       "accept Vector" in withConnection() { implicit c =>
         SQL("set-vector {vector}").
-          on('vector -> Vector("a", "b", "c")) aka "query" must beLike {
+          on(Symbol("vector") -> Vector("a", "b", "c")) must beLike {
             case q @ SimpleSql(
               SqlQuery(TokenizedStatement(List(TokenGroup(List(StringToken("set-vector ")), Some("vector"))), List("vector")), "vector" :: Nil, _), ps, _, _) if (
               ps.size == 1 && ps.contains("vector")) =>
@@ -800,47 +802,51 @@ val params: Seq[NamedParameter] = Seq("mod" -> d, "id" -> "idv")
 
     "refuse multi-value" >> {
       "for List" in withConnection() { _ =>
-        SQL("set-null-seq {list}").on('list -> null.asInstanceOf[List[String]]).
+        SQL("set-null-seq {list}").
+          on(Symbol("list") -> null.asInstanceOf[List[String]]).
           aka("parameter conversion") must throwA[IllegalArgumentException]
 
       }
 
       "for Seq" in withConnection() { _ =>
-        SQL("set-null-seq {seq}").on('seq -> null.asInstanceOf[Seq[String]]).
+        SQL("set-null-seq {seq}").
+          on(Symbol("seq") -> null.asInstanceOf[Seq[String]]).
           aka("parameter conversion") must throwA[IllegalArgumentException]
 
       }
 
       "for Set" in withConnection() { _ =>
-        SQL("set-null-seq {set}").on('set -> null.asInstanceOf[Set[String]]).
+        SQL("set-null-seq {set}").
+          on(Symbol("set") -> null.asInstanceOf[Set[String]]).
           aka("parameter conversion") must throwA[IllegalArgumentException]
 
       }
 
       "for SortedSet" in withConnection() { _ =>
-        SQL("sortedSet-null-seq {sortedSet}").on('sortedSet -> null.asInstanceOf[SortedSet[String]]).
+        SQL("sortedSet-null-seq {sortedSet}").
+          on(Symbol("sortedSet") -> null.asInstanceOf[SortedSet[String]]).
           aka("parameter conversion") must throwA[IllegalArgumentException]
 
       }
 
       "for Stream" in withConnection() { _ =>
         SQL("stream-null-seq {stream}").on(
-          'stream -> null.asInstanceOf[Stream[String]]).
+          Symbol("stream") -> null.asInstanceOf[Compat.LazyLst[String]]).
           aka("parameter conversion") must throwA[IllegalArgumentException]
 
       }
 
       "for Vector" in withConnection() { _ =>
         SQL("vector-null-seq {vector}").on(
-          'vector -> null.asInstanceOf[Vector[String]]).
+          Symbol("vector") -> null.asInstanceOf[Vector[String]]).
           aka("parameter conversion") must throwA[IllegalArgumentException]
 
       }
     }
 
     "set formatted value from sequence" in withConnection() { implicit c =>
-      SQL("set-seqp {p}").on('p ->
-        SeqParameter(Seq(1.2f, 23.4f, 5.6f), " OR ", "cat = ")).
+      SQL("set-seqp {p}").on(Symbol("p") ->
+        SeqParameter(Seq(1.2F, 23.4F, 5.6F), " OR ", "cat = ")).
         aka("query") must beLike {
           case q @ SimpleSql(
             SqlQuery(TokenizedStatement(List(TokenGroup(List(StringToken("set-seqp ")), Some("p"))), List("p")), "p" :: Nil, _), ps, _, _) if (
@@ -851,7 +857,7 @@ val params: Seq[NamedParameter] = Seq("mod" -> d, "id" -> "idv")
 
     "for multi-value in string interpolation" >> {
       "accept custom formatting" in withConnection() { implicit c =>
-        SQL"""set-seqp ${SeqParameter(Seq(1.2f, 23.4f, 5.6f), " OR ", "cat = ")}""" aka "query" must beLike {
+        SQL"""set-seqp ${SeqParameter(Seq(1.2F, 23.4F, 5.6F), " OR ", "cat = ")}""" aka "query" must beLike {
           case q @ SimpleSql(
             SqlQuery(TokenizedStatement(List(TokenGroup(List(StringToken("set-seqp ")), Some("_0"))), List("_0")), "_0" :: Nil, _), ps, _, _) if (
             ps.size == 1 && ps.contains("_0")) =>
@@ -929,15 +935,15 @@ val params: Seq[NamedParameter] = Seq("mod" -> d, "id" -> "idv")
     }
 
     "be long" in withConnection() { implicit c =>
-      SQL("set-long {p}").onParams(pv(5l)).execute() must beFalse
+      SQL("set-long {p}").onParams(pv(5L)).execute() must beFalse
     }
 
     "be float" in withConnection() { implicit c =>
-      SQL("set-float {p}").onParams(pv(1.23f)).execute() must beFalse
+      SQL("set-float {p}").onParams(pv(1.23F)).execute() must beFalse
     }
 
     "be double" in withConnection() { implicit c =>
-      SQL("set-double {p}").onParams(pv(23.456d)).execute() must beFalse
+      SQL("set-double {p}").onParams(pv(23.456D)).execute() must beFalse
     }
 
     "be one Java big integer" in withConnection() { implicit c =>
