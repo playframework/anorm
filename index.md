@@ -52,7 +52,7 @@ You will need to add Anorm and JDBC plugin to your dependencies :
 {% highlight scala %}
 libraryDependencies ++= Seq(
   jdbc,
-  "org.playframework.anorm" %% "anorm" % "2.6.2"
+  "org.playframework.anorm" %% "anorm" % "2.6.3"
 )
 {% endhighlight %}
 
@@ -95,7 +95,7 @@ First, import `anorm._`, and then simply use the `SQL` object to create queries.
 import anorm._
 
 database.withConnection { implicit c =>
-  val result: Boolean = SQL("Select 1").execute()
+  val _: Boolean = SQL("Select 1").execute()
 }
 {% endhighlight %}
 
@@ -649,7 +649,7 @@ case object Lorem extends Family
 // either by macros or by custom parsers
 implicit val barParser = Macro.namedParser[Bar]
 implicit val loremParser = RowParser[Lorem.type] {
-  anyRowDiscriminatedAsLorem => Success(Lorem)
+  _ /*anyRowDiscriminatedAsLorem*/ => Success(Lorem)
 }
 
 val familyParser = Macro.sealedParser[Family]
@@ -1096,7 +1096,7 @@ books match {
 
 #### Akka Stream
 
-The query result from Anorm can be processed as [Source](doc.akka.io/api/akka/2.4.12/#akka.stream.javadsl.Source) with [Akka Stream](http://doc.akka.io/docs/akka/2.4.12/scala/stream/index.html).
+The query result from Anorm can be processed as [Source](https://doc.akka.io/api/akka/current/akka/stream/scaladsl/Source.html) with [Akka Stream](https://doc.akka.io/docs/akka/current/stream/index.html).
 
 To do so, the Anorm Akka module must be used.
 
