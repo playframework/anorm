@@ -11,7 +11,7 @@ object Common extends AutoPlugin {
   override def trigger = allRequirements
   override def requires = JvmPlugin
 
-  val previousVersion = "2.5.3"
+  val previousVersion = "2.6.0"
 
   override def projectSettings = mimaDefaultSettings ++ Seq(
     organization := "org.playframework.anorm",
@@ -76,15 +76,9 @@ object Common extends AutoPlugin {
     scalacOptions in Test ++= Seq("-Yrangepos"),
     scalacOptions ~= (_.filterNot(_ == "-Xfatal-warnings")),
     fork in Test := true,
-    mimaPreviousArtifacts := {
-      if (scalaVersion.value startsWith "2.11.") {
-        if (crossPaths.value) {
-          Set("com.typesafe.play" % s"${moduleName.value}_${scalaBinaryVersion.value}" % previousVersion)
-        } else {
-          Set("com.typesafe.play" % moduleName.value % previousVersion)
-        }
-      } else Set.empty[ModuleID]
-    }) ++ Publish.settings
+    mimaPreviousArtifacts := Set(
+      organization.value %% moduleName.value % previousVersion)
+  ) ++ Publish.settings
 
   @inline def missMeth(n: String) =
     ProblemFilters.exclude[MissingMethodProblem](n)
