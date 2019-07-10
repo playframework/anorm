@@ -9,4 +9,4 @@ EOF
     false
 )
 
-sbt ++$TRAVIS_SCALA_VERSION publishLocal mimaReportBinaryIssues test docs/test
+sbt ++$TRAVIS_SCALA_VERSION package publishLocal mimaReportBinaryIssues test docs/test

@@ -10,3 +10,5 @@ addSbtPlugin("org.scalariform" % "sbt-scalariform" % "1.8.3")
 addSbtPlugin("com.sksamuel.scapegoat" %% "sbt-scapegoat" % "1.0.9")
 
 addSbtPlugin("com.eed3si9n" % "sbt-unidoc" % "0.4.2")
+
+addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "0.14.10")

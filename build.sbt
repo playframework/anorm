@@ -1,5 +1,6 @@
 import AnormGeneration.{ generateFunctionAdapter => GFA }
 import Common._
+
 import com.typesafe.tools.mima.core._
 import com.typesafe.tools.mima.plugin.MimaKeys.{
   mimaBinaryIssueFilters, mimaPreviousArtifacts
@@ -16,6 +17,8 @@ lazy val acolyte = "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test
 resolvers in ThisBuild ++= Seq(
   "Tatami Snapshots" at "https://raw.github.com/cchantep/tatami/master/snapshots")
 
+ThisBuild / mimaFailOnNoPrevious := false
+
 lazy val `anorm-tokenizer` = project.in(file("tokenizer"))
   .settings(
     scalariformAutoformat := true,
@@ -26,32 +29,75 @@ lazy val `anorm-tokenizer` = project.in(file("tokenizer"))
         mimaPreviousArtifacts.value
       }
     },
-    mimaBinaryIssueFilters ++= Seq( // private[anorm]
-      ProblemFilters.exclude[IncompatibleMethTypeProblem]("anorm.TokenizedStatement.apply"),
-      ProblemFilters.exclude[IncompatibleMethTypeProblem]("anorm.TokenizedStatement.tokenize"),
-      ProblemFilters.exclude[IncompatibleResultTypeProblem]("anorm.TokenizedStatement.tokens"),
-      ProblemFilters.exclude[IncompatibleResultTypeProblem]("anorm.TokenizedStatement.names"),
-      ProblemFilters.exclude[IncompatibleResultTypeProblem]("anorm.TokenizedStatement.copy$default$2"),
-      ProblemFilters.exclude[IncompatibleMethTypeProblem]("anorm.TokenizedStatement.copy"),
-      ProblemFilters.exclude[IncompatibleResultTypeProblem]("anorm.TokenizedStatement.copy$default$1"),
-      ProblemFilters.exclude[IncompatibleMethTypeProblem]("anorm.TokenizedStatement.this")
-    ),
     libraryDependencies ++= Seq(
       "org.scala-lang" % "scala-reflect" % scalaVersion.value
     )
   )
 
+// ---
+
+val armShading = Seq(
+  libraryDependencies += "com.jsuereth" %% "scala-arm" % "2.1-SNAPSHOT",
+  test in assembly := {},
+  assemblyOption in assembly ~= {
+    _.copy(includeScala = false) // java libraries shouldn't include scala
+  },
+  assemblyShadeRules in assembly := Seq.empty,
+  assemblyExcludedJars in assembly := (fullClasspath in assembly).value.filter {
+    !_.data.getName.startsWith("scala-arm")
+  },
+  assemblyMergeStrategy in assembly := {
+    val tokPrefixes = Seq(
+      "PercentToken", "Show", "StatementToken", "StringShow",
+      "StringToken", "TokenGroup", "TokenizedStatement")
+
+    {
+      case path if tokPrefixes.exists(p => path.startsWith(s"anorm/$p")) =>
+        MergeStrategy.discard
+
+      case x =>
+        val oldStrategy = (assemblyMergeStrategy in assembly).value
+        oldStrategy(x)
+    }
+  },
+  pomPostProcess := {
+    val excludeGroups = Seq(
+      "com.github.ghik",
+      "com.jsuereth",
+      "com.sksamuel.scapegoat")
+
+    XmlUtil.transformPomDependencies { d =>
+      (d \ "groupId").headOption.collect {
+        case g if !excludeGroups.contains(g.text) => d
+      }
+    }
+  },
+  makePom := makePom.dependsOn(assembly).value,
+  packageBin in Compile := (Def.taskDyn {
+    val targetDir =
+      CrossVersion.partialVersion((scalaVersion in Compile).value) match {
+        case Some((maj, min)) => target.value / s"scala-${maj}.${min}"
+        case _ => target.value
+      }
+
+    Def.task {
+      val _ = assembly.value
+      targetDir / (assemblyJarName in assembly).value
+    }
+  }).value
+)
+
 lazy val `anorm-core` = project.in(file("core"))
-  .settings(
+  .settings(Seq(
     name := "anorm",
     scalariformAutoformat := true,
     sourceGenerators in Compile += Def.task {
       Seq(GFA((sourceManaged in Compile).value / "anorm"))
     }.taskValue,
-    scalacOptions += "-Xlog-free-terms",
-    scalacOptions += { // Silencer
+    scalacOptions ++= Seq(
+      "-Xlog-free-terms",
       "-P:silencer:globalFilters=missing\\ in\\ object\\ ToSql\\ is\\ deprecated;possibilities\\ in\\ class\\ ColumnNotFound\\ is\\ deprecated;DeprecatedSqlParser\\ in\\ package\\ anorm\\ is\\ deprecated;constructor\\ deprecatedName\\ in\\ class\\ deprecatedName\\ is\\ deprecated"
-    },
+    ),
     mimaPreviousArtifacts := {
       if (scalaVersion.value startsWith "2.13") {
         Set.empty
@@ -60,6 +106,11 @@ lazy val `anorm-core` = project.in(file("core"))
       }
     },
     mimaBinaryIssueFilters ++= Seq(
+      ProblemFilters.exclude[IncompatibleSignatureProblem](
+        "anorm.SqlStatementParser.elem"),
+      ProblemFilters.exclude[IncompatibleSignatureProblem](
+        "anorm.SqlStatementParser.accept"),
+      // ---
       ProblemFilters.exclude[ReversedMissingMethodProblem](
         "anorm.ToStatementPriority0.urlToStatement"),
       ProblemFilters.exclude[ReversedMissingMethodProblem](
@@ -70,14 +121,6 @@ lazy val `anorm-core` = project.in(file("core"))
         "anorm.SimpleSql.preparedStatement$default$2"),
       ProblemFilters.exclude[MissingClassProblem]("anorm.MayErr"),
       ProblemFilters.exclude[MissingClassProblem]("anorm.MayErr$"),
-      // was sealed:
-      ProblemFilters.exclude[FinalClassProblem]("anorm.TupleFlattener"),
-      ProblemFilters.exclude[FinalClassProblem]("anorm.NamedParameter"),
-      // was deprecated:
-      missMeth("anorm.Row.get"),
-      missMeth("anorm.Row.getIndexed"),
-      incoRet("anorm.Cursor#ResultRow.get"),
-      incoRet("anorm.Cursor#ResultRow.getIndexed"),
       // was private:
       incoMeth("anorm.package.tokenize"),
       ProblemFilters.exclude[FinalClassProblem]("anorm.Sql$MissingParameter"),
@@ -94,21 +137,6 @@ lazy val `anorm-core` = project.in(file("core"))
       ProblemFilters.exclude[DirectMissingMethodProblem]( // deprecated 2.3.8
         "anorm.SqlQuery.statement"),
       // private:
-      incoMeth("anorm.Sql.asTry"),
-      missMeth("anorm.WithResult.asTry$default$2"),
-      missMeth("anorm.Sql.withResult"),
-      missMeth("anorm.Cursor.onFirstRow"),
-      missMeth("anorm.Cursor.apply"),
-      ProblemFilters.exclude[MissingTypesProblem]("anorm.MetaData$"),
-      incoRet("anorm.MetaData.ms"),
-      incoMeth("anorm.MetaData.this"),
-      incoMeth("anorm.MetaData.apply"),
-      incoMeth("anorm.MetaData.copy"),
-      incoRet("anorm.MetaData.availableColumns"),
-      incoRet("anorm.MetaData.copy$default$1"),
-      //missMeth("anorm.ToStatement.contramap"),
-      missMeth("anorm.Column.mapResult"),
-      missMeth("anorm.Column.map"),
       ProblemFilters.exclude[MissingClassProblem]( // macro
         "anorm.Macro$ImplicitResolver$2$ImplicitTransformer$"),
       ProblemFilters.exclude[MissingClassProblem]( // macro
@@ -120,7 +148,6 @@ lazy val `anorm-core` = project.in(file("core"))
       ProblemFilters.exclude[ReversedMissingMethodProblem]("anorm.JavaTimeToStatement.localDateToStatement")
     ),
     libraryDependencies ++= Seq(
-      "com.jsuereth" %% "scala-arm" % "2.1-SNAPSHOT",
       "joda-time" % "joda-time" % "2.10.3",
       "org.joda" % "joda-convert" % "2.2.1",
       "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2",
@@ -128,7 +155,7 @@ lazy val `anorm-core` = project.in(file("core"))
       acolyte,
       "com.chuusai" %% "shapeless" % "2.3.3" % Test
     ) ++ specs2Test
-  ).dependsOn(`anorm-tokenizer`)
+  ) ++ armShading).dependsOn(`anorm-tokenizer`)
 
 lazy val `anorm-iteratee` = (project in file("iteratee"))
   .settings(
@@ -218,6 +245,8 @@ lazy val `anorm-postgres` = (project in file("postgres"))
       ) ++ specs2Test :+ acolyte
     }
   ).dependsOn(`anorm-core`)
+
+// ---
 
 lazy val `anorm-parent` = (project in file("."))
   .enablePlugins(ScalaUnidocPlugin)

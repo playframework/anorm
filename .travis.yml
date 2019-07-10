@@ -20,4 +20,4 @@ matrix:
   - jdk: openjdk11
     scala: 2.13.0
 
-script: ./.travis_scripts/validate.sh
+script: ./.ci_scripts/validate.sh
