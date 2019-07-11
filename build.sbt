@@ -42,6 +42,12 @@ val armShading = Seq(
   assemblyOption in assembly ~= {
     _.copy(includeScala = false) // java libraries shouldn't include scala
   },
+  assemblyJarName in assembly := {
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((maj, min)) => s"anorm_${maj}.${min}-${version.value}.jar"
+      case _                => "anorm.jar"
+    }
+  },
   assemblyShadeRules in assembly := Seq.empty,
   assemblyExcludedJars in assembly := (fullClasspath in assembly).value.filter {
     !_.data.getName.startsWith("scala-arm")
@@ -73,18 +79,7 @@ val armShading = Seq(
     }
   },
   makePom := makePom.dependsOn(assembly).value,
-  packageBin in Compile := (Def.taskDyn {
-    val targetDir =
-      CrossVersion.partialVersion((scalaVersion in Compile).value) match {
-        case Some((maj, min)) => target.value / s"scala-${maj}.${min}"
-        case _ => target.value
-      }
-
-    Def.task {
-      val _ = assembly.value
-      targetDir / (assemblyJarName in assembly).value
-    }
-  }).value
+  packageBin in Compile := assembly.value
 )
 
 lazy val `anorm-core` = project.in(file("core"))
