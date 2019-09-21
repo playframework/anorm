@@ -9,7 +9,7 @@ import com.typesafe.tools.mima.plugin.MimaKeys.{
 val specs2Test = Seq(
   "specs2-core",
   "specs2-junit"
-).map("org.specs2" %% _ % "4.7.0" % Test)
+).map("org.specs2" %% _ % "4.7.1" % Test)
 
 lazy val acolyteVersion = "1.0.52"
 lazy val acolyte = "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test
@@ -143,7 +143,7 @@ lazy val `anorm-core` = project.in(file("core"))
       ProblemFilters.exclude[ReversedMissingMethodProblem]("anorm.JavaTimeToStatement.localDateToStatement")
     ),
     libraryDependencies ++= Seq(
-      "joda-time" % "joda-time" % "2.10.3",
+      "joda-time" % "joda-time" % "2.10.4",
       "org.joda" % "joda-convert" % "2.2.1",
       "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2",
       "com.h2database" % "h2" % "1.4.199" % Test,
