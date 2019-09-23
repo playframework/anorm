@@ -1,7 +1,7 @@
 resolvers ++= DefaultOptions.resolvers(snapshot = true) :+ (
   Resolver.typesafeRepo("releases"))
 
-addSbtPlugin("com.typesafe.play" % "interplay" % sys.props.get("interplay.version").getOrElse("2.0.9"))
+addSbtPlugin("com.typesafe.play" % "interplay" % sys.props.get("interplay.version").getOrElse("2.1.0"))
 
 addSbtPlugin("com.typesafe" % "sbt-mima-plugin" % "0.6.1")
 
