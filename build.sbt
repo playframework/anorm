@@ -146,7 +146,7 @@ lazy val `anorm-core` = project.in(file("core"))
       "joda-time" % "joda-time" % "2.10.4",
       "org.joda" % "joda-convert" % "2.2.1",
       "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2",
-      "com.h2database" % "h2" % "1.4.199" % Test,
+      "com.h2database" % "h2" % "1.4.200" % Test,
       acolyte,
       "com.chuusai" %% "shapeless" % "2.3.3" % Test
     ) ++ specs2Test
