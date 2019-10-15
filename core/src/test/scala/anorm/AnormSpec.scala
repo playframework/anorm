@@ -514,7 +514,7 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
           insert("id") must beSuccessfulTry(Some(2L))
         } and {
           insert("invalid").
-            aka("ignore invalid key") must beSuccessfulTry(Option.empty[Long])
+            aka("ignore invalid key") must beFailedTry[Option[Long]]
         }
       }
     }
