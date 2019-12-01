@@ -13,7 +13,7 @@ trait Row {
    *
    * {{{
    * // Row first column is string "str", second one is integer 2
-   * val l: List[Any] = row.asList
+   * def l(row: anorm.Row): List[Any] = row.asList
    * // l == List[Any]("str", 2)
    * }}}
    *
@@ -28,7 +28,7 @@ trait Row {
    *
    * {{{
    * // Row column named 'A' is string "str", column named 'B' is integer 2
-   * val m: Map[String, Any] = row.asMap
+   * def m(row: anorm.Row): Map[String, Any] = row.asMap
    * // l == Map[String, Any]("table.A" -> "str", "table.B" -> 2)
    * }}}
    *
@@ -46,18 +46,20 @@ trait Row {
    * Returns row as `T`.
    *
    * {{{
-   * import anorm.SqlParser.{ int, str }
+   * import anorm._, SqlParser.{ int, str }
    *
-   * val parseOnlyFirstRow =
-   *   SQL"SELECT * FROM Table".withResult(_.map(_.row.as(
-   *     str("foo") ~ int(2) map {
-   *       case a ~ b => b -> a
-   *     })))
-   * // Either[List[Throwable], Option[Try[(Int, String)]]]
+   * def foo(implicit con: java.sql.Connection) = {
+   *  val parseOnlyFirstRow =
+   *      SQL"SELECT * FROM Table".withResult(_.map(_.row.as(
+   *       str("foo") ~ int(2) map {
+   *         case a ~ b => b -> a
+   *       })))
+   *   // Either[List[Throwable], Option[Try[(Int, String)]]]
    *
-   * val optionalParseRes =
-   *   parseOnlyFirstRow.right.map(_.flatMap(_.toOption))
-   *   // Either[List[Throwable], Option[(Int, String)]]
+   *   val optionalParseRes =
+   *     parseOnlyFirstRow.right.map(_.flatMap(_.toOption))
+   *     // Either[List[Throwable], Option[(Int, String)]]
+   * }
    * }}}
    *
    * @param parser Row parser
@@ -72,11 +74,13 @@ trait Row {
    * @param c Column mapping
    *
    * {{{
+   * import anorm.SQL
    * import anorm.Column.columnToString // mapping column to string
    *
-   * val res: (String, String) = SQL("SELECT * FROM Test").map(row =>
-   *   row("code") -> row("label") // string columns 'code' and 'label'
-   * )
+   * val res = SQL("SELECT * FROM Test").map { row =>
+   *   // string columns 'code' and 'label'
+   *   row[String]("code") -> row[String]("label")
+   * }
    * }}}
    */
   def apply[B](name: String)(implicit c: Column[B]): B =
@@ -89,11 +93,12 @@ trait Row {
    * @param c Column mapping
    *
    * {{{
+   * import anorm.SQL
    * import anorm.Column.columnToString // mapping column to string
    *
-   * val res: (String, String) = SQL("SELECT * FROM Test").map(row =>
+   * val res = SQL("SELECT * FROM Test").map { row =>
    *   row(1) -> row(2) // string columns #1 and #2
-   * )
+   * }
    * }}}
    */
   def apply[B](position: Int)(implicit c: Column[B]): B =
@@ -160,11 +165,14 @@ object Row {
    * {{{
    * import java.util.Locale
    *
-   * val l: Option[Locale] =
-   *   SQL("Select name,population from Country")().collect {
-   *     case Row("France", _) => Some(Locale.FRANCE)
-   *     case _ => None
-   *   }
+   * import anorm._
+   *
+   * def l(implicit con: java.sql.Connection): Option[Locale] =
+   *   SQL("Select name,population from Country").
+   *     as(RowParser[Option[Locale]] {
+   *       case Row("France", _) => Success(Some(Locale.FRANCE))
+   *       case _ => Success(Option.empty[Locale])
+   *     }.single)
    * }}}
    */
   def unapplySeq(row: Row): Option[List[Any]] = Some(row.asList)

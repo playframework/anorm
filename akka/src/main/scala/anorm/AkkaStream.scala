@@ -31,13 +31,14 @@ object AkkaStream {
    * {{{
    * import java.sql.Connection
    *
-   * import akka.NotUsed
+   * import scala.concurrent.Future
+   *
    * import akka.stream.Materializer
    * import akka.stream.scaladsl.Source
    *
    * import anorm._
    *
-   * def resultSource(implicit m: Materializer, con: Connection): Source[String, NotUsed] = AkkaStream.source(SQL"SELECT * FROM Test", SqlParser.scalar[String], ColumnAliaser.empty)
+   * def resultSource(implicit m: Materializer, con: Connection): Source[String, Future[Int]] = AkkaStream.source(SQL"SELECT * FROM Test", SqlParser.scalar[String], ColumnAliaser.empty)
    * }}}
    */
   @SuppressWarnings(Array("UnusedMethodParameter"))

@@ -51,7 +51,10 @@ sealed trait PGJson {
    * implicit val w: Writes[Foo] = Json.writes[Foo]
    *
    * val value = Foo("lorem")
-   * SQL"INSERT INTO test(id, json) VALUES(\${"bar"}, \${value})".executeUpdate()
+   *
+   * def foo(implicit con: java.sql.Connection) =
+   *   SQL"INSERT INTO test(id, json) VALUES(\${"bar"}, \${asJson(value)})".
+   *     executeUpdate()
    * }}}
    */
   def asJson[T](value: T)(implicit w: Writes[T]): ParameterValue =
@@ -65,10 +68,11 @@ sealed trait PGJson {
   /**
    * {{{
    * import play.api.libs.json.JsValue
-   * import anorm.{ SQL, SqlParser }
-   * import anorm.postgresql._
    *
-   * SQL"SELECT json FROM test".as(SqlParser.scalar[JsValue].single)
+   * import anorm._, postgresql._
+   *
+   * def foo(implicit con: java.sql.Connection) =
+   *   SQL"SELECT json FROM test".as(SqlParser.scalar[JsValue].single)
    * }}}
    */
   implicit val jsValueColumn: Column[JsValue] =
@@ -95,10 +99,11 @@ sealed trait PGJson {
   /**
    * {{{
    * import play.api.libs.json.JsObject
-   * import anorm.{ SQL, SqlParser }
-   * import anorm.postgresql._
    *
-   * SQL"SELECT json FROM test".as(SqlParser.scalar[JsObject].single)
+   * import anorm._, postgresql._
+   *
+   * def foo(implicit con: java.sql.Connection) =
+   *   SQL"SELECT json FROM test".as(SqlParser.scalar[JsObject].single)
    * }}}
    */
   implicit val jsObjectColumn: Column[JsObject] = jsValueColumn.mapResult {
@@ -112,10 +117,12 @@ sealed trait PGJson {
    *
    * {{{
    * import play.api.libs.json.Reads
-   * import anorm.{ SQL, SqlParser }
-   * import anorm.postgresql._
    *
-   * def foo(implicit r: Reads[Foo]): Foo
+   * import anorm._, postgresql._
+   *
+   * case class Foo(bar: String)
+   *
+   * def foo(implicit con: java.sql.Connection, r: Reads[Foo]): Foo =
    *   SQL"SELECT json FROM test".
    *     as(SqlParser.scalar(fromJson[Foo]).single)
    * }}}

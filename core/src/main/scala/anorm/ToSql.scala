@@ -28,7 +28,7 @@ object ToSql {
    * Returns fragment for each value, separated by ", ".
    *
    * {{{
-   * listToSql(List(1, 3, 5))
+   * anorm.ToSql.listToSql[Int].fragment(List(1, 3, 5))
    * // "?, ?, ?"
    * }}}
    */
@@ -38,7 +38,7 @@ object ToSql {
    * Returns fragment for each value, separated by ", ".
    *
    * {{{
-   * seqToSql(Seq("A", "B", "C"))
+   * anorm.ToSql.seqToSql[String].fragment(Seq("A", "B", "C"))
    * // "?, ?, ?"
    * }}}
    */
@@ -48,7 +48,7 @@ object ToSql {
    * Returns fragment for each value, separated by ", ".
    *
    * {{{
-   * setToSql(Set(1, 3, 5))
+   * anorm.ToSql.setToSql[Int].fragment(Set(1, 3, 5))
    * // "?, ?, ?"
    * }}}
    */
@@ -58,7 +58,9 @@ object ToSql {
    * Returns fragment for each value, separated by ", ".
    *
    * {{{
-   * sortedSetToSql(SortedSet("A", "B", "C"))
+   * import scala.collection.immutable.SortedSet
+   *
+   * anorm.ToSql.sortedSetToSql[String].fragment(SortedSet("A", "B", "C"))
    * // "?, ?, ?"
    * }}}
    */
@@ -68,7 +70,7 @@ object ToSql {
    * Returns fragment for each value, separated by ", ".
    *
    * {{{
-   * streamToSql(Stream(1, 3, 5))
+   * anorm.ToSql.streamToSql[Int].fragment(Stream(1, 3, 5))
    * // "?, ?, ?"
    * }}}
    */
@@ -78,7 +80,7 @@ object ToSql {
    * Returns fragment for each value, separated by ", ".
    *
    * {{{
-   * vectorToSql(Vector("A", "B", "C"))
+   * anorm.ToSql.vectorToSql[String].fragment(Vector("A", "B", "C"))
    * // "?, ?, ?"
    * }}}
    */

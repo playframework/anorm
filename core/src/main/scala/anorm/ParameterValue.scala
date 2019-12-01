@@ -53,7 +53,9 @@ final class DefaultParameterValue[A](
  * Value factory for parameter.
  *
  * {{{
- * val param = ParameterValue("str", null, setter)
+ * import anorm._
+ *
+ * val param = ParameterValue("str", null, implicitly[ToStatement[String]])
  *
  * SQL("...").onParams(param)
  * }}}

@@ -31,7 +31,7 @@ trait Column[A] extends ((Any, MetaDataItem) => Either[SqlRequestError, A]) { pa
    * $mapDescription
    *
    * {{{
-   * import anorm.{ Column, SqlParser, SQL }
+   * import anorm._
    *
    * sealed trait MyEnum
    * case object Foo extends MyEnum
@@ -43,7 +43,7 @@ trait Column[A] extends ((Any, MetaDataItem) => Either[SqlRequestError, A]) { pa
    *   case _ => Left(TypeDoesNotMatch("Unexpected"))
    * }
    *
-   * def find(id: String) =
+   * def find(id: String)(implicit con: java.sql.Connection) =
    *   SQL"SELECT enum_code FROM my_table WHERE id = \$id".
    *     as(SqlParser.scalar(myEnumCol).single)
    * }}}
@@ -57,18 +57,18 @@ trait Column[A] extends ((Any, MetaDataItem) => Either[SqlRequestError, A]) { pa
    * $mapDescription
    *
    * {{{
-   * import anorm.{ Column, SqlParser, SQL }
+   * import anorm._
    *
    * sealed trait MyEnum
    * case object Foo extends MyEnum
    * case object Bar extends MyEnum
    *
    * val myEnumCol: Column[MyEnum] = Column.of[Int].map {
-   *   case 1 => Right(Foo) // `Right` means successful
-   *   case 2 => Right(Bar)
+   *   case 1 => Foo
+   *   case 2 => Bar
    * }
    *
-   * def find(id: String) =
+   * def find(id: String)(implicit con: java.sql.Connection) =
    *   SQL"SELECT enum_code FROM my_table WHERE id = \$id".
    *     as(SqlParser.scalar(myEnumCol).single)
    * }}}
@@ -147,11 +147,11 @@ object Column extends JodaColumn with JavaTimeColumn {
    * Column conversion to bytes array.
    *
    * {{{
-   * import anorm.SqlParser.scalar
+   * import anorm._, SqlParser.scalar
    * import anorm.Column.columnToByteArray
    *
-   * val bytes: Array[Byte] = SQL("SELECT bin FROM tbl").
-   *   as(scalar[Array[Byte]].single)
+   * def bytes(implicit con: java.sql.Connection): Array[Byte] =
+   *   SQL("SELECT bin FROM tbl").as(scalar[Array[Byte]].single)
    * }}}
    */
   implicit val columnToByteArray: Column[Array[Byte]] =
@@ -171,10 +171,11 @@ object Column extends JodaColumn with JavaTimeColumn {
    * Column conversion to character.
    *
    * {{{
-   * import anorm.SqlParser.scalar
+   * import anorm._, SqlParser.scalar
    * import anorm.Column.columnToChar
    *
-   * val c: Char = SQL("SELECT char FROM tbl").as(scalar[Char].single)
+   * def c(implicit con: java.sql.Connection): Char =
+   *   SQL("SELECT char FROM tbl").as(scalar[Char].single)
    * }}}
    */
   implicit val columnToChar: Column[Char] = nonNull[Char] { (value, meta) =>
@@ -204,11 +205,13 @@ object Column extends JodaColumn with JavaTimeColumn {
    * Column conversion to bytes array.
    *
    * {{{
-   * import anorm.SqlParser.scalar
+   * import java.io.InputStream
+   *
+   * import anorm._, SqlParser.scalar
    * import anorm.Column.columnToInputStream
    *
-   * val bytes: InputStream = SQL("SELECT bin FROM tbl").
-   *   as(scalar[InputStream].single)
+   * def bytes(implicit con: java.sql.Connection): InputStream =
+   *   SQL("SELECT bin FROM tbl").as(scalar[InputStream].single)
    * }}}
    */
   implicit val columnToInputStream: Column[InputStream] =
@@ -315,10 +318,12 @@ object Column extends JodaColumn with JavaTimeColumn {
    * Column conversion to Java big integer.
    *
    * {{{
-   * import anorm.SqlParser.scalar
-   * import anorm.Column.columnToScalaBigInteger
+   * import java.math.BigInteger
    *
-   * val c: BigInteger =
+   * import anorm._, SqlParser.scalar
+   * import anorm.Column.columnToBigInteger
+   *
+   * def c(implicit con: java.sql.Connection): BigInteger =
    *   SQL("SELECT COUNT(*) FROM tbl").as(scalar[BigInteger].single)
    * }}}
    */
@@ -328,10 +333,10 @@ object Column extends JodaColumn with JavaTimeColumn {
    * Column conversion to big integer.
    *
    * {{{
-   * import anorm.SqlParser.scalar
+   * import anorm._, SqlParser.scalar
    * import anorm.Column.columnToBigInt
    *
-   * val c: BigInt =
+   * def c(implicit con: java.sql.Connection): BigInt =
    *   SQL("SELECT COUNT(*) FROM tbl").as(scalar[BigInt].single)
    * }}}
    */
@@ -388,10 +393,11 @@ object Column extends JodaColumn with JavaTimeColumn {
    *
    * {{{
    * import java.math.{ BigDecimal => JBigDecimal }
-   * import anorm.SqlParser.scalar
+   *
+   * import anorm._, SqlParser.scalar
    * import anorm.Column.columnToJavaBigDecimal
    *
-   * val c: JBigDecimal =
+   * def c(implicit con: java.sql.Connection): JBigDecimal =
    *   SQL("SELECT COUNT(*) FROM tbl").as(scalar[JBigDecimal].single)
    * }}}
    */
@@ -402,10 +408,10 @@ object Column extends JodaColumn with JavaTimeColumn {
    * Column conversion to big decimal.
    *
    * {{{
-   * import anorm.SqlParser.scalar
+   * import anorm._, SqlParser.scalar
    * import anorm.Column.columnToScalaBigDecimal
    *
-   * val c: BigDecimal =
+   * def c(implicit con: java.sql.Connection): BigDecimal =
    *   SQL("SELECT COUNT(*) FROM tbl").as(scalar[BigDecimal].single)
    * }}}
    */
@@ -420,8 +426,10 @@ object Column extends JodaColumn with JavaTimeColumn {
    *
    * {{{
    * import java.util.Date
+   * import anorm._, SqlParser._
    *
-   * val d: Date = SQL("SELECT last_mod FROM tbl").as(scalar[Date].single)
+   * def d(implicit con: java.sql.Connection): Date =
+   *   SQL("SELECT last_mod FROM tbl").as(scalar[Date].single)
    * }}}
    */
   implicit val columnToDate: Column[Date] = nonNull { (value, meta) =>
@@ -444,8 +452,11 @@ object Column extends JodaColumn with JavaTimeColumn {
   /**
    * Parses column as array.
    *
-   * val a: Array[String] =
-   *   SQL"SELECT str_arr FROM tbl".as(scalar[Array[String]])
+   * {{{
+   * import anorm._, SqlParser._
+   *
+   * def a(implicit con: java.sql.Connection): Array[String] =
+   *   SQL"SELECT str_arr FROM tbl".as(scalar[Array[String]].single)
    * }}}
    */
   implicit def columnToArray[T](implicit transformer: Column[T], t: scala.reflect.ClassTag[T]): Column[Array[T]] = Column.nonNull[Array[T]] { (value, meta) =>
@@ -499,8 +510,11 @@ object Column extends JodaColumn with JavaTimeColumn {
   /**
    * Parses column as list.
    *
-   * val a: List[String] =
-   *   SQL"SELECT str_arr FROM tbl".as(scalar[List[String]])
+   * {{{
+   * import anorm._, SqlParser._
+   *
+   * def a(implicit con: java.sql.Connection): List[String] =
+   *   SQL"SELECT str_arr FROM tbl".as(scalar[String].*)
    * }}}
    */
   @SuppressWarnings(Array("UnusedMethodParameter" /* deprecated */ ))
@@ -578,9 +592,10 @@ sealed trait JodaColumn {
    *
    * {{{
    * import org.joda.time.LocalDate
+   * import anorm.{ SQL, SqlParser }, SqlParser.scalar
    *
-   * val i: LocalDate = SQL("SELECT last_mod FROM tbl").
-   *   as(scalar[LocalDate].single)
+   * def ld(implicit con: java.sql.Connection): LocalDate =
+   *   SQL("SELECT last_mod FROM tbl").as(scalar[LocalDate].single)
    * }}}
    */
   implicit val columnToJodaLocalDate: Column[LocalDate] =
@@ -603,9 +618,10 @@ sealed trait JodaColumn {
    *
    * {{{
    * import org.joda.time.LocalDateTime
+   * import anorm._, SqlParser._
    *
-   * val i: LocalDateTime = SQL("SELECT last_mod FROM tbl").
-   *   as(scalar[LocalDateTime].single)
+   * def ldt(implicit con: java.sql.Connection): LocalDateTime =
+   *   SQL("SELECT last_mod FROM tbl").as(scalar[LocalDateTime].single)
    * }}}
    */
   implicit val columnToJodaLocalDateTime: Column[LocalDateTime] =
@@ -626,8 +642,10 @@ sealed trait JodaColumn {
    *
    * {{{
    * import org.joda.time.DateTime
+   * import anorm._, SqlParser._
    *
-   * val d: Date = SQL("SELECT last_mod FROM tbl").as(scalar[DateTime].single)
+   * def dt(implicit con: java.sql.Connection): DateTime =
+   *   SQL("SELECT last_mod FROM tbl").as(scalar[DateTime].single)
    * }}}
    */
   implicit val columnToJodaDateTime: Column[DateTime] =
@@ -655,9 +673,11 @@ sealed trait JodaColumn {
    * Parses column as joda Instant
    *
    * {{{
+   * import anorm.{ SQL, SqlParser }, SqlParser.scalar
    * import org.joda.time.Instant
    *
-   * val d: Date = SQL("SELECT last_mod FROM tbl").as(scalar[Instant].single)
+   * def d(implicit con: java.sql.Connection): Instant =
+   *   SQL("SELECT last_mod FROM tbl").as(scalar[Instant].single)
    * }}}
    */
   implicit val columnToJodaInstant: Column[Instant] =
@@ -684,9 +704,10 @@ sealed trait JavaTimeColumn {
    *
    * {{{
    * import java.time.Instant
-   * import anorm.Java8._
+   * import anorm._, SqlParser.scalar
    *
-   * val i: Instant = SQL("SELECT last_mod FROM tbl").as(scalar[Instant].single)
+   * def i(implicit con: java.sql.Connection): Instant =
+   *   SQL("SELECT last_mod FROM tbl").as(scalar[Instant].single)
    * }}}
    */
   implicit val columnToInstant: Column[Instant] = nonNull { (value, meta) =>
@@ -718,10 +739,12 @@ sealed trait JavaTimeColumn {
    *
    * {{{
    * import java.time.LocalDateTime
-   * import anorm.Java8._
    *
-   * val i: LocalDateTime = SQL("SELECT last_mod FROM tbl").
-   *   as(scalar[LocalDateTime].single)
+   * import anorm._
+   *
+   * def i(implicit con: java.sql.Connection): LocalDateTime =
+   *   SQL("SELECT last_mod FROM tbl").
+   *     as(SqlParser.scalar[LocalDateTime].single)
    * }}}
    */
   implicit val columnToLocalDateTime: Column[LocalDateTime] =
@@ -736,10 +759,12 @@ sealed trait JavaTimeColumn {
    *
    * {{{
    * import java.time.LocalDateTime
-   * import anorm.Java8._
    *
-   * val i: LocalDateTime = SQL("SELECT last_mod FROM tbl").
-   *   as(scalar[LocalDateTime].single)
+   * import anorm._
+   *
+   * def i(implicit con: java.sql.Connection): LocalDateTime =
+   *   SQL("SELECT last_mod FROM tbl").
+   *     as(SqlParser.scalar[LocalDateTime].single)
    * }}}
    */
   implicit val columnToLocalDate: Column[LocalDate] =
@@ -755,10 +780,12 @@ sealed trait JavaTimeColumn {
    *
    * {{{
    * import java.time.ZonedDateTime
-   * import anorm.Java8._
    *
-   * val i: ZonedDateTime = SQL("SELECT last_mod FROM tbl").
-   *   as(scalar[ZonedDateTime].single)
+   * import anorm._
+   *
+   * def i(implicit con: java.sql.Connection): ZonedDateTime =
+   *   SQL("SELECT last_mod FROM tbl").
+   *     as(SqlParser.scalar[ZonedDateTime].single)
    * }}}
    */
   implicit val columnToZonedDateTime: Column[ZonedDateTime] =

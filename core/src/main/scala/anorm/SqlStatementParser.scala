@@ -16,11 +16,11 @@ object SqlStatementParser extends JavaTokenParsers {
    * {{{
    * import anorm.SqlStatementParser.parse
    *
-   * val parsed: (String, List[String]) =
+   * val parsed =
    *   parse("SELECT * FROM schema.table WHERE name = {name} AND cat = ?")
    * // parsed ==
-   * //   ("SELECT * FROM schema.table WHERE name = ? AND cat = ?" ->
-   * //    List("name"))
+   * //   Success("SELECT * FROM schema.table WHERE name = ? AND cat = ?" ->
+   * //     List("name"))
    * }}}
    */
   def parse(sql: String): Try[TokenizedStatement] =

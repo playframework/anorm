@@ -67,6 +67,8 @@ object ColumnAliaser {
    * Initializes an aliaser from a given partial function.
    *
    * {{{
+   * import anorm.{ ColumnAliaser, ColumnName }
+   *
    * ColumnAliaser({
    *   case (1, cn) => "my_id"
    *   case (_, ColumnName(".foo", _)) => "prefix.foo"
@@ -85,6 +87,8 @@ object ColumnAliaser {
    * @param as function to determine the alias for the matching columns
    *
    * {{{
+   * import anorm.ColumnAliaser
+   *
    * ColumnAliaser.perPositions((2 to 3).toSet) {
    *   case (2, _) => "prefix.foo"
    *   case _ => "bar"
@@ -101,7 +105,7 @@ object ColumnAliaser {
    * @param suffix the suffix to be appended to the aliases (default: `""`)
    *
    * {{{
-   * ColumnAliaser.withPattern((2 to 3).toSet, "prefix.")
+   * anorm.ColumnAliaser.withPattern((2 to 3).toSet, "prefix.")
    * }}}
    */
   def withPattern(positions: Set[Int], prefix: String, suffix: String = ""): ColumnAliaser = perPositions(positions) {
@@ -115,7 +119,7 @@ object ColumnAliaser {
    * @param positions the column positions (>= 1); duplicate are merged
    *
    * {{{
-   * ColumnAliaser.withPattern((2 to 3).toSet, "prefix.")
+   * anorm.ColumnAliaser.withPattern((2 to 3).toSet, "prefix.")
    * }}}
    */
   def withPattern1(prefix: String, suffix: String = "")(positions: Int*): ColumnAliaser = withPattern(positions.toSet, prefix, suffix)
