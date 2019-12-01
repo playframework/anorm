@@ -72,7 +72,7 @@ package object anorm {
    * @param stmt SQL statement
    *
    * {{{
-   * val query = SQL("SELECT * FROM Country")
+   * val query = anorm.SQL("SELECT * FROM Country")
    * }}}
    */
   @SuppressWarnings(Array("MethodNames", "TryGet" /* TODO: Make it safer */ ))
@@ -84,13 +84,25 @@ package object anorm {
    * It is a 1-step alternative for SQL("...").on(...) functions.
    *
    * {{{
-   * SQL"""
-   *   UPDATE computer SET name = \\${computer.name},
-   *   introduced = \\${computer.introduced},
-   *   discontinued = \\${computer.discontinued},
-   *   company_id = \\${computer.companyId}
-   *   WHERE id = \\$id
-   * """.executeUpdate()
+   * import java.util.Date
+   * import java.sql.Connection
+   *
+   * import anorm._
+   *
+   * case class Computer(
+   *   name: String,
+   *   introduced: Date,
+   *   discontinued: Date,
+   *   companyId: String)
+   *
+   * def foo(computer: Computer, id: String)(implicit con: Connection) =
+   *   SQL"""
+   *     UPDATE computer SET name = \\${computer.name},
+   *     introduced = \\${computer.introduced},
+   *     discontinued = \\${computer.discontinued},
+   *     company_id = \\${computer.companyId}
+   *     WHERE id = \\$id
+   *   """.executeUpdate()
    * }}}
    */
   implicit class SqlStringInterpolation(val sc: StringContext) extends AnyVal {

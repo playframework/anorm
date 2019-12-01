@@ -216,9 +216,11 @@ object Macro {
    * @tparam T $caseTParam
    *
    * {{{
-   * import anorm.{ Macros, RowParser }
+   * import anorm.{ Macro, RowParser }
    *
-   * val p: RowParser[YourCaseClass] = Macros.namedParser[YourCaseClass]
+   * case class YourCaseClass(v: Int)
+   *
+   * val p: RowParser[YourCaseClass] = Macro.namedParser[YourCaseClass]
    * }}}
    */
   def namedParser[T]: RowParser[T] = macro namedParserImpl[T]
@@ -231,9 +233,11 @@ object Macro {
    * @param naming $namingParam
    *
    * {{{
-   * import anorm.{ Macros, RowParser }
+   * import anorm.{ Macro, RowParser }
    *
-   * val p: RowParser[YourCaseClass] = Macros.namedParser[YourCaseClass]
+   * case class YourCaseClass(v: Int)
+   *
+   * val p: RowParser[YourCaseClass] = Macro.namedParser[YourCaseClass]
    * }}}
    */
   @SuppressWarnings(Array("UnusedMethodParameter" /* macro */ ))
@@ -247,10 +251,12 @@ object Macro {
    * @param names $namesParam
    *
    * {{{
-   * import anorm.{ Macros, RowParser }
+   * import anorm.{ Macro, RowParser }
+   *
+   * case class YourCaseClass(a: Int, b: String)
    *
    * val p: RowParser[YourCaseClass] =
-   *   Macros.parser[YourCaseClass]("foo", "bar")
+   *   Macro.parser[YourCaseClass]("foo", "bar")
    * }}}
    */
   @SuppressWarnings(Array("UnusedMethodParameter" /* macro */ ))
@@ -266,10 +272,12 @@ object Macro {
    * @param names $namesParam
    *
    * {{{
-   * import anorm.{ Macros, RowParser }
+   * import anorm.{ Macro, RowParser }
+   *
+   * case class YourCaseClass(a: Int, b: String)
    *
    * val p: RowParser[YourCaseClass] =
-   *   Macros.parser[YourCaseClass]("foo", "loremIpsum")
+   *   Macro.parser[YourCaseClass]("foo", "loremIpsum")
    * }}}
    */
   @SuppressWarnings(Array("UnusedMethodParameter" /* macro */ ))
@@ -282,9 +290,11 @@ object Macro {
    * @tparam T $caseTParam
    *
    * {{{
-   * import anorm.{ Macros, RowParser }
+   * import anorm.{ Macro, RowParser }
    *
-   * val p: RowParser[YourCaseClass] = Macros.indexedParser[YourCaseClass]
+   * case class YourCaseClass(v: Int)
+   *
+   * val p: RowParser[YourCaseClass] = Macro.indexedParser[YourCaseClass]
    * }}}
    */
   def indexedParser[T]: RowParser[T] = macro indexedParserImpl[T]
@@ -297,9 +307,11 @@ object Macro {
    * @param offset the offset of column to be considered by the parser
    *
    * {{{
-   * import anorm.{ Macros, RowParser }
+   * import anorm.{ Macro, RowParser }
    *
-   * val p: RowParser[YourCaseClass] = Macros.offsetParser[YourCaseClass](2)
+   * case class YourCaseClass(v: Int)
+   *
+   * val p: RowParser[YourCaseClass] = Macro.offsetParser[YourCaseClass](2)
    * }}}
    */
   @SuppressWarnings(Array("UnusedMethodParameter" /* macro */ ))
@@ -347,6 +359,8 @@ object Macro {
    * {{{
    * import anorm._
    *
+   * class ValueClassType(val v: Int) extends AnyVal
+   *
    * implicit val column: Column[ValueClassType] =
    *   Macro.valueColumn[ValueClassType]
    * }}}
@@ -365,6 +379,8 @@ object Macro {
    *
    * {{{
    * import anorm.{ Macro, ToParameterList }
+   *
+   * case class Bar(v: Float)
    *
    * // Bar must be a case class, or a sealed trait with known subclasses
    * implicit val toParams: ToParameterList[Bar] = Macro.toParameters[Bar]
@@ -397,9 +413,11 @@ object Macro {
    * {{{
    * import anorm.{ Macro, ToParameterList }
    *
+   * case class Bar(v: String)
+   *
    * // Bar must be a case class
    * implicit val toParams: ToParameterList[Bar] =
-   *   Macro.toParameters[Bar](separator = "_")
+   *   Macro.toParameters[Bar]("_")
    * }}}
    */
   @SuppressWarnings(Array("UnusedMethodParameter" /*macro*/ ))
@@ -413,6 +431,8 @@ object Macro {
    *
    * {{{
    * import anorm.{ Macro, ToParameterList }
+   *
+   * case class Bar(v: Int)
    *
    * // Bar must be a case class
    * implicit val toParams: ToParameterList[Bar] =
@@ -445,6 +465,8 @@ object Macro {
    *
    * {{{
    * import anorm._
+   *
+   * class ValueClassType(val i: Int) extends AnyVal
    *
    * implicit val instance: ToStatement[ValueClassType] =
    *   Macro.valueToStatement[ValueClassType]

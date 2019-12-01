@@ -15,11 +15,11 @@ object Common extends AutoPlugin {
 
   override def projectSettings = mimaDefaultSettings ++ Seq(
     organization := "org.playframework.anorm",
-    scalaVersion := "2.12.9",
+    scalaVersion := "2.12.10",
     crossScalaVersions := Seq(
-      "2.11.12", scalaVersion.value, "2.13.0"),
+      "2.11.12", scalaVersion.value, "2.13.1"),
     resolvers += "Scalaz Bintray Repo" at {
-      "http://dl.bintray.com/scalaz/releases" // specs2 depends on scalaz-stream
+      "https://dl.bintray.com/scalaz/releases" // specs2 depends on scalaz-stream
     },
     unmanagedSourceDirectories in Compile ++= {
       val sv = scalaVersion.value
@@ -32,11 +32,14 @@ object Common extends AutoPlugin {
       scalaVersion.value, 12,
       (sourceDirectory in Test).value),
     libraryDependencies ++= {
-      val silencerVer = "1.4.2"
+      val silencerVer = "1.4.4"
 
       Seq(
-        compilerPlugin("com.github.ghik" %% "silencer-plugin" % silencerVer),
-        "com.github.ghik" %% "silencer-lib" % silencerVer % Provided)
+        compilerPlugin(("com.github.ghik" %% "silencer-plugin" % silencerVer).
+          cross(CrossVersion.full)),
+        ("com.github.ghik" %% "silencer-lib" % silencerVer % Provided).
+          cross(CrossVersion.full)
+      )
     },
     scalacOptions ++= Seq(
       "-encoding", "UTF-8",

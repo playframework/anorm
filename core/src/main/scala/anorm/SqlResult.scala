@@ -135,14 +135,17 @@ private[anorm] trait WithResult {
    * @param aliaser the column aliaser
    *
    * {{{
+   * import java.sql.Connection
+   * import anorm._
+   *
    * @annotation.tailrec
    * def go(c: Option[Cursor], l: List[Row]): List[Row] = c match {
    *   case Some(cursor) => go(cursor.next, l :+ cursor.row)
    *   case _ => l
    * }
    *
-   * val l: Either[List[Throwable], List[Row]] =
-   *   SQL"SELECT * FROM Test".withResult(go)
+   * def l(implicit con: Connection): Either[List[Throwable], List[Row]] =
+   *   SQL"SELECT * FROM Test".withResult(go(_, List.empty))
    * }}}
    */
   def withResult[T](op: Option[Cursor] => T)(implicit connection: Connection): Either[List[Throwable], T] = withResult[T](op, ColumnAliaser.empty)
@@ -153,14 +156,17 @@ private[anorm] trait WithResult {
    * @param op Operation applied with row cursor
    *
    * {{{
+   * import java.sql.Connection
+   * import anorm._
+   *
    * @annotation.tailrec
    * def go(c: Option[Cursor], l: List[Row]): List[Row] = c match {
    *   case Some(cursor) => go(cursor.next, l :+ cursor.row)
    *   case _ => l
    * }
    *
-   * val l: Either[List[Throwable], List[Row]] =
-   *   SQL"SELECT * FROM Test".withResult(go)
+   * def l(implicit con: Connection): Either[List[Throwable], List[Row]] =
+   *   SQL"SELECT * FROM Test".withResult(go(_, List.empty))
    * }}}
    */
   def withResult[T](op: Option[Cursor] => T, aliaser: ColumnAliaser)(implicit connection: Connection): Either[List[Throwable], T] = Sql.withResult(resultSet(connection), resultSetOnFirstRow, aliaser)(op).acquireFor(identity)
