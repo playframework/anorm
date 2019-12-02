@@ -581,11 +581,6 @@ sealed trait ToStatementPriority0 {
 
   /**
    * Sets multi-value parameter from stream on statement.
-   *
-   * {{{
-   * anorm.SQL("SELECT * FROM Test WHERE cat IN ({categories})").
-   *   on('categories -> Stream(1, 3, 4))
-   * }}}
    */
   implicit def streamToStatement[A](implicit c: ToStatement[A]): ToStatement[Compat.LazyLst[A]] = traversableToStatement[A, Compat.LazyLst[A]]
 

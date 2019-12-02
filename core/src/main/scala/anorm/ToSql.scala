@@ -68,11 +68,6 @@ object ToSql {
 
   /**
    * Returns fragment for each value, separated by ", ".
-   *
-   * {{{
-   * anorm.ToSql.streamToSql[Int].fragment(Stream(1, 3, 5))
-   * // "?, ?, ?"
-   * }}}
    */
   implicit def streamToSql[A](implicit conv: ToSql[A] = ToSql.missing[A]): ToSql[Compat.LazyLst[A]] = traversableToSql[A, Compat.LazyLst[A]]
 

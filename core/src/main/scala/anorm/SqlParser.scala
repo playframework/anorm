@@ -70,7 +70,7 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    *
    * def tuple(implicit con: java.sql.Connection): (Long, String, Int) =
    *   SQL("SELECT a, b, c FROM Test").
-   *     as(long("a") ~ str("b") ~ int("c") map (SqlParser.flatten) single)
+   *     as((long("a") ~ str("b") ~ int("c")).map(SqlParser.flatten).single)
    * }}}
    */
   def flatten[T1, T2, R](implicit f: TupleFlattener[(T1 ~ T2) => R]): ((T1 ~ T2) => R) = f.f
@@ -82,10 +82,9 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    * import anorm._
    *
    * def t(implicit con: java.sql.Connection): (String, Array[String]) =
-   *   SQL"SELECT a, sqlArrayOfString FROM test"
-   *   .as(SqlParser.str("a") ~
-   * SqlParser.array[String]("sqlArrayOfString") map (
-   *     SqlParser.flatten) single)
+   *   SQL"SELECT a, sqlArrayOfString FROM test".as(
+   *     (SqlParser.str("a") ~ SqlParser.array[String](
+   *       "sqlArrayOfString")).map(SqlParser.flatten).single)
    * }}}
    */
   def array[T](columnName: String)(implicit c: Column[Array[T]]): RowParser[Array[T]] = get[Array[T]](columnName)(c)
@@ -98,9 +97,9 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    * import anorm._
    *
    * def t(implicit con: java.sql.Connection): (String, Array[String]) =
-   *   SQL"SELECT a, sqlArrayOfString FROM test"
-   *   .as(SqlParser.str("a") ~ SqlParser.array[String](2) map (
-   *     SqlParser.flatten) single)
+   *   SQL"SELECT a, sqlArrayOfString FROM test".as(
+   *     (SqlParser.str("a") ~ SqlParser.array[String](2)).
+   *       map(SqlParser.flatten).single)
    * }}}
    */
   def array[T](columnPosition: Int)(implicit c: Column[Array[T]]): RowParser[Array[T]] = get[Array[T]](columnPosition)(c)
@@ -112,9 +111,9 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    * import anorm.{ SQL, SqlParser }
    *
    * def t(implicit con: java.sql.Connection): (Float, String) =
-   *   SQL("SELECT a, b FROM test")
-   *   .as(SqlParser.float("a") ~ SqlParser.str("b") map (
-   *     SqlParser.flatten) single)
+   *   SQL("SELECT a, b FROM test").as(
+   *     (SqlParser.float("a") ~ SqlParser.str("b")).
+   *       map(SqlParser.flatten).single)
    * }}}
    */
   def float(columnName: String)(implicit c: Column[Float]): RowParser[Float] =
@@ -128,9 +127,9 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    * import anorm.{ SQL, SqlParser }
    *
    * def t(implicit con: java.sql.Connection): (Float, String) =
-   *   SQL("SELECT a, b FROM test")
-   *   .as(SqlParser.float(1) ~ SqlParser.str("b") map (
-   *     SqlParser.flatten) single)
+   *   SQL("SELECT a, b FROM test").as(
+   *     (SqlParser.float(1) ~ SqlParser.str("b")).
+   *       map(SqlParser.flatten).single)
    * }}}
    */
   def float(columnPosition: Int)(implicit c: Column[Float]): RowParser[Float] =
@@ -143,9 +142,9 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    * import anorm.{ SQL, SqlParser }
    *
    * def t(implicit con: java.sql.Connection): (Float, String) =
-   *   SQL("SELECT a, b FROM test")
-   *   .as((SqlParser.float("a") ~ SqlParser.str("b")).
-   *     map(SqlParser.flatten).single)
+   *   SQL("SELECT a, b FROM test").as(
+   *     (SqlParser.float("a") ~ SqlParser.str("b")).
+   *       map(SqlParser.flatten).single)
    * }}}
    */
   def str(columnName: String)(implicit c: Column[String]): RowParser[String] =
@@ -159,9 +158,9 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    * import anorm.{ SQL, SqlParser }
    *
    * def t(implicit con: java.sql.Connection): (Float, String) =
-   *   SQL("SELECT a, b FROM test")
-   *   .as((SqlParser.float("a") ~ SqlParser.str(1)).
-   *          map(SqlParser.flatten).single)
+   *   SQL("SELECT a, b FROM test").as(
+   *     (SqlParser.float("a") ~ SqlParser.str(1)).
+   *       map(SqlParser.flatten).single)
    * }}}
    */
   def str(columnPosition: Int)(implicit c: Column[String]): RowParser[String] =
@@ -206,9 +205,9 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    * import anorm.{ SQL, SqlParser }
    *
    * def t(implicit con: java.sql.Connection): (Boolean, String) =
-   *   SQL("SELECT a, b FROM test")
-   *   .as(SqlParser.bool("a") ~ SqlParser.str("b") map (
-   *     SqlParser.flatten) single)
+   *   SQL("SELECT a, b FROM test").as(
+   *     (SqlParser.bool("a") ~ SqlParser.str("b")).
+   *       map(SqlParser.flatten).single)
    * }}}
    */
   def bool(columnName: String)(implicit c: Column[Boolean]): RowParser[Boolean] = get[Boolean](columnName)(c)
@@ -221,9 +220,9 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    * import anorm.{ SQL, SqlParser }
    *
    * def t(implicit con: java.sql.Connection): (Boolean, String) =
-   *   SQL("SELECT a, b FROM test")
-   *   .as(SqlParser.bool(1) ~ SqlParser.str("b") map (
-   *     SqlParser.flatten) single)
+   *   SQL("SELECT a, b FROM test").as(
+   *     (SqlParser.bool(1) ~ SqlParser.str("b")).
+   *       map(SqlParser.flatten).single)
    * }}}
    */
   def bool(columnPosition: Int)(implicit c: Column[Boolean]): RowParser[Boolean] = get[Boolean](columnPosition)(c)
@@ -235,9 +234,9 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    * import anorm.{ SQL, SqlParser }
    *
    * def t(implicit con: java.sql.Connection): (Byte, String) =
-   *   SQL("SELECT a, b FROM test")
-   *   .as(SqlParser.byte("a") ~ SqlParser.str("b") map (
-   *     SqlParser.flatten) single)
+   *   SQL("SELECT a, b FROM test").as(
+   *     (SqlParser.byte("a") ~ SqlParser.str("b")).
+   *       map(SqlParser.flatten).single)
    * }}}
    */
   def byte(columnName: String)(implicit c: Column[Byte]): RowParser[Byte] =
@@ -251,9 +250,9 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    * import anorm.{ SQL, SqlParser }
    *
    * def t(implicit con: java.sql.Connection): (Byte, String) =
-   *   SQL("SELECT a, b FROM test")
-   *   .as(SqlParser.byte(1) ~ SqlParser.str("b") map (
-   *     SqlParser.flatten) single)
+   *   SQL("SELECT a, b FROM test").as(
+   *     (SqlParser.byte(1) ~ SqlParser.str("b")).
+   *       map(SqlParser.flatten).single)
    * }}}
    */
   def byte(columnPosition: Int)(implicit c: Column[Byte]): RowParser[Byte] =
@@ -295,9 +294,9 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    * import anorm.{ SQL, SqlParser }
    *
    * def t(implicit con: java.sql.Connection): (Double, String) =
-   *   SQL("SELECT a, b FROM test")
-   *   .as(SqlParser.double("a") ~ SqlParser.str("b") map (
-   *     SqlParser.flatten) single)
+   *   SQL("SELECT a, b FROM test").as(
+   *     (SqlParser.double("a") ~ SqlParser.str("b")).
+   *       map(SqlParser.flatten).single)
    * }}}
    */
   def double(columnName: String)(implicit c: Column[Double]): RowParser[Double] = get[Double](columnName)(c)
@@ -310,9 +309,9 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    * import anorm.{ SQL, SqlParser }
    *
    * def t(implicit con: java.sql.Connection): (Double, String) =
-   *   SQL("SELECT a, b FROM test")
-   *   .as(SqlParser.double(1) ~ SqlParser.str("b") map (
-   *     SqlParser.flatten) single)
+   *   SQL("SELECT a, b FROM test").as(
+   *     (SqlParser.double(1) ~ SqlParser.str("b")).
+   *       map(SqlParser.flatten).single)
    * }}}
    */
   def double(columnPosition: Int)(implicit c: Column[Double]): RowParser[Double] = get[Double](columnPosition)(c)
@@ -324,9 +323,9 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    * import anorm.{ SQL, SqlParser }
    *
    * def t(implicit con: java.sql.Connection): (Short, String) =
-   *   SQL("SELECT a, b FROM test")
-   *   .as(SqlParser.short("a") ~ SqlParser.str("b") map (
-   *     SqlParser.flatten) single)
+   *   SQL("SELECT a, b FROM test").as(
+   *     (SqlParser.short("a") ~ SqlParser.str("b")).
+   *       map(SqlParser.flatten).single)
    * }}}
    */
   def short(columnName: String)(implicit c: Column[Short]): RowParser[Short] =
@@ -340,9 +339,9 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    * import anorm.{ SQL, SqlParser }
    *
    * def t(implicit con: java.sql.Connection): (Short, String) =
-   *   SQL("SELECT a, b FROM test")
-   *   .as(SqlParser.short(1) ~ SqlParser.str("b") map (
-   *     SqlParser.flatten) single)
+   *   SQL("SELECT a, b FROM test").as(
+   *     (SqlParser.short(1) ~ SqlParser.str("b")).
+   *       map(SqlParser.flatten).single)
    * }}}
    */
   def short(columnPosition: Int)(implicit c: Column[Short]): RowParser[Short] =
@@ -355,9 +354,9 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    * import anorm.{ SQL, SqlParser }
    *
    * def t(implicit con: java.sql.Connection): (Int, String) =
-   *   SQL("SELECT a, b FROM test")
-   *   .as((SqlParser.int("a") ~ SqlParser.str("b")).
-   *     map(SqlParser.flatten).single)
+   *   SQL("SELECT a, b FROM test").as(
+   *     (SqlParser.int("a") ~ SqlParser.str("b")).
+   *       map(SqlParser.flatten).single)
    * }}}
    */
   def int(columnName: String)(implicit c: Column[Int]): RowParser[Int] =
@@ -415,9 +414,9 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    * import anorm.{ SQL, SqlParser }
    *
    * def t(implicit con: java.sql.Connection): (Long, String) =
-   *   SQL("SELECT a, b FROM test")
-   *   .as(SqlParser.long("a") ~ SqlParser.str("b") map (
-   *     SqlParser.flatten) single)
+   *   SQL("SELECT a, b FROM test").as(
+   *     (SqlParser.long("a") ~ SqlParser.str("b")).
+   *       map(SqlParser.flatten).single)
    * }}}
    */
   def long(columnName: String)(implicit c: Column[Long]): RowParser[Long] =
@@ -431,9 +430,9 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    * import anorm.{ SQL, SqlParser }
    *
    * def t(implicit con: java.sql.Connection): (Long, String) =
-   *   SQL("SELECT a, b FROM test")
-   *   .as(SqlParser.long(1) ~ SqlParser.str("b") map (
-   *     SqlParser.flatten) single)
+   *   SQL("SELECT a, b FROM test").as(
+   *     (SqlParser.long(1) ~ SqlParser.str("b")).
+   *       map(SqlParser.flatten).single)
    * }}}
    */
   def long(columnPosition: Int)(implicit c: Column[Long]): RowParser[Long] =
@@ -446,9 +445,9 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    * import anorm.{ SQL, SqlParser }
    *
    * def t(implicit con: java.sql.Connection): (java.util.Date, String) =
-   *   SQL("SELECT a, b FROM test")
-   *   .as(SqlParser.date("a") ~ SqlParser.str("b") map (
-   *     SqlParser.flatten) single)
+   *   SQL("SELECT a, b FROM test").as(
+   *     (SqlParser.date("a") ~ SqlParser.str("b")).
+   *       map(SqlParser.flatten).single)
    * }}}
    */
   def date(columnName: String)(implicit c: Column[Date]): RowParser[Date] =
@@ -462,9 +461,9 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    * import anorm.{ SQL, SqlParser }
    *
    * def t(implicit con: java.sql.Connection): (java.util.Date, String) =
-   *   SQL("SELECT a, b FROM test")
-   *   .as(SqlParser.date(1) ~ SqlParser.str("b") map (
-   *     SqlParser.flatten) single)
+   *   SQL("SELECT a, b FROM test").as(
+   *     (SqlParser.date(1) ~ SqlParser.str("b")).
+   *       map(SqlParser.flatten).single)
    * }}}
    */
   def date(columnPosition: Int)(implicit c: Column[Date]): RowParser[Date] =
