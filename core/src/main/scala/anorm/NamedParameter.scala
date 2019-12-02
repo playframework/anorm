@@ -18,6 +18,8 @@ object NamedParameter {
    * $namedWithString
    *
    * {{{
+   * import anorm.{ NamedParameter, ParameterValue }
+   *
    * def foo(pv: ParameterValue): NamedParameter = "name" -> pv
    * }}}
    */
@@ -27,6 +29,8 @@ object NamedParameter {
    * $namedWithString
    *
    * {{{
+   * import anorm.NamedParameter
+   *
    * val p: NamedParameter = "name" -> 1L
    * }}}
    */
@@ -39,6 +43,8 @@ object NamedParameter {
    * $namedWithSymbol
    *
    * {{{
+   * import anorm.{ NamedParameter, ParameterValue }
+   *
    * def foo(pv: ParameterValue): NamedParameter = 'name -> pv
    * }}}
    */
@@ -49,6 +55,8 @@ object NamedParameter {
    * $namedWithSymbol
    *
    * {{{
+   * import anorm.NamedParameter
+   *
    * val p: NamedParameter = 'name -> 1L
    * }}}
    */
