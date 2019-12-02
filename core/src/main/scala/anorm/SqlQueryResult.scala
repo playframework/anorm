@@ -25,15 +25,20 @@ final case class SqlQueryResult(
    * Returns statement warning if there is some for this result.
    *
    * {{{
-   * val res = SQL("EXEC stored_proc {p}").on("p" -> paramVal).executeQuery()
-   * res.statementWarning match {
-   *   case Some(warning) =>
-   *     warning.printStackTrace()
-   *     None
+   * import anorm._, SqlParser.scalar
    *
-   *   case None =>
-   *     // go on with row parsing ...
-   *     res.as(scalar[String].singleOpt)
+   * def foo(paramVal: String)(implicit con: java.sql.Connection) = {
+   *   val res = SQL("EXEC stored_proc {p}").on("p" -> paramVal).executeQuery()
+   *
+   *   res.statementWarning match {
+   *     case Some(warning) =>
+   *       warning.printStackTrace()
+   *       None
+   *
+   *     case None =>
+   *       // go on with row parsing ...
+   *       res.as(scalar[String].singleOpt)
+   *   }
    * }
    * }}}
    */

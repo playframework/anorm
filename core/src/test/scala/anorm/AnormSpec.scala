@@ -417,12 +417,11 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
     }
 
     "do nothing when there is no result (with degraded result set)" in {
-      withQRes(QueryResult.Nil) {
-        implicit c =>
-          SQL"EXEC test".withResultSetOnFirstRow(true).withResult(go(_)).
-            aka("iteration") must beRight[List[Row]].like {
-              case Row() :: Nil => ok
-            }
+      withQRes(QueryResult.Nil) { implicit c =>
+        SQL"EXEC test".withResultSetOnFirstRow(true).withResult(go(_)).
+          aka("iteration") must beRight[List[Row]].like {
+            case Row() :: Nil => ok
+          }
       }
     }
 

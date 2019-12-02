@@ -13,7 +13,9 @@ import resource.{ managed, ManagedResource }
  * Untyped value wrapper.
  *
  * {{{
- * SQL("UPDATE t SET val = {o}").on('o -> anorm.Object(val))
+ * import anorm._
+ *
+ * def foo(v: Any) = SQL("UPDATE t SET val = {o}").on('o -> anorm.Object(v))
  * }}}
  */
 case class Object(value: Any)
@@ -22,10 +24,14 @@ case class Object(value: Any)
  * Wrapper to use a value sequence as SQL parameter, with custom formatting.
  *
  * {{{
- * SQL("SELECT * FROM t WHERE %s").
- *   on(SeqParameter(Seq("a", "b"), " OR ", Some("cat = ")))
- * // Will execute as:
- * // SELECT * FROM t WHERE cat = 'a' OR cat = 'b'
+ * import anorm._
+ *
+ * def foo(implicit con: java.sql.Connection) = {
+ *   SQL("SELECT * FROM t WHERE {s}").
+ *     on("s" -> SeqParameter(Seq("a", "b"), " OR ", "cat = "))
+ *   // Will execute as:
+ *   // SELECT * FROM t WHERE cat = 'a' OR cat = 'b'
+ * }
  * }}}
  */
 sealed trait SeqParameter[A] {
@@ -81,7 +87,9 @@ private[anorm] trait Sql extends WithResult {
    * (statement is query), or false if it executed update.
    *
    * {{{
-   * val res: Boolean =
+   * import anorm._
+   *
+   * def res(implicit con: java.sql.Connection): Boolean =
    *   SQL"""INSERT INTO Test(a, b) VALUES(\\${"A"}, \\${"B"}""".execute()
    * }}}
    */
@@ -105,14 +113,16 @@ private[anorm] trait Sql extends WithResult {
    * @return Parsed generated keys
    *
    * {{{
-   * import anorm.SqlParser.scalar
+   * import anorm._, SqlParser.scalar
    *
-   * val keys1 = SQL("INSERT INTO Test(x) VALUES ({x})").
-   *   on("x" -> "y").executeInsert()
+   * def foo(implicit con: java.sql.Connection) = {
+   *   val keys1 = SQL("INSERT INTO Test(x) VALUES ({x})").
+   *     on("x" -> "y").executeInsert()
    *
-   * val keys2 = SQL("INSERT INTO Test(x) VALUES ({x})").
-   *   on("x" -> "y").executeInsert(scalar[String].singleOpt)
-   * // ... generated string key
+   *   val keys2 = SQL("INSERT INTO Test(x) VALUES ({x})").
+   *     on("x" -> "y").executeInsert(scalar[String].singleOpt)
+   *   // ... generated string key
+   * }
    * }}}
    */
   @SuppressWarnings(Array("TryGet" /* TODO: Make it safer */ ))
@@ -127,14 +137,16 @@ private[anorm] trait Sql extends WithResult {
    * @return Parsed generated keys
    *
    * {{{
-   * import anorm.SqlParser.scalar
+   * import anorm._, SqlParser.scalar
    *
-   * val keys1 = SQL("INSERT INTO Test(x) VALUES ({x})").
-   *   on("x" -> "y").executeInsert1("generatedCol", "colB")()
+   * def foo(implicit con: java.sql.Connection) = {
+   *   val keys1 = SQL("INSERT INTO Test(x) VALUES ({x})").
+   *     on("x" -> "y").executeInsert1("generatedCol", "colB")()
    *
-   * val keys2 = SQL("INSERT INTO Test(x) VALUES ({x})").
-   *   on("x" -> "y").executeInsert1("generatedCol")(scalar[String].singleOpt)
-   * // ... generated string key
+   *   val keys2 = SQL("INSERT INTO Test(x) VALUES ({x})").
+   *     on("x" -> "y").executeInsert1("generatedCol")(scalar[String].singleOpt)
+   *   // ... generated string key
+   * }
    * }}}
    */
   def executeInsert1[A](generatedColumn: String, otherColumns: String*)(generatedKeysParser: ResultSetParser[A] = SqlParser.scalar[Long].singleOpt)(implicit connection: Connection): Try[A] = execInsert[A](preparedStatement(_, generatedColumn, otherColumns), generatedKeysParser, ColumnAliaser.empty)
@@ -149,14 +161,16 @@ private[anorm] trait Sql extends WithResult {
    * @return Parsed generated keys
    *
    * {{{
-   * import anorm.SqlParser.scalar
+   * import anorm._, SqlParser.scalar
    *
-   * val keys1 = SQL("INSERT INTO Test(x) VALUES ({x})").
-   *   on("x" -> "y").executeInsert1("generatedCol", "colB")()
+   * def foo(implicit con: java.sql.Connection) = {
+   *   val keys1 = SQL("INSERT INTO Test(x) VALUES ({x})").
+   *     on("x" -> "y").executeInsert1("generatedCol", "colB")()
    *
-   * val keys2 = SQL("INSERT INTO Test(x) VALUES ({x})").
-   *   on("x" -> "y").executeInsert1("generatedCol")(scalar[String].singleOpt)
-   * // ... generated string key
+   *   val keys2 = SQL("INSERT INTO Test(x) VALUES ({x})").
+   *     on("x" -> "y").executeInsert1("generatedCol")(scalar[String].singleOpt)
+   *   // ... generated string key
+   * }
    * }}}
    */
   def executeInsert2[A](generatedColumn: String, otherColumns: String*)(generatedKeysParser: ResultSetParser[A] = SqlParser.scalar[Long].singleOpt, aliaser: ColumnAliaser)(implicit connection: Connection): Try[A] = execInsert[A](preparedStatement(_, generatedColumn, otherColumns), generatedKeysParser, aliaser)
@@ -170,12 +184,15 @@ private[anorm] trait Sql extends WithResult {
    * Executes this SQL query, and returns its result.
    *
    * {{{
-   * implicit val conn: Connection = openConnection
-   * val res: SqlQueryResult =
-   *   SQL("SELECT text_col FROM table WHERE id = {code}").
-   *   on("code" -> code).executeQuery()
-   * // Check execution context; e.g. res.statementWarning
-   * val str = res as scalar[String].single // going with row parsing
+   * import anorm._, SqlParser.scalar
+   *
+   * def foo(code: String)(implicit con: java.sql.Connection) = {
+   *   val res: SqlQueryResult =
+   *     SQL("SELECT text_col FROM table WHERE id = {code}").
+   *     on("code" -> code).executeQuery()
+   *   // Check execution context; e.g. res.statementWarning
+   *   val str = res as scalar[String].single // going with row parsing
+   * }
    * }}}
    */
   def executeQuery()(implicit connection: Connection): SqlQueryResult =

@@ -13,7 +13,7 @@ case class SimpleSql[T](
    * Returns the query prepared with named parameters.
    *
    * {{{
-   * import anorm.toParameterValue
+   * import anorm._
    *
    * val baseSql = SQL("SELECT * FROM table WHERE id = {id}") // one named param
    * val preparedSql = baseSql.on("id" -> "value")
@@ -27,7 +27,7 @@ case class SimpleSql[T](
    * of placeholder in statement.
    *
    * {{{
-   * import anorm.toParameterValue
+   * import anorm._
    *
    * val baseSql =
    *   SQL("SELECT * FROM table WHERE name = {name} AND lang = {lang}")
@@ -92,8 +92,8 @@ case class SimpleSql[T](
    * {{{
    * import anorm.{ SQL, SqlParser }
    *
-   * val res: Int = SQL("SELECT 1").using(SqlParser.scalar[Int]).single
-   * // Equivalent to: SQL("SELECT 1").as(SqlParser.scalar[Int].single)
+   * val res = SQL("SELECT 1").using(SqlParser.scalar[Int])
+   * // See: SQL("SELECT 1").as(SqlParser.scalar[Int].single)
    * }}}
    */
   @deprecated(message = "Use [[as]]", since = "2.5.1")
