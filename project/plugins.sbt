@@ -1,5 +1,6 @@
-resolvers ++= DefaultOptions.resolvers(snapshot = true) :+ (
-  Resolver.typesafeRepo("releases"))
+resolvers ++= DefaultOptions.resolvers(snapshot = true) ++ Seq(
+  Resolver.typesafeRepo("releases"),
+  "Tatami Releases" at "https://raw.github.com/cchantep/tatami/master/releases")
 
 addSbtPlugin("com.typesafe.play" % "interplay" % sys.props.get("interplay.version").getOrElse("2.1.3"))
 
@@ -14,3 +15,5 @@ addSbtPlugin("com.eed3si9n" % "sbt-unidoc" % "0.4.2")
 addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "0.14.10")
 
 addSbtPlugin("com.dwijnand" % "sbt-dynver" % "4.0.0")
+
+addSbtPlugin("cchantep" % "sbt-scaladoc-compiler" % "0.1")
