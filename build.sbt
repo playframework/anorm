@@ -200,7 +200,7 @@ lazy val akkaVer = Def.setting[String] {
 }
 
 val akkaContribVer = Def.setting[String] {
-  if (akkaVer.value startsWith "2.5") "0.10+12-3f9327c0"
+  if (akkaVer.value startsWith "2.5") "0.11+1-f9eaa640"
   else "0.6-6-g12a86f9-SNAPSHOT"
 }
 
