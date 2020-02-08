@@ -4,7 +4,7 @@ resolvers ++= DefaultOptions.resolvers(snapshot = true) ++ Seq(
 
 addSbtPlugin("com.typesafe.play" % "interplay" % sys.props.get("interplay.version").getOrElse("3.0.0"))
 
-addSbtPlugin("com.typesafe" % "sbt-mima-plugin" % "0.6.1")
+addSbtPlugin("com.typesafe" % "sbt-mima-plugin" % "0.6.4")
 
 addSbtPlugin("org.scalariform" % "sbt-scalariform" % "1.8.3")
 
