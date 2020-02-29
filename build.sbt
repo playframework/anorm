@@ -9,7 +9,7 @@ import com.typesafe.tools.mima.plugin.MimaKeys.{
 val specs2Test = Seq(
   "specs2-core",
   "specs2-junit"
-).map("org.specs2" %% _ % "4.8.3" % Test)
+).map("org.specs2" %% _ % "4.9.0" % Test)
 
 lazy val acolyteVersion = "1.0.54"
 lazy val acolyte = "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test
@@ -200,7 +200,7 @@ lazy val akkaVer = Def.setting[String] {
 }
 
 val akkaContribVer = Def.setting[String] {
-  if (akkaVer.value startsWith "2.5") "0.11+2-9a997928"
+  if (akkaVer.value startsWith "2.5") "0.11+3-08ccb218"
   else "0.6-6-g12a86f9-SNAPSHOT"
 }
 
@@ -217,7 +217,7 @@ lazy val `anorm-akka` = (project in file("akka"))
 
 // ---
 
-lazy val pgVer = sys.env.get("POSTGRES_VERSION").getOrElse("42.2.9")
+lazy val pgVer = sys.env.get("POSTGRES_VERSION").getOrElse("42.2.10")
 
 val playVer = Def.setting[String] {
   if (scalaVersion.value startsWith "2.13") "2.7.3"
