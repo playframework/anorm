@@ -2,6 +2,9 @@ language: scala
 sudo: true
 dist: trusty
 
+git:
+  depth: 70
+
 cache:
   directories:
   - $HOME/.ivy2
