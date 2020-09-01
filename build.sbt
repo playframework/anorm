@@ -11,7 +11,7 @@ val specs2Test = Seq(
   "specs2-junit"
 ).map("org.specs2" %% _ % "4.10.3" % Test)
 
-lazy val acolyteVersion = "1.0.55"
+lazy val acolyteVersion = "1.0.56"
 lazy val acolyte = "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test
 
 resolvers in ThisBuild ++= Seq(
