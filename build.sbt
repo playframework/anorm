@@ -9,7 +9,7 @@ import com.typesafe.tools.mima.plugin.MimaKeys.{
 val specs2Test = Seq(
   "specs2-core",
   "specs2-junit"
-).map("org.specs2" %% _ % "4.10.3" % Test)
+).map("org.specs2" %% _ % "4.10.5" % Test)
 
 lazy val acolyteVersion = "1.0.56"
 lazy val acolyte = "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test
