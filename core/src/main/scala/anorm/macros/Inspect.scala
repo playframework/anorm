@@ -1,8 +1,8 @@
 package anorm.macros
 
-import anorm.Compat
-
 import scala.reflect.macros.whitebox
+
+import anorm.Compat
 
 private[anorm] object Inspect {
   def directKnownSubclasses(c: whitebox.Context)(tpe: c.Type): List[c.Type] = {

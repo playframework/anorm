@@ -1,6 +1,6 @@
 package anorm
 
-import scala.util.{ Try, Success => TrySuccess }
+import scala.util.{ Success => TrySuccess, Try }
 
 trait Row {
   private[anorm] def metaData: MetaData

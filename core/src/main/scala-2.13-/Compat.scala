@@ -3,7 +3,6 @@ package anorm
 import java.util.{ Enumeration => JEnum }
 
 import scala.collection.breakOut
-
 import scala.collection.immutable.Map
 
 private[anorm] object Compat {

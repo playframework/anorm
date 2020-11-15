@@ -132,7 +132,7 @@ sealed trait BatchSql {
   @throws[IllegalArgumentException](BatchSqlErrors.UnexpectedParameterName)
   @throws[IllegalArgumentException](BatchSqlErrors.MissingParameter)
   @inline private def checkedMap(args: Seq[NamedParameter]): Map[String, ParameterValue] = {
-    val ps = args.foldLeft(Map[String, ParameterValue]()) { (m, np) =>
+    val ps = args.foldLeft(Map.empty[String, ParameterValue]) { (m, np) =>
       if (!names.contains(np.name)) throw new IllegalArgumentException(s"""Unexpected parameter name: ${np.name} != expected ${names mkString ", "}""")
       else m + np.tupled
     }

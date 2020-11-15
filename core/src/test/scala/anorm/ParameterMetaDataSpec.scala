@@ -1,22 +1,12 @@
 package anorm
 
-import java.lang.{
-  Boolean => JBool,
-  Byte => JByte,
-  Character,
-  Double => JDouble,
-  Float => JFloat,
-  Long => JLong,
-  Integer,
-  Short => JShort
-}
-
 import java.util.{ Date => JDate, UUID => JUUID }
-
-import java.net.{ URI, URL }
 
 import java.math.{ BigDecimal => JBigDec, BigInteger }
 
+import java.net.{ URI, URL }
+
+import java.lang.{ Boolean => JBool, Byte => JByte, Character, Double => JDouble, Float => JFloat, Integer, Long => JLong, Short => JShort }
 import java.sql.Timestamp
 
 class ParameterMetaDataSpec extends org.specs2.mutable.Specification {

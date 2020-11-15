@@ -2,10 +2,8 @@ package anorm.macros
 
 import scala.reflect.macros.whitebox
 
+import anorm.Macro.{ debugEnabled, Discriminate, DiscriminatorNaming }
 import anorm.RowParser
-
-import anorm.Macro.{ Discriminate, DiscriminatorNaming, debugEnabled }
-
 import anorm.macros.Inspect.{ directKnownSubclasses, pretty }
 
 private[anorm] object SealedRowParserImpl {

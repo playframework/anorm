@@ -3,8 +3,8 @@ package anorm
 import scala.util.Try
 
 import acolyte.jdbc.AcolyteDSL.withQueryResult
-import acolyte.jdbc.RowLists.{ rowList2, rowList1, stringList }
 import acolyte.jdbc.Implicits._
+import acolyte.jdbc.RowLists.{ rowList1, rowList2, stringList }
 
 class RowSpec extends org.specs2.mutable.Specification {
   "Row" title
@@ -14,27 +14,27 @@ class RowSpec extends org.specs2.mutable.Specification {
       classOf[String] -> "foo", classOf[Int] -> "bar") :+ ("row1", 100)) {
       implicit c =>
         SQL("SELECT * FROM test").as(RowParser(r => Success(r.asList)).single).
-          aka("column list") must_== List("row1", 100)
+          aka("column list") must_=== List("row1", 100)
     }
 
     "keep null if not nullable" in withQueryResult(stringList :+ null) {
       implicit c =>
         SQL("SELECT 1").as(RowParser(r => Success(r.asList)).single).
-          aka("column list") must_== List(null)
+          aka("column list") must_=== List(null)
 
     }
 
     "turn null into None if nullable" in withQueryResult(
       stringList.withNullable(1, true) :+ null) { implicit c =>
         SQL("SELECT 1").as(RowParser(r => Success(r.asList)).single).
-          aka("column list") must_== List(None)
+          aka("column list") must_=== List(None)
 
       }
 
     "turn value into Some(X) if nullable" in withQueryResult(
       stringList.withNullable(1, true) :+ "str") { implicit c =>
         SQL("SELECT 1").as(RowParser(r => Success(r.asList)).single).
-          aka("column list") must_== List(Some("str"))
+          aka("column list") must_=== List(Some("str"))
 
       }
 
@@ -62,14 +62,14 @@ class RowSpec extends org.specs2.mutable.Specification {
       classOf[String] -> "foo", classOf[Int] -> "bar") :+ ("row1", 100)) {
       implicit c =>
         SQL("SELECT * FROM test").as(RowParser(r => Success(r.asMap)).single).
-          aka("column map") must_== Map(".foo" -> "row1", ".bar" -> 100)
+          aka("column map") must_=== Map(".foo" -> "row1", ".bar" -> 100)
 
     }
 
     "keep null if not nullable" in withQueryResult(
       rowList1(classOf[String] -> "foo") :+ null) { implicit c =>
         SQL("SELECT 1").as(RowParser(r => Success(r.asMap)).single).
-          aka("column map") must_== Map(".foo" -> null)
+          aka("column map") must_=== Map(".foo" -> null)
 
       }
 
@@ -77,7 +77,7 @@ class RowSpec extends org.specs2.mutable.Specification {
       rowList1(classOf[String] -> "foo").withNullable(1, true) :+ null) {
         implicit c =>
           SQL("SELECT 1").as(RowParser(r => Success(r.asMap)).single).
-            aka("column map") must_== Map(".foo" -> None)
+            aka("column map") must_=== Map(".foo" -> None)
 
       }
 
@@ -85,7 +85,7 @@ class RowSpec extends org.specs2.mutable.Specification {
       rowList1(classOf[String] -> "foo").withNullable(1, true) :+ "str") {
         implicit c =>
           SQL("SELECT 1").as(RowParser(r => Success(r.asMap)).single).
-            aka("column map") must_== Map(".foo" -> Some("str"))
+            aka("column map") must_=== Map(".foo" -> Some("str"))
 
       }
   }
@@ -94,13 +94,13 @@ class RowSpec extends org.specs2.mutable.Specification {
     "be extracted by name" in withQueryResult(
       rowList1(classOf[String] -> "foo") :+ "byName") { implicit c =>
         SQL("SELECT *").as(RowParser(r => Success(r[String]("foo"))).single).
-          aka("column by name") must_== "byName"
+          aka("column by name") must_=== "byName"
       }
 
     "be extracted by position" in withQueryResult(stringList :+ "byPos") {
       implicit c =>
         SQL("SELECT *").as(RowParser(r => Success(r[String](1))).single).
-          aka("column by name") must_== "byPos"
+          aka("column by name") must_=== "byPos"
     }
   }
 

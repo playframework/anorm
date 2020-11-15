@@ -1,16 +1,10 @@
 package anorm
 
-import java.lang.{
-  Byte => JByte,
-  Boolean => JBool,
-  Double => JDouble,
-  Float => JFloat,
-  Long => JLong,
-  Short => JShort
-}
-import java.math.{ BigDecimal => JBigDec, BigInteger }
 import java.util.Date
 
+import java.math.{ BigDecimal => JBigDec, BigInteger }
+
+import java.lang.{ Boolean => JBool, Byte => JByte, Double => JDouble, Float => JFloat, Long => JLong, Short => JShort }
 import java.sql.{
   Array => JdbcArray,
   Blob => JdbcBlob,
@@ -20,8 +14,6 @@ import java.sql.{
 
 import scala.collection.immutable.SortedSet
 
-import com.github.ghik.silencer.silent
-
 import acolyte.jdbc.{
   DefinedParameter => DParam,
   ParameterMetaData => ParamMeta,
@@ -29,6 +21,8 @@ import acolyte.jdbc.{
 }
 import acolyte.jdbc.AcolyteDSL.{ connection, handleStatement }
 import acolyte.jdbc.Implicits._
+
+import com.github.ghik.silencer.silent
 
 class ParameterSpec
   extends org.specs2.mutable.Specification with JodaParameterSpec {

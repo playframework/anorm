@@ -2,17 +2,18 @@ package anorm
 
 import java.sql.{ Connection, ResultSet }
 
+import scala.collection.immutable.Seq
+
 import scala.concurrent.Future
 import scala.concurrent.duration._
-import scala.collection.immutable.Seq
 
 import akka.stream.scaladsl.{ Keep, Sink, Source }
 
-import org.specs2.concurrent.ExecutionEnv
-
 import acolyte.jdbc.AcolyteDSL.withQueryResult
-import acolyte.jdbc.RowLists.stringList
 import acolyte.jdbc.Implicits._
+import acolyte.jdbc.RowLists.stringList
+
+import org.specs2.concurrent.ExecutionEnv
 
 final class AkkaStreamSpec(implicit ee: ExecutionEnv)
   extends org.specs2.mutable.Specification {

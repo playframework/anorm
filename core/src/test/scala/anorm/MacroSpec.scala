@@ -1,26 +1,20 @@
 package anorm
 
 import java.lang.{ Boolean => JBool, Long => JLong }
-
 import java.sql.Connection
 
-import com.github.ghik.silencer.silent
-
-import acolyte.jdbc.{
-  DefinedParameter => DParam,
-  ParameterMetaData => ParamMeta,
-  UpdateExecution
-}
+import acolyte.jdbc.{ DefinedParameter => DParam, ParameterMetaData => ParamMeta, RowLists, UpdateExecution }
 import acolyte.jdbc.AcolyteDSL.{ connection, handleStatement, withQueryResult }
-import acolyte.jdbc.RowLists
 import acolyte.jdbc.Implicits._
+
+import org.specs2.specification.core.Fragments
+
+import com.github.ghik.silencer.silent
 
 import Macro.ColumnNaming
 import SqlParser.scalar
 
-import org.specs2.specification.core.Fragments
-
-class MacroSpec extends org.specs2.mutable.Specification {
+final class MacroSpec extends org.specs2.mutable.Specification {
   "Macro" title
 
   val barRow1 = RowLists.rowList1(classOf[Int] -> "v")
@@ -39,11 +33,11 @@ class MacroSpec extends org.specs2.mutable.Specification {
     import ColumnNaming._
 
     "be snake case with 'loremIpsum' transformed to 'lorem_ipsum'" in {
-      SnakeCase("loremIpsum") must_== "lorem_ipsum"
+      SnakeCase("loremIpsum") must_=== "lorem_ipsum"
     }
 
     "be using a custom transformation" in {
-      ColumnNaming(_.toUpperCase).apply("foo") must_== "FOO"
+      ColumnNaming(_.toUpperCase).apply("foo") must_=== "FOO"
     }
   }
 
@@ -59,16 +53,16 @@ class MacroSpec extends org.specs2.mutable.Specification {
       val parser1 = Macro.namedParser[Bar]
       val parser2 = Macro.parser[Bar]("v")
 
-      SQL"TEST".as(parser1.*) must_== List(Bar(1), Bar(3)) and (
-        SQL"TEST".as(parser2.*) must_== List(Bar(1), Bar(3)))
+      SQL"TEST".as(parser1.*) must_=== List(Bar(1), Bar(3)) and (
+        SQL"TEST".as(parser2.*) must_=== List(Bar(1), Bar(3)))
     }
 
     "be successful for Foo[Int]" >> {
       def spec(parser1: RowParser[Foo[Int]], parser2: RowParser[Foo[Int]])(implicit c: Connection) = {
         val expected = List(Foo(1.2F, "str1")(1, Some(2L))(Some(true)), Foo(2.3F, "str2")(4, None)(None), Foo(3.4F, "str3")(5, Some(3L))(None), Foo(5.6F, "str4")(6, None)(Some(false)))
 
-        SQL"TEST".as(parser1.*) must_== expected and (
-          SQL("TEST").as(parser2.*) must_== expected)
+        SQL"TEST".as(parser1.*) must_=== expected and (
+          SQL("TEST").as(parser2.*) must_=== expected)
       }
 
       "using the default column naming" in withQueryResult(
@@ -126,7 +120,7 @@ class MacroSpec extends org.specs2.mutable.Specification {
 
     "be successful for Bar" in withQueryResult(
       RowLists.intList :+ 1 :+ 3) { implicit c =>
-        SQL"TEST".as(Macro.indexedParser[Bar].*) must_== List(Bar(1), Bar(3))
+        SQL"TEST".as(Macro.indexedParser[Bar].*) must_=== List(Bar(1), Bar(3))
       }
 
     "be successful for Foo[Int]" in withQueryResult(
@@ -138,7 +132,7 @@ class MacroSpec extends org.specs2.mutable.Specification {
             nullLong, false)) { implicit con =>
         val parser: RowParser[Foo[Int]] = Macro.indexedParser[Foo[Int]]
 
-        SQL"TEST".as(parser.*) must_== List(Foo(1.2F, "str1")(1, Some(2L))(Some(true)), Foo(2.3F, "str2")(4, None)(None), Foo(3.4F, "str3")(5, Some(3L))(None), Foo(5.6F, "str4")(6, None)(Some(false)))
+        SQL"TEST".as(parser.*) must_=== List(Foo(1.2F, "str1")(1, Some(2L))(Some(true)), Foo(2.3F, "str2")(4, None)(None), Foo(3.4F, "str3")(5, Some(3L))(None), Foo(5.6F, "str4")(6, None)(Some(false)))
       }
   }
 
@@ -148,7 +142,7 @@ class MacroSpec extends org.specs2.mutable.Specification {
 
     "be successful for Bar" in withQueryResult(
       RowLists.intList :+ 1 :+ 3) { implicit c =>
-        SQL"TEST".as(Macro.offsetParser[Bar](0).*) must_== List(Bar(1), Bar(3))
+        SQL"TEST".as(Macro.offsetParser[Bar](0).*) must_=== List(Bar(1), Bar(3))
       }
 
     "be successful for Foo[Int]" in withQueryResult(
@@ -160,7 +154,7 @@ class MacroSpec extends org.specs2.mutable.Specification {
             nullLong, false)) { implicit con =>
         val parser: RowParser[Foo[Int]] = Macro.offsetParser[Foo[Int]](0)
 
-        SQL"TEST".as(parser.*) must_== List(Foo(1.2F, "str1")(1, Some(2L))(Some(true)), Foo(2.3F, "str2")(4, None)(None), Foo(3.4F, "str3")(5, Some(3L))(None), Foo(5.6F, "str4")(6, None)(Some(false)))
+        SQL"TEST".as(parser.*) must_=== List(Foo(1.2F, "str1")(1, Some(2L))(Some(true)), Foo(2.3F, "str2")(4, None)(None), Foo(3.4F, "str3")(5, Some(3L))(None), Foo(5.6F, "str4")(6, None)(Some(false)))
       }
 
     "be successful for Goo[T] with offset = 2" in withQueryResult(
@@ -170,7 +164,7 @@ class MacroSpec extends org.specs2.mutable.Specification {
             5.6F, "str4", 6, nullLong, false)) { implicit con =>
         val parser: RowParser[Goo[Int]] = Macro.offsetParser[Goo[Int]](2)
 
-        SQL"TEST".as(parser.*) must_== List(Goo(1, Some(2L), Some(true)), Goo(4, None, None), Goo(5, Some(3L), None), Goo(6, None, Some(false)))
+        SQL"TEST".as(parser.*) must_=== List(Goo(1, Some(2L), Some(true)), Goo(4, None, None), Goo(5, Some(3L), None), Goo(6, None, Some(false)))
       }
   }
 
@@ -178,12 +172,12 @@ class MacroSpec extends org.specs2.mutable.Specification {
     import Macro.DiscriminatorNaming
 
     "be 'classname' by default" in {
-      DiscriminatorNaming.Default("foo") must_== "classname"
+      DiscriminatorNaming.Default("foo") must_=== "classname"
     }
 
     "be customized" in {
       val naming = DiscriminatorNaming { _ => "foo" }
-      naming("bar") must_== "foo"
+      naming("bar") must_=== "foo"
     }
   }
 
@@ -191,12 +185,12 @@ class MacroSpec extends org.specs2.mutable.Specification {
     import Macro.Discriminate
 
     "be identity by default" in {
-      Discriminate.Identity("x.y.z.Type") must_== "x.y.z.Type"
+      Discriminate.Identity("x.y.z.Type") must_=== "x.y.z.Type"
     }
 
     "be customized" in {
       val discriminate = Discriminate(_.split("\\.").last)
-      discriminate("x.y.z.Type") must_== "Type"
+      discriminate("x.y.z.Type") must_=== "Type"
     }
   }
 
@@ -227,7 +221,7 @@ class MacroSpec extends org.specs2.mutable.Specification {
             // cannot handle object anorm.MacroSpec.NotCase: no case accessor
             @silent def familyParser = Macro.sealedParser[Family]
 
-            SQL"TEST".as(familyParser.*) must_== List(Bar(1), CaseObj)
+            SQL"TEST".as(familyParser.*) must_=== List(Bar(1), CaseObj)
         }
       }
 
@@ -247,7 +241,7 @@ class MacroSpec extends org.specs2.mutable.Specification {
               Macro.DiscriminatorNaming(_ => "foo"),
               Macro.Discriminate(_.split("\\.").last))
 
-            SQL"TEST".as(familyParser.*) must_== List(Bar(1), CaseObj)
+            SQL"TEST".as(familyParser.*) must_=== List(Bar(1), CaseObj)
         }
       }
     }
@@ -267,7 +261,7 @@ class MacroSpec extends org.specs2.mutable.Specification {
         Macro.toParameters[Bar]() -> List(named("v" -> 1)),
         Macro.toParameters[Bar](proj("v", "w")) -> List(named("w" -> 1))).zipWithIndex) {
         case ((encoder, params), index) => s"using encoder #${index}" in {
-          encoder(fixture) must_== params
+          encoder(fixture) must_=== params
         }
       }
     }
@@ -284,7 +278,7 @@ class MacroSpec extends org.specs2.mutable.Specification {
           proj("loremIpsum", "value")) -> List(
             named("value" -> 1))).zipWithIndex) {
         case ((encoder, params), index) => s"using encoder #${index}" in {
-          encoder(fixture) must_== params
+          encoder(fixture) must_=== params
         }
       }
     }
@@ -302,7 +296,7 @@ class MacroSpec extends org.specs2.mutable.Specification {
         Bar(1) -> List(named("v" -> 1)),
         CaseObj -> List.empty[NamedParameter])) {
         case (i, params) => s"for $i" in {
-          ToParameterList.from(i) must_== params
+          ToParameterList.from(i) must_=== params
         }
       }
     }
@@ -324,7 +318,7 @@ class MacroSpec extends org.specs2.mutable.Specification {
           named("x" -> Some(false)))).zipWithIndex) {
         case ((encoder, params), index) =>
           s"using encoder #${index}" in {
-            encoder(fixture) must_== params
+            encoder(fixture) must_=== params
           }
       }
     }
@@ -339,9 +333,9 @@ class MacroSpec extends org.specs2.mutable.Specification {
       implicit val generated: Column[ValidValueClass] =
         Macro.valueColumn[ValidValueClass]
 
-      withQueryResult(RowLists.doubleList :+ 1.2d) { implicit con =>
+      withQueryResult(RowLists.doubleList :+ 1.2D) { implicit con =>
         SQL("SELECT d").as(scalar[ValidValueClass].single).
-          aka("parsed column") must_=== new ValidValueClass(1.2d)
+          aka("parsed column") must_=== new ValidValueClass(1.2D)
       }
     }
   }

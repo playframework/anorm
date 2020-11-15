@@ -4,7 +4,6 @@ import scala.reflect.macros.whitebox
 
 import anorm.Column
 import anorm.Macro.debugEnabled
-
 import anorm.macros.Inspect.pretty
 
 private[anorm] object ValueColumnImpl {

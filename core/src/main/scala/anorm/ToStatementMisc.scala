@@ -1,5 +1,11 @@
 package anorm
 
+import java.util.{ UUID => JUUID }
+
+import java.math.{ BigDecimal => JBigDec, BigInteger }
+
+import java.net.{ URI, URL }
+
 import java.lang.{
   Boolean => JBool,
   Byte => JByte,
@@ -8,13 +14,6 @@ import java.lang.{
   Long => JLong,
   Short => JShort
 }
-
-import java.util.{ UUID => JUUID }
-
-import java.net.{ URI, URL }
-
-import java.math.{ BigDecimal => JBigDec, BigInteger }
-
 import java.sql.{ PreparedStatement, Timestamp }
 
 private[anorm] trait ToStatementBase[A] { self =>

@@ -1,7 +1,7 @@
 package anorm
 
-import acolyte.jdbc.RowLists.rowList1
 import acolyte.jdbc.Implicits._
+import acolyte.jdbc.RowLists.rowList1
 
 class CursorSpec extends org.specs2.mutable.Specification {
   "Cursor" title
@@ -14,7 +14,7 @@ class CursorSpec extends org.specs2.mutable.Specification {
     "be returned for one row" in {
       Cursor(stringList :+ "A" resultSet, ColumnAliaser.empty).
         aka("cursor") must beSome.which { cur =>
-          cur.row[String]("str") aka "row" must_== "A" and (
+          cur.row[String]("str") aka "row" must_=== "A" and (
             cur.next aka "after first" must beNone)
         }
     }
@@ -23,11 +23,11 @@ class CursorSpec extends org.specs2.mutable.Specification {
       Cursor(
         stringList :+ "red" :+ "green" :+ "blue" resultSet,
         ColumnAliaser.empty) aka "cursor" must beSome.which { first =>
-          first.row[String]("str") aka "row #1" must_== "red" and (
+          first.row[String]("str") aka "row #1" must_=== "red" and (
             first.next aka "after first" must beSome.which { snd =>
-              snd.row[String]("str") aka "row #2" must_== "green" and (
+              snd.row[String]("str") aka "row #2" must_=== "green" and (
                 snd.next aka "after second" must beSome.which { third =>
-                  third.row[String]("str") aka "row #1" must_== "blue" and (
+                  third.row[String]("str") aka "row #1" must_=== "blue" and (
                     third.next aka "after third" must beNone)
                 })
             })
@@ -37,9 +37,9 @@ class CursorSpec extends org.specs2.mutable.Specification {
     "match pattern" in {
       Cursor(stringList :+ "Foo" :+ "Bar" resultSet, ColumnAliaser.empty).
         aka("cursor") must beSome[Cursor].like {
-          case Cursor(row1, b) => row1[String](1) must_== "Foo" and (
+          case Cursor(row1, b) => row1[String](1) must_=== "Foo" and (
             b must beSome[Cursor].like {
-              case Cursor(row2, None) => row2[String](1) must_== "Bar"
+              case Cursor(row2, None) => row2[String](1) must_=== "Bar"
             })
         }
     }

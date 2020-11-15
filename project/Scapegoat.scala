@@ -8,7 +8,7 @@ object Scapegoat {
 
   val settings = Seq(
     scapegoatVersion in ThisBuild := "1.3.11",
-    scapegoatReports in ThisBuild := Seq("xml"),
+    scapegoatReports in ThisBuild := Seq("text"),
     scapegoatDisabledInspections in ThisBuild := Seq(
       "FinalModifierOnCaseClass"),
     pomPostProcess := transformPomDependencies { dep =>

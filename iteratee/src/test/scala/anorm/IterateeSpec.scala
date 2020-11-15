@@ -1,14 +1,14 @@
 import scala.concurrent.duration._
 
-import org.specs2.concurrent.ExecutionEnv
-
 import play.api.libs.iteratee.Iteratee
 
-import anorm._
-
 import acolyte.jdbc.AcolyteDSL.withQueryResult
-import acolyte.jdbc.RowLists.stringList
 import acolyte.jdbc.Implicits._
+import acolyte.jdbc.RowLists.stringList
+
+import org.specs2.concurrent.ExecutionEnv
+
+import anorm._
 
 class IterateeSpec(implicit ee: ExecutionEnv)
   extends org.specs2.mutable.Specification {

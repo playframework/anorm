@@ -4,15 +4,7 @@ import java.util.UUID
 
 import scala.util.control.NonFatal
 
-import play.api.libs.json.{
-  JsError,
-  JsObject,
-  Json,
-  JsSuccess,
-  JsValue,
-  Reads,
-  Writes
-}
+import play.api.libs.json.{ JsError, JsObject, JsSuccess, JsValue, Json, Reads, Writes }
 
 import org.postgresql.util.PGobject
 
@@ -22,8 +14,13 @@ package object postgresql extends PGJson {
   implicit val UUIDToSql: ToSql[UUID] = ToSql[UUID] { _ => "?::UUID" -> 1 }
 }
 
-// Could be moved to a separate module
+/**
+ * @define paramTypeToJson the type of value to be written as JSON
+ * @define writesParam the Play writes to be used to serialized the value as JSON
+ */
 sealed trait PGJson {
+  // Could be moved to a separate module
+
   /** Allows to pass a `JsValue` as parameter to be stored as `PGobject`. */
   implicit def jsValueToStatement[J <: JsValue] = ToStatement[J] { (s, i, js) =>
     val pgObject = new PGobject()
@@ -39,9 +36,11 @@ sealed trait PGJson {
   }
 
   /**
-   * @tparam the type of value to be written as JSON
+   * Sets a value as a JSON parameter.
+   *
+   * @tparam $paramTypeToJson
    * @param value the value to be passed as a JSON parameter
-   * @param w the Play writes to be used to serialized the value as JSON
+   * @param w $writesParam
    *
    * {{{
    * import play.api.libs.json._
@@ -50,15 +49,48 @@ sealed trait PGJson {
    * case class Foo(bar: String)
    * implicit val w: Writes[Foo] = Json.writes[Foo]
    *
-   * val value = Foo("lorem")
+   * implicit def con: java.sql.Connection = ???
    *
-   * def foo(implicit con: java.sql.Connection) =
-   *   SQL"INSERT INTO test(id, json) VALUES(\${"bar"}, \${asJson(value)})".
-   *     executeUpdate()
+   * val value = asJson(Foo("lorem"))
+   * SQL"INSERT INTO test(id, json) VALUES(\${"bar"}, \${value})".executeUpdate()
    * }}}
    */
   def asJson[T](value: T)(implicit w: Writes[T]): ParameterValue =
     anorm.postgresql.PGUtil.asJson[T](value)(w)
+
+  /**
+   * Sets an optional value as a JSON parameters.
+   *
+   * @tparam $paramTypeToJson
+   * @param value the optional value to be passed as a JSON parameter
+   * @param w $writesParam
+   *
+   * {{{
+   * import play.api.libs.json._
+   * import anorm._, postgresql._
+   *
+   * case class Foo(bar: String)
+   * implicit val w: Writes[Foo] = Json.writes[Foo]
+   *
+   * val someVal = asNullableJson(Some(Foo("lorem")))
+   * val noVal = asNullableJson(Option.empty[Foo])
+   *
+   * implicit def con: java.sql.Connection = ???
+   *
+   * SQL"INSERT INTO test(id, json) VALUES(\${"bar"}, \${someVal})".executeUpdate()
+   * SQL"INSERT INTO test(id, json) VALUES(\${"bar"}, \${noVal})".executeUpdate()
+   * }}}
+   *
+   */
+  def asNullableJson[T](value: Option[T])(implicit w: Writes[T]): ParameterValue = {
+    implicit val writeNullableJsonToStatement: ToStatement[Option[T]] = ToStatement[Option[T]] { (s, index, v) =>
+      v.fold(s.setNull(index, JsObjectParameterMetaData.jdbcType)) { json =>
+        jsValueToStatement.set(s, index, w.writes(json))
+      }
+    }
+
+    ParameterValue from value
+  }
 
   implicit object JsValueParameterMetaData extends ParameterMetaData[JsValue] {
     val sqlType = "JSONB"

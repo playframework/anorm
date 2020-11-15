@@ -3,8 +3,9 @@
  */
 package anorm
 
-import scala.util.Try
 import scala.language.postfixOps
+
+import scala.util.Try
 import scala.util.parsing.combinator._
 
 /** Parser for SQL statement. */

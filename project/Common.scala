@@ -2,7 +2,6 @@ import sbt.Keys._
 import sbt._
 import sbt.plugins.JvmPlugin
 
-import com.typesafe.tools.mima.plugin.MimaPlugin.mimaDefaultSettings
 import com.typesafe.tools.mima.plugin.MimaKeys.mimaPreviousArtifacts
 
 object Common extends AutoPlugin {
@@ -13,11 +12,11 @@ object Common extends AutoPlugin {
 
   val previousVersion = "2.6.0"
 
-  override def projectSettings = mimaDefaultSettings ++ Seq(
+  override def projectSettings = Seq(
     organization := "org.playframework.anorm",
-    scalaVersion := "2.12.10",
+    scalaVersion := "2.12.12",
     crossScalaVersions := Seq(
-      "2.11.12", scalaVersion.value, "2.13.1"),
+      "2.11.12", scalaVersion.value, "2.13.3"),
     resolvers += "Scalaz Bintray Repo" at {
       "https://dl.bintray.com/scalaz/releases" // specs2 depends on scalaz-stream
     },
@@ -32,7 +31,7 @@ object Common extends AutoPlugin {
       scalaVersion.value, 12,
       (sourceDirectory in Test).value),
     libraryDependencies ++= {
-      val silencerVer = "1.4.4"
+      val silencerVer = "1.7.1"
 
       Seq(
         compilerPlugin(("com.github.ghik" %% "silencer-plugin" % silencerVer).
@@ -52,22 +51,31 @@ object Common extends AutoPlugin {
       "-g:vars"
     ),
     scalacOptions ++= {
-      CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((2, n)) if n < 12 => Seq.empty[String]
-        case _ => Seq("-Ywarn-macros:after")
-      }
-    },
-    scalacOptions in Compile ++= {
-      if ((scalaVersion in Compile).value startsWith "2.12.") {
+      if (scalaBinaryVersion.value == "2.12") {
         Seq(
+          "-Xmax-classfile-name", "128",
           "-Ywarn-numeric-widen",
-          "-Ywarn-infer-any",
           "-Ywarn-dead-code",
+          "-Ywarn-value-discard",
+          "-Ywarn-infer-any",
           "-Ywarn-unused",
           "-Ywarn-unused-import",
-          "-Ywarn-value-discard")
+          "-Ywarn-macros:after"
+        )
+      } else if (scalaBinaryVersion.value == "2.11") {
+        Seq(
+          "-Xmax-classfile-name", "128",
+          "-Yopt:_", "-Ydead-code", "-Yclosure-elim", "-Yconst-opt")
       } else {
-        Seq.empty[String]
+        Seq(
+          "-explaintypes",
+          //"-Werror",
+          "-Wnumeric-widen",
+          "-Wdead-code",
+          "-Wvalue-discard",
+          "-Wextra-implicit",
+          "-Wunused",
+          "-Wmacros:after")
       }
     },
     scalacOptions in (Compile, console) ~= {

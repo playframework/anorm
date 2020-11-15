@@ -53,11 +53,11 @@ case class ColumnNotFound(
 
 object ColumnNotFound {
   def apply(column: String, row: Row): ColumnNotFound =
-    ColumnNotFound(column, row.metaData.availableColumns)
+    new ColumnNotFound(column, row.metaData.availableColumns)
 
   @deprecated("Use factory with `available` sequence", "2.5.4")
   def apply(column: String, possibilities: List[String]): ColumnNotFound =
-    ColumnNotFound(column, possibilities.toSeq)
+    new ColumnNotFound(column, possibilities)
 }
 
 // TODO: No longer be SqlRequestError, but a ColumnError (new hierarchy)
