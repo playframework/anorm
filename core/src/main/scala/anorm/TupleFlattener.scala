@@ -32,8 +32,7 @@ sealed trait TupleFlattenerPriority2 extends TupleFlattenerPriority1 {
 }
 
 /**
- * Conversion from 4-column tuple-like to [[scala.Tuple4]],
- * with resolution priority 3.
+ * Conversion from 4-column tuple-like with resolution priority 3.
  */
 sealed trait TupleFlattenerPriority3 extends TupleFlattenerPriority2 {
   /**
