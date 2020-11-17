@@ -23,4 +23,4 @@ matrix:
   - jdk: openjdk11
     scala: 2.13.3
 
-script: ./.ci_scripts/validate.sh
+script: git fetch --tags && ./.ci_scripts/validate.sh
