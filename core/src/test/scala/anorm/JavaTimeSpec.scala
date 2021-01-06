@@ -1,5 +1,6 @@
 package anorm
 
+import java.sql.Timestamp
 import java.time.{ Instant, LocalDate, LocalDateTime, ZoneId, ZonedDateTime }
 
 import acolyte.jdbc.AcolyteDSL._
@@ -34,6 +35,16 @@ class JavaTimeColumnSpec extends Specification {
         SQL("SELECT ts").as(scalar[Instant].single).
           aka("parsed instant") must_=== instant
       }
+
+    "be parsed from timestamp with nano precision" in {
+      val instantWithNanoPrecision = Instant.parse("2021-01-06T08:45:26.441477Z")
+
+      withQueryResult(
+        timestampList :+ Timestamp.from(instantWithNanoPrecision)) { implicit con =>
+          SQL("SELECT ts").as(scalar[Instant].single).
+            aka("parsed instant") must_=== instantWithNanoPrecision
+        }
+    }
 
     "be parsed from numeric time" in withQueryResult(longList :+ time) {
       implicit con =>
