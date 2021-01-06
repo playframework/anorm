@@ -17,7 +17,7 @@ fi
 
 sbt ++$TRAVIS_SCALA_VERSION $SBT_TASKS
 
-if [ "branch:$TRAVIS_BRANCH" = "branch:master" ]; then
+if [ "branch:$TRAVIS_BRANCH" = "branch:master" -a `java -version 2>&1 | head -n 1 | grep '1.8' | wc -l` -eq 1 ]; then
   echo "Publishing snapshot ..."
 
   sbt ";set publishTo := Some(\"Sonatype Nexus Repository Manager\" at \"https://oss.sonatype.org/content/repositories/snapshots\") ;set credentials += Credentials(\"Sonatype Nexus Repository Manager\", \"oss.sonatype.org\", \"$SONATYPE_USER\", \"$SONATYPE_PASSWORD\") ;publish"
