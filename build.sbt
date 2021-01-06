@@ -9,7 +9,7 @@ import com.typesafe.tools.mima.plugin.MimaKeys.{
 ThisBuild / scalaVersion := "2.12.12"
 
 ThisBuild / crossScalaVersions := Seq(
-  "2.11.12", (scalaVersion in ThisBuild).value, "2.13.3")
+  "2.11.12", (scalaVersion in ThisBuild).value, "2.13.4")
 
 // Scalafix
 inThisBuild(

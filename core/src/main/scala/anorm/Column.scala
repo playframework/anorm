@@ -713,10 +713,11 @@ sealed trait JavaTimeColumn {
   implicit val columnToInstant: Column[Instant] = nonNull { (value, meta) =>
     val MetaDataItem(qualified, _, _) = meta
     value match {
+      case ts: java.sql.Timestamp => Ts(ts)(_.toInstant)
       case date: java.util.Date => Right(Instant ofEpochMilli date.getTime)
       case time: Long => Right(Instant ofEpochMilli time)
-      case TimestampWrapper1(ts) => Ts(ts)(Instant ofEpochMilli _.getTime)
-      case TimestampWrapper2(ts) => Ts(ts)(Instant ofEpochMilli _.getTime)
+      case TimestampWrapper1(ts) => Ts(ts)(_.toInstant)
+      case TimestampWrapper2(ts) => Ts(ts)(_.toInstant)
       case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to Java8 Instant for column $qualified"))
     }
   }
