@@ -722,7 +722,7 @@ sealed trait JavaTimeColumn {
     }
   }
 
-  private def temporalColumn[T](epoch: Long => T, description: String): Column[T] = nonNull { (value, meta) =>
+  private def temporalValueTo[T](epoch: Long => T, description: String)(value: Any, meta: MetaDataItem): Either[SqlRequestError, T] = {
     val MetaDataItem(qualified, _, _) = meta
     value match {
       case date: java.util.Date => Right(epoch(date.getTime))
@@ -732,6 +732,9 @@ sealed trait JavaTimeColumn {
       case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to $description for column $qualified"))
     }
   }
+
+  private def temporalColumn[T](epoch: Long => T, description: String): Column[T] =
+    nonNull(temporalValueTo(epoch, description))
 
   /**
    * Parses column as Java8 local date/time.
@@ -748,10 +751,17 @@ sealed trait JavaTimeColumn {
    *     as(SqlParser.scalar[LocalDateTime].single)
    * }}}
    */
-  implicit val columnToLocalDateTime: Column[LocalDateTime] =
-    temporalColumn[LocalDateTime]({ ts: Long =>
+  implicit val columnToLocalDateTime: Column[LocalDateTime] = nonNull { (value, meta) =>
+
+    def millisToLocalDateTime(ts: Long) =
       LocalDateTime.ofInstant(Instant.ofEpochMilli(ts), ZoneId.systemDefault)
-    }, "Java8 LocalDateTime")
+
+    value match {
+      case localDateTime: LocalDateTime => Right(localDateTime)
+      case _ =>
+        temporalValueTo[LocalDateTime](millisToLocalDateTime, "Java8 LocalDateTime")(value, meta)
+    }
+  }
 
   /**
    * Parses column as Java8 local date.

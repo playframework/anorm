@@ -10,6 +10,7 @@ import java.net.{ URI, URL }
 
 import java.sql.{ Array => SqlArray }
 import javax.sql.rowset.serial.{ SerialBlob, SerialClob }
+import java.time.LocalDateTime
 
 import scala.util.Random
 
@@ -189,6 +190,13 @@ class ColumnSpec
     "be parsed from date" in withQueryResult(dateList :+ now) { implicit con =>
       SQL"SELECT d".as(scalar[Long].single).
         aka("parsed long") must_=== now.getTime
+    }
+
+    val localDateTimeNow = LocalDateTime.now()
+    val localDateTimeRow = rowList1(classOf[LocalDateTime])
+    "be parsed from LocalDateTime" in withQueryResult(localDateTimeRow :+ localDateTimeNow) { implicit con =>
+      SQL"SELECT d".as(scalar[LocalDateTime].single).
+        aka("parsed LocalDateTime") must_=== localDateTimeNow
     }
 
     "be parsed from a timestamp wrapper" in withQueryResult(
