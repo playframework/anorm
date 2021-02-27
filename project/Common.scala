@@ -14,7 +14,7 @@ object Common extends AutoPlugin {
 
   override def projectSettings = Seq(
     organization := "org.playframework.anorm",
-    scalaVersion := "2.12.12",
+    scalaVersion := "2.12.13",
     crossScalaVersions := Seq(
       "2.11.12", scalaVersion.value, "2.13.3"),
     resolvers += "Scalaz Bintray Repo" at {
@@ -31,7 +31,7 @@ object Common extends AutoPlugin {
       scalaVersion.value, 12,
       (sourceDirectory in Test).value),
     libraryDependencies ++= {
-      val silencerVer = "1.7.1"
+      val silencerVer = "1.7.3"
 
       Seq(
         compilerPlugin(("com.github.ghik" %% "silencer-plugin" % silencerVer).
