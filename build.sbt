@@ -6,7 +6,7 @@ import com.typesafe.tools.mima.plugin.MimaKeys.{
   mimaBinaryIssueFilters, mimaPreviousArtifacts
 }
 
-ThisBuild / scalaVersion := "2.12.12"
+ThisBuild / scalaVersion := "2.12.13"
 
 ThisBuild / crossScalaVersions := Seq(
   "2.11.12", (scalaVersion in ThisBuild).value, "2.13.4")
