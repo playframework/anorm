@@ -6,11 +6,6 @@ import com.typesafe.tools.mima.plugin.MimaKeys.{
   mimaBinaryIssueFilters, mimaPreviousArtifacts
 }
 
-ThisBuild / scalaVersion := "2.12.13"
-
-ThisBuild / crossScalaVersions := Seq(
-  "2.11.12", (scalaVersion in ThisBuild).value, "2.13.4")
-
 // Scalafix
 inThisBuild(
   List(
@@ -109,8 +104,17 @@ lazy val `anorm-core` = project.in(file("core"))
       "-Xlog-free-terms",
       "-P:silencer:globalFilters=missing\\ in\\ object\\ ToSql\\ is\\ deprecated;possibilities\\ in\\ class\\ ColumnNotFound\\ is\\ deprecated;DeprecatedSqlParser\\ in\\ package\\ anorm\\ is\\ deprecated;constructor\\ deprecatedName\\ in\\ class\\ deprecatedName\\ is\\ deprecated"
     ),
+    scalacOptions in Test ++= {
+      if (scalaBinaryVersion.value == "2.13") {
+        Seq(
+          "-Ypatmat-exhaust-depth", "off",
+          "-P:silencer:globalFilters=multiarg\\ infix\\ syntax")
+      } else {
+        Seq.empty
+      }
+    },
     mimaPreviousArtifacts := {
-      if (scalaVersion.value startsWith "2.13") {
+      if (scalaBinaryVersion.value == "2.13") {
         Set.empty
       } else {
         mimaPreviousArtifacts.value
@@ -190,10 +194,9 @@ lazy val `anorm-iteratee` = (project in file("iteratee"))
     }).value,
     publishTo := (Def.taskDyn {
       val p = publishTo.value
-      val ver = scalaVersion.value
 
       Def.task {
-        if (ver startsWith "2.13.") None
+        if (scalaBinaryVersion.value == "2.13") None
         else p
       }
     }).value,
@@ -228,7 +231,8 @@ lazy val `anorm-akka` = (project in file("akka"))
       "com.typesafe.akka" %% m % akkaVer.value % Provided
     },
     libraryDependencies ++= (acolyte +: specs2Test) ++ Seq(
-      "com.typesafe.akka" %% "akka-stream-contrib" % akkaContribVer.value % Test)
+      "com.typesafe.akka" %% "akka-stream-contrib" % akkaContribVer.value % Test),
+    scalacOptions += "-P:silencer:globalFilters=deprecated"
   ).dependsOn(`anorm-core`)
 
 // ---
@@ -255,7 +259,16 @@ lazy val `anorm-postgres` = (project in file("postgres"))
         "com.typesafe.play" %% "play-json" % playJsonVer
       ) ++ specs2Test :+ acolyte
     }
-  ).dependsOn(`anorm-core`)
+).dependsOn(`anorm-core`)
+
+lazy val `anorm-enumeratum` = (project in file("enumeratum"))
+  .settings(
+    scalariformAutoformat := true,
+    mimaPreviousArtifacts := Set.empty,
+    libraryDependencies ++= Seq(
+      "com.beachape" %% "enumeratum" % "1.6.1",
+      acolyte) ++ specs2Test
+).dependsOn(`anorm-core`)
 
 // ---
 
@@ -264,7 +277,7 @@ lazy val `anorm-parent` = (project in file("."))
   .aggregate(
     `anorm-tokenizer`, `anorm-core`,
     `anorm-iteratee`, `anorm-akka`,
-    `anorm-postgres`)
+    `anorm-postgres`, `anorm-enumeratum`)
   .settings(
     mimaPreviousArtifacts := Set.empty)
 

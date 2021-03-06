@@ -55,9 +55,9 @@ private[anorm] object Inspect {
     import c.universe._
 
     val tpeArgs: List[c.Type] = tpe match {
-      case SingleType(_, _) => List.empty
       case TypeRef(_, _, args) => args
       case i @ ClassInfoType(_, _, _) => i.typeArgs
+      case _ => List.empty
     }
 
     val companion = tpe.typeSymbol.companion.typeSignature

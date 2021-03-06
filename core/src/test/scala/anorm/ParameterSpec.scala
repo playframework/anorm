@@ -714,8 +714,9 @@ val params: Seq[NamedParameter] = Seq("mod" -> d, "id" -> "idv")
 
     "accept value wrapped as opaque parameter object" in withConnection() {
       implicit c =>
-        SQL("set-date {d}").on(Symbol("d") -> anorm.Object(new java.util.Date())).
-          execute aka "execution" must throwA[SQLFeatureNotSupportedException](
+        SQL("set-date {d}").on(
+          Symbol("d") -> anorm.Object(new java.util.Date())).
+          execute() must throwA[SQLFeatureNotSupportedException](
             message = "Unsupported parameter type: java.util.Date")
 
     }

@@ -9,8 +9,8 @@ import java.math.BigInteger
 import java.net.{ URI, URL }
 
 import java.sql.{ Array => SqlArray }
-import javax.sql.rowset.serial.{ SerialBlob, SerialClob }
 import java.time.LocalDateTime
+import javax.sql.rowset.serial.{ SerialBlob, SerialClob }
 
 import scala.util.Random
 

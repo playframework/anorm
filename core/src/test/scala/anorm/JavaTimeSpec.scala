@@ -276,6 +276,10 @@ object JavaTimeParameterSpec extends Specification {
       DParam(t: java.sql.Timestamp, SqlTimestamp) :: Nil) if t.getTime == 123456789000L => 1 /* case ok */
     case UpdateExecution("set-null-zoned-date-time ?",
       DParam(null, SqlTimestamp) :: Nil) => 1 /* case ok */
+
+    case exec =>
+      sys.error(s"Unexpected execution: $exec")
+
   }, ps: _*))
 
   "Java time named parameters" should {

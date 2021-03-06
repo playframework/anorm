@@ -70,7 +70,7 @@ object ColumnAliaser {
    * import anorm.{ ColumnAliaser, ColumnName }
    *
    * ColumnAliaser({
-   *   case (1, cn) => "my_id"
+   *   case (1, _) => "my_id"
    *   case (_, ColumnName(".foo", _)) => "prefix.foo"
    * })
    * }}}

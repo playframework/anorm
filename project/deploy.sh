@@ -41,7 +41,7 @@ EOF
   done
 }
 
-SCALA_MODULES="core:anorm tokenizer:anorm-tokenizer akka:anorm-akka iteratee:anorm-iteratee postgres:anorm-postgres"
+SCALA_MODULES="core:anorm tokenizer:anorm-tokenizer akka:anorm-akka iteratee:anorm-iteratee postgres:anorm-postgres enumeratum:anorm-enumeratum"
 SCALA_VERSIONS="2.11 2.12 2.13"
 BASES=""
 

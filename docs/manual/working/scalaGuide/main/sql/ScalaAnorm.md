@@ -419,6 +419,8 @@ val query = SQL("INSERT INTO foo(id, bar) VALUES ({n}, {bar_v})").
   bind(Foo(1, Bar(2)))
 ```
 
+*Also see the additional [module for Enumeratum](AnormEnumeratum.html)*.
+
 ## Parsing rows
 
 Anorm provides several ways to handle and parse the row retrieved by the database queries.
@@ -1057,7 +1059,10 @@ val str: Option[String] =
 
 As already seen in this documentation, Anorm provides builtins converters between JDBC and JVM types.
 
-*Also see the additional [module for PostgreSQL](AnormPostgres.html)*.
+*Also see the additional modules:*
+
+- [PostgreSQL support](AnormPostgres.html)*
+- [Enumeratum support](AnormEnumeratum.html)*
 
 ### Column parsers
 
