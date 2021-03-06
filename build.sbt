@@ -6,11 +6,6 @@ import com.typesafe.tools.mima.plugin.MimaKeys.{
   mimaBinaryIssueFilters, mimaPreviousArtifacts
 }
 
-ThisBuild / scalaVersion := "2.12.13"
-
-ThisBuild / crossScalaVersions := Seq(
-  "2.11.12", (scalaVersion in ThisBuild).value, "2.13.4")
-
 // Scalafix
 inThisBuild(
   List(
@@ -236,7 +231,8 @@ lazy val `anorm-akka` = (project in file("akka"))
       "com.typesafe.akka" %% m % akkaVer.value % Provided
     },
     libraryDependencies ++= (acolyte +: specs2Test) ++ Seq(
-      "com.typesafe.akka" %% "akka-stream-contrib" % akkaContribVer.value % Test)
+      "com.typesafe.akka" %% "akka-stream-contrib" % akkaContribVer.value % Test),
+    scalacOptions += "-P:silencer:globalFilters=deprecated"
   ).dependsOn(`anorm-core`)
 
 // ---
@@ -281,7 +277,7 @@ lazy val `anorm-parent` = (project in file("."))
   .aggregate(
     `anorm-tokenizer`, `anorm-core`,
     `anorm-iteratee`, `anorm-akka`,
-    `anorm-postgres`)
+    `anorm-postgres`, `anorm-enumeratum`)
   .settings(
     mimaPreviousArtifacts := Set.empty)
 

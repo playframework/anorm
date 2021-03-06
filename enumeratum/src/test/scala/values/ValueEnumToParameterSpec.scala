@@ -1,7 +1,5 @@
 package anorm.enumeratum.values
 
-import scala.util.control.NonFatal
-
 import acolyte.jdbc.{
   DefinedParameter => DParam,
   ParameterMetaData => ParamMeta,
