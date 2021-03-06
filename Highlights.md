@@ -1,3 +1,8 @@
+# What's new in Anorm 2.7
+
+This page highlights the new features of Anorm 2.7. If you want learn about the changes you need to make to migrate to Anorm 2.7, check out the [Migration Guide](Migration26.html).
+
+- Support [`java.net.URI`](https://docs.oracle.com/javase/8/docs/api/java/net/URI.html) & [`java.net.URL`](https://docs.oracle.com/javase/8/docs/api/java/net/URL.html) in parameter or column mappings.
 # What's new in Anorm 2.6
 
 This page highlights the new features of Anorm 2.6. If you want learn about the changes you need to make to migrate to Anorm 2.6, check out the [Migration Guide](Migration26.html).

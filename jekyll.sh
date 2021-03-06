@@ -35,7 +35,7 @@ for R in `grep '(code/' "$SRCDIR/ScalaAnorm.md" | grep '.scala' | sed -e 's/^@\[
 
   echo "$REF @ docs/manual/working/scalaGuide/main/sql/$SRC"
 
-  awk -v "ref=$REF" 'BEGIN { \
+  gawk -v "ref=$REF" 'BEGIN { \
     h = 0; \
     needle = "//#" ref;\
     ind = 0;\
@@ -84,6 +84,10 @@ rm -rf code && cp -R "$SRCDIR/code" code
 # PostgreSQL
 cp "$SRCDIR/AnormPostgres.md" .
 git add AnormPostgres.md
+
+# Enumeratum
+cp "$SRCDIR/AnormEnumeratum.md" .
+git add AnormEnumeratum.md
 
 # Contributing page
 cp anorm/CONTRIBUTING.md .
