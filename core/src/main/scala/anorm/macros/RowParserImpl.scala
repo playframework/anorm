@@ -38,7 +38,7 @@ private[anorm] object RowParserImpl {
       case ((xa, ma, bs, ia, sr), pss) =>
         val (xb, mb, vs, ib, selfRef) =
           pss.foldLeft((xa, ma, List.empty[Tree], ia, sr)) {
-            case ((xtr, mp, ps, pi, sref), term: TermSymbol) =>
+            case ((xtr, mp, ps, pi, sref), term: TermSymbol) => {
               val tn = term.name.toString
               val tt = {
                 val t = term.typeSignature
@@ -57,7 +57,7 @@ private[anorm] object RowParserImpl {
                     case Implicit(_, _, pr, _, s) => {
                       // Use an existing `RowParser[T]` as part
                       pq"${term.name}" match {
-                        case b @ Bind(bn, _) =>
+                        case b @ Bind(bn, _) => {
                           val bt = q"${bn.toTermName}"
 
                           xtr match {
@@ -68,6 +68,10 @@ private[anorm] object RowParserImpl {
                               pq"anorm.~($mp, $b)", bt :: ps, pi + 1, s || sref)
 
                           }
+                        }
+
+                        case _ =>
+                          abort(s"unsupported $colTpe nor $parserTpe for ${term.name}:$tt in $ctor")
                       }
                     }
                   }
@@ -77,7 +81,7 @@ private[anorm] object RowParserImpl {
                   val get = genGet(tt, tn, pi)
 
                   pq"${term.name}" match {
-                    case b @ Bind(bn, _) =>
+                    case b @ Bind(bn, _) => {
                       val bt = q"${bn.toTermName}"
 
                       xtr match {
@@ -88,9 +92,19 @@ private[anorm] object RowParserImpl {
                           pq"anorm.~($mp, $b)", bt :: ps, pi + 1, sref)
 
                       }
+                    }
+
+                    case _ =>
+                      abort(s"unsupported $colTpe nor $parserTpe for ${term.name}:$tt: ${show(itree)}")
                   }
                 }
               }
+            }
+
+            case (state, sym) => {
+              c.warning(c.enclosingPosition, s"unexpected symbol: $sym")
+              state
+            }
           }
 
         val by = bs match {

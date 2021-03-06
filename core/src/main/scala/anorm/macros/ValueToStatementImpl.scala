@@ -45,6 +45,9 @@ private[anorm] object ValueToStatement {
           }
         }
       }
+
+      case _ =>
+        abort(s"cannot supported ${show(ctor)} for ${tpe}")
     }
   }
 }

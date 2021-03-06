@@ -145,7 +145,7 @@ sealed trait ToStatementPriority0 {
    * Sets double value on statement.
    *
    * {{{
-   * anorm.SQL("SELECT * FROM Test WHERE flag = {b}").on('b -> 1d)
+   * anorm.SQL("SELECT * FROM Test WHERE flag = {b}").on('b -> 1D)
    * }}}
    */
   implicit object doubleToStatement extends ToStatement[Double] {
@@ -158,7 +158,7 @@ sealed trait ToStatementPriority0 {
    *
    * {{{
    * anorm.SQL("SELECT * FROM Test WHERE flag = {b}").
-   *   on('b -> new java.lang.Double(1d))
+   *   on('b -> new java.lang.Double(1D))
    * }}}
    */
   implicit object javaDoubleToStatement extends ToStatement[JDouble] {
@@ -171,7 +171,7 @@ sealed trait ToStatementPriority0 {
    * Sets float value on statement.
    *
    * {{{
-   * anorm.SQL("SELECT * FROM Test WHERE flag = {b}").on('b -> 1f)
+   * anorm.SQL("SELECT * FROM Test WHERE flag = {b}").on('b -> 1F)
    * }}}
    */
   implicit object floatToStatement extends ToStatement[Float] {
@@ -184,7 +184,7 @@ sealed trait ToStatementPriority0 {
    *
    * {{{
    * anorm.SQL("SELECT * FROM Test WHERE flag = {b}").
-   *   on('b -> new java.lang.Float(1f))
+   *   on('b -> new java.lang.Float(1F))
    * }}}
    */
   implicit object javaFloatToStatement extends ToStatement[JFloat] {
@@ -197,7 +197,7 @@ sealed trait ToStatementPriority0 {
    * Sets long value on statement.
    *
    * {{{
-   * anorm.SQL("SELECT * FROM Test WHERE flag = {b}").on('b -> 1l)
+   * anorm.SQL("SELECT * FROM Test WHERE flag = {b}").on('b -> 1L)
    * }}}
    */
   implicit object longToStatement extends ToStatement[Long] {
@@ -210,7 +210,7 @@ sealed trait ToStatementPriority0 {
    *
    * {{{
    * anorm.SQL("SELECT * FROM Test WHERE flag = {b}").
-   *   on('b -> new java.lang.Long(1l))
+   *   on('b -> new java.lang.Long(1L))
    * }}}
    */
   implicit object javaLongToStatement extends ToStatement[JLong] {
@@ -395,7 +395,7 @@ sealed trait ToStatementPriority0 {
    *
    * {{{
    * anorm.SQL("UPDATE tbl SET max = {m}").
-   *   on('m -> new java.math.BigDecimal(10.02f))
+   *   on('m -> new java.math.BigDecimal(10.02F))
    * }}}
    */
   implicit object javaBigDecimalToStatement extends ToStatement[JBigDec] {

@@ -456,10 +456,15 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
   "Insertion" should {
     def con = connection(handleStatement withUpdateHandler {
       case UpdateExecution("INSERT ?", ExecutedParameter(1) :: Nil) => 1
+
       case UpdateExecution("INSERT ?", ExecutedParameter(2) :: Nil) =>
         updateResult(2, longList :+ 3L)
+
       case UpdateExecution("INSERT ?", ExecutedParameter(3) :: Nil) =>
         updateResult(3, stringList :+ "generated")
+
+      case exec =>
+        sys.error(s"Unexpected execution: $exec")
 
     })
 

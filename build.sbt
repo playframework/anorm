@@ -109,8 +109,17 @@ lazy val `anorm-core` = project.in(file("core"))
       "-Xlog-free-terms",
       "-P:silencer:globalFilters=missing\\ in\\ object\\ ToSql\\ is\\ deprecated;possibilities\\ in\\ class\\ ColumnNotFound\\ is\\ deprecated;DeprecatedSqlParser\\ in\\ package\\ anorm\\ is\\ deprecated;constructor\\ deprecatedName\\ in\\ class\\ deprecatedName\\ is\\ deprecated"
     ),
+    scalacOptions in Test ++= {
+      if (scalaBinaryVersion.value == "2.13") {
+        Seq(
+          "-Ypatmat-exhaust-depth", "off",
+          "-P:silencer:globalFilters=multiarg\\ infix\\ syntax")
+      } else {
+        Seq.empty
+      }
+    },
     mimaPreviousArtifacts := {
-      if (scalaVersion.value startsWith "2.13") {
+      if (scalaBinaryVersion.value == "2.13") {
         Set.empty
       } else {
         mimaPreviousArtifacts.value
@@ -190,10 +199,9 @@ lazy val `anorm-iteratee` = (project in file("iteratee"))
     }).value,
     publishTo := (Def.taskDyn {
       val p = publishTo.value
-      val ver = scalaVersion.value
 
       Def.task {
-        if (ver startsWith "2.13.") None
+        if (scalaBinaryVersion.value == "2.13") None
         else p
       }
     }).value,

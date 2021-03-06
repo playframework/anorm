@@ -69,7 +69,7 @@ object Common extends AutoPlugin {
       } else {
         Seq(
           "-explaintypes",
-          //"-Werror",
+          "-Werror",
           "-Wnumeric-widen",
           "-Wdead-code",
           "-Wvalue-discard",
@@ -85,6 +85,7 @@ object Common extends AutoPlugin {
       _.filterNot { opt => opt.startsWith("-X") || opt.startsWith("-Y") }
     },
     scalacOptions in Test ++= Seq("-Yrangepos"),
+    scalacOptions in Test ~= (_.filterNot(_ == "-Werror")),
     scalacOptions ~= (_.filterNot(_ == "-Xfatal-warnings")),
     fork in Test := true,
     mimaPreviousArtifacts := Set(
