@@ -11,7 +11,7 @@ Play includes a simple data access layer called Anorm that uses plain SQL to int
 
 > In the following documentation, we will use the [MySQL world sample database](http://dev.mysql.com/doc/index-other.html). 
 > 
-> If you want to enable it for your application, follow the MySQL website instructions, and configure it as explained [on the Scala database page](https://playframework.com/documentation/latest/ScalaDatabase)| ScalaDatabase]].
+> If you want to enable it for your application, follow the MySQL website instructions, and configure it as explained [on the Scala database page](https://playframework.com/documentation/latest/ScalaDatabase).
 
 ## Overview
 
@@ -52,7 +52,7 @@ You will need to add Anorm and JDBC plugin to your dependencies :
 {% highlight scala %}
 libraryDependencies ++= Seq(
   jdbc,
-  "org.playframework.anorm" %% "anorm" % "2.6.4"
+  "org.playframework.anorm" %% "anorm" % "2.6.10"
 )
 {% endhighlight %}
 
