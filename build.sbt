@@ -255,7 +255,16 @@ lazy val `anorm-postgres` = (project in file("postgres"))
         "com.typesafe.play" %% "play-json" % playJsonVer
       ) ++ specs2Test :+ acolyte
     }
-  ).dependsOn(`anorm-core`)
+).dependsOn(`anorm-core`)
+
+lazy val `anorm-enumeratum` = (project in file("enumeratum"))
+  .settings(
+    scalariformAutoformat := true,
+    mimaPreviousArtifacts := Set.empty,
+    libraryDependencies ++= Seq(
+      "com.beachape" %% "enumeratum" % "1.6.1",
+      acolyte) ++ specs2Test
+).dependsOn(`anorm-core`)
 
 // ---
 

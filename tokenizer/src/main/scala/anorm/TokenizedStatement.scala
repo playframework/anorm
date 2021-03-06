@@ -70,7 +70,7 @@ private[anorm] object TokenizedStatement {
         val groups = ((gs match {
           case TokenGroup(List(StringToken("")), None) :: tgs => tgs // trim end
           case _ => gs
-        }) map {
+        }).collect {
           case TokenGroup(pr, pl) => TokenGroup(pr.reverse, pl)
         }).reverse
 
