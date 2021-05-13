@@ -39,9 +39,12 @@ lazy val `anorm-tokenizer` = project
         mimaPreviousArtifacts.value
       }
     },
-    libraryDependencies ++= Seq(
-      "org.scala-lang" % "scala-reflect" % scalaVersion.value
-    )
+    libraryDependencies ++= {
+      if (isDotty.value) Seq.empty
+      else Seq(
+        "org.scala-lang" % "scala-reflect" % scalaVersion.value
+      )
+    }
   )
 
 // ---
