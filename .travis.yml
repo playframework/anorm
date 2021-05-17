@@ -17,11 +17,11 @@ matrix:
   - jdk: openjdk8
     scala: 2.12.13
   - jdk: openjdk8
-    scala: 2.13.3
+    scala: 2.13.6
   - jdk: openjdk9
     scala: 2.12.13
   - jdk: openjdk11
-    scala: 2.13.3
+    scala: 2.13.6
 
 install:
   - |
