@@ -8,7 +8,7 @@ object Publish {
 
   lazy val settings = Seq(
     publishMavenStyle := true,
-    publishArtifact in Test := false,
+    Test / publishArtifact := false,
     pomIncludeRepository := { _ => false },
     autoAPIMappings := true,
     apiURL := Some(url(s"$siteUrl/unidoc/anorm/")),
