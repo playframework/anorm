@@ -25,7 +25,7 @@ val specs2Test = Seq(
 lazy val acolyteVersion = "1.0.57"
 lazy val acolyte = "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test
 
-resolvers in ThisBuild ++= Seq(
+ThisBuild / resolvers ++= Seq(
   "Tatami Snapshots" at "https://raw.github.com/cchantep/tatami/master/snapshots")
 
 ThisBuild / mimaFailOnNoPrevious := false
@@ -49,21 +49,21 @@ lazy val `anorm-tokenizer` = project.in(file("tokenizer"))
 
 val armShading = Seq(
   libraryDependencies += "com.jsuereth" %% "scala-arm" % "2.1-SNAPSHOT",
-  test in assembly := {},
-  assemblyOption in assembly ~= {
+  assembly / test := {},
+  assembly / assemblyOption ~= {
     _.copy(includeScala = false) // java libraries shouldn't include scala
   },
-  assemblyJarName in assembly := {
+  (assembly / assemblyJarName) := {
     CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((maj, min)) => s"anorm_${maj}.${min}-${version.value}.jar"
       case _                => "anorm.jar"
     }
   },
-  assemblyShadeRules in assembly := Seq.empty,
-  assemblyExcludedJars in assembly := (fullClasspath in assembly).value.filter {
+  assembly / assemblyShadeRules := Seq.empty,
+  (assembly / assemblyExcludedJars) := (assembly / fullClasspath).value.filter {
     !_.data.getName.startsWith("scala-arm")
   },
-  assemblyMergeStrategy in assembly := {
+  (assembly / assemblyMergeStrategy) := {
     val tokPrefixes = Seq(
       "PercentToken", "Show", "StatementToken", "StringShow",
       "StringToken", "TokenGroup", "TokenizedStatement")
@@ -73,7 +73,7 @@ val armShading = Seq(
         MergeStrategy.discard
 
       case x =>
-        val oldStrategy = (assemblyMergeStrategy in assembly).value
+        val oldStrategy = (assembly / assemblyMergeStrategy).value
         oldStrategy(x)
     }
   },
@@ -90,21 +90,21 @@ val armShading = Seq(
     }
   },
   makePom := makePom.dependsOn(assembly).value,
-  packageBin in Compile := assembly.value
+  (Compile / packageBin) := assembly.value
 )
 
 lazy val `anorm-core` = project.in(file("core"))
   .settings(Seq(
     name := "anorm",
     scalariformAutoformat := true,
-    sourceGenerators in Compile += Def.task {
-      Seq(GFA((sourceManaged in Compile).value / "anorm"))
+    (Compile / sourceGenerators) += Def.task {
+      Seq(GFA((Compile / sourceManaged).value / "anorm"))
     }.taskValue,
     scalacOptions ++= Seq(
       "-Xlog-free-terms",
       "-P:silencer:globalFilters=missing\\ in\\ object\\ ToSql\\ is\\ deprecated;possibilities\\ in\\ class\\ ColumnNotFound\\ is\\ deprecated;DeprecatedSqlParser\\ in\\ package\\ anorm\\ is\\ deprecated;constructor\\ deprecatedName\\ in\\ class\\ deprecatedName\\ is\\ deprecated"
     ),
-    scalacOptions in Test ++= {
+    (Test / scalacOptions) ++= {
       if (scalaBinaryVersion.value == "2.13") {
         Seq(
           "-Ypatmat-exhaust-depth", "off",
@@ -286,7 +286,7 @@ lazy val docs = project.in(file("docs"))
   .configs(Docs)
   .settings(
     name := "anorm-docs",
-    unmanagedSourceDirectories in Test ++= {
+    (Test / unmanagedSourceDirectories) ++= {
       val manualDir = baseDirectory.value / "manual" / "working"
 
       (manualDir / "javaGuide" ** "code").get ++ (
@@ -302,4 +302,4 @@ lazy val docs = project.in(file("docs"))
 
 Scapegoat.settings
 
-playBuildRepoName in ThisBuild := "anorm"
+ThisBuild / playBuildRepoName := "anorm"
