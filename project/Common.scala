@@ -20,16 +20,16 @@ object Common extends AutoPlugin {
     resolvers += "Scalaz Bintray Repo" at {
       "https://dl.bintray.com/scalaz/releases" // specs2 depends on scalaz-stream
     },
-    unmanagedSourceDirectories in Compile ++= {
+    (Compile / unmanagedSourceDirectories) ++= {
       val sv = scalaVersion.value
 
       Seq(
-        scala2Unmanaged(sv, 12, (sourceDirectory in Compile).value),
-        scala2Unmanaged(sv, 13, (sourceDirectory in Compile).value))
+        scala2Unmanaged(sv, 12, (Compile / sourceDirectory).value),
+        scala2Unmanaged(sv, 13, (Compile / sourceDirectory).value))
     },
-    unmanagedSourceDirectories in Test += scala2Unmanaged(
+    (Test / unmanagedSourceDirectories) += scala2Unmanaged(
       scalaVersion.value, 12,
-      (sourceDirectory in Test).value),
+      (Test / sourceDirectory).value),
     libraryDependencies ++= {
       val silencerVer = "1.7.4"
 
@@ -78,16 +78,16 @@ object Common extends AutoPlugin {
           "-Wmacros:after")
       }
     },
-    scalacOptions in (Compile, console) ~= {
+    Compile / console / scalacOptions ~= {
       _.filterNot { opt => opt.startsWith("-X") || opt.startsWith("-Y") }
     },
-    scalacOptions in (Test, console) ~= {
+    Test / console / scalacOptions ~= {
       _.filterNot { opt => opt.startsWith("-X") || opt.startsWith("-Y") }
     },
-    scalacOptions in Test ++= Seq("-Yrangepos"),
-    scalacOptions in Test ~= (_.filterNot(_ == "-Werror")),
+    Test / scalacOptions ++= Seq("-Yrangepos"),
+    Test / scalacOptions ~= (_.filterNot(_ == "-Werror")),
     scalacOptions ~= (_.filterNot(_ == "-Xfatal-warnings")),
-    fork in Test := true,
+    Test / fork := true,
     mimaPreviousArtifacts := Set(
       organization.value %% moduleName.value % previousVersion)
   ) ++ Publish.settings
