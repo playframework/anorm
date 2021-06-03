@@ -779,7 +779,7 @@ sealed trait JavaTimeColumn {
    * }}}
    */
   implicit val columnToLocalDate: Column[LocalDate] =
-    temporalColumn[LocalDate]({ ts: Long =>
+    temporalColumn[LocalDate]({ (ts: Long) =>
       LocalDateTime.ofInstant(
         Instant.ofEpochMilli(ts), ZoneId.systemDefault).toLocalDate
     }, "Java8 LocalDate")
@@ -800,7 +800,7 @@ sealed trait JavaTimeColumn {
    * }}}
    */
   implicit val columnToZonedDateTime: Column[ZonedDateTime] =
-    temporalColumn[ZonedDateTime]({ ts: Long =>
+    temporalColumn[ZonedDateTime]({ (ts: Long) =>
       ZonedDateTime.ofInstant(Instant.ofEpochMilli(ts), ZoneId.systemDefault)
     }, "Java8 ZonedDateTime")
 }
