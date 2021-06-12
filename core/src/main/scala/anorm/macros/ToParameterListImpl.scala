@@ -73,7 +73,7 @@ private[anorm] object ToParameterListImpl {
 
     val debug: String => Unit = {
       if (debugEnabled) c.echo(c.enclosingPosition, _: String)
-      else { _: String => () }
+      else { (_: String) => () }
     }
 
     val compiledProj: Seq[ParameterProjection] = projection.map { expr =>
