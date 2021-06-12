@@ -47,7 +47,7 @@ object MacroParsers {
 
   // Generate a parser as following...
   val generated: RowParser[Family] =
-    SqlParser.str("classname").flatMap { discriminator: String =>
+    SqlParser.str("classname").flatMap { (discriminator: String) =>
       discriminator match {
         case "scalaguide.sql.MacroParsers.Bar" =>
           implicitly[RowParser[Bar]]
