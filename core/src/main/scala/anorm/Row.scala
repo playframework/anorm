@@ -19,6 +19,7 @@ trait Row {
    *
    * @see #as
    */
+  @SuppressWarnings(Array("UnnecessaryConversion"))
   lazy val asList: List[Any] = Compat.lazyZip(data, metaData.ms).map { (v, m) =>
     if (m.nullable) Option(v) else v
   }.toList
@@ -140,7 +141,7 @@ trait Row {
           orElse(m.column.alias.flatMap(aliasesDictionary.get(_)))
 
       } else {
-        m.column.alias.flatMap(a => aliasesDictionary.get(a.toUpperCase)).
+        m.column.alias.flatMap(x => aliasesDictionary.get(x.toUpperCase)).
           orElse(columnsDictionary.get(m.column.qualified.toUpperCase))
       }
 

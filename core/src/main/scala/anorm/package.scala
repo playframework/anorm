@@ -107,6 +107,7 @@ package object anorm {
    * }}}
    */
   implicit class SqlStringInterpolation(val sc: StringContext) extends AnyVal {
+    @SuppressWarnings(Array("MethodNames"))
     def SQL(args: ParameterValue*) = {
       val (ts, ps) = TokenizedStatement.stringInterpolation(sc.parts, args)
       SimpleSql(SqlQuery.prepare(ts, ts.names), ps, RowParser(Success(_)))
@@ -140,7 +141,7 @@ package object anorm {
               val ng = TokenGroup(tks, None)
               val n = '_'.toString + ns.size
               tokenize(ti, tks.tail, parts, ps.tail,
-                (ng :: prev.copy(placeholder = Some(n)) :: groups),
+                (ng :: prev.copy(_placeholder = Some(n)) :: groups),
                 (n +: ns), m + (n -> v))
           }
           case _ =>

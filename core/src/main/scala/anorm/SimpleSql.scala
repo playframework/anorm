@@ -60,7 +60,7 @@ case class SimpleSql[T](
   }
 
   private def prepareGeneratedCols(columns: Array[String]) = {
-    (con: Connection, sql: String) => con.prepareStatement(sql, columns)
+    (_con: Connection, _sql: String) => _con.prepareStatement(_sql, columns)
   }
 
   def unsafeStatement(connection: Connection, getGeneratedKeys: Boolean = false) = {

@@ -7,10 +7,10 @@ object Scapegoat {
   import ScapegoatSbtPlugin.autoImport._
 
   val settings = Seq(
-    ThisBuild / scapegoatVersion := "1.3.11",
+    ThisBuild / scapegoatVersion := "1.4.9",
     ThisBuild / scapegoatReports := Seq("text"),
     ThisBuild / scapegoatDisabledInspections := Seq(
-      "FinalModifierOnCaseClass"),
+      "FinalModifierOnCaseClass", "UnsafeTraversableMethods"),
     pomPostProcess := transformPomDependencies { dep =>
       if ((dep \ "groupId").text == "com.sksamuel.scapegoat") {
         None

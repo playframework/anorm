@@ -9,9 +9,13 @@ EOF
     false
 )
 
-SBT_TASKS="publishLocal mimaReportBinaryIssues test docs/test doc"
+SBT_TASKS="publishLocal mimaReportBinaryIssues test"
 
-if [ "v$TRAVIS_SCALA_VERSION" = "2.12.12" ]; then
+if [ ! "v$TRAVIS_SCALA_VERSION" = "v2.11.12" ]; then
+  SBT_TASKS="$SBT_TASKS docs/test doc"
+fi
+
+if [ "v$TRAVIS_SCALA_VERSION" = "v2.13.5" ]; then
   SBT_TASKS="$SBT_TASKS scapegoat"
 fi
 

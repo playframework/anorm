@@ -9,7 +9,7 @@ import com.typesafe.tools.mima.plugin.MimaKeys.{
 // Scalafix
 inThisBuild(
   List(
-    //scalaVersion := "2.13.3",
+    //scalaVersion := "2.13.5",
     semanticdbEnabled := true,
     semanticdbVersion := scalafixSemanticdb.revision,
     scalafixDependencies ++= Seq(
@@ -34,7 +34,7 @@ lazy val `anorm-tokenizer` = project.in(file("tokenizer"))
   .settings(
     scalariformAutoformat := true,
     mimaPreviousArtifacts := {
-      if (scalaVersion.value startsWith "2.13") {
+      if (scalaBinaryVersion.value == "2.13") {
         Set.empty
       } else {
         mimaPreviousArtifacts.value
@@ -53,17 +53,17 @@ val armShading = Seq(
   assembly / assemblyOption ~= {
     _.copy(includeScala = false) // java libraries shouldn't include scala
   },
-  (assembly / assemblyJarName) := {
+  assembly / assemblyJarName := {
     CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((maj, min)) => s"anorm_${maj}.${min}-${version.value}.jar"
       case _                => "anorm.jar"
     }
   },
   assembly / assemblyShadeRules := Seq.empty,
-  (assembly / assemblyExcludedJars) := (assembly / fullClasspath).value.filter {
+  assembly / assemblyExcludedJars := (assembly / fullClasspath).value.filter {
     !_.data.getName.startsWith("scala-arm")
   },
-  (assembly / assemblyMergeStrategy) := {
+  assembly / assemblyMergeStrategy := {
     val tokPrefixes = Seq(
       "PercentToken", "Show", "StatementToken", "StringShow",
       "StringToken", "TokenGroup", "TokenizedStatement")
@@ -90,21 +90,21 @@ val armShading = Seq(
     }
   },
   makePom := makePom.dependsOn(assembly).value,
-  (Compile / packageBin) := assembly.value
+  Compile / packageBin := assembly.value
 )
 
 lazy val `anorm-core` = project.in(file("core"))
   .settings(Seq(
     name := "anorm",
     scalariformAutoformat := true,
-    (Compile / sourceGenerators) += Def.task {
+    Compile / sourceGenerators += Def.task {
       Seq(GFA((Compile / sourceManaged).value / "anorm"))
     }.taskValue,
     scalacOptions ++= Seq(
       "-Xlog-free-terms",
       "-P:silencer:globalFilters=missing\\ in\\ object\\ ToSql\\ is\\ deprecated;possibilities\\ in\\ class\\ ColumnNotFound\\ is\\ deprecated;DeprecatedSqlParser\\ in\\ package\\ anorm\\ is\\ deprecated;constructor\\ deprecatedName\\ in\\ class\\ deprecatedName\\ is\\ deprecated"
     ),
-    (Test / scalacOptions) ++= {
+    Test / scalacOptions ++= {
       if (scalaBinaryVersion.value == "2.13") {
         Seq(
           "-Ypatmat-exhaust-depth", "off",
@@ -165,7 +165,7 @@ lazy val `anorm-core` = project.in(file("core"))
     libraryDependencies ++= Seq(
       "joda-time" % "joda-time" % "2.10.10",
       "org.joda" % "joda-convert" % "2.2.1",
-      "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2",
+      "org.scala-lang.modules" %% "scala-parser-combinators" % "2.0.0",
       "com.h2database" % "h2" % "1.4.200" % Test,
       acolyte,
       "com.chuusai" %% "shapeless" % "2.3.7" % Test
@@ -180,7 +180,7 @@ lazy val `anorm-iteratee` = (project in file("iteratee"))
     },
     scalariformAutoformat := true,
     mimaPreviousArtifacts := {
-      if (scalaBinaryVersion.value startsWith "2.13") Set.empty[ModuleID]
+      if (scalaBinaryVersion.value == "2.13") Set.empty[ModuleID]
       else Set(organization.value %% name.value % "2.6.0")
     },
     publish := (Def.taskDyn {
@@ -240,7 +240,7 @@ lazy val `anorm-akka` = (project in file("akka"))
 lazy val pgVer = sys.env.get("POSTGRES_VERSION").getOrElse("42.2.22")
 
 val playVer = Def.setting[String] {
-  if (scalaVersion.value startsWith "2.13") "2.7.3"
+  if (scalaBinaryVersion.value == "2.13") "2.7.3"
   else "2.6.7"
 }
 
@@ -286,7 +286,7 @@ lazy val docs = project.in(file("docs"))
   .configs(Docs)
   .settings(
     name := "anorm-docs",
-    (Test / unmanagedSourceDirectories) ++= {
+    Test / unmanagedSourceDirectories ++= {
       val manualDir = baseDirectory.value / "manual" / "working"
 
       (manualDir / "javaGuide" ** "code").get ++ (

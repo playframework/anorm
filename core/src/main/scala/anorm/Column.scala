@@ -462,7 +462,7 @@ object Column extends JodaColumn with JavaTimeColumn {
   implicit def columnToArray[T](implicit transformer: Column[T], t: scala.reflect.ClassTag[T]): Column[Array[T]] = Column.nonNull[Array[T]] { (value, meta) =>
     val MetaDataItem(qualified, _, _) = meta
 
-    @inline def typeNotMatch(value: Any, target: String, cause: Any) = TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to $target for column $qualified: $cause")
+    @inline def typeNotMatch(v: Any, target: String, cause: Any) = TypeDoesNotMatch(s"Cannot convert $v: ${className(v)} to $target for column $qualified: $cause")
 
     @annotation.tailrec
     def transf(a: Array[_], p: Array[T]): Either[SqlRequestError, Array[T]] =
@@ -521,7 +521,7 @@ object Column extends JodaColumn with JavaTimeColumn {
   implicit def columnToList[T](implicit transformer: Column[T], @deprecated("Unused", "2.5.4") t: scala.reflect.ClassTag[T]): Column[List[T]] = Column.nonNull[List[T]] { (value, meta) =>
     val MetaDataItem(qualified, _, _) = meta
 
-    @inline def typeNotMatch(value: Any, target: String, cause: Any) = TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to $target for column $qualified: $cause")
+    @inline def typeNotMatch(v: Any, target: String, cause: Any) = TypeDoesNotMatch(s"Cannot convert $v: ${className(v)} to $target for column $qualified: $cause")
 
     @annotation.tailrec
     def transf(a: Array[_], p: List[T]): Either[SqlRequestError, List[T]] =

@@ -27,7 +27,7 @@ private[anorm] class TokenGroup(
   val prepared: List[StatementToken],
   val placeholder: Option[String]) extends Product with Serializable {
 
-  def copy(prepared: List[StatementToken] = this.prepared, placeholder: Option[String] = this.placeholder): TokenGroup = new TokenGroup(prepared, placeholder)
+  def copy(_prepared: List[StatementToken] = this.prepared, _placeholder: Option[String] = this.placeholder): TokenGroup = new TokenGroup(_prepared, _placeholder)
 
   val productArity = 2
 

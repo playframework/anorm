@@ -57,13 +57,13 @@ object ImplicitResolver {
           }
 
         case _ => {
-          val tpe = appliedType(base, out.reverse)
+          val atpe = appliedType(base, out.reverse)
 
           tail match {
             case (x, y, more) :: ts =>
-              refactor(x, y, (tpe :: more), ts, filter, replacement, altered)
+              refactor(x, y, (atpe :: more), ts, filter, replacement, altered)
 
-            case _ => tpe -> altered
+            case _ => atpe -> altered
           }
         }
       }

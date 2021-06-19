@@ -16,18 +16,18 @@ object Common extends AutoPlugin {
     organization := "org.playframework.anorm",
     scalaVersion := "2.12.14",
     crossScalaVersions := Seq(
-      "2.11.12", scalaVersion.value, "2.13.3"),
+      "2.11.12", scalaVersion.value, "2.13.5"),
     resolvers += "Scalaz Bintray Repo" at {
       "https://dl.bintray.com/scalaz/releases" // specs2 depends on scalaz-stream
     },
-    (Compile / unmanagedSourceDirectories) ++= {
+    Compile / unmanagedSourceDirectories ++= {
       val sv = scalaVersion.value
 
       Seq(
         scala2Unmanaged(sv, 12, (Compile / sourceDirectory).value),
         scala2Unmanaged(sv, 13, (Compile / sourceDirectory).value))
     },
-    (Test / unmanagedSourceDirectories) += scala2Unmanaged(
+    Test / unmanagedSourceDirectories += scala2Unmanaged(
       scalaVersion.value, 12,
       (Test / sourceDirectory).value),
     libraryDependencies ++= {

@@ -465,7 +465,7 @@ sealed trait ToStatementPriority0 {
   implicit def timestampWrapper1ToStatement[T <: TimestampWrapper1]: ToStatement[T] = new ToStatement[T] {
     def set(s: PreparedStatement, index: Int, tsw: T): Unit =
       if (tsw != (null: TimestampWrapper1) &&
-        tsw.getTimestamp != (null: TimestampWrapper1)) {
+        tsw.getTimestamp != (null: java.sql.Timestamp)) {
         s.setTimestamp(index, tsw.getTimestamp)
       } else s.setNull(index, timestampWrapper1JdbcType)
   }

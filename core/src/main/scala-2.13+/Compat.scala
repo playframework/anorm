@@ -31,5 +31,6 @@ private[anorm] object Compat {
   /** Scala 2.13 compatibility type alias */
   type LazyLst[T] = LazyList[T]
 
+  @SuppressWarnings(Array("MethodNames"))
   @inline def LazyLst[T](values: T*): LazyLst[T] = LazyList.empty[T] :++ values
 }

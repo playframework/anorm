@@ -27,12 +27,12 @@ sealed trait ParameterValue extends Show {
 }
 
 final class DefaultParameterValue[A](
-  val value: A, s: ToSql[A], toStmt: ToStatement[A])
+  val value: A, _s: ToSql[A], toStmt: ToStatement[A])
   extends ParameterValue with ParameterValue.Wrapper[A] {
 
   lazy val toSql: (String, Int) = {
     @SuppressWarnings(Array("NullParameter"))
-    def to = if (s == null) ("?" -> 1) else s.fragment(value)
+    def to = if (_s == null) ("?" -> 1) else _s.fragment(value)
 
     to
   }

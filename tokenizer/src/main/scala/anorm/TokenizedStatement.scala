@@ -49,7 +49,7 @@ private[anorm] object TokenizedStatement {
               val ng = TokenGroup(tks, None)
               val n = '_'.toString + ns.size
               tokenize(ti, tks.tail, parts, ps.tail,
-                (ng :: prev.copy(placeholder = Some(n)) :: groups),
+                (ng :: prev.copy(_placeholder = Some(n)) :: groups),
                 (n +: ns), m + (n -> v))
           }
           case _ =>

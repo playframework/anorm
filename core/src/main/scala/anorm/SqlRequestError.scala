@@ -34,7 +34,7 @@ case class ColumnNotFound(
   @deprecatedName(Symbol("possibilities")) available: Seq[String]) extends SqlRequestError {
   @deprecated("Use constructor with `available` sequence", "2.5.4")
   def this(column: String, possibilities: List[String]) =
-    this(column, available = possibilities.toSeq)
+    this(column, available = possibilities)
 
   lazy val message = s"'$column' not found, available columns: " +
     available.map(_.dropWhile(_ == '.')).mkString(", ")
@@ -42,11 +42,12 @@ case class ColumnNotFound(
   @deprecated("Use `available`", "2.5.4")
   def possibilities = available.toList
 
+  @SuppressWarnings(Array("VariableShadowing"))
   @deprecated("Use copy with `available`", "2.5.4")
   def copy(
     column: String = this.column,
     possibilities: List[String] = this.possibilities): ColumnNotFound =
-    ColumnNotFound(column, possibilities.toSeq)
+    ColumnNotFound(column, possibilities)
 
   override lazy val toString = message
 }
