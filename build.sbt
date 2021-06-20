@@ -266,7 +266,7 @@ lazy val `anorm-enumeratum` = (project in file("enumeratum"))
     scalariformAutoformat := true,
     mimaPreviousArtifacts := Set.empty,
     libraryDependencies ++= Seq(
-      "com.beachape" %% "enumeratum" % "1.6.1",
+      "com.beachape" %% "enumeratum" % "1.7.0",
       acolyte) ++ specs2Test
 ).dependsOn(`anorm-core`)
 
