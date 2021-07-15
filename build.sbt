@@ -51,7 +51,7 @@ val armShading = Seq(
   libraryDependencies += "com.jsuereth" %% "scala-arm" % "2.1-SNAPSHOT",
   assembly / test := {},
   assembly / assemblyOption ~= {
-    _.copy(includeScala = false) // java libraries shouldn't include scala
+    _.withIncludeScala(false) // java libraries shouldn't include scala
   },
   (assembly / assemblyJarName) := {
     CrossVersion.partialVersion(scalaVersion.value) match {
