@@ -659,6 +659,7 @@ sealed trait JodaColumn {
         case TimestampWrapper1(ts) =>
           Option(ts).fold(Right(null.asInstanceOf[DateTime]))(t =>
             Right(new DateTime(t.getTime)))
+
         case TimestampWrapper2(ts) =>
           Option(ts).fold(Right(null.asInstanceOf[DateTime]))(t =>
             Right(new DateTime(t.getTime)))
@@ -694,7 +695,14 @@ sealed trait JodaColumn {
 }
 
 sealed trait JavaTimeColumn {
-  import java.time.{ ZonedDateTime, ZoneId, LocalDate, LocalDateTime, Instant }
+  import java.time.{
+    ZonedDateTime,
+    ZoneOffset,
+    ZoneId,
+    LocalDate,
+    LocalDateTime,
+    Instant
+  }
   import Column.{ nonNull, className, timestamp => Ts }
 
   /**
@@ -712,7 +720,9 @@ sealed trait JavaTimeColumn {
    */
   implicit val columnToInstant: Column[Instant] = nonNull { (value, meta) =>
     val MetaDataItem(qualified, _, _) = meta
+
     value match {
+      case date: LocalDateTime => Right(date.toInstant(ZoneOffset.UTC))
       case ts: java.sql.Timestamp => Ts(ts)(_.toInstant)
       case date: java.util.Date => Right(Instant ofEpochMilli date.getTime)
       case time: Long => Right(Instant ofEpochMilli time)
@@ -733,8 +743,7 @@ sealed trait JavaTimeColumn {
     }
   }
 
-  private def temporalColumn[T](epoch: Long => T, description: String): Column[T] =
-    nonNull(temporalValueTo(epoch, description))
+  private def temporalColumn[T](epoch: Long => T, description: String): Column[T] = nonNull(temporalValueTo(epoch, description))
 
   /**
    * Parses column as Java8 local date/time.
@@ -751,15 +760,18 @@ sealed trait JavaTimeColumn {
    *     as(SqlParser.scalar[LocalDateTime].single)
    * }}}
    */
-  implicit val columnToLocalDateTime: Column[LocalDateTime] = nonNull { (value, meta) =>
-
+  implicit val columnToLocalDateTime: Column[LocalDateTime] = {
     def millisToLocalDateTime(ts: Long) =
       LocalDateTime.ofInstant(Instant.ofEpochMilli(ts), ZoneId.systemDefault)
 
-    value match {
-      case localDateTime: LocalDateTime => Right(localDateTime)
-      case _ =>
-        temporalValueTo[LocalDateTime](millisToLocalDateTime, "Java8 LocalDateTime")(value, meta)
+    nonNull { (value, meta) =>
+      value match {
+        case localDateTime: LocalDateTime => Right(localDateTime)
+
+        case _ =>
+          temporalValueTo[LocalDateTime](
+            millisToLocalDateTime, "Java8 LocalDateTime")(value, meta)
+      }
     }
   }
 

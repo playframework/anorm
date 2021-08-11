@@ -276,7 +276,7 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    * Parses specified column as binary stream.
    *
    * {{{
-   * import anorm.{ SQL, SqlParser }, SqlParser.{ str, byteArray }
+   * import anorm.{ SQL, SqlParser }
    *
    * val parser =
    *   (SqlParser.str(1) ~ SqlParser.byteArray(2)).map(SqlParser.flatten)
@@ -575,7 +575,7 @@ trait RowParser[+A] extends (Row => SqlResult[A]) { parent =>
    * @param f Function applied on the successful parser result
    *
    * {{{
-   * import anorm.{ RowParser, SQL, SqlParser }
+   * import anorm.{ RowParser, SqlParser }
    *
    * val parser: RowParser[Int] = SqlParser.str("col").map(_.length)
    * // Prepares a parser that first get 'col' string value,

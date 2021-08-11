@@ -316,6 +316,10 @@ sealed trait ToStatementPriority0 {
    *
    * {{{
    * anorm.SQL("SELECT * FROM Test WHERE category = {c}").on('c -> None)
+   *
+   * // Rather use:
+   * anorm.SQL("SELECT * FROM Test WHERE category = {c}").
+   *   on('c -> Option.empty[String]) // Not deprecated
    * }}}
    */
   @deprecated(
