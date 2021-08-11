@@ -9,7 +9,7 @@ import java.math.BigInteger
 import java.net.{ URI, URL }
 
 import java.sql.{ Array => SqlArray }
-import java.time.LocalDateTime
+import java.time.{ Instant, LocalDateTime, ZoneOffset }
 import javax.sql.rowset.serial.{ SerialBlob, SerialClob }
 
 import scala.util.Random
@@ -190,13 +190,6 @@ class ColumnSpec
     "be parsed from date" in withQueryResult(dateList :+ now) { implicit con =>
       SQL"SELECT d".as(scalar[Long].single).
         aka("parsed long") must_=== now.getTime
-    }
-
-    val localDateTimeNow = LocalDateTime.now()
-    val localDateTimeRow = rowList1(classOf[LocalDateTime])
-    "be parsed from LocalDateTime" in withQueryResult(localDateTimeRow :+ localDateTimeNow) { implicit con =>
-      SQL"SELECT d".as(scalar[LocalDateTime].single).
-        aka("parsed LocalDateTime") must_=== localDateTimeNow
     }
 
     "be parsed from a timestamp wrapper" in withQueryResult(
@@ -667,6 +660,19 @@ class ColumnSpec
               aka("parsed date") must beNone
 
         }
+    }
+
+    {
+      val localDateTimeNow = LocalDateTime.now()
+      val localDateTimeRow = rowList1(classOf[LocalDateTime])
+
+      "be parsed from LocalDateTime" in withQueryResult(localDateTimeRow :+ localDateTimeNow) { implicit con =>
+        SQL"SELECT d".as(scalar[LocalDateTime].single).
+          aka("parsed LocalDateTime") must_=== localDateTimeNow and {
+            SQL"SELECT d".as(scalar[Instant].single).
+              aka("instant") must_=== localDateTimeNow.toInstant(ZoneOffset.UTC)
+          }
+      }
     }
   }
 
