@@ -52,7 +52,8 @@ sealed trait PGJson {
    * implicit def con: java.sql.Connection = ???
    *
    * val value = asJson(Foo("lorem"))
-   * SQL"INSERT INTO test(id, json) VALUES(\${"bar"}, \${value})".executeUpdate()
+   * SQL("INSERT INTO test(id, json) VALUES({id}, {json})").
+   *   on("id" -> "bar", "json" -> value).executeUpdate()
    * }}}
    */
   def asJson[T](value: T)(implicit w: Writes[T]): ParameterValue =
@@ -77,8 +78,11 @@ sealed trait PGJson {
    *
    * implicit def con: java.sql.Connection = ???
    *
-   * SQL"INSERT INTO test(id, json) VALUES(\${"bar"}, \${someVal})".executeUpdate()
-   * SQL"INSERT INTO test(id, json) VALUES(\${"bar"}, \${noVal})".executeUpdate()
+   * SQL("INSERT INTO test(id, json) VALUES({id}, {json})").
+   *   on("id" -> "bar", "json" -> someVal).executeUpdate()
+   *
+   * SQL("INSERT INTO test(id, json) VALUES({id}, {json})").
+   *   on("id" -> "bar", "json" -> noVal).executeUpdate()
    * }}}
    *
    */
