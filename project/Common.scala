@@ -31,7 +31,7 @@ object Common extends AutoPlugin {
       scalaVersion.value, 12,
       (Test / sourceDirectory).value),
     libraryDependencies ++= {
-      val silencerVer = "1.7.5"
+      val silencerVer = "1.7.6"
 
       Seq(
         compilerPlugin(("com.github.ghik" %% "silencer-plugin" % silencerVer).
