@@ -165,7 +165,7 @@ lazy val `anorm-core` = project.in(file("core"))
     libraryDependencies ++= Seq(
       "joda-time" % "joda-time" % "2.10.11",
       "org.joda" % "joda-convert" % "2.2.1",
-      "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2",
+      "org.scala-lang.modules" %% "scala-parser-combinators" % "2.1.0",
       "com.h2database" % "h2" % "1.4.200" % Test,
       acolyte,
       "com.chuusai" %% "shapeless" % "2.3.7" % Test
