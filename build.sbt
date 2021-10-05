@@ -250,7 +250,7 @@ lazy val `anorm-postgres` = (project in file("postgres"))
     mimaPreviousArtifacts := Set.empty,
     libraryDependencies ++= {
       val playJsonVer = {
-        if (scalaBinaryVersion.value == "2.13") "2.7.4"
+        if (scalaBinaryVersion.value == "2.13") "2.9.2"
         else "2.6.7"
       }
 
