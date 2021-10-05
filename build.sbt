@@ -220,7 +220,7 @@ lazy val akkaVer = Def.setting[String] {
 
 val akkaContribVer = Def.setting[String] {
   if (akkaVer.value startsWith "2.5") "0.11+4-91b2f9fa"
-  else "0.6-6-g12a86f9-SNAPSHOT"
+  else "0.10"
 }
 
 lazy val `anorm-akka` = (project in file("akka"))
