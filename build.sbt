@@ -213,7 +213,7 @@ lazy val `anorm-iteratee` = (project in file("iteratee"))
 
 lazy val akkaVer = Def.setting[String] {
   sys.env.get("AKKA_VERSION").getOrElse {
-    if (scalaBinaryVersion.value == "2.11") "2.4.10"
+    if (scalaBinaryVersion.value == "2.11") "2.4.20"
     else "2.5.23"
   }
 }
