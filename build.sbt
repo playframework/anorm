@@ -241,7 +241,7 @@ lazy val pgVer = sys.env.get("POSTGRES_VERSION").getOrElse("42.2.24")
 
 val playVer = Def.setting[String] {
   if (scalaVersion.value startsWith "2.13") "2.7.3"
-  else "2.6.7"
+  else "2.6.14"
 }
 
 lazy val `anorm-postgres` = (project in file("postgres"))
