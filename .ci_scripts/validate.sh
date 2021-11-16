@@ -11,8 +11,8 @@ EOF
 
 SBT_TASKS="publishLocal mimaReportBinaryIssues test docs/test"
 
-if [ "v$SCALA_VERSION" = "v2.12.15" ]; then
-  SBT_TASKS="$SBT_TASKS scapegoat"
-fi
+#TODO: if [ "v$SCALA_VERSION" = "v2.12.15" ]; then
+#  SBT_TASKS="$SBT_TASKS scapegoat"
+#fi
 
 sbt ++$SCALA_VERSION $SBT_TASKS
