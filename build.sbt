@@ -6,6 +6,7 @@ import com.typesafe.tools.mima.plugin.MimaKeys.{
   mimaBinaryIssueFilters, mimaPreviousArtifacts
 }
 
+/* TODO
 // Scalafix
 inThisBuild(
   List(
@@ -16,6 +17,7 @@ inThisBuild(
       "com.github.liancheng" %% "organize-imports" % "0.5.0")
   )
 )
+ */
 
 val specs2Test = Seq(
   "specs2-core",

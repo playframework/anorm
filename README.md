@@ -24,7 +24,7 @@ To run the tests, use:
 
     sbt test
 
-[Travis](https://travis-ci.org/playframework/anorm): ![Travis build status](https://travis-ci.org/playframework/anorm.svg?branch=master)
+[CircleCI](https://circleci.com/gh/playframework/anorm): ![CircleCI build status](https://circleci.com/gh/playframework/anorm.png?branch=master)
 
 ## Documentation
 
