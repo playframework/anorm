@@ -6,6 +6,7 @@ import com.typesafe.tools.mima.plugin.MimaKeys.{
   mimaBinaryIssueFilters, mimaPreviousArtifacts
 }
 
+/* TODO
 // Scalafix
 inThisBuild(
   List(
@@ -16,6 +17,7 @@ inThisBuild(
       "com.github.liancheng" %% "organize-imports" % "0.5.0")
   )
 )
+ */
 
 val specs2Test = Seq(
   "specs2-core",
@@ -163,7 +165,7 @@ lazy val `anorm-core` = project.in(file("core"))
       ProblemFilters.exclude[ReversedMissingMethodProblem]("anorm.JavaTimeToStatement.localDateToStatement")
     ),
     libraryDependencies ++= Seq(
-      "joda-time" % "joda-time" % "2.10.12",
+      "joda-time" % "joda-time" % "2.10.13",
       "org.joda" % "joda-convert" % "2.2.1",
       "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2",
       "com.h2database" % "h2" % "1.4.200" % Test,
@@ -214,7 +216,7 @@ lazy val `anorm-iteratee` = (project in file("iteratee"))
 lazy val akkaVer = Def.setting[String] {
   sys.env.get("AKKA_VERSION").getOrElse {
     if (scalaBinaryVersion.value == "2.11") "2.4.20"
-    else "2.5.23"
+    else "2.5.32"
   }
 }
 
@@ -237,7 +239,7 @@ lazy val `anorm-akka` = (project in file("akka"))
 
 // ---
 
-lazy val pgVer = sys.env.get("POSTGRES_VERSION").getOrElse("42.3.0")
+lazy val pgVer = sys.env.get("POSTGRES_VERSION").getOrElse("42.3.1")
 
 val playVer = Def.setting[String] {
   if (scalaVersion.value startsWith "2.13") "2.7.3"

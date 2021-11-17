@@ -14,10 +14,6 @@ package object postgresql extends PGJson {
   implicit val UUIDToSql: ToSql[UUID] = ToSql[UUID] { _ => "?::UUID" -> 1 }
 }
 
-/**
- * @define paramTypeToJson the type of value to be written as JSON
- * @define writesParam the Play writes to be used to serialized the value as JSON
- */
 sealed trait PGJson {
   // Could be moved to a separate module
 
@@ -38,9 +34,9 @@ sealed trait PGJson {
   /**
    * Sets a value as a JSON parameter.
    *
-   * @tparam $paramTypeToJson
+   * @tparam the type of value to be written as JSON
    * @param value the value to be passed as a JSON parameter
-   * @param w $writesParam
+   * @param w the Play writes to be used to serialized the value as JSON
    *
    * {{{
    * import play.api.libs.json._
@@ -62,9 +58,9 @@ sealed trait PGJson {
   /**
    * Sets an optional value as a JSON parameters.
    *
-   * @tparam $paramTypeToJson
+   * @tparam the type of value to be written as JSON
    * @param value the optional value to be passed as a JSON parameter
-   * @param w $writesParam
+   * @param w the Play writes to be used to serialized the value as JSON
    *
    * {{{
    * import play.api.libs.json._
