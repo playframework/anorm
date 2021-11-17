@@ -6,6 +6,7 @@ import com.typesafe.tools.mima.plugin.MimaKeys.{
   mimaBinaryIssueFilters, mimaPreviousArtifacts
 }
 
+/* TODO
 // Scalafix
 inThisBuild(
   List(
@@ -16,6 +17,7 @@ inThisBuild(
       "com.github.liancheng" %% "organize-imports" % "0.5.0")
   )
 )
+ */
 
 val specs2Test = Seq(
   "specs2-core",
@@ -214,7 +216,7 @@ lazy val `anorm-iteratee` = (project in file("iteratee"))
 lazy val akkaVer = Def.setting[String] {
   sys.env.get("AKKA_VERSION").getOrElse {
     if (scalaBinaryVersion.value == "2.11") "2.4.20"
-    else "2.5.23"
+    else "2.5.32"
   }
 }
 
