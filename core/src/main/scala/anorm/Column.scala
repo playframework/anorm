@@ -718,22 +718,39 @@ sealed trait JavaTimeColumn {
    *   SQL("SELECT last_mod FROM tbl").as(scalar[Instant].single)
    * }}}
    */
-  implicit val columnToInstant: Column[Instant] = temporalColumn(identity[Instant], "Java8 Instant")
+  implicit val columnToInstant: Column[Instant] =
+    nonNull(instantValueTo(identity, "Java8 Instant"))
 
-  private def temporalValueTo[T](epoch: Instant => T, description: String)(value: Any, meta: MetaDataItem): Either[SqlRequestError, T] = {
+  private def instantValueTo[T](epoch: Instant => T, description: String)(value: Any, meta: MetaDataItem): Either[SqlRequestError, T] = {
     val MetaDataItem(qualified, _, _) = meta
+
     value match {
       case date: LocalDateTime => Right(epoch(date.toInstant(ZoneOffset.UTC)))
       case ts: java.sql.Timestamp => Ts(ts)(t => epoch(t.toInstant))
-      case date: java.util.Date => Right(epoch(Instant ofEpochMilli date.getTime))
-      case time: Long => Right(epoch(Instant ofEpochMilli time))
+      case date: java.util.Date =>
+        Right(epoch(Instant ofEpochMilli date.getTime))
+
+      case time: Long =>
+        Right(epoch(Instant ofEpochMilli time))
+
       case TimestampWrapper1(ts) => Ts(ts)(t => epoch(t.toInstant))
       case TimestampWrapper2(ts) => Ts(ts)(t => epoch(t.toInstant))
       case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to $description for column $qualified"))
     }
   }
 
-  private def temporalColumn[T](epoch: Instant => T, description: String): Column[T] = nonNull(temporalValueTo(epoch, description))
+  private def temporalValueTo[T](epoch: Long => T, description: String)(value: Any, meta: MetaDataItem): Either[SqlRequestError, T] = {
+    val MetaDataItem(qualified, _, _) = meta
+    value match {
+      case date: java.util.Date => Right(epoch(date.getTime))
+      case time: Long => Right(epoch(time))
+      case TimestampWrapper1(ts) => Ts(ts)(t => epoch(t.getTime))
+      case TimestampWrapper2(ts) => Ts(ts)(t => epoch(t.getTime))
+      case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to $description for column $qualified"))
+    }
+  }
+
+  private def temporalColumn[T](epoch: Long => T, description: String): Column[T] = nonNull(temporalValueTo(epoch, description))
 
   /**
    * Parses column as Java8 local date/time.
@@ -750,17 +767,20 @@ sealed trait JavaTimeColumn {
    *     as(SqlParser.scalar[LocalDateTime].single)
    * }}}
    */
-  implicit val columnToLocalDateTime: Column[LocalDateTime] =
+  implicit val columnToLocalDateTime: Column[LocalDateTime] = {
+    def millisToLocalDateTime(ts: Long) =
+      LocalDateTime.ofInstant(Instant.ofEpochMilli(ts), ZoneId.systemDefault)
+
     nonNull { (value, meta) =>
       value match {
         case localDateTime: LocalDateTime => Right(localDateTime)
 
         case _ =>
-          temporalValueTo[LocalDateTime]({ (instant: Instant) =>
-            LocalDateTime.ofInstant(instant, ZoneId.systemDefault)
-          }, "Java8 LocalDateTime")(value, meta)
+          temporalValueTo[LocalDateTime](
+            millisToLocalDateTime, "Java8 LocalDateTime")(value, meta)
       }
     }
+  }
 
   /**
    * Parses column as Java8 local date.
@@ -778,9 +798,9 @@ sealed trait JavaTimeColumn {
    * }}}
    */
   implicit val columnToLocalDate: Column[LocalDate] =
-    temporalColumn[LocalDate]({ (instant: Instant) =>
+    temporalColumn[LocalDate]({ (ts: Long) =>
       LocalDateTime.ofInstant(
-        instant, ZoneId.systemDefault).toLocalDate
+        Instant.ofEpochMilli(ts), ZoneId.systemDefault).toLocalDate
     }, "Java8 LocalDate")
 
   /**
@@ -799,7 +819,7 @@ sealed trait JavaTimeColumn {
    * }}}
    */
   implicit val columnToZonedDateTime: Column[ZonedDateTime] =
-    temporalColumn[ZonedDateTime]({ (instant: Instant) =>
-      ZonedDateTime.ofInstant(instant, ZoneId.systemDefault)
-    }, "Java8 ZonedDateTime")
+    nonNull(instantValueTo(
+      ZonedDateTime.ofInstant(_: Instant, ZoneId.systemDefault),
+      "Java8 ZonedDateTime"))
 }
