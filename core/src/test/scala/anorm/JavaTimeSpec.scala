@@ -188,6 +188,15 @@ class JavaTimeColumnSpec extends Specification {
           aka("parsed zoned date/time") must_=== date
       }
 
+    "be parsed from timestamp with nano precision" in {
+      val instantWithNanoPrecision = Instant.parse("2021-01-06T08:45:26.441477Z")
+      withQueryResult(
+        timestampList :+ java.sql.Timestamp.from(instantWithNanoPrecision)) { implicit con =>
+          SQL("SELECT ts").as(scalar[ZonedDateTime].single).
+            aka("parsed zoned date/time") must_=== ZonedDateTime.ofInstant(instantWithNanoPrecision, ZoneId.systemDefault)
+        }
+    }
+
     "be parsed from numeric time" in withQueryResult(longList :+ time) {
       implicit con =>
         SQL("SELECT time").as(scalar[ZonedDateTime].single).
