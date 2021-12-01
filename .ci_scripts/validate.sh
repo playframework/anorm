@@ -1,5 +1,11 @@
 #! /bin/bash
 
+set -e
+
+SCRIPT_DIR=`dirname $0 | sed -e "s|^\./|$PWD/|"`
+
+source "$SCRIPT_DIR/jvmopts.sh"
+
 sbt ++$SCALA_VERSION scalariformFormat test:scalariformFormat > /dev/null #scalafixAll
 git diff --exit-code || (cat >> /dev/stdout <<EOF
 [ERROR] Scalariform check failed, see differences above.

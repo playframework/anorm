@@ -718,17 +718,24 @@ sealed trait JavaTimeColumn {
    *   SQL("SELECT last_mod FROM tbl").as(scalar[Instant].single)
    * }}}
    */
-  implicit val columnToInstant: Column[Instant] = nonNull { (value, meta) =>
+  implicit val columnToInstant: Column[Instant] =
+    nonNull(instantValueTo(identity, "Java8 Instant"))
+
+  private def instantValueTo[T](epoch: Instant => T, description: String)(value: Any, meta: MetaDataItem): Either[SqlRequestError, T] = {
     val MetaDataItem(qualified, _, _) = meta
 
     value match {
-      case date: LocalDateTime => Right(date.toInstant(ZoneOffset.UTC))
-      case ts: java.sql.Timestamp => Ts(ts)(_.toInstant)
-      case date: java.util.Date => Right(Instant ofEpochMilli date.getTime)
-      case time: Long => Right(Instant ofEpochMilli time)
-      case TimestampWrapper1(ts) => Ts(ts)(_.toInstant)
-      case TimestampWrapper2(ts) => Ts(ts)(_.toInstant)
-      case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to Java8 Instant for column $qualified"))
+      case date: LocalDateTime => Right(epoch(date.toInstant(ZoneOffset.UTC)))
+      case ts: java.sql.Timestamp => Ts(ts)(t => epoch(t.toInstant))
+      case date: java.util.Date =>
+        Right(epoch(Instant ofEpochMilli date.getTime))
+
+      case time: Long =>
+        Right(epoch(Instant ofEpochMilli time))
+
+      case TimestampWrapper1(ts) => Ts(ts)(t => epoch(t.toInstant))
+      case TimestampWrapper2(ts) => Ts(ts)(t => epoch(t.toInstant))
+      case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to $description for column $qualified"))
     }
   }
 
@@ -812,7 +819,7 @@ sealed trait JavaTimeColumn {
    * }}}
    */
   implicit val columnToZonedDateTime: Column[ZonedDateTime] =
-    temporalColumn[ZonedDateTime]({ (ts: Long) =>
-      ZonedDateTime.ofInstant(Instant.ofEpochMilli(ts), ZoneId.systemDefault)
-    }, "Java8 ZonedDateTime")
+    nonNull(instantValueTo(
+      ZonedDateTime.ofInstant(_: Instant, ZoneId.systemDefault),
+      "Java8 ZonedDateTime"))
 }
