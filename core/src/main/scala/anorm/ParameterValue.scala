@@ -44,7 +44,7 @@ final class DefaultParameterValue[A](
   override lazy val hashCode = value.hashCode
 
   override def equals(that: Any) = that match {
-    case o: DefaultParameterValue[A] => (o.value == value)
+    case o: DefaultParameterValue[_] => (o.value == value)
     case _ => false
   }
 }

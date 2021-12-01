@@ -5,7 +5,7 @@ import anorm.{ Column, TypeDoesNotMatch }
 
 private[values] object ValueEnumColumn {
   def apply[ValueType, EntryType <: ValueEnumEntry[ValueType]](
-    enum: ValueEnum[ValueType, EntryType])(
+    e: ValueEnum[ValueType, EntryType])(
     implicit
     baseColumn: Column[ValueType]): Column[EntryType] = Column.nonNull[EntryType] {
     case (value, meta) =>
@@ -14,7 +14,7 @@ private[values] object ValueEnumColumn {
           Left(err)
 
         case Right(s) =>
-          enum.withValueOpt(s) match {
+          e.withValueOpt(s) match {
             case Some(obj) => Right(obj)
             case None => Left(TypeDoesNotMatch(s"Invalid value: $s"))
           }

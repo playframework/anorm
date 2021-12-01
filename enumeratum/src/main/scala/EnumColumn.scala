@@ -4,18 +4,18 @@ import _root_.enumeratum.{ Enum, EnumEntry }
 import anorm.{ Column, TypeDoesNotMatch }
 
 private[enumeratum] object EnumColumn {
-  def column[A <: EnumEntry](enum: Enum[A], insensitive: Boolean): Column[A] =
+  def column[A <: EnumEntry](e: Enum[A], insensitive: Boolean): Column[A] =
     if (insensitive) {
-      parse[A](enum.withNameInsensitiveOption)
+      parse[A](e.withNameInsensitiveOption)
     } else {
-      parse[A](enum.withNameOption)
+      parse[A](e.withNameOption)
     }
 
-  def lowercaseOnlyColumn[A <: EnumEntry](enum: Enum[A]): Column[A] =
-    parse[A](enum.withNameLowercaseOnlyOption)
+  def lowercaseOnlyColumn[A <: EnumEntry](e: Enum[A]): Column[A] =
+    parse[A](e.withNameLowercaseOnlyOption)
 
-  def uppercaseOnlyColumn[A <: EnumEntry](enum: Enum[A]): Column[A] =
-    parse[A](enum.withNameUppercaseOnlyOption)
+  def uppercaseOnlyColumn[A <: EnumEntry](e: Enum[A]): Column[A] =
+    parse[A](e.withNameUppercaseOnlyOption)
 
   // ---
 
