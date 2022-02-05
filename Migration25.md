@@ -1,6 +1,6 @@
 # Anorm 2.5 Migration Guide
 
-This is a guide for migrating from Anorm 2.4 to Anorm 2.5. If you need to migrate from an earlier version of Anorm then you must first follow the [Anorm 2.4 Migration Guide](https://github.com/playframework/anorm/blob/master/Migration24.md#anorm-24-migration-guide).
+This is a guide for migrating from Anorm 2.4 to Anorm 2.5. If you need to migrate from an earlier version of Anorm then you must first follow the [Anorm 2.4 Migration Guide](https://github.com/playframework/anorm/blob/main/Migration24.md#anorm-24-migration-guide).
 
 ## Type safety
 

@@ -17,7 +17,7 @@ import java.lang.{
 import java.sql.{ Timestamp, Types }
 
 /** Parameter meta data for type `T` */
-@annotation.implicitNotFound("Meta data not found for parameter of type ${T}: `anorm.ParameterMetaData[${T}]` required; See https://github.com/playframework/anorm/blob/master/docs/manual/working/scalaGuide/main/sql/ScalaAnorm.md#parameters")
+@annotation.implicitNotFound("Meta data not found for parameter of type ${T}: `anorm.ParameterMetaData[${T}]` required; See https://github.com/playframework/anorm/blob/main/docs/manual/working/scalaGuide/main/sql/ScalaAnorm.md#parameters")
 trait ParameterMetaData[T] {
   /**
    * Name of SQL type (see `java.sql.Types`)

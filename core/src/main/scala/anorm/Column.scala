@@ -24,7 +24,7 @@ import resource.managed
  * @define mapDescription If the column is successfully parsed, then apply the given function on the result.
  */
 @annotation.implicitNotFound(
-  "No column extractor found for the type ${A}: `anorm.Column[${A}]` required; See https://github.com/playframework/anorm/blob/master/docs/manual/working/scalaGuide/main/sql/ScalaAnorm.md#column-parsers")
+  "No column extractor found for the type ${A}: `anorm.Column[${A}]` required; See https://github.com/playframework/anorm/blob/main/docs/manual/working/scalaGuide/main/sql/ScalaAnorm.md#column-parsers")
 trait Column[A] extends ((Any, MetaDataItem) => Either[SqlRequestError, A]) { parent =>
 
   /**
