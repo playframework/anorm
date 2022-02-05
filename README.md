@@ -24,7 +24,7 @@ To run the tests, use:
 
     sbt test
 
-[CircleCI](https://circleci.com/gh/playframework/anorm): ![CircleCI build status](https://circleci.com/gh/playframework/anorm.png?branch=master)
+[CircleCI](https://circleci.com/gh/playframework/anorm): ![CircleCI build status](https://circleci.com/gh/playframework/anorm.png?branch=main)
 
 ## Documentation
 
