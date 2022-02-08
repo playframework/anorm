@@ -189,5 +189,22 @@ package object anorm {
   }
 
   /** Activable features */
-  object features {}
+  object features {
+    /**
+     * Column conversion that will accept `Byte` and `Short` values to represent booleans.
+     * This is useful if the underlying database or driver does not support boolean datatype.
+     * For example, the MariaDB JDBC driver v3 will return TINYINT metadata even for columns declared as BOOLEAN.
+     *
+     * 0 is false, 1 is true, anything else is an error.
+     *
+     * Note that the column is not limited to byte or short, boolean types are transparently accepted as well.
+     *
+     * {{{
+     * import anorm.features.columnByteToBoolean
+     * }}}
+     *
+     */
+
+    implicit val columnByteToBoolean: Column[Boolean] = Column.columnByteToBoolean
+  }
 }
