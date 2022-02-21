@@ -280,6 +280,19 @@ object Column extends JodaColumn with JavaTimeColumn {
     }
   }
 
+  private[anorm] val columnByteToBoolean: Column[Boolean] = nonNull { (value, meta) =>
+    val MetaDataItem(qualified, _, _) = meta
+    value match {
+      case bit: Byte if bit == 1 => Right(true)
+      case bit: Byte if bit == 0 => Right(false)
+      case _: Byte => Left(TypeDoesNotMatch(s"Cannot convert Byte $value to Boolean for column $qualified"))
+      case bit: Short if bit == 1 => Right(true)
+      case bit: Short if bit == 0 => Right(false)
+      case _: Short => Left(TypeDoesNotMatch(s"Cannot convert Short $value to Boolean for column $qualified"))
+      case _ => columnToBoolean(value, meta)
+    }
+  }
+
   @SuppressWarnings(Array("AsInstanceOf"))
   private[anorm] def timestamp[T](ts: Timestamp)(f: Timestamp => T): Either[SqlRequestError, T] = Right(if (ts == null) null.asInstanceOf[T] else f(ts))
 
