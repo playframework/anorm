@@ -170,7 +170,7 @@ lazy val `anorm-core` = project.in(file("core"))
       "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2",
       "com.h2database" % "h2" % "2.1.210" % Test,
       acolyte,
-      "com.chuusai" %% "shapeless" % "2.3.8" % Test
+      "com.chuusai" %% "shapeless" % "2.3.9" % Test
     ) ++ specs2Test
   ) ++ armShading).dependsOn(`anorm-tokenizer`)
 
