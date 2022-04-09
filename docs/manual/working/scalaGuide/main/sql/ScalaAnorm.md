@@ -1180,7 +1180,7 @@ import anorm.Column
 
 // Custom conversion from JDBC column to Boolean
 implicit def columnToBoolean: Column[Boolean] = 
-  Column.nonNull1 { (value, meta) =>
+  Column.nonNull { (value, meta) =>
     val MetaDataItem(qualified, nullable, clazz) = meta
     value match {
       case bool: Boolean => Right(bool) // Provided-default case

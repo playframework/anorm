@@ -197,3 +197,14 @@ The deprecated operations `.list()`, `.single()` and `.singleOpt()` on SQL resul
 The `.getFilledStatement` has been removed.
 
 The former streaming operation `.apply()` is now removed, and must be replaced by either `.fold`, `.foldWhile` or `.withResult`.
+
+## Type mappings
+
+A new column converter is available:
+
+```scala
+import anorm.features.columnByteToBoolean
+```
+
+This column will accept bytes (or shorts) as representations for booleans.
+One useful case is upgrading the MariaDB JDBC driver from v2 to v3, but other databases already behaved that way.
