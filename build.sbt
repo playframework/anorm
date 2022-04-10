@@ -36,7 +36,7 @@ lazy val `anorm-tokenizer` = project.in(file("tokenizer"))
   .settings(
     scalariformAutoformat := true,
     mimaPreviousArtifacts := {
-      if (scalaVersion.value startsWith "2.13") {
+      if (scalaBinaryVersion.value == "2.13") {
         Set.empty
       } else {
         mimaPreviousArtifacts.value
@@ -96,7 +96,7 @@ val armShading = Seq(
 )
 
 lazy val parserCombinatorsVer = Def.setting[String] {
-  if (scalaBinaryVersion == "2.11") {
+  if (scalaBinaryVersion.value == "2.11") {
     "1.1.2"
   } else {
     "2.1.1"
