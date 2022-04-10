@@ -1,6 +1,6 @@
 # Anorm 2.6 Migration Guide
 
-This is a guide for migrating from Anorm 2.5 to Anorm 2.6. If you need to migrate from an earlier version of Anorm then you must first follow the [Anorm 2.5 Migration Guide](https://github.com/playframework/anorm/blob/master/Migration25.md#anorm-25-migration-guide).
+This is a guide for migrating from Anorm 2.5 to Anorm 2.6. If you need to migrate from an earlier version of Anorm then you must first follow the [Anorm 2.5 Migration Guide](https://github.com/playframework/anorm/blob/main/Migration25.md#anorm-25-migration-guide).
 
 **Note:** The dependency group has been updated from `com.typesafe.play` to `org.playframework.anorm`.
 
@@ -197,3 +197,14 @@ The deprecated operations `.list()`, `.single()` and `.singleOpt()` on SQL resul
 The `.getFilledStatement` has been removed.
 
 The former streaming operation `.apply()` is now removed, and must be replaced by either `.fold`, `.foldWhile` or `.withResult`.
+
+## Type mappings
+
+A new column converter is available:
+
+```scala
+import anorm.features.columnByteToBoolean
+```
+
+This column will accept bytes (or shorts) as representations for booleans.
+One useful case is upgrading the MariaDB JDBC driver from v2 to v3, but other databases already behaved that way.

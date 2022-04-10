@@ -24,7 +24,7 @@ import resource.managed
  * @define mapDescription If the column is successfully parsed, then apply the given function on the result.
  */
 @annotation.implicitNotFound(
-  "No column extractor found for the type ${A}: `anorm.Column[${A}]` required; See https://github.com/playframework/anorm/blob/master/docs/manual/working/scalaGuide/main/sql/ScalaAnorm.md#column-parsers")
+  "No column extractor found for the type ${A}: `anorm.Column[${A}]` required; See https://github.com/playframework/anorm/blob/main/docs/manual/working/scalaGuide/main/sql/ScalaAnorm.md#column-parsers")
 trait Column[A] extends ((Any, MetaDataItem) => Either[SqlRequestError, A]) { parent =>
 
   /**
@@ -277,6 +277,19 @@ object Column extends JodaColumn with JavaTimeColumn {
     value match {
       case bool: Boolean => Right(bool)
       case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to Boolean for column $qualified"))
+    }
+  }
+
+  private[anorm] val columnByteToBoolean: Column[Boolean] = nonNull { (value, meta) =>
+    val MetaDataItem(qualified, _, _) = meta
+    value match {
+      case bit: Byte if bit == 1 => Right(true)
+      case bit: Byte if bit == 0 => Right(false)
+      case _: Byte => Left(TypeDoesNotMatch(s"Cannot convert Byte $value to Boolean for column $qualified"))
+      case bit: Short if bit == 1 => Right(true)
+      case bit: Short if bit == 0 => Right(false)
+      case _: Short => Left(TypeDoesNotMatch(s"Cannot convert Short $value to Boolean for column $qualified"))
+      case _ => columnToBoolean(value, meta)
     }
   }
 

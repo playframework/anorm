@@ -165,12 +165,12 @@ lazy val `anorm-core` = project.in(file("core"))
       ProblemFilters.exclude[ReversedMissingMethodProblem]("anorm.JavaTimeToStatement.localDateToStatement")
     ),
     libraryDependencies ++= Seq(
-      "joda-time" % "joda-time" % "2.10.13",
+      "joda-time" % "joda-time" % "2.10.14",
       "org.joda" % "joda-convert" % "2.2.2",
       "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2",
-      "com.h2database" % "h2" % "2.0.206" % Test,
+      "com.h2database" % "h2" % "2.1.212" % Test,
       acolyte,
-      "com.chuusai" %% "shapeless" % "2.3.7" % Test
+      "com.chuusai" %% "shapeless" % "2.3.9" % Test
     ) ++ specs2Test
   ) ++ armShading).dependsOn(`anorm-tokenizer`)
 
@@ -239,7 +239,7 @@ lazy val `anorm-akka` = (project in file("akka"))
 
 // ---
 
-lazy val pgVer = sys.env.get("POSTGRES_VERSION").getOrElse("42.3.1")
+lazy val pgVer = sys.env.get("POSTGRES_VERSION").getOrElse("42.3.3")
 
 val playVer = Def.setting[String] {
   if (scalaVersion.value startsWith "2.13") "2.7.3"
