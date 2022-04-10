@@ -36,7 +36,7 @@ lazy val `anorm-tokenizer` = project.in(file("tokenizer"))
   .settings(
     scalariformAutoformat := true,
     mimaPreviousArtifacts := {
-      if (scalaVersion.value startsWith "2.13") {
+      if (scalaBinaryVersion.value == "2.13") {
         Set.empty
       } else {
         mimaPreviousArtifacts.value
@@ -94,6 +94,14 @@ val armShading = Seq(
   makePom := makePom.dependsOn(assembly).value,
   (Compile / packageBin) := assembly.value
 )
+
+lazy val parserCombinatorsVer = Def.setting[String] {
+  if (scalaBinaryVersion.value == "2.11") {
+    "1.1.2"
+  } else {
+    "2.1.1"
+  }
+}
 
 lazy val `anorm-core` = project.in(file("core"))
   .settings(Seq(
@@ -167,7 +175,7 @@ lazy val `anorm-core` = project.in(file("core"))
     libraryDependencies ++= Seq(
       "joda-time" % "joda-time" % "2.10.14",
       "org.joda" % "joda-convert" % "2.2.2",
-      "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2",
+      "org.scala-lang.modules" %% "scala-parser-combinators" % parserCombinatorsVer.value,
       "com.h2database" % "h2" % "2.1.212" % Test,
       acolyte,
       "com.chuusai" %% "shapeless" % "2.3.9" % Test
