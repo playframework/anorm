@@ -95,6 +95,14 @@ val armShading = Seq(
   (Compile / packageBin) := assembly.value
 )
 
+lazy val parserCombinatorsVer = Def.setting[String] {
+  if (scalaBinaryVersion == "2.11") {
+    "1.1.2"
+  } else {
+    "2.1.1"
+  }
+}
+
 lazy val `anorm-core` = project.in(file("core"))
   .settings(Seq(
     name := "anorm",
@@ -167,7 +175,7 @@ lazy val `anorm-core` = project.in(file("core"))
     libraryDependencies ++= Seq(
       "joda-time" % "joda-time" % "2.10.14",
       "org.joda" % "joda-convert" % "2.2.2",
-      "org.scala-lang.modules" %% "scala-parser-combinators" % "2.1.1",
+      "org.scala-lang.modules" %% "scala-parser-combinators" % parserCombinatorsVer,
       "com.h2database" % "h2" % "2.1.212" % Test,
       acolyte,
       "com.chuusai" %% "shapeless" % "2.3.9" % Test
