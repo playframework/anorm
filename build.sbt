@@ -190,7 +190,7 @@ lazy val `anorm-iteratee` = (project in file("iteratee"))
     },
     scalariformAutoformat := true,
     mimaPreviousArtifacts := {
-      if (scalaBinaryVersion.value startsWith "2.13") Set.empty[ModuleID]
+      if (scalaBinaryVersion.value == "2.13") Set.empty[ModuleID]
       else Set(organization.value %% name.value % "2.6.0")
     },
     publish := (Def.taskDyn {
