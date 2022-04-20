@@ -130,13 +130,13 @@ object ParameterMetaData extends JavaTimeParameterMetaData {
   }
 
   implicit object LongParameterMetaData extends ParameterMetaData[Long] {
-    val sqlType  = BigIntParameterMetaData.sqlType
-    val jdbcType = BigIntParameterMetaData.jdbcType
+    val sqlType  = "BIGINT"
+    val jdbcType = Types.BIGINT
   }
 
   implicit object JLongParameterMetaData extends ParameterMetaData[JLong] {
-    val sqlType  = BigIntParameterMetaData.sqlType
-    val jdbcType = BigIntParameterMetaData.jdbcType
+    val sqlType  = LongParameterMetaData.sqlType
+    val jdbcType = LongParameterMetaData.jdbcType
   }
 
   /** Decimal (big decimal) parameter meta data */
