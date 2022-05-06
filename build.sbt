@@ -303,3 +303,11 @@ lazy val docs = project
 Scapegoat.settings
 
 ThisBuild / playBuildRepoName := "anorm"
+
+addCommandAlias(
+  "validateCode",
+  List(
+    "scalafmtSbtCheck",
+    "scalafmtCheckAll",
+  ).mkString(";")
+)
