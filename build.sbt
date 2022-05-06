@@ -34,7 +34,6 @@ ThisBuild / mimaFailOnNoPrevious := false
 
 lazy val `anorm-tokenizer` = project.in(file("tokenizer"))
   .settings(
-    scalariformAutoformat := true,
     mimaPreviousArtifacts := {
       if (scalaBinaryVersion.value == "2.13") {
         Set.empty
@@ -106,7 +105,6 @@ lazy val parserCombinatorsVer = Def.setting[String] {
 lazy val `anorm-core` = project.in(file("core"))
   .settings(Seq(
     name := "anorm",
-    scalariformAutoformat := true,
     (Compile / sourceGenerators) += Def.task {
       Seq(GFA((Compile / sourceManaged).value / "anorm"))
     }.taskValue,
@@ -188,7 +186,6 @@ lazy val `anorm-iteratee` = (project in file("iteratee"))
       if (scalaBinaryVersion.value == "2.13") new java.io.File("/no/sources")
       else sourceDirectory.value
     },
-    scalariformAutoformat := true,
     mimaPreviousArtifacts := {
       if (scalaBinaryVersion.value == "2.13") Set.empty[ModuleID]
       else Set(organization.value %% name.value % "2.6.0")
@@ -235,7 +232,6 @@ val akkaContribVer = Def.setting[String] {
 
 lazy val `anorm-akka` = (project in file("akka"))
   .settings(
-    scalariformAutoformat := true,
     mimaPreviousArtifacts := Set.empty,
     libraryDependencies ++= Seq("akka-testkit", "akka-stream").map { m =>
       "com.typesafe.akka" %% m % akkaVer.value % Provided
@@ -256,7 +252,6 @@ val playVer = Def.setting[String] {
 
 lazy val `anorm-postgres` = (project in file("postgres"))
   .settings(
-    scalariformAutoformat := true,
     mimaPreviousArtifacts := Set.empty,
     libraryDependencies ++= {
       val playJsonVer = {
@@ -273,7 +268,6 @@ lazy val `anorm-postgres` = (project in file("postgres"))
 
 lazy val `anorm-enumeratum` = (project in file("enumeratum"))
   .settings(
-    scalariformAutoformat := true,
     mimaPreviousArtifacts := Set.empty,
     libraryDependencies ++= Seq(
       "com.beachape" %% "enumeratum" % "1.7.0",
