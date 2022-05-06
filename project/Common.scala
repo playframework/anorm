@@ -7,17 +7,16 @@ import com.typesafe.tools.mima.plugin.MimaKeys.mimaPreviousArtifacts
 object Common extends AutoPlugin {
   import com.typesafe.tools.mima.core._
 
-  override def trigger = allRequirements
+  override def trigger  = allRequirements
   override def requires = JvmPlugin
 
   val previousVersion = "2.6.0"
 
   override def projectSettings = Seq(
-    organization := "org.playframework.anorm",
-    scalaVersion := "2.12.15",
-    crossScalaVersions := Seq(
-      "2.11.12", scalaVersion.value, "2.13.8"),
-    resolvers += "Scalaz Bintray Repo" at {
+    organization       := "org.playframework.anorm",
+    scalaVersion       := "2.12.15",
+    crossScalaVersions := Seq("2.11.12", scalaVersion.value, "2.13.8"),
+    resolvers += "Scalaz Bintray Repo".at {
       "https://dl.bintray.com/scalaz/releases" // specs2 depends on scalaz-stream
     },
     (Compile / unmanagedSourceDirectories) ++= {
@@ -25,23 +24,21 @@ object Common extends AutoPlugin {
 
       Seq(
         scala2Unmanaged(sv, 12, (Compile / sourceDirectory).value),
-        scala2Unmanaged(sv, 13, (Compile / sourceDirectory).value))
+        scala2Unmanaged(sv, 13, (Compile / sourceDirectory).value)
+      )
     },
-    (Test / unmanagedSourceDirectories) += scala2Unmanaged(
-      scalaVersion.value, 12,
-      (Test / sourceDirectory).value),
+    (Test / unmanagedSourceDirectories) += scala2Unmanaged(scalaVersion.value, 12, (Test / sourceDirectory).value),
     libraryDependencies ++= {
       val silencerVer = "1.7.8"
 
       Seq(
-        compilerPlugin(("com.github.ghik" %% "silencer-plugin" % silencerVer).
-          cross(CrossVersion.full)),
-        ("com.github.ghik" %% "silencer-lib" % silencerVer % Provided).
-          cross(CrossVersion.full)
+        compilerPlugin(("com.github.ghik" %% "silencer-plugin" % silencerVer).cross(CrossVersion.full)),
+        ("com.github.ghik"                %% "silencer-lib"    % silencerVer % Provided).cross(CrossVersion.full)
       )
     },
     scalacOptions ++= Seq(
-      "-encoding", "UTF-8",
+      "-encoding",
+      "UTF-8",
       "-target:jvm-1.8",
       "-unchecked",
       "-deprecation",
@@ -53,7 +50,8 @@ object Common extends AutoPlugin {
     scalacOptions ++= {
       if (scalaBinaryVersion.value == "2.12") {
         Seq(
-          "-Xmax-classfile-name", "128",
+          "-Xmax-classfile-name",
+          "128",
           "-Ywarn-numeric-widen",
           "-Ywarn-dead-code",
           "-Ywarn-value-discard",
@@ -63,9 +61,7 @@ object Common extends AutoPlugin {
           "-Ywarn-macros:after"
         )
       } else if (scalaBinaryVersion.value == "2.11") {
-        Seq(
-          "-Xmax-classfile-name", "128",
-          "-Yopt:_", "-Ydead-code", "-Yclosure-elim", "-Yconst-opt")
+        Seq("-Xmax-classfile-name", "128", "-Yopt:_", "-Ydead-code", "-Yclosure-elim", "-Yconst-opt")
       } else {
         Seq(
           "-explaintypes",
@@ -75,7 +71,8 @@ object Common extends AutoPlugin {
           "-Wvalue-discard",
           "-Wextra-implicit",
           "-Wunused",
-          "-Wmacros:after")
+          "-Wmacros:after"
+        )
       }
     },
     Compile / console / scalacOptions ~= {
@@ -87,9 +84,8 @@ object Common extends AutoPlugin {
     Test / scalacOptions ++= Seq("-Yrangepos"),
     Test / scalacOptions ~= (_.filterNot(_ == "-Werror")),
     scalacOptions ~= (_.filterNot(_ == "-Xfatal-warnings")),
-    Test / fork := true,
-    mimaPreviousArtifacts := Set(
-      organization.value %% moduleName.value % previousVersion)
+    Test / fork           := true,
+    mimaPreviousArtifacts := Set(organization.value %% moduleName.value % previousVersion)
   ) ++ Publish.settings
 
   @inline def missMeth(n: String) =
@@ -101,7 +97,7 @@ object Common extends AutoPlugin {
   @inline def incoRet(n: String) =
     ProblemFilters.exclude[IncompatibleResultTypeProblem](n)
 
-  def scala2Unmanaged(ver: String, minor: Int, base: File): File = 
+  def scala2Unmanaged(ver: String, minor: Int, base: File): File =
     CrossVersion.partialVersion(ver) match {
       case Some((2, n)) if n >= minor => base / s"scala-2.${minor}+"
       case _                          => base / s"scala-2.${minor}-"
@@ -113,7 +109,8 @@ object AnormGeneration {
   def generateFunctionAdapter(dir: File): File = {
     val out = dir / "FunctionAdapter.scala"
 
-    if (out exists) out else {
+    if (out exists) out
+    else {
       IO.writer[File](out, "", IO.defaultCharset, false) { w ⇒
         w.append("""package anorm
 
@@ -129,7 +126,7 @@ private[anorm] trait FunctionAdapter {
 
         (2 to 22).foreach { i =>
           val values = (1 to i).map(j => s"c$j")
-          val types = (1 to i).map(j => s"T$j")
+          val types  = (1 to i).map(j => s"T$j")
 
           w.append(s"""
 
@@ -149,7 +146,8 @@ private[anorm] trait FunctionAdapter {
 
           (1 to i).foreach { j => w.append(s"T$j, ") }
 
-          w.append(s"R](f: Function$i[${types mkString ", "}, R]): ${types mkString " ~ "} => R = { case ${values mkString " ~ "} => f(${values mkString ", "}) }")
+          w.append(s"R](f: Function$i[${types.mkString(", ")}, R]): ${types.mkString(" ~ ")} => R = { case ${values
+              .mkString(" ~ ")} => f(${values.mkString(", ")}) }")
         }
 
         w.append("""

@@ -14,12 +14,12 @@ case class ColumnName(qualified: String, alias: Option[String])
 case class MetaDataItem(column: ColumnName, nullable: Boolean, clazz: String)
 
 private[anorm] case class MetaData(ms: Seq[MetaDataItem]) {
+
   /** Returns meta data for specified column. */
   def get(columnName: String): Option[MetaDataItem] = {
     val key = columnName.toUpperCase
 
-    aliasedDictionary.get(key).
-      orElse(dictionary2 get key).orElse(dictionary get key)
+    aliasedDictionary.get(key).orElse(dictionary2.get(key)).orElse(dictionary.get(key))
   }
 
   private lazy val dictionary: Map[String, MetaDataItem] =
@@ -46,6 +46,7 @@ private[anorm] case class MetaData(ms: Seq[MetaDataItem]) {
 
 /** Allows to define or overwrite the alias for a column. */
 trait ColumnAliaser extends Function[(Int, ColumnName), Option[String]] {
+
   /**
    * Returns the alias for the specified column, if defined.
    *
@@ -57,8 +58,7 @@ trait ColumnAliaser extends Function[(Int, ColumnName), Option[String]] {
 object ColumnAliaser {
   import scala.collection.immutable.Set
 
-  private class Default(
-    f: PartialFunction[(Int, ColumnName), String]) extends ColumnAliaser {
+  private class Default(f: PartialFunction[(Int, ColumnName), String]) extends ColumnAliaser {
 
     def apply(column: (Int, ColumnName)) = f.lift(column)
   }
@@ -96,7 +96,7 @@ object ColumnAliaser {
    * }}}
    */
   def perPositions(positions: Set[Int])(as: ((Int, ColumnName)) => String): ColumnAliaser = new Default({
-    case c @ (pos, _) if (positions contains pos) => as(c)
+    case c @ (pos, _) if positions contains pos => as(c)
   })
 
   /**
@@ -110,7 +110,7 @@ object ColumnAliaser {
    */
   def withPattern(positions: Set[Int], prefix: String, suffix: String = ""): ColumnAliaser = perPositions(positions) {
     case (_, ColumnName(_, Some(alias))) => s"$prefix$alias$suffix"
-    case (_, ColumnName(_, _)) => s"$prefix$suffix"
+    case (_, ColumnName(_, _))           => s"$prefix$suffix"
   }
 
   /**
@@ -122,7 +122,8 @@ object ColumnAliaser {
    * anorm.ColumnAliaser.withPattern((2 to 3).toSet, "prefix.")
    * }}}
    */
-  def withPattern1(prefix: String, suffix: String = "")(positions: Int*): ColumnAliaser = withPattern(positions.toSet, prefix, suffix)
+  def withPattern1(prefix: String, suffix: String = "")(positions: Int*): ColumnAliaser =
+    withPattern(positions.toSet, prefix, suffix)
 }
 
 private[anorm] object MetaData {
@@ -133,12 +134,12 @@ private[anorm] object MetaData {
 
   /** Returns metadata for given result set. */
   def parse(rs: ResultSet, as: ColumnAliaser): MetaData = {
-    val meta = rs.getMetaData()
+    val meta      = rs.getMetaData()
     val nbColumns = meta.getColumnCount()
     MetaData(List.range(1, nbColumns + 1).map { i =>
       @SuppressWarnings(Array("AsInstanceOf"))
       def tableName = {
-        if (meta.getClass.getName startsWith "org.postgresql.") {
+        if (meta.getClass.getName.startsWith("org.postgresql.")) {
           // HACK FOR POSTGRES:
           // Fix in https://github.com/pgjdbc/pgjdbc/pull/107
 
@@ -149,16 +150,15 @@ private[anorm] object MetaData {
 
       }
 
-      val cn = ColumnName(
-        tableName + "." + meta.getColumnName(i),
-        alias = Option(meta.getColumnLabel(i)))
+      val cn = ColumnName(tableName + "." + meta.getColumnName(i), alias = Option(meta.getColumnLabel(i)))
 
       val colName = as(i -> cn).fold(cn)(a => cn.copy(alias = Some(a)))
 
       MetaDataItem(
         column = colName,
         nullable = meta.isNullable(i) == ResultSetMetaData.columnNullable,
-        clazz = meta.getColumnClassName(i))
+        clazz = meta.getColumnClassName(i)
+      )
     })
   }
 }

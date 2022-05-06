@@ -17,6 +17,7 @@ import akka.stream.scaladsl.{ Source }
  * @define columnAliaserParam the column aliaser
  */
 object AkkaStream {
+
   /**
    * Returns the rows parsed from the `sql` query as a reactive source.
    *
@@ -43,7 +44,10 @@ object AkkaStream {
    * }}}
    */
   @SuppressWarnings(Array("UnusedMethodParameter"))
-  def source[T](sql: => Sql, parser: RowParser[T], as: ColumnAliaser)(implicit @deprecated("No longer required (will be removed)", "2.5.4") m: Materializer, con: Connection): Source[T, Future[Int]] = Source.fromGraph(new ResultSource[T](con, sql, as, parser))
+  def source[T](sql: => Sql, parser: RowParser[T], as: ColumnAliaser)(implicit
+      @deprecated("No longer required (will be removed)", "2.5.4") m: Materializer,
+      con: Connection
+  ): Source[T, Future[Int]] = Source.fromGraph(new ResultSource[T](con, sql, as, parser))
 
   /**
    * Returns the rows parsed from the `sql` query as a reactive source.
@@ -57,7 +61,10 @@ object AkkaStream {
    * @param connection $connectionParam
    */
   @SuppressWarnings(Array("UnusedMethodParameter"))
-  def source[T](sql: => Sql, parser: RowParser[T])(implicit @deprecated("No longer required (will be removed)", "2.5.4") m: Materializer, con: Connection): Source[T, Future[Int]] = source[T](sql, parser, ColumnAliaser.empty)
+  def source[T](sql: => Sql, parser: RowParser[T])(implicit
+      @deprecated("No longer required (will be removed)", "2.5.4") m: Materializer,
+      con: Connection
+  ): Source[T, Future[Int]] = source[T](sql, parser, ColumnAliaser.empty)
 
   /**
    * Returns the result rows from the `sql` query as an enumerator.
@@ -70,7 +77,10 @@ object AkkaStream {
    * @param m $materializerParam
    * @param connection $connectionParam
    */
-  def source(sql: => Sql, as: ColumnAliaser)(implicit m: Materializer, connnection: Connection): Source[Row, Future[Int]] = source(sql, RowParser.successful, as)
+  def source(sql: => Sql, as: ColumnAliaser)(implicit
+      m: Materializer,
+      connnection: Connection
+  ): Source[Row, Future[Int]] = source(sql, RowParser.successful, as)
 
   /**
    * Returns the result rows from the `sql` query as an enumerator.
@@ -83,7 +93,8 @@ object AkkaStream {
    * @param m $materializerParam
    * @param connection $connectionParam
    */
-  def source(sql: => Sql)(implicit m: Materializer, connnection: Connection): Source[Row, Future[Int]] = source(sql, RowParser.successful, ColumnAliaser.empty)
+  def source(sql: => Sql)(implicit m: Materializer, connnection: Connection): Source[Row, Future[Int]] =
+    source(sql, RowParser.successful, ColumnAliaser.empty)
 
   // Internal stages
 
@@ -92,23 +103,20 @@ object AkkaStream {
   import akka.stream.{ Attributes, Outlet, SourceShape }
   import akka.stream.stage.{ GraphStageWithMaterializedValue, GraphStageLogic, OutHandler }
 
-  private[anorm] class ResultSource[T](
-    connection: Connection,
-    sql: Sql,
-    as: ColumnAliaser,
-    parser: RowParser[T]) extends GraphStageWithMaterializedValue[SourceShape[T], Future[Int]] {
+  private[anorm] class ResultSource[T](connection: Connection, sql: Sql, as: ColumnAliaser, parser: RowParser[T])
+      extends GraphStageWithMaterializedValue[SourceShape[T], Future[Int]] {
 
     private[anorm] var resultSet: ResultSet = _
 
-    override val toString = "AnormQueryResult"
-    val out: Outlet[T] = Outlet(s"${toString}.out")
+    override val toString     = "AnormQueryResult"
+    val out: Outlet[T]        = Outlet(s"${toString}.out")
     val shape: SourceShape[T] = SourceShape(out)
 
     override def createLogicAndMaterializedValue(inheritedAttributes: Attributes): (GraphStageLogic, Future[Int]) = {
       val result = Promise[Int]()
       val logic = new GraphStageLogic(shape) with OutHandler {
         private var cursor: Option[Cursor] = None
-        private var counter: Int = 0
+        private var counter: Int           = 0
 
         override def preStart(): Unit = {
           resultSet = sql.unsafeResultSet(connection)
@@ -136,18 +144,19 @@ object AkkaStream {
         }
 
         def onPull(): Unit = cursor match {
-          case Some(c) => c.row.as(parser) match {
-            case Success(parsed) => {
-              counter += 1
-              push(out, parsed)
-              nextCursor()
-            }
+          case Some(c) =>
+            c.row.as(parser) match {
+              case Success(parsed) => {
+                counter += 1
+                push(out, parsed)
+                nextCursor()
+              }
 
-            case Failure(cause) => {
-              result.failure(cause)
-              fail(out, cause)
+              case Failure(cause) => {
+                result.failure(cause)
+                fail(out, cause)
+              }
             }
-          }
 
           case _ => {
             result.success(counter)

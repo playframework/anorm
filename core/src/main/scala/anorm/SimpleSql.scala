@@ -4,10 +4,11 @@ import java.sql.{ Connection, PreparedStatement }
 
 /** Simple/plain SQL. */
 case class SimpleSql[T](
-  sql: SqlQuery,
-  params: Map[String, ParameterValue],
-  defaultParser: RowParser[T],
-  resultSetOnFirstRow: Boolean = false) extends Sql {
+    sql: SqlQuery,
+    params: Map[String, ParameterValue],
+    defaultParser: RowParser[T],
+    resultSetOnFirstRow: Boolean = false
+) extends Sql {
 
   /**
    * Returns the query prepared with named parameters.
@@ -37,8 +38,7 @@ case class SimpleSql[T](
    * }}}
    */
   def onParams(args: ParameterValue*): SimpleSql[T] =
-    copy(params = this.params ++ Sql.zipParams(
-      sql.paramsInitialOrder, args, Map.empty))
+    copy(params = this.params ++ Sql.zipParams(sql.paramsInitialOrder, args, Map.empty))
 
   /**
    * Returns the query prepared with the named parameters,
@@ -59,8 +59,8 @@ case class SimpleSql[T](
     con.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS)
   }
 
-  private def prepareGeneratedCols(columns: Array[String]) = {
-    (con: Connection, sql: String) => con.prepareStatement(sql, columns)
+  private def prepareGeneratedCols(columns: Array[String]) = { (con: Connection, sql: String) =>
+    con.prepareStatement(sql, columns)
   }
 
   def unsafeStatement(connection: Connection, getGeneratedKeys: Boolean = false) = {
@@ -68,11 +68,17 @@ case class SimpleSql[T](
     else unsafeStatement(connection, prepareNoGeneratedKeys)
   }
 
-  def unsafeStatement(connection: Connection, generatedColumn: String, generatedColumns: Seq[String]) = unsafeStatement(connection, prepareGeneratedCols((generatedColumn +: generatedColumns).toArray))
+  def unsafeStatement(connection: Connection, generatedColumn: String, generatedColumns: Seq[String]) =
+    unsafeStatement(connection, prepareGeneratedCols((generatedColumn +: generatedColumns).toArray))
 
-  private def unsafeStatement(connection: Connection, prep: (Connection, String) => PreparedStatement): PreparedStatement = {
+  private def unsafeStatement(
+      connection: Connection,
+      prep: (Connection, String) => PreparedStatement
+  ): PreparedStatement = {
     @SuppressWarnings(Array("TryGet"))
-    def unsafe = Sql.query(sql.stmt.tokens, sql.paramsInitialOrder, params, 0, new StringBuilder(), List.empty[(Int, ParameterValue)]).get
+    def unsafe = Sql
+      .query(sql.stmt.tokens, sql.paramsInitialOrder, params, 0, new StringBuilder(), List.empty[(Int, ParameterValue)])
+      .get
 
     val (psql, vs): (String, Seq[(Int, ParameterValue)]) = unsafe
 

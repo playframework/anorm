@@ -5,12 +5,12 @@ sealed trait SqlResult[+A] { self =>
   // TODO: Review along with MayErr (unify?)
 
   def flatMap[B](k: A => SqlResult[B]): SqlResult[B] = self match {
-    case Success(a) => k(a)
+    case Success(a)   => k(a)
     case e @ Error(_) => e
   }
 
   def map[B](f: A => B): SqlResult[B] = self match {
-    case Success(a) => Success(f(a))
+    case Success(a)   => Success(f(a))
     case e @ Error(_) => e
   }
 
@@ -49,14 +49,12 @@ private[anorm] trait WithResult {
    * @see #foldWhile
    * @see #withResult
    */
-  @deprecated(
-    message = "Use `fold` with empty [[ColumnAliaser]]",
-    since = "2.5.1")
+  @deprecated(message = "Use `fold` with empty [[ColumnAliaser]]", since = "2.5.1")
   def fold[T](z: => T)(op: (T, Row) => T)(implicit connection: Connection): Either[List[Throwable], T] = {
     @annotation.tailrec
     def go(c: Option[Cursor], cur: T): T = c match {
       case Some(cursor) => go(cursor.next, op(cur, cursor.row))
-      case _ => cur
+      case _            => cur
     }
 
     withResult(go(_, z))
@@ -72,11 +70,13 @@ private[anorm] trait WithResult {
    * @see #foldWhile
    * @see #withResult
    */
-  def fold[T](z: => T, aliaser: ColumnAliaser)(op: (T, Row) => T)(implicit connection: Connection): Either[List[Throwable], T] = {
+  def fold[T](z: => T, aliaser: ColumnAliaser)(
+      op: (T, Row) => T
+  )(implicit connection: Connection): Either[List[Throwable], T] = {
     @annotation.tailrec
     def go(c: Option[Cursor], cur: T): T = c match {
       case Some(cursor) => go(cursor.next, op(cur, cursor.row))
-      case _ => cur
+      case _            => cur
     }
 
     withResult(go(_, z), aliaser)
@@ -91,10 +91,10 @@ private[anorm] trait WithResult {
    * @return Either list of failures at left, or aggregated value
    * @see #withResult
    */
-  @deprecated(
-    message = "Use `foldWhile` with empty [[ColumnAliaser]]",
-    since = "2.5.1")
-  def foldWhile[T](z: => T)(op: (T, Row) => (T, Boolean))(implicit connection: Connection): Either[List[Throwable], T] = {
+  @deprecated(message = "Use `foldWhile` with empty [[ColumnAliaser]]", since = "2.5.1")
+  def foldWhile[T](
+      z: => T
+  )(op: (T, Row) => (T, Boolean))(implicit connection: Connection): Either[List[Throwable], T] = {
     @annotation.tailrec
     def go(c: Option[Cursor], cur: T): T = c match {
       case Some(cursor) =>
@@ -116,7 +116,9 @@ private[anorm] trait WithResult {
    * @return Either list of failures at left, or aggregated value
    * @see #withResult
    */
-  def foldWhile[T](z: => T, aliaser: ColumnAliaser)(op: (T, Row) => (T, Boolean))(implicit connection: Connection): Either[List[Throwable], T] = {
+  def foldWhile[T](z: => T, aliaser: ColumnAliaser)(
+      op: (T, Row) => (T, Boolean)
+  )(implicit connection: Connection): Either[List[Throwable], T] = {
     @annotation.tailrec
     def go(c: Option[Cursor], cur: T): T = c match {
       case Some(cursor) =>
@@ -148,7 +150,8 @@ private[anorm] trait WithResult {
    *   SQL"SELECT * FROM Test".withResult(go(_, List.empty))
    * }}}
    */
-  def withResult[T](op: Option[Cursor] => T)(implicit connection: Connection): Either[List[Throwable], T] = withResult[T](op, ColumnAliaser.empty)
+  def withResult[T](op: Option[Cursor] => T)(implicit connection: Connection): Either[List[Throwable], T] =
+    withResult[T](op, ColumnAliaser.empty)
 
   /**
    * Processes all or some rows from current result.
@@ -169,7 +172,10 @@ private[anorm] trait WithResult {
    *   SQL"SELECT * FROM Test".withResult(go(_, List.empty))
    * }}}
    */
-  def withResult[T](op: Option[Cursor] => T, aliaser: ColumnAliaser)(implicit connection: Connection): Either[List[Throwable], T] = Sql.withResult(resultSet(connection), resultSetOnFirstRow, aliaser)(op).acquireFor(identity)
+  def withResult[T](op: Option[Cursor] => T, aliaser: ColumnAliaser)(implicit
+      connection: Connection
+  ): Either[List[Throwable], T] =
+    Sql.withResult(resultSet(connection), resultSetOnFirstRow, aliaser)(op).acquireFor(identity)
 
   /**
    * Converts this query result as `T`, using parser.
@@ -187,6 +193,8 @@ private[anorm] trait WithResult {
    * @param parser the result parser
    * @param aliaser the column aliaser
    */
-  def asTry[T](parser: ResultSetParser[T], aliaser: ColumnAliaser = ColumnAliaser.empty)(implicit connection: Connection): Try[T] = Sql.asTry(parser, resultSet(connection), resultSetOnFirstRow, aliaser)
+  def asTry[T](parser: ResultSetParser[T], aliaser: ColumnAliaser = ColumnAliaser.empty)(implicit
+      connection: Connection
+  ): Try[T] = Sql.asTry(parser, resultSet(connection), resultSetOnFirstRow, aliaser)
 
 }

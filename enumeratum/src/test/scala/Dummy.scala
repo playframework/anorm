@@ -13,8 +13,7 @@ object Dummy extends Enum[Dummy] with AnormEnum[Dummy] {
 
 sealed trait InsensitiveDummy extends EnumEntry
 
-object InsensitiveDummy extends Enum[InsensitiveDummy]
-  with AnormInsensitiveEnum[InsensitiveDummy] {
+object InsensitiveDummy extends Enum[InsensitiveDummy] with AnormInsensitiveEnum[InsensitiveDummy] {
 
   case object A extends InsensitiveDummy
   case object B extends InsensitiveDummy
@@ -24,10 +23,9 @@ object InsensitiveDummy extends Enum[InsensitiveDummy]
 
 sealed trait LowercaseDummy extends EnumEntry
 
-object LowercaseDummy extends Enum[LowercaseDummy]
-  with AnormLowercaseEnum[LowercaseDummy] {
+object LowercaseDummy extends Enum[LowercaseDummy] with AnormLowercaseEnum[LowercaseDummy] {
 
-  case object Apple extends LowercaseDummy
+  case object Apple  extends LowercaseDummy
   case object Banana extends LowercaseDummy
   case object Cherry extends LowercaseDummy
   val values = findValues
@@ -35,10 +33,9 @@ object LowercaseDummy extends Enum[LowercaseDummy]
 
 sealed trait UppercaseDummy extends EnumEntry
 
-object UppercaseDummy extends Enum[UppercaseDummy]
-  with AnormUppercaseEnum[UppercaseDummy] {
+object UppercaseDummy extends Enum[UppercaseDummy] with AnormUppercaseEnum[UppercaseDummy] {
 
-  case object Apple extends UppercaseDummy
+  case object Apple  extends UppercaseDummy
   case object Banana extends UppercaseDummy
   case object Cherry extends UppercaseDummy
   val values = findValues

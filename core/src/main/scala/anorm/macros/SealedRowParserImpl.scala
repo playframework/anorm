@@ -7,7 +7,9 @@ import anorm.RowParser
 import anorm.macros.Inspect.{ directKnownSubclasses, pretty }
 
 private[anorm] object SealedRowParserImpl {
-  def apply[T: c.WeakTypeTag](c: whitebox.Context)(naming: c.Expr[DiscriminatorNaming], discriminate: c.Expr[Discriminate]): c.Expr[RowParser[T]] = {
+  def apply[T: c.WeakTypeTag](
+      c: whitebox.Context
+  )(naming: c.Expr[DiscriminatorNaming], discriminate: c.Expr[Discriminate]): c.Expr[RowParser[T]] = {
     import c.universe._
 
     val tpe = c.weakTypeTag[T].tpe
@@ -31,18 +33,20 @@ private[anorm] object SealedRowParserImpl {
 
       c.inferImplicitValue(ptype) match {
         case EmptyTree => List(subclass)
-        case _ => List.empty
+        case _         => List.empty
       }
     }
 
     if (missing.nonEmpty) {
-      def details = missing.map { subclass =>
-        val typeStr = if (subclass.typeSymbol.companion == NoSymbol) {
-          s"${subclass.typeSymbol.fullName}.type"
-        } else subclass.typeSymbol.fullName
+      def details = missing
+        .map { subclass =>
+          val typeStr = if (subclass.typeSymbol.companion == NoSymbol) {
+            s"${subclass.typeSymbol.fullName}.type"
+          } else subclass.typeSymbol.fullName
 
-        s"- cannot find anorm.RowParser[$typeStr] in the implicit scope"
-      }.mkString(",\r\n")
+          s"- cannot find anorm.RowParser[$typeStr] in the implicit scope"
+        }
+        .mkString(",\r\n")
 
       abort(s"fails to generate sealed parser: $tpe;\r\n$details")
     }
@@ -51,7 +55,7 @@ private[anorm] object SealedRowParserImpl {
 
     val cases = sub.map { subclass =>
       val caseName = TermName(c.freshName("discriminated"))
-      val key = q"$discriminate(${subclass.typeSymbol.fullName})"
+      val key      = q"$discriminate(${subclass.typeSymbol.fullName})"
       val caseDecl = q"val $caseName = $key"
       val subtype = {
         if (subclass.typeSymbol.asClass.typeParams.isEmpty) subclass
@@ -62,14 +66,14 @@ private[anorm] object SealedRowParserImpl {
     }
 
     lazy val supported = q"List(..${cases.map(_._1)})"
-    def mappingError = q"""anorm.RowParser.failed[$tpe](anorm.Error(anorm.SqlMappingError("unexpected row type '%s'; expected: %s".format(d, $supported))))"""
+    def mappingError =
+      q"""anorm.RowParser.failed[$tpe](anorm.Error(anorm.SqlMappingError("unexpected row type '%s'; expected: %s".format(d, $supported))))"""
 
     val discriminatorTerm = TermName(c.freshName("discriminator"))
-    val colTerm = TermName(c.freshName("column"))
+    val colTerm           = TermName(c.freshName("column"))
 
     @SuppressWarnings(Array("ListAppend" /* only once*/ ))
-    def matching = Match(
-      q"$discriminatorTerm", cases.map(_._3) :+ cq"d => $mappingError")
+    def matching = Match(q"$discriminatorTerm", cases.map(_._3) :+ cq"d => $mappingError")
 
     val parser = q"""new anorm.RowParser[$tpe] {
       val $colTerm = $naming(${tpe.typeSymbol.fullName})

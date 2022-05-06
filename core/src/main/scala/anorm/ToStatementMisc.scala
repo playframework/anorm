@@ -6,14 +6,7 @@ import java.math.{ BigDecimal => JBigDec, BigInteger }
 
 import java.net.{ URI, URL }
 
-import java.lang.{
-  Boolean => JBool,
-  Byte => JByte,
-  Double => JDouble,
-  Float => JFloat,
-  Long => JLong,
-  Short => JShort
-}
+import java.lang.{ Boolean => JBool, Byte => JByte, Double => JDouble, Float => JFloat, Long => JLong, Short => JShort }
 import java.sql.{ PreparedStatement, Timestamp }
 
 private[anorm] trait ToStatementBase[A] { self =>
@@ -322,9 +315,7 @@ sealed trait ToStatementPriority0 {
    *   on('c -> Option.empty[String]) // Not deprecated
    * }}}
    */
-  @deprecated(
-    "Parameter value should be passed using `Option.empty[T]`",
-    since = "2.3.7")
+  @deprecated("Parameter value should be passed using `Option.empty[T]`", since = "2.3.7")
   implicit object noneToStatement extends ToStatement[None.type] {
     def set(s: PreparedStatement, i: Int, n: None.type) =
       s.setObject(i, null: Object)
@@ -353,10 +344,8 @@ sealed trait ToStatementPriority0 {
    * SQL"SELECT * FROM Test WHERE nullable_int = \\${Option.empty[Int]}"
    * }}}
    */
-  implicit def optionToStatement[A](
-    implicit
-    c: ToStatement[A],
-    meta: ParameterMetaData[A]) = new ToStatement[Option[A]] with NotNullGuard {
+  implicit def optionToStatement[A](implicit c: ToStatement[A], meta: ParameterMetaData[A]) = new ToStatement[Option[A]]
+    with NotNullGuard {
     def set(s: PreparedStatement, index: Int, o: Option[A]) = {
       o.fold[Unit](s.setNull(index, meta.jdbcType))(c.set(s, index, _))
     }
@@ -468,8 +457,10 @@ sealed trait ToStatementPriority0 {
    */
   implicit def timestampWrapper1ToStatement[T <: TimestampWrapper1]: ToStatement[T] = new ToStatement[T] {
     def set(s: PreparedStatement, index: Int, tsw: T): Unit =
-      if (tsw != (null: TimestampWrapper1) &&
-        tsw.getTimestamp != (null: TimestampWrapper1)) {
+      if (
+        tsw != (null: TimestampWrapper1) &&
+        tsw.getTimestamp != (null: TimestampWrapper1)
+      ) {
         s.setTimestamp(index, tsw.getTimestamp)
       } else s.setNull(index, timestampWrapper1JdbcType)
   }
@@ -580,12 +571,14 @@ sealed trait ToStatementPriority0 {
    *   on('categories -> SortedSet("a", "b", "c"))
    * }}}
    */
-  implicit def sortedSetToStatement[A](implicit c: ToStatement[A]): ToStatement[SortedSet[A]] = traversableToStatement[A, SortedSet[A]]
+  implicit def sortedSetToStatement[A](implicit c: ToStatement[A]): ToStatement[SortedSet[A]] =
+    traversableToStatement[A, SortedSet[A]]
 
   /**
    * Sets multi-value parameter from stream on statement.
    */
-  implicit def streamToStatement[A](implicit c: ToStatement[A]): ToStatement[Compat.LazyLst[A]] = traversableToStatement[A, Compat.LazyLst[A]]
+  implicit def streamToStatement[A](implicit c: ToStatement[A]): ToStatement[Compat.LazyLst[A]] =
+    traversableToStatement[A, Compat.LazyLst[A]]
 
   /**
    * Sets multi-value parameter from vector on statement.
@@ -595,7 +588,8 @@ sealed trait ToStatementPriority0 {
    *   on('categories -> Vector("a", "b", "c"))
    * }}}
    */
-  implicit def vectorToStatement[A](implicit c: ToStatement[A]): ToStatement[Vector[A]] = traversableToStatement[A, Vector[A]]
+  implicit def vectorToStatement[A](implicit c: ToStatement[A]): ToStatement[Vector[A]] =
+    traversableToStatement[A, Vector[A]]
 
   /**
    * Sets multi-value parameter on statement, with custom formatting
@@ -617,7 +611,8 @@ sealed trait ToStatementPriority0 {
         c.set(s, offset, ps.values)
     }
 
-  @inline private def traversableToStatement[A, T <: Compat.Trav[A]](implicit c: ToStatement[A]) = new ToStatement[T] with NotNullGuard {
+  @inline private def traversableToStatement[A, T <: Compat.Trav[A]](implicit c: ToStatement[A]) = new ToStatement[T]
+    with NotNullGuard {
     def set(s: PreparedStatement, offset: Int, ps: T) =
       if (ps == (null: Compat.Trav[A])) throw new IllegalArgumentException()
       else {
@@ -638,8 +633,7 @@ sealed trait ToStatementPriority0 {
     new ToStatement[Array[A]] with NotNullGuard {
       def set(s: PreparedStatement, i: Int, arr: Array[A]) =
         if (arr == (null: AnyRef)) throw new IllegalArgumentException()
-        else s.setArray(i, s.getConnection.createArrayOf(
-          m.sqlType, arr.map(a => a: AnyRef)))
+        else s.setArray(i, s.getConnection.createArrayOf(m.sqlType, arr.map(a => a: AnyRef)))
     }
 }
 
@@ -650,25 +644,21 @@ object JodaParameterMetaData {
   import java.sql.Types
 
   sealed trait JodaTimeMetaData {
-    val sqlType = "TIMESTAMP"
+    val sqlType  = "TIMESTAMP"
     val jdbcType = Types.TIMESTAMP
   }
 
   /** Date/time parameter meta data */
-  implicit object JodaDateTimeMetaData
-    extends ParameterMetaData[DateTime] with JodaTimeMetaData
+  implicit object JodaDateTimeMetaData extends ParameterMetaData[DateTime] with JodaTimeMetaData
 
   /** Local date/time parameter meta data */
-  implicit object JodaLocalDateTimeMetaData
-    extends ParameterMetaData[LocalDateTime] with JodaTimeMetaData
+  implicit object JodaLocalDateTimeMetaData extends ParameterMetaData[LocalDateTime] with JodaTimeMetaData
 
   /** Instant parameter meta data */
-  implicit object JodaInstantMetaData
-    extends ParameterMetaData[Instant] with JodaTimeMetaData
+  implicit object JodaInstantMetaData extends ParameterMetaData[Instant] with JodaTimeMetaData
 
   /** Local date parameter meta data */
-  implicit object JodaLocalDateMetaData
-    extends ParameterMetaData[LocalDate] with JodaTimeMetaData
+  implicit object JodaLocalDateMetaData extends ParameterMetaData[LocalDate] with JodaTimeMetaData
 }
 
 sealed trait JodaToStatement {
@@ -678,17 +668,20 @@ sealed trait JodaToStatement {
    * Sets joda-time DateTime as statement parameter.
    * For `null` value, `setNull` with `TIMESTAMP` is called on statement.
    */
-  implicit def jodaDateTimeToStatement(implicit meta: ParameterMetaData[DateTime]): ToStatement[DateTime] = new ToStatement[DateTime] {
-    def set(s: PreparedStatement, index: Int, date: DateTime): Unit =
-      if (date != (null: DateTime)) {
-        s.setTimestamp(index, new Timestamp(date.getMillis()))
-      } else s.setNull(index, meta.jdbcType)
-  }
+  implicit def jodaDateTimeToStatement(implicit meta: ParameterMetaData[DateTime]): ToStatement[DateTime] =
+    new ToStatement[DateTime] {
+      def set(s: PreparedStatement, index: Int, date: DateTime): Unit =
+        if (date != (null: DateTime)) {
+          s.setTimestamp(index, new Timestamp(date.getMillis()))
+        } else s.setNull(index, meta.jdbcType)
+    }
 
   /**
    * Sets a local date/time on statement.
    */
-  implicit def jodaLocalDateTimeToStatement(implicit meta: ParameterMetaData[LocalDateTime]): ToStatement[LocalDateTime] = new ToStatement[LocalDateTime] {
+  implicit def jodaLocalDateTimeToStatement(implicit
+      meta: ParameterMetaData[LocalDateTime]
+  ): ToStatement[LocalDateTime] = new ToStatement[LocalDateTime] {
     def set(s: PreparedStatement, i: Int, t: LocalDateTime): Unit =
       if (t == (null: LocalDateTime)) s.setNull(i, meta.jdbcType)
       else s.setTimestamp(i, new Timestamp(t.toDateTime.getMillis))
@@ -697,22 +690,24 @@ sealed trait JodaToStatement {
   /**
    * Sets a local date on statement.
    */
-  implicit def jodaLocalDateToStatement(implicit meta: ParameterMetaData[LocalDate]): ToStatement[LocalDate] = new ToStatement[LocalDate] {
-    def set(s: PreparedStatement, i: Int, t: LocalDate): Unit =
-      if (t == (null: LocalDate)) s.setNull(i, meta.jdbcType)
-      else s.setTimestamp(i, new Timestamp(t.toDate.getTime))
-  }
+  implicit def jodaLocalDateToStatement(implicit meta: ParameterMetaData[LocalDate]): ToStatement[LocalDate] =
+    new ToStatement[LocalDate] {
+      def set(s: PreparedStatement, i: Int, t: LocalDate): Unit =
+        if (t == (null: LocalDate)) s.setNull(i, meta.jdbcType)
+        else s.setTimestamp(i, new Timestamp(t.toDate.getTime))
+    }
 
   /**
    * Sets joda-time Instant as statement parameter.
    * For `null` value, `setNull` with `TIMESTAMP` is called on statement.
    */
-  implicit def jodaInstantToStatement(implicit meta: ParameterMetaData[Instant]): ToStatement[Instant] = new ToStatement[Instant] {
-    def set(s: PreparedStatement, index: Int, instant: Instant): Unit =
-      if (instant != (null: Instant)) {
-        s.setTimestamp(index, new Timestamp(instant.getMillis))
-      } else s.setNull(index, meta.jdbcType)
-  }
+  implicit def jodaInstantToStatement(implicit meta: ParameterMetaData[Instant]): ToStatement[Instant] =
+    new ToStatement[Instant] {
+      def set(s: PreparedStatement, index: Int, instant: Instant): Unit =
+        if (instant != (null: Instant)) {
+          s.setTimestamp(index, new Timestamp(instant.getMillis))
+        } else s.setNull(index, meta.jdbcType)
+    }
 }
 
 sealed trait JavaTimeToStatement {
@@ -728,11 +723,12 @@ sealed trait JavaTimeToStatement {
    * SQL("SELECT * FROM Test WHERE time < {b}").on('b -> Instant.now)
    * }}}
    */
-  implicit def instantToStatement(implicit meta: ParameterMetaData[Instant]): ToStatement[Instant] = new ToStatement[Instant] {
-    def set(s: PreparedStatement, i: Int, t: Instant): Unit =
-      if (t == (null: Instant)) s.setNull(i, meta.jdbcType)
-      else s.setTimestamp(i, Timestamp from t)
-  }
+  implicit def instantToStatement(implicit meta: ParameterMetaData[Instant]): ToStatement[Instant] =
+    new ToStatement[Instant] {
+      def set(s: PreparedStatement, i: Int, t: Instant): Unit =
+        if (t == (null: Instant)) s.setNull(i, meta.jdbcType)
+        else s.setTimestamp(i, Timestamp.from(t))
+    }
 
   /**
    * Sets a local date/time on statement.
@@ -744,11 +740,12 @@ sealed trait JavaTimeToStatement {
    * SQL("SELECT * FROM Test WHERE time < {b}").on('b -> LocalDateTime.now)
    * }}}
    */
-  implicit def localDateTimeToStatement(implicit meta: ParameterMetaData[LocalDateTime]): ToStatement[LocalDateTime] = new ToStatement[LocalDateTime] {
-    def set(s: PreparedStatement, i: Int, t: LocalDateTime): Unit =
-      if (t == (null: LocalDateTime)) s.setNull(i, meta.jdbcType)
-      else s.setTimestamp(i, Timestamp valueOf t)
-  }
+  implicit def localDateTimeToStatement(implicit meta: ParameterMetaData[LocalDateTime]): ToStatement[LocalDateTime] =
+    new ToStatement[LocalDateTime] {
+      def set(s: PreparedStatement, i: Int, t: LocalDateTime): Unit =
+        if (t == (null: LocalDateTime)) s.setNull(i, meta.jdbcType)
+        else s.setTimestamp(i, Timestamp.valueOf(t))
+    }
 
   /**
    * Sets a local date on statement.
@@ -760,11 +757,12 @@ sealed trait JavaTimeToStatement {
    * SQL("SELECT * FROM Test WHERE time < {b}").on('b -> LocalDate.now)
    * }}}
    */
-  implicit def localDateToStatement(implicit meta: ParameterMetaData[LocalDate]): ToStatement[LocalDate] = new ToStatement[LocalDate] {
-    def set(s: PreparedStatement, i: Int, t: LocalDate): Unit =
-      if (t == (null: LocalDate)) s.setNull(i, meta.jdbcType)
-      else s.setTimestamp(i, Timestamp valueOf t.atStartOfDay())
-  }
+  implicit def localDateToStatement(implicit meta: ParameterMetaData[LocalDate]): ToStatement[LocalDate] =
+    new ToStatement[LocalDate] {
+      def set(s: PreparedStatement, i: Int, t: LocalDate): Unit =
+        if (t == (null: LocalDate)) s.setNull(i, meta.jdbcType)
+        else s.setTimestamp(i, Timestamp.valueOf(t.atStartOfDay()))
+    }
 
   /**
    * Sets a zoned date/time on statement.
@@ -776,14 +774,16 @@ sealed trait JavaTimeToStatement {
    * SQL("SELECT * FROM Test WHERE time < {b}").on('b -> ZonedDateTime.now)
    * }}}
    */
-  implicit def zonedDateTimeToStatement(implicit meta: ParameterMetaData[ZonedDateTime]): ToStatement[ZonedDateTime] = new ToStatement[ZonedDateTime] {
-    def set(s: PreparedStatement, i: Int, t: ZonedDateTime): Unit =
-      if (t == (null: ZonedDateTime)) s.setNull(i, meta.jdbcType)
-      else s.setTimestamp(i, Timestamp from t.toInstant)
-  }
+  implicit def zonedDateTimeToStatement(implicit meta: ParameterMetaData[ZonedDateTime]): ToStatement[ZonedDateTime] =
+    new ToStatement[ZonedDateTime] {
+      def set(s: PreparedStatement, i: Int, t: ZonedDateTime): Unit =
+        if (t == (null: ZonedDateTime)) s.setNull(i, meta.jdbcType)
+        else s.setTimestamp(i, Timestamp.from(t.toInstant))
+    }
 }
 
 sealed trait ToStatementPriority1 extends ToStatementPriority0 {
+
   /**
    * Sets an array of byte as parameter on statement.
    * For `null` value, `setNull` with `LONGVARBINARY` is called on statement.
@@ -806,8 +806,7 @@ sealed trait ToStatementPriority1 extends ToStatementPriority0 {
 /**
  * Provided conversions to set statement parameter.
  */
-private[anorm] class ToStatementConversions extends ToStatementPriority1
-  with JodaToStatement with JavaTimeToStatement {
+private[anorm] class ToStatementConversions extends ToStatementPriority1 with JodaToStatement with JavaTimeToStatement {
 
   /**
    * Resolves `ToStatement` instance for the given type.

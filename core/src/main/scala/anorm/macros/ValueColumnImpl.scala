@@ -10,8 +10,8 @@ private[anorm] object ValueColumnImpl {
   def apply[T <: AnyVal: c.WeakTypeTag](c: whitebox.Context): c.Expr[Column[T]] = {
     @inline def abort(msg: String) = c.abort(c.enclosingPosition, msg)
 
-    val tpe = c.weakTypeTag[T].tpe
-    val ctor = tpe.decl(c.universe.termNames.CONSTRUCTOR).asMethod
+    val tpe       = c.weakTypeTag[T].tpe
+    val ctor      = tpe.decl(c.universe.termNames.CONSTRUCTOR).asMethod
     val anyValTpe = c.typeOf[AnyVal]
 
     import c.universe._
@@ -39,9 +39,7 @@ private[anorm] object ValueColumnImpl {
               }"""
 
               if (debugEnabled) {
-                c.echo(
-                  c.enclosingPosition,
-                  s"column generated for $tpe: ${pretty(c)(generated)}")
+                c.echo(c.enclosingPosition, s"column generated for $tpe: ${pretty(c)(generated)}")
               }
 
               c.Expr[Column[T]](generated)
@@ -50,8 +48,7 @@ private[anorm] object ValueColumnImpl {
         }
       }
 
-      case _ => abort(
-        s"constructor for a value class must have a single argument: $ctor")
+      case _ => abort(s"constructor for a value class must have a single argument: $ctor")
     }
   }
 }
