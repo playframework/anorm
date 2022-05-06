@@ -3,8 +3,7 @@ package anorm
 import java.sql.PreparedStatement
 
 /** Prepared parameter value. */
-@annotation.implicitNotFound(
-  "Wrapper not found for the parameter value")
+@annotation.implicitNotFound("Wrapper not found for the parameter value")
 sealed trait ParameterValue extends Show {
 
   /**
@@ -26,9 +25,9 @@ sealed trait ParameterValue extends Show {
   def show: String
 }
 
-final class DefaultParameterValue[A](
-  val value: A, s: ToSql[A], toStmt: ToStatement[A])
-  extends ParameterValue with ParameterValue.Wrapper[A] {
+final class DefaultParameterValue[A](val value: A, s: ToSql[A], toStmt: ToStatement[A])
+    extends ParameterValue
+    with ParameterValue.Wrapper[A] {
 
   lazy val toSql: (String, Int) = {
     @SuppressWarnings(Array("NullParameter"))
@@ -39,13 +38,13 @@ final class DefaultParameterValue[A](
 
   def set(s: PreparedStatement, i: Int) = toStmt.set(s, i, value)
 
-  lazy val show = s"$value"
+  lazy val show              = s"$value"
   override lazy val toString = s"ParameterValue($value)"
   override lazy val hashCode = value.hashCode
 
   override def equals(that: Any) = that match {
     case o: DefaultParameterValue[_] => (o.value == value)
-    case _ => false
+    case _                           => false
   }
 }
 
@@ -70,26 +69,30 @@ object ParameterValue {
   @inline def apply[A](v: A, s: ToSql[A], toStmt: ToStatement[A]) =
     (v, toStmt) match {
       case (null, _: NotNullGuard) => throw new IllegalArgumentException()
-      case _ => new DefaultParameterValue(v, s, toStmt)
+      case _                       => new DefaultParameterValue(v, s, toStmt)
     }
 
   @deprecated("Use an instance of `ToParameterValue`", "2.5.4")
-  def toParameterValue[A](a: A)(implicit s: ToSql[A] = ToSql.missing, p: ToStatement[A]): ParameterValue = apply(a, s, p)
+  def toParameterValue[A](a: A)(implicit s: ToSql[A] = ToSql.missing, p: ToStatement[A]): ParameterValue =
+    apply(a, s, p)
 
   implicit def from[A](a: A)(implicit c: ToParameterValue[A]): ParameterValue = c(a)
 }
 
-@annotation.implicitNotFound("No converter found for type ${A} to `ParameterValue`; Please define appropriate `ToParameter` and `ParameterMetaData`.")
+@annotation.implicitNotFound(
+  "No converter found for type ${A} to `ParameterValue`; Please define appropriate `ToParameter` and `ParameterMetaData`."
+)
 sealed trait ToParameterValue[A] extends (A => ParameterValue) {
+
   /** Returns the parameter value corresponding to the given value */
   def apply(value: A): ParameterValue
 }
 
 object ToParameterValue {
-  private class Default[A](s: ToSql[A], p: ToStatement[A])
-    extends ToParameterValue[A] {
+  private class Default[A](s: ToSql[A], p: ToStatement[A]) extends ToParameterValue[A] {
     def apply(value: A): ParameterValue = ParameterValue(value, s, p)
   }
 
-  implicit def apply[A](implicit s: ToSql[A] = ToSql.missing, p: ToStatement[A]): ToParameterValue[A] = new Default[A](s, p)
+  implicit def apply[A](implicit s: ToSql[A] = ToSql.missing, p: ToStatement[A]): ToParameterValue[A] =
+    new Default[A](s, p)
 }

@@ -43,28 +43,37 @@ sealed trait SeqParameter[A] {
 
 /** SeqParameter factory */
 object SeqParameter {
-  def apply[A](
-    seq: Seq[A], sep: String = ", ",
-    pre: String = "", post: String = ""): SeqParameter[A] =
+  def apply[A](seq: Seq[A], sep: String = ", ", pre: String = "", post: String = ""): SeqParameter[A] =
     new SeqParameter[A] {
-      val values = seq
+      val values    = seq
       val separator = sep
-      val before = Option(pre)
-      val after = Option(post)
+      val before    = Option(pre)
+      val after     = Option(post)
     }
 }
 
 private[anorm] trait Sql extends WithResult {
   private[anorm] def unsafeStatement(connection: Connection, getGeneratedKeys: Boolean = false): PreparedStatement
 
-  private[anorm] def unsafeStatement(connection: Connection, generatedColumn: String, generatedColumns: Seq[String]): PreparedStatement
+  private[anorm] def unsafeStatement(
+      connection: Connection,
+      generatedColumn: String,
+      generatedColumns: Seq[String]
+  ): PreparedStatement
 
-  protected final def preparedStatement(connection: Connection, getGeneratedKeys: Boolean = false): ManagedResource[PreparedStatement] = {
+  protected final def preparedStatement(
+      connection: Connection,
+      getGeneratedKeys: Boolean = false
+  ): ManagedResource[PreparedStatement] = {
     implicit val res = StatementResource
     managed(unsafeStatement(connection, getGeneratedKeys))
   }
 
-  final def preparedStatement(connection: Connection, generatedColumn: String, generatedColumns: Seq[String]): ManagedResource[PreparedStatement] = {
+  final def preparedStatement(
+      connection: Connection,
+      generatedColumn: String,
+      generatedColumns: Seq[String]
+  ): ManagedResource[PreparedStatement] = {
     implicit val res = StatementResource
     managed(unsafeStatement(connection, generatedColumn, generatedColumns))
   }
@@ -104,7 +113,7 @@ private[anorm] trait Sql extends WithResult {
   @throws[java.sql.SQLException]("If statement is query not update")
   def executeUpdate()(implicit connection: Connection): Int =
     preparedStatement(connection).acquireAndGet(_.executeUpdate())
-  //TODO: Safe alternative
+  // TODO: Safe alternative
 
   /**
    * Executes this SQL as an insert statement.
@@ -126,7 +135,9 @@ private[anorm] trait Sql extends WithResult {
    * }}}
    */
   @SuppressWarnings(Array("TryGet" /* TODO: Make it safer */ ))
-  def executeInsert[A](generatedKeysParser: ResultSetParser[A] = SqlParser.scalar[Long].singleOpt)(implicit connection: Connection): A = execInsert[A](preparedStatement(_, true), generatedKeysParser, ColumnAliaser.empty).get
+  def executeInsert[A](generatedKeysParser: ResultSetParser[A] = SqlParser.scalar[Long].singleOpt)(implicit
+      connection: Connection
+  ): A = execInsert[A](preparedStatement(_, true), generatedKeysParser, ColumnAliaser.empty).get
 
   /**
    * Executes this SQL as an insert statement.
@@ -149,7 +160,10 @@ private[anorm] trait Sql extends WithResult {
    * }
    * }}}
    */
-  def executeInsert1[A](generatedColumn: String, otherColumns: String*)(generatedKeysParser: ResultSetParser[A] = SqlParser.scalar[Long].singleOpt)(implicit connection: Connection): Try[A] = execInsert[A](preparedStatement(_, generatedColumn, otherColumns), generatedKeysParser, ColumnAliaser.empty)
+  def executeInsert1[A](generatedColumn: String, otherColumns: String*)(
+      generatedKeysParser: ResultSetParser[A] = SqlParser.scalar[Long].singleOpt
+  )(implicit connection: Connection): Try[A] =
+    execInsert[A](preparedStatement(_, generatedColumn, otherColumns), generatedKeysParser, ColumnAliaser.empty)
 
   /**
    * Executes this SQL as an insert statement.
@@ -173,12 +187,25 @@ private[anorm] trait Sql extends WithResult {
    * }
    * }}}
    */
-  def executeInsert2[A](generatedColumn: String, otherColumns: String*)(generatedKeysParser: ResultSetParser[A] = SqlParser.scalar[Long].singleOpt, aliaser: ColumnAliaser)(implicit connection: Connection): Try[A] = execInsert[A](preparedStatement(_, generatedColumn, otherColumns), generatedKeysParser, aliaser)
+  def executeInsert2[A](generatedColumn: String, otherColumns: String*)(
+      generatedKeysParser: ResultSetParser[A] = SqlParser.scalar[Long].singleOpt,
+      aliaser: ColumnAliaser
+  )(implicit connection: Connection): Try[A] =
+    execInsert[A](preparedStatement(_, generatedColumn, otherColumns), generatedKeysParser, aliaser)
 
-  private def execInsert[A](prep: Connection => ManagedResource[PreparedStatement], generatedKeysParser: ResultSetParser[A], as: ColumnAliaser)(implicit connection: Connection): Try[A] = Sql.asTry(generatedKeysParser, prep(connection).flatMap { stmt =>
-    stmt.executeUpdate()
-    managed(stmt.getGeneratedKeys)
-  }, resultSetOnFirstRow, as)
+  private def execInsert[A](
+      prep: Connection => ManagedResource[PreparedStatement],
+      generatedKeysParser: ResultSetParser[A],
+      as: ColumnAliaser
+  )(implicit connection: Connection): Try[A] = Sql.asTry(
+    generatedKeysParser,
+    prep(connection).flatMap { stmt =>
+      stmt.executeUpdate()
+      managed(stmt.getGeneratedKeys)
+    },
+    resultSetOnFirstRow,
+    as
+  )
 
   /**
    * Executes this SQL query, and returns its result.
@@ -208,50 +235,75 @@ object Sql { // TODO: Rename to SQL
     if (onFirstRow) Cursor.onFirstRow(res, as) else Cursor(res, as)
   }
 
-  private[anorm] def withResult[T](res: ManagedResource[ResultSet], onFirstRow: Boolean, as: ColumnAliaser)(op: Option[Cursor] => T): ManagedResource[T] =
+  private[anorm] def withResult[T](res: ManagedResource[ResultSet], onFirstRow: Boolean, as: ColumnAliaser)(
+      op: Option[Cursor] => T
+  ): ManagedResource[T] =
     res.map(rs => op(unsafeCursor(rs, onFirstRow, as)))
 
-  private[anorm] def asTry[T](parser: ResultSetParser[T], rs: ManagedResource[ResultSet], onFirstRow: Boolean, as: ColumnAliaser): Try[T] = Try(withResult(rs, onFirstRow, as)(parser) acquireAndGet identity).flatMap(_.fold[Try[T]](_.toFailure, TrySuccess.apply))
+  private[anorm] def asTry[T](
+      parser: ResultSetParser[T],
+      rs: ManagedResource[ResultSet],
+      onFirstRow: Boolean,
+      as: ColumnAliaser
+  ): Try[T] = Try(withResult(rs, onFirstRow, as)(parser).acquireAndGet(identity))
+    .flatMap(_.fold[Try[T]](_.toFailure, TrySuccess.apply))
 
   @annotation.tailrec
-  private[anorm] def zipParams(ns: Seq[String], vs: Seq[ParameterValue], ps: Map[String, ParameterValue]): Map[String, ParameterValue] = (ns.headOption, vs.headOption) match {
+  private[anorm] def zipParams(
+      ns: Seq[String],
+      vs: Seq[ParameterValue],
+      ps: Map[String, ParameterValue]
+  ): Map[String, ParameterValue] = (ns.headOption, vs.headOption) match {
     case (Some(n), Some(v)) => zipParams(ns.tail, vs.tail, ps + (n -> v))
-    case _ => ps
+    case _                  => ps
   }
 
   @inline
   private def toSql(ts: List[StatementToken], buf: StringBuilder): StringBuilder = ts.foldLeft(buf) {
     case (sql, StringToken(t)) => sql ++= t
-    case (sql, PercentToken) => sql += '%'
-    case (sql, _) => sql
+    case (sql, PercentToken)   => sql += '%'
+    case (sql, _)              => sql
   }
 
   @SuppressWarnings(Array("IncorrectlyNamedExceptions"))
   final class MissingParameter(after: String, placeholder: String)
-    extends java.util.NoSuchElementException(
-      s"Missing parameter value for '$placeholder' after: $after") with NoStackTrace {
+      extends java.util.NoSuchElementException(s"Missing parameter value for '$placeholder' after: $after")
+      with NoStackTrace {
     @deprecated("Create this exception while supplying the missing placeholder value", "2.6.1")
     def this(after: String) = this(after, "<unknown>")
   }
 
-  object NoMorePlaceholder extends Exception("No more placeholder")
-    with NoStackTrace {}
+  object NoMorePlaceholder extends Exception("No more placeholder") with NoStackTrace {}
 
   @deprecated("Internal function: will be made private", "2.5.2")
-  def prepareQuery(tok: List[TokenGroup], ns: List[String], ps: Map[String, ParameterValue], i: Int, buf: StringBuilder, vs: List[(Int, ParameterValue)]): Try[(String, Seq[(Int, ParameterValue)])] = query(tok, ns, ps, i, buf, vs)
+  def prepareQuery(
+      tok: List[TokenGroup],
+      ns: List[String],
+      ps: Map[String, ParameterValue],
+      i: Int,
+      buf: StringBuilder,
+      vs: List[(Int, ParameterValue)]
+  ): Try[(String, Seq[(Int, ParameterValue)])] = query(tok, ns, ps, i, buf, vs)
 
   @annotation.tailrec
-  private[anorm] def query(tok: Seq[TokenGroup], ns: List[String], ps: Map[String, ParameterValue], i: Int, buf: StringBuilder, vs: List[(Int, ParameterValue)]): Try[(String, Seq[(Int, ParameterValue)])] =
+  private[anorm] def query(
+      tok: Seq[TokenGroup],
+      ns: List[String],
+      ps: Map[String, ParameterValue],
+      i: Int,
+      buf: StringBuilder,
+      vs: List[(Int, ParameterValue)]
+  ): Try[(String, Seq[(Int, ParameterValue)])] =
     (tok.headOption, ns.headOption.flatMap(ps.lift(_))) match {
       case (Some(TokenGroup(pr, Some(_))), Some(p)) => {
         val (frag, c): (String, Int) = p.toSql
-        val prepared = toSql(pr, buf) ++= frag
+        val prepared                 = toSql(pr, buf) ++= frag
 
         query(tok.tail, ns.tail, ps, i + c, prepared, (i, p) :: vs)
       }
 
       case (Some(TokenGroup(pr, Some(placeholder))), _) =>
-        Failure(new MissingParameter(pr mkString ", ", placeholder))
+        Failure(new MissingParameter(pr.mkString(", "), placeholder))
 
       case (Some(TokenGroup(pr, None)), _) =>
         query(tok.tail, ns, ps, i, toSql(pr, buf), vs)
@@ -262,6 +314,6 @@ object Sql { // TODO: Rename to SQL
       }
 
       case (None, _) | (_, None) => TrySuccess(buf.toString -> vs.reverse)
-      case _ => Failure(NoMorePlaceholder)
+      case _                     => Failure(NoMorePlaceholder)
     }
 }

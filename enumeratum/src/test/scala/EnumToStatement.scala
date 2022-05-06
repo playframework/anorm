@@ -1,10 +1,6 @@
 package anorm.enumeratum
 
-import acolyte.jdbc.{
-  DefinedParameter => DParam,
-  ParameterMetaData => ParamMeta,
-  UpdateExecution
-}
+import acolyte.jdbc.{ DefinedParameter => DParam, ParameterMetaData => ParamMeta, UpdateExecution }
 import acolyte.jdbc.AcolyteDSL.{ connection, handleStatement }
 import acolyte.jdbc.Implicits._
 
@@ -90,13 +86,11 @@ final class EnumToStatementSpec extends org.specs2.mutable.Specification {
   private val SqlStr = ParamMeta.Str
 
   private def withConnection[A](repr: String)(f: java.sql.Connection => A): A =
-    f(
-      connection(
-        handleStatement withUpdateHandler {
-          case UpdateExecution("set-str ?", DParam(`repr`, SqlStr) :: Nil) => 1 /* case ok */
+    f(connection(handleStatement.withUpdateHandler {
+      case UpdateExecution("set-str ?", DParam(`repr`, SqlStr) :: Nil) => 1 /* case ok */
 
-          case _ =>
-            throw new Exception("Unexpected execution")
+      case _ =>
+        throw new Exception("Unexpected execution")
 
-        }))
+    }))
 }

@@ -10,7 +10,7 @@ private[anorm] object ValueToStatement {
   def apply[T <: AnyVal: c.WeakTypeTag](c: whitebox.Context): c.Expr[ToStatement[T]] = {
     @inline def abort(msg: String) = c.abort(c.enclosingPosition, msg)
 
-    val tpe = c.weakTypeTag[T].tpe
+    val tpe  = c.weakTypeTag[T].tpe
     val ctor = tpe.decl(c.universe.termNames.CONSTRUCTOR).asMethod
 
     import c.universe._
@@ -36,9 +36,7 @@ private[anorm] object ValueToStatement {
             }"""
 
             if (debugEnabled) {
-              c.echo(
-                c.enclosingPosition,
-                s"ToStatement for $tpe: ${pretty(c)(generated)}")
+              c.echo(c.enclosingPosition, s"ToStatement for $tpe: ${pretty(c)(generated)}")
             }
 
             c.Expr[ToStatement[T]](generated)

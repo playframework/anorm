@@ -36,8 +36,7 @@ trait AnormValueEnum[ValueType, EntryType <: ValueEnumEntry[ValueType]] {
  * Enum implementation for Int enum members
  * that provides instances for Anorm typeclasses
  */
-trait IntAnormValueEnum[EntryType <: IntEnumEntry]
-  extends AnormValueEnum[Int, EntryType] {
+trait IntAnormValueEnum[EntryType <: IntEnumEntry] extends AnormValueEnum[Int, EntryType] {
   this: IntEnum[EntryType] =>
 
   implicit val column: Column[EntryType] = ValueEnumColumn(this)
@@ -50,8 +49,7 @@ trait IntAnormValueEnum[EntryType <: IntEnumEntry]
  * Enum implementation for Long enum members
  * that provides instances for Anorm typeclasses.
  */
-trait LongAnormValueEnum[EntryType <: LongEnumEntry]
-  extends AnormValueEnum[Long, EntryType] {
+trait LongAnormValueEnum[EntryType <: LongEnumEntry] extends AnormValueEnum[Long, EntryType] {
   this: LongEnum[EntryType] =>
 
   implicit val column: Column[EntryType] = ValueEnumColumn(this)
@@ -64,8 +62,7 @@ trait LongAnormValueEnum[EntryType <: LongEnumEntry]
  * Enum implementation for Short enum members
  * that provides instances for Anorm typeclasses
  */
-trait ShortAnormValueEnum[EntryType <: ShortEnumEntry]
-  extends AnormValueEnum[Short, EntryType] {
+trait ShortAnormValueEnum[EntryType <: ShortEnumEntry] extends AnormValueEnum[Short, EntryType] {
   this: ShortEnum[EntryType] =>
 
   implicit val column: Column[EntryType] = ValueEnumColumn(this)

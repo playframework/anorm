@@ -6,12 +6,7 @@ import acolyte.jdbc.{ RowList, RowLists }
 import acolyte.jdbc.AcolyteDSL.withQueryResult
 import acolyte.jdbc.Implicits._
 
-import anorm.{
-  AnormException,
-  SQL,
-  SqlParser,
-  TypeDoesNotMatch
-}
+import anorm.{ AnormException, SQL, SqlParser, TypeDoesNotMatch }
 
 import SqlParser.scalar
 
@@ -33,11 +28,9 @@ final class EnumColumnSpec extends org.specs2.mutable.Specification {
     "not be parsed as Column from invalid String representation" >> {
       def spec(title: String, repr: String) =
         title in withQueryResult(RowLists.stringList :+ repr) { implicit con =>
-          SQL("SELECT v").as(scalar[Dummy].single) must throwA[Exception].
-            like {
-              case NonFatal(cause) =>
-                cause must_=== AnormException(TypeDoesNotMatch(s"Invalid value: $repr").message)
-            }
+          SQL("SELECT v").as(scalar[Dummy].single) must throwA[Exception].like { case NonFatal(cause) =>
+            cause must_=== AnormException(TypeDoesNotMatch(s"Invalid value: $repr").message)
+          }
         }
 
       spec("a (!= A as sensitive)", "a")
@@ -48,14 +41,12 @@ final class EnumColumnSpec extends org.specs2.mutable.Specification {
     "not be parsed as Column from non-String values" >> {
       def spec(tpe: String, rowList: RowList[_]) =
         tpe in withQueryResult(rowList) { implicit con =>
-          SQL("SELECT v").as(scalar[Dummy].single) must throwA[Exception].like {
-            case NonFatal(cause) =>
-              cause must_=== AnormException(
-                TypeDoesNotMatch(s"Column '.null' expected to be String; Found $tpe").message)
+          SQL("SELECT v").as(scalar[Dummy].single) must throwA[Exception].like { case NonFatal(cause) =>
+            cause must_=== AnormException(TypeDoesNotMatch(s"Column '.null' expected to be String; Found $tpe").message)
           }
         }
 
-      spec("float", RowLists.floatList :+ 0.1F)
+      spec("float", RowLists.floatList :+ 0.1f)
       spec("int", RowLists.intList :+ 1)
     }
   }
@@ -80,15 +71,15 @@ final class EnumColumnSpec extends org.specs2.mutable.Specification {
     "not be parsed as Column from non-String values" >> {
       def spec(tpe: String, rowList: RowList[_]) =
         tpe in withQueryResult(rowList) { implicit con =>
-          SQL("SELECT v").as(scalar[InsensitiveDummy].single).
-            aka("result") must throwA[Exception].like {
-              case NonFatal(cause) =>
-                cause must_=== AnormException(
-                  TypeDoesNotMatch(s"Column '.null' expected to be String; Found $tpe").message)
-            }
+          SQL("SELECT v").as(scalar[InsensitiveDummy].single).aka("result") must throwA[Exception].like {
+            case NonFatal(cause) =>
+              cause must_=== AnormException(
+                TypeDoesNotMatch(s"Column '.null' expected to be String; Found $tpe").message
+              )
+          }
         }
 
-      spec("float", RowLists.floatList :+ 0.1F)
+      spec("float", RowLists.floatList :+ 0.1f)
       spec("int", RowLists.intList :+ 1)
     }
   }
@@ -108,11 +99,10 @@ final class EnumColumnSpec extends org.specs2.mutable.Specification {
     "not be parsed as Column from invalid String representation" >> {
       def spec(title: String, repr: String) =
         title in withQueryResult(RowLists.stringList :+ repr) { implicit con =>
-          SQL("SELECT v").as(scalar[LowercaseDummy].single).
-            aka("result") must throwA[Exception].like {
-              case NonFatal(cause) =>
-                cause must_=== AnormException(TypeDoesNotMatch(s"Invalid value: $repr").message)
-            }
+          SQL("SELECT v").as(scalar[LowercaseDummy].single).aka("result") must throwA[Exception].like {
+            case NonFatal(cause) =>
+              cause must_=== AnormException(TypeDoesNotMatch(s"Invalid value: $repr").message)
+          }
         }
 
       spec("Apple (!= apple as lowercase)", "Apple")
@@ -123,15 +113,15 @@ final class EnumColumnSpec extends org.specs2.mutable.Specification {
     "not be parsed as Column from non-String values" >> {
       def spec(tpe: String, rowList: RowList[_]) =
         tpe in withQueryResult(rowList) { implicit con =>
-          SQL("SELECT v").as(scalar[LowercaseDummy].single).
-            aka("result") must throwA[Exception].like {
-              case NonFatal(cause) =>
-                cause must_=== AnormException(
-                  TypeDoesNotMatch(s"Column '.null' expected to be String; Found $tpe").message)
-            }
+          SQL("SELECT v").as(scalar[LowercaseDummy].single).aka("result") must throwA[Exception].like {
+            case NonFatal(cause) =>
+              cause must_=== AnormException(
+                TypeDoesNotMatch(s"Column '.null' expected to be String; Found $tpe").message
+              )
+          }
         }
 
-      spec("float", RowLists.floatList :+ 0.1F)
+      spec("float", RowLists.floatList :+ 0.1f)
       spec("int", RowLists.intList :+ 1)
     }
   }
@@ -151,11 +141,10 @@ final class EnumColumnSpec extends org.specs2.mutable.Specification {
     "not be parsed as Column from invalid String representation" >> {
       def spec(title: String, repr: String) =
         title in withQueryResult(RowLists.stringList :+ repr) { implicit con =>
-          SQL("SELECT v").as(scalar[UppercaseDummy].single).
-            aka("result") must throwA[Exception].like {
-              case NonFatal(cause) =>
-                cause must_=== AnormException(TypeDoesNotMatch(s"Invalid value: $repr").message)
-            }
+          SQL("SELECT v").as(scalar[UppercaseDummy].single).aka("result") must throwA[Exception].like {
+            case NonFatal(cause) =>
+              cause must_=== AnormException(TypeDoesNotMatch(s"Invalid value: $repr").message)
+          }
         }
 
       spec("Apple (!= APPLE as uppercase)", "Apple")
@@ -166,15 +155,15 @@ final class EnumColumnSpec extends org.specs2.mutable.Specification {
     "not be parsed as Column from non-String values" >> {
       def spec(tpe: String, rowList: RowList[_]) =
         tpe in withQueryResult(rowList) { implicit con =>
-          SQL("SELECT v").as(scalar[UppercaseDummy].single).
-            aka("result") must throwA[Exception].like {
-              case NonFatal(cause) =>
-                cause must_=== AnormException(
-                  TypeDoesNotMatch(s"Column '.null' expected to be String; Found $tpe").message)
-            }
+          SQL("SELECT v").as(scalar[UppercaseDummy].single).aka("result") must throwA[Exception].like {
+            case NonFatal(cause) =>
+              cause must_=== AnormException(
+                TypeDoesNotMatch(s"Column '.null' expected to be String; Found $tpe").message
+              )
+          }
         }
 
-      spec("float", RowLists.floatList :+ 0.1F)
+      spec("float", RowLists.floatList :+ 0.1f)
       spec("int", RowLists.intList :+ 1)
     }
   }

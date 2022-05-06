@@ -25,9 +25,8 @@ sealed trait PGJson {
     s.setObject(i, pgObject, JsValueParameterMetaData.jdbcType)
   }
 
-  implicit object JsObjectParameterMetaData
-    extends ParameterMetaData[JsObject] {
-    val sqlType = "JSONB"
+  implicit object JsObjectParameterMetaData extends ParameterMetaData[JsObject] {
+    val sqlType  = "JSONB"
     val jdbcType = java.sql.Types.OTHER
   }
 
@@ -80,7 +79,6 @@ sealed trait PGJson {
    * SQL("INSERT INTO test(id, json) VALUES({id}, {json})").
    *   on("id" -> "bar", "json" -> noVal).executeUpdate()
    * }}}
-   *
    */
   def asNullableJson[T](value: Option[T])(implicit w: Writes[T]): ParameterValue = {
     implicit val writeNullableJsonToStatement: ToStatement[Option[T]] = ToStatement[Option[T]] { (s, index, v) =>
@@ -89,11 +87,11 @@ sealed trait PGJson {
       }
     }
 
-    ParameterValue from value
+    ParameterValue.from(value)
   }
 
   implicit object JsValueParameterMetaData extends ParameterMetaData[JsValue] {
-    val sqlType = "JSONB"
+    val sqlType  = "JSONB"
     val jdbcType = java.sql.Types.OTHER
   }
 
@@ -110,21 +108,22 @@ sealed trait PGJson {
   implicit val jsValueColumn: Column[JsValue] =
     Column.nonNull[JsValue] { (value, meta) =>
       @inline def str: Option[String] = value match {
-        case o: PGobject => Some(o.getValue)
-        case s: String => Some(s)
-        case clob: java.sql.Clob => Some(
-          clob.getSubString(1, clob.length.toInt))
-        case _ => None
+        case o: PGobject         => Some(o.getValue)
+        case s: String           => Some(s)
+        case clob: java.sql.Clob => Some(clob.getSubString(1, clob.length.toInt))
+        case _                   => None
       }
 
       str match {
-        case Some(js) => try {
-          Right(Json parse js)
-        } catch {
-          case NonFatal(cause) => Left(SqlRequestError(cause))
-        }
+        case Some(js) =>
+          try {
+            Right(Json.parse(js))
+          } catch {
+            case NonFatal(cause) => Left(SqlRequestError(cause))
+          }
 
-        case _ => Left(TypeDoesNotMatch(s"Cannot convert $value:${value.getClass} to JsValue for column ${meta.column}"))
+        case _ =>
+          Left(TypeDoesNotMatch(s"Cannot convert $value:${value.getClass} to JsValue for column ${meta.column}"))
       }
     }
 
@@ -140,8 +139,7 @@ sealed trait PGJson {
    */
   implicit val jsObjectColumn: Column[JsObject] = jsValueColumn.mapResult {
     case obj @ JsObject(_) => Right(obj)
-    case js => Left(TypeDoesNotMatch(
-      s"JsValue found, but JsObject expected: ${Json stringify js}"))
+    case js                => Left(TypeDoesNotMatch(s"JsValue found, but JsObject expected: ${Json.stringify(js)}"))
   }
 
   /**
@@ -161,9 +159,8 @@ sealed trait PGJson {
    */
   def fromJson[T](implicit r: Reads[T]): Column[T] = jsValueColumn.mapResult {
     r.reads(_) match {
-      case JsSuccess(v, _) => Right(v)
-      case err @ JsError(_) => Left(TypeDoesNotMatch(
-        s"JSON validation error: ${Json.stringify(JsError toJson err)}"))
+      case JsSuccess(v, _)  => Right(v)
+      case err @ JsError(_) => Left(TypeDoesNotMatch(s"JSON validation error: ${Json.stringify(JsError.toJson(err))}"))
     }
   }
 }

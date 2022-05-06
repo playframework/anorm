@@ -10,12 +10,10 @@ class ParameterMetaDataSpec extends org.specs2.mutable.Specification {
   "Metadata" should {
     "be provided for parameter" >> {
       "of type JsValue" in {
-        Option(implicitly[ParameterMetaData[JsValue]].sqlType).
-          aka("SQL type") must beSome("JSONB")
+        Option(implicitly[ParameterMetaData[JsValue]].sqlType).aka("SQL type") must beSome("JSONB")
       }
       "of type JsObject" in {
-        Option(implicitly[ParameterMetaData[JsObject]].sqlType).
-          aka("SQL type") must beSome("JSONB")
+        Option(implicitly[ParameterMetaData[JsObject]].sqlType).aka("SQL type") must beSome("JSONB")
       }
     }
   }

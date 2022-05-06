@@ -13,8 +13,7 @@ private[anorm] object Inspect {
 
     @annotation.tailrec
     def allSubclasses(path: Compat.Trav[Symbol], subclasses: Set[Type]): Set[Type] = path.headOption match {
-      case Some(cls: ClassSymbol) if (
-        tpeSym != cls && cls.selfType.baseClasses.contains(tpeSym)) => {
+      case Some(cls: ClassSymbol) if tpeSym != cls && cls.selfType.baseClasses.contains(tpeSym) => {
         val newSub: Set[Type] = if (!cls.isCaseClass) {
           c.warning(c.enclosingPosition, s"cannot handle class ${cls.fullName}: no case accessor")
           Set.empty
@@ -26,9 +25,9 @@ private[anorm] object Inspect {
         allSubclasses(path.tail, subclasses ++ newSub)
       }
 
-      case Some(o: ModuleSymbol) if (
-        o.companion == NoSymbol && // not a companion object
-        o.typeSignature.baseClasses.contains(tpeSym)) => {
+      case Some(o: ModuleSymbol)
+          if o.companion == NoSymbol && // not a companion object
+            o.typeSignature.baseClasses.contains(tpeSym) => {
         val newSub: Set[Type] = if (!o.moduleClass.asClass.isCaseClass) {
           c.warning(c.enclosingPosition, s"cannot handle object ${o.fullName}: no case accessor")
           Set.empty
@@ -37,9 +36,10 @@ private[anorm] object Inspect {
         allSubclasses(path.tail, subclasses ++ newSub)
       }
 
-      case Some(o: ModuleSymbol) if (
-        o.companion == NoSymbol // not a companion object
-      ) => allSubclasses(path.tail, subclasses)
+      case Some(o: ModuleSymbol)
+          if o.companion == NoSymbol // not a companion object
+          =>
+        allSubclasses(path.tail, subclasses)
 
       case Some(_) => allSubclasses(path.tail, subclasses)
 
@@ -55,33 +55,36 @@ private[anorm] object Inspect {
     import c.universe._
 
     val tpeArgs: List[c.Type] = tpe match {
-      case TypeRef(_, _, args) => args
+      case TypeRef(_, _, args)        => args
       case i @ ClassInfoType(_, _, _) => i.typeArgs
-      case _ => List.empty
+      case _                          => List.empty
     }
 
     val companion = tpe.typeSymbol.companion.typeSignature
-    val apply = companion.decl(TermName("apply")).asMethod
+    val apply     = companion.decl(TermName("apply")).asMethod
 
-    if (tpeArgs.isEmpty) Map.empty else {
+    if (tpeArgs.isEmpty) Map.empty
+    else {
       // Need apply rather than ctor to resolve parameter symbols
 
       if (apply.paramLists.isEmpty) {
         Map.empty
       } else {
-        Compat.toMap(Compat.lazyZip(apply.typeParams, tpeArgs)) {
-          case (sym, ty) => sym.fullName -> ty
+        Compat.toMap(Compat.lazyZip(apply.typeParams, tpeArgs)) { case (sym, ty) =>
+          sym.fullName -> ty
         }
       }
     }
   }
 
   def pretty(c: whitebox.Context)(tree: c.Tree): String =
-    c.universe.show(tree).replaceAll("anorm.", "").
-      replaceAll(f"\\.\\$$tilde", " ~ ").
-      replaceAll("\\(SqlParser([^(]+)\\(([^)]+)\\)\\)", f"SqlParser$$1($$2)").
-      replaceAll(f"\\.\\$$plus\\(([0-9]+)\\)", f" + $$1").
-      replaceAll("\\(([^ ]+) @ _\\)", f"($$1)").
-      replaceAll(f"\\$$tilde", "~")
+    c.universe
+      .show(tree)
+      .replaceAll("anorm.", "")
+      .replaceAll(f"\\.\\$$tilde", " ~ ")
+      .replaceAll("\\(SqlParser([^(]+)\\(([^)]+)\\)\\)", f"SqlParser$$1($$2)")
+      .replaceAll(f"\\.\\$$plus\\(([0-9]+)\\)", f" + $$1")
+      .replaceAll("\\(([^ ]+) @ _\\)", f"($$1)")
+      .replaceAll(f"\\$$tilde", "~")
 
 }

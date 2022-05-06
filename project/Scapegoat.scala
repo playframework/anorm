@@ -7,15 +7,15 @@ object Scapegoat {
   import ScapegoatSbtPlugin.autoImport._
 
   val settings = Seq(
-    ThisBuild / scapegoatVersion := "1.4.13",
-    ThisBuild / scapegoatReports := Seq("text"),
-    ThisBuild / scapegoatDisabledInspections := Seq(
-      "FinalModifierOnCaseClass"),
+    ThisBuild / scapegoatVersion             := "1.4.13",
+    ThisBuild / scapegoatReports             := Seq("text"),
+    ThisBuild / scapegoatDisabledInspections := Seq("FinalModifierOnCaseClass"),
     pomPostProcess := transformPomDependencies { dep =>
       if ((dep \ "groupId").text == "com.sksamuel.scapegoat") {
         None
       } else Some(dep)
-    })
+    }
+  )
 
   import scala.xml.{ Elem => XmlElem, Node => XmlNode }
   private def transformPomDependencies(tx: XmlElem => Option[XmlNode]): XmlNode => XmlNode = { node: XmlNode =>
@@ -24,10 +24,11 @@ object Scapegoat {
 
     val tr = new RuleTransformer(new RewriteRule {
       override def transform(node: XmlNode): NodeSeq = node match {
-        case e: XmlElem if e.label == "dependency" => tx(e) match {
-          case Some(n) => n
-          case _ => NodeSeq.Empty
-        }
+        case e: XmlElem if e.label == "dependency" =>
+          tx(e) match {
+            case Some(n) => n
+            case _       => NodeSeq.Empty
+          }
 
         case _ => node
       }
@@ -35,7 +36,7 @@ object Scapegoat {
 
     tr.transform(node).headOption match {
       case Some(transformed) => transformed
-      case _ => sys.error("Fails to transform the POM")
+      case _                 => sys.error("Fails to transform the POM")
     }
   }
 }

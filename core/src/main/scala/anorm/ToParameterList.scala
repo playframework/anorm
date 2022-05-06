@@ -8,8 +8,7 @@ trait ToParameterList[A] extends (A => List[NamedParameter]) {
 
 /** Companion/factory for [[ToParameterList]]. */
 object ToParameterList {
-  private class FunctionalToParameterList[A](
-    f: A => List[NamedParameter]) extends ToParameterList[A] {
+  private class FunctionalToParameterList[A](f: A => List[NamedParameter]) extends ToParameterList[A] {
     def apply(value: A) = f(value)
   }
 
@@ -39,4 +38,3 @@ object ToParameterList {
    */
   def empty[A] = apply[A] { _ => List.empty }
 }
-

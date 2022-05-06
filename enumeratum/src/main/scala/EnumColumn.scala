@@ -24,13 +24,11 @@ private[enumeratum] object EnumColumn {
       case (s: String, _) =>
         extract(s) match {
           case Some(result) => Right(result)
-          case None => Left(TypeDoesNotMatch(s"Invalid value: $s"))
+          case None         => Left(TypeDoesNotMatch(s"Invalid value: $s"))
         }
 
       case (_, meta) =>
-        Left(
-          TypeDoesNotMatch(
-            s"Column '${meta.column.qualified}' expected to be String; Found ${meta.clazz}"))
+        Left(TypeDoesNotMatch(s"Column '${meta.column.qualified}' expected to be String; Found ${meta.clazz}"))
     }
 
 }

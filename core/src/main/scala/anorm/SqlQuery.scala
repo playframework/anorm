@@ -38,7 +38,12 @@ sealed trait SqlQuery {
 
   private def defaultParser: RowParser[Row] = RowParser(Success(_))
 
-  private[anorm] def copy(statement: TokenizedStatement = this.stmt, paramsInitialOrder: List[String] = this.paramsInitialOrder, timeout: Option[Int] = this.timeout, fetchSize: Option[Int] = this.fetchSize) = SqlQuery.prepare(statement, paramsInitialOrder, timeout, fetchSize)
+  private[anorm] def copy(
+      statement: TokenizedStatement = this.stmt,
+      paramsInitialOrder: List[String] = this.paramsInitialOrder,
+      timeout: Option[Int] = this.timeout,
+      fetchSize: Option[Int] = this.fetchSize
+  ) = SqlQuery.prepare(statement, paramsInitialOrder, timeout, fetchSize)
 
   override def toString = s"SqlQuery($stmt, $paramsInitialOrder, timeout = $timeout, fetchSize = $fetchSize)"
 
@@ -55,15 +60,21 @@ object SqlQuery {
    * @param params Parameter names in initial order (see [[SqlQuery.paramsInitialOrder]])
    * @param tmout Query execution timeout (see [[SqlQuery.timeout]])
    */
-  private[anorm] def prepare(st: TokenizedStatement, params: Seq[String] = List.empty, tmout: Option[Int] = None, fetchSz: Option[Int] = None): SqlQuery = new SqlQuery {
-    val stmt = st
+  private[anorm] def prepare(
+      st: TokenizedStatement,
+      params: Seq[String] = List.empty,
+      tmout: Option[Int] = None,
+      fetchSz: Option[Int] = None
+  ): SqlQuery = new SqlQuery {
+    val stmt               = st
     val paramsInitialOrder = params.toList
-    val timeout = tmout
-    val fetchSize = fetchSz
+    val timeout            = tmout
+    val fetchSize          = fetchSz
   }
 
   /** Extractor for pattern matching */
-  def unapply(query: SqlQuery): Option[(TokenizedStatement, List[String], Option[Int])] = Option(query).map(q => (q.stmt, q.paramsInitialOrder, q.timeout))
+  def unapply(query: SqlQuery): Option[(TokenizedStatement, List[String], Option[Int])] =
+    Option(query).map(q => (q.stmt, q.paramsInitialOrder, q.timeout))
 
   final class SqlQueryShow(query: SqlQuery) extends Show {
     def show = s"SqlQuery(${Show.mkString(query.stmt)}, timeout = ${query.timeout}, fetchSize = ${query.fetchSize})"

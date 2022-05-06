@@ -11,9 +11,8 @@ import resource.ManagedResource
  * @constructor create a result with a result set
  * @param resultSet Result set from executed query
  */
-final case class SqlQueryResult(
-  resultSet: ManagedResource[java.sql.ResultSet],
-  resultSetOnFirstRow: Boolean = false) extends WithResult {
+final case class SqlQueryResult(resultSet: ManagedResource[java.sql.ResultSet], resultSetOnFirstRow: Boolean = false)
+    extends WithResult {
 
   protected def resultSet(c: Connection) = resultSet
 
@@ -43,7 +42,6 @@ final case class SqlQueryResult(
    * }}}
    */
   def statementWarning: Option[SQLWarning] =
-    statement.acquireFor(_.getWarnings).fold[Option[SQLWarning]](
-      _.headOption.map(new SQLWarning(_)), Option(_))
+    statement.acquireFor(_.getWarnings).fold[Option[SQLWarning]](_.headOption.map(new SQLWarning(_)), Option(_))
 
 }

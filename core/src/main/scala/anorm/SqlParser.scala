@@ -25,7 +25,7 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
         val input: Either[SqlMappingError, (Any, MetaDataItem)] = (for {
           m <- row.metaData.ms.headOption
           v <- row.data.headOption
-        } yield v -> m) toRight NoColumnsInReturnedResult
+        } yield v -> m).toRight(NoColumnsInReturnedResult)
 
         val parsed = Compat.rightFlatMap[SqlMappingError, SqlRequestError, (Any, MetaDataItem), T](input) {
           case in @ (_, m) =>
@@ -52,10 +52,11 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
     @annotation.tailrec
     def go(data: List[Any], meta: Seq[MetaDataItem], out: T): SqlResult[T] =
       (data.headOption, meta.headOption) match {
-        case (Some(d), Some(m)) => f(out, d, m) match {
-          case Left(err) => Error(err)
-          case Right(res) => go(data.tail, meta.tail, res)
-        }
+        case (Some(d), Some(m)) =>
+          f(out, d, m) match {
+            case Left(err)  => Error(err)
+            case Right(res) => go(data.tail, meta.tail, res)
+          }
         case _ => Success(out)
       }
 
@@ -102,7 +103,8 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    *       map(SqlParser.flatten).single)
    * }}}
    */
-  def array[T](columnPosition: Int)(implicit c: Column[Array[T]]): RowParser[Array[T]] = get[Array[T]](columnPosition)(c)
+  def array[T](columnPosition: Int)(implicit c: Column[Array[T]]): RowParser[Array[T]] =
+    get[Array[T]](columnPosition)(c)
 
   /**
    * Parses specified column as float.
@@ -180,7 +182,8 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    *   SQL("SELECT name, data FROM files").as(parser.single)
    * }}}
    */
-  def binaryStream(columnName: String)(implicit c: Column[InputStream]): RowParser[InputStream] = get[InputStream](columnName)(c)
+  def binaryStream(columnName: String)(implicit c: Column[InputStream]): RowParser[InputStream] =
+    get[InputStream](columnName)(c)
 
   /**
    * Parses specified column as binary stream.
@@ -196,7 +199,8 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    *   SQL("SELECT name, data FROM files").as(parser.single)
    * }}}
    */
-  def binaryStream(columnPosition: Int)(implicit c: Column[InputStream]): RowParser[InputStream] = get[InputStream](columnPosition)(c)
+  def binaryStream(columnPosition: Int)(implicit c: Column[InputStream]): RowParser[InputStream] =
+    get[InputStream](columnPosition)(c)
 
   /**
    * Parses specified column as boolean.
@@ -270,7 +274,8 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    *   SQL("SELECT name, data FROM files").as(parser.single)
    * }}}
    */
-  def byteArray(columnName: String)(implicit c: Column[Array[Byte]]): RowParser[Array[Byte]] = get[Array[Byte]](columnName)(c)
+  def byteArray(columnName: String)(implicit c: Column[Array[Byte]]): RowParser[Array[Byte]] =
+    get[Array[Byte]](columnName)(c)
 
   /**
    * Parses specified column as binary stream.
@@ -285,7 +290,8 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    *   SQL("SELECT name, data FROM files").as(parser.single)
    * }}}
    */
-  def byteArray(columnPosition: Int)(implicit c: Column[Array[Byte]]): RowParser[Array[Byte]] = get[Array[Byte]](columnPosition)(c)
+  def byteArray(columnPosition: Int)(implicit c: Column[Array[Byte]]): RowParser[Array[Byte]] =
+    get[Array[Byte]](columnPosition)(c)
 
   /**
    * Parses specified column as double.
@@ -481,10 +487,13 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    *   SQL("SELECT title FROM Books").as(get[String]("title").single)
    * }}}
    */
-  def get[T](name: String)(implicit @deprecatedName(Symbol("extractor")) c: Column[T]): RowParser[T] = RowParser { row =>
-    (Compat.rightFlatMap(row get name) { in =>
-      parseColumn(row, name, c, in)
-    }).fold(Error(_), Success(_))
+  def get[T](name: String)(implicit @deprecatedName(Symbol("extractor")) c: Column[T]): RowParser[T] = RowParser {
+    row =>
+      Compat
+        .rightFlatMap(row.get(name)) { in =>
+          parseColumn(row, name, c, in)
+        }
+        .fold(Error(_), Success(_))
   }
 
   /**
@@ -503,9 +512,11 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    */
   def get[T](position: Int)(implicit @deprecatedName(Symbol("extractor")) c: Column[T]): RowParser[T] =
     RowParser { row =>
-      (Compat.rightFlatMap(row.getIndexed(position - 1)) { in =>
-        parseColumn(row, in._2.column.qualified, c, in)
-      }).fold(Error(_), Success(_))
+      Compat
+        .rightFlatMap(row.getIndexed(position - 1)) { in =>
+          parseColumn(row, in._2.column.qualified, c, in)
+        }
+        .fold(Error(_), Success(_))
     }
 
   /**
@@ -526,7 +537,12 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
   def matches[T: Column](column: String, value: T): RowParser[Boolean] =
     get[T](column).?.map(_.fold(false) { _ == value })
 
-  @inline private def parseColumn[T](row: Row, name: String, c: Column[T], input: (Any, MetaDataItem)): Either[SqlRequestError, T] = c.tupled(input).left.map {
+  @inline private def parseColumn[T](
+      row: Row,
+      name: String,
+      c: Column[T],
+      input: (Any, MetaDataItem)
+  ): Either[SqlRequestError, T] = c.tupled(input).left.map {
     case UnexpectedNullableFound(_) =>
       ColumnNotFound(name, row)
 
@@ -539,9 +555,10 @@ sealed trait DeprecatedSqlParser { _: SqlParser.type =>
 
   @deprecated("Use `matches[T]`", "2.5.4")
   @SuppressWarnings(Array("AsInstanceOf"))
-  def matches[TT: Column, T <: TT](column: String, value: T)(implicit c: Column[TT]): RowParser[Boolean] = get[TT](column)(c).?.map(_.fold(false) {
-    _.asInstanceOf[T] == value
-  })
+  def matches[TT: Column, T <: TT](column: String, value: T)(implicit c: Column[TT]): RowParser[Boolean] =
+    get[TT](column)(c).?.map(_.fold(false) {
+      _.asInstanceOf[T] == value
+    })
 
 }
 
@@ -592,8 +609,7 @@ trait RowParser[+A] extends (Row => SqlResult[A]) { parent =>
    * @param f Collecting function
    */
   def collect[B](otherwise: String)(f: PartialFunction[A, B]): RowParser[B] =
-    RowParser(parent(_).flatMap(f.lift(_).
-      fold[SqlResult[B]](Error(SqlMappingError(otherwise)))(Success(_))))
+    RowParser(parent(_).flatMap(f.lift(_).fold[SqlResult[B]](Error(SqlMappingError(otherwise)))(Success(_))))
 
   def flatMap[B](k: A => RowParser[B]): RowParser[B] =
     RowParser(row => parent(row).flatMap(k(_)(row)))
@@ -650,7 +666,7 @@ trait RowParser[+A] extends (Row => SqlResult[A]) { parent =>
   def |[B >: A](p: RowParser[B]): RowParser[B] = RowParser { row =>
     parent(row) match {
       case Error(_) => p(row)
-      case a => a
+      case a        => a
     }
   }
 
@@ -733,18 +749,18 @@ trait RowParser[+A] extends (Row => SqlResult[A]) { parent =>
 /** Parser for scalar row (row of one single column). */
 sealed trait ScalarRowParser[+A] extends RowParser[A] {
   override def singleOpt: ResultSetParser[Option[A]] = ResultSetParser {
-    case Some(cur) if cur.next.isEmpty => cur.row.data match {
-      case (null :: _) | Nil =>
-        // one column present in head row, but column value is null
-        Success(Option.empty[A])
+    case Some(cur) if cur.next.isEmpty =>
+      cur.row.data match {
+        case (null :: _) | Nil =>
+          // one column present in head row, but column value is null
+          Success(Option.empty[A])
 
-      case _ :: _ => map(Some(_))(cur.row)
-    }
+        case _ :: _ => map(Some(_))(cur.row)
+      }
 
     case None => Success(Option.empty[A])
 
-    case _ => Error(SqlMappingError(
-      "too many rows when expecting a single one"))
+    case _ => Error(SqlMappingError("too many rows when expecting a single one"))
   }
 }
 
@@ -768,10 +784,11 @@ private[anorm] object ResultSetParser {
     @annotation.tailrec
     def sequence(results: List[A], cur: Option[Cursor]): SqlResult[List[A]] =
       cur match {
-        case Some(c) => p(c.row) match {
-          case Success(a) => sequence(a :: results, c.next)
-          case Error(msg) => Error(msg)
-        }
+        case Some(c) =>
+          p(c.row) match {
+            case Success(a) => sequence(a :: results, c.next)
+            case Error(msg) => Error(msg)
+          }
         case _ => Success(results.reverse)
       }
 
@@ -781,22 +798,21 @@ private[anorm] object ResultSetParser {
   def nonEmptyList[A](p: RowParser[A]): ResultSetParser[List[A]] =
     ResultSetParser(rows =>
       if (rows.isEmpty) Error(SqlMappingError("Empty Result Set"))
-      else list(p)(rows))
+      else list(p)(rows)
+    )
 
   def single[A](p: RowParser[A]): ResultSetParser[A] = ResultSetParser {
     case Some(cur) if cur.next.isEmpty => p(cur.row)
-    case None => Error(SqlMappingError("No rows when expecting a single one"))
-    case _ => Error(SqlMappingError(
-      "too many rows when expecting a single one"))
+    case None                          => Error(SqlMappingError("No rows when expecting a single one"))
+    case _                             => Error(SqlMappingError("too many rows when expecting a single one"))
 
   }
 
   def singleOpt[A](p: RowParser[A]): ResultSetParser[Option[A]] =
     ResultSetParser {
       case Some(cur) if cur.next.isEmpty => p.map(Some(_))(cur.row)
-      case None => Success(Option.empty[A])
-      case _ => Error(SqlMappingError(
-        "too many rows when expecting a single one"))
+      case None                          => Success(Option.empty[A])
+      case _                             => Error(SqlMappingError("too many rows when expecting a single one"))
     }
 
 }

@@ -34,7 +34,8 @@ object NamedParameter {
    * val p: NamedParameter = "name" -> 1L
    * }}}
    */
-  implicit def namedWithString[V](t: (String, V))(implicit c: ToParameterValue[V]): NamedParameter = NamedParameter(t._1, c(t._2))
+  implicit def namedWithString[V](t: (String, V))(implicit c: ToParameterValue[V]): NamedParameter =
+    NamedParameter(t._1, c(t._2))
 
   @deprecated("Use `string` based in `ToParameterValue`", "2.5.4")
   def string[V](t: (String, V))(implicit c: V => ParameterValue): NamedParameter = NamedParameter(t._1, c(t._2))
@@ -60,7 +61,8 @@ object NamedParameter {
    * val p: NamedParameter = 'name -> 1L
    * }}}
    */
-  implicit def namedWithSymbol[V](t: (Symbol, V))(implicit c: ToParameterValue[V]): NamedParameter = NamedParameter(t._1.name, c(t._2))
+  implicit def namedWithSymbol[V](t: (Symbol, V))(implicit c: ToParameterValue[V]): NamedParameter =
+    NamedParameter(t._1.name, c(t._2))
 
   @deprecated("Use `string` based in `ToParameterValue`", "2.5.4")
   def symbol[V](t: (Symbol, V))(implicit c: V => ParameterValue): NamedParameter = NamedParameter(t._1.name, c(t._2))

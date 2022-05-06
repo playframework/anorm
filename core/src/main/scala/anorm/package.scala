@@ -45,7 +45,7 @@ package object anorm {
       Some(that.asInstanceOf[TimestampWrapper2].timestampValue)
     } catch {
       case _: NoSuchMethodException => None
-      case _: SQLException => None
+      case _: SQLException          => None
     }
   }
 
@@ -60,7 +60,7 @@ package object anorm {
       Some(that.asInstanceOf[StringWrapper2].stringValue)
     } catch {
       case _: NoSuchMethodException => None
-      case _: SQLException => None
+      case _: SQLException          => None
     }
   }
 
@@ -77,8 +77,7 @@ package object anorm {
    * }}}
    */
   @SuppressWarnings(Array("MethodNames", "TryGet" /* TODO: Make it safer */ ))
-  def SQL(stmt: String): SqlQuery = SqlStatementParser.parse(stmt).
-    map(ts => SqlQuery.prepare(ts, ts.names)).get
+  def SQL(stmt: String): SqlQuery = SqlStatementParser.parse(stmt).map(ts => SqlQuery.prepare(ts, ts.names)).get
 
   /**
    * Creates an SQL query using String Interpolation feature.
@@ -114,7 +113,15 @@ package object anorm {
   }
 
   @annotation.tailrec
-  private[anorm] def tokenize(ti: Iterator[Any], tks: List[StatementToken], parts: Seq[String], ps: Seq[ParameterValue], gs: Seq[TokenGroup], ns: Seq[String], m: Map[String, ParameterValue]): (TokenizedStatement, Map[String, ParameterValue]) = if (ti.hasNext) ti.next() match {
+  private[anorm] def tokenize(
+      ti: Iterator[Any],
+      tks: List[StatementToken],
+      parts: Seq[String],
+      ps: Seq[ParameterValue],
+      gs: Seq[TokenGroup],
+      ns: Seq[String],
+      m: Map[String, ParameterValue]
+  ): (TokenizedStatement, Map[String, ParameterValue]) = if (ti.hasNext) ti.next() match {
     case "%" => tokenize(ti, PercentToken :: tks, parts, ps, gs, ns, m)
     case s: String =>
       tokenize(ti, StringToken(s) :: tks, parts, ps, gs, ns, m)
@@ -123,56 +130,65 @@ package object anorm {
   else {
     if (tks.nonEmpty) {
       gs match {
-        case prev :: groups => ps.headOption match {
-          case Some(v) => prev match {
-            case TokenGroup(StringToken(str) :: gts, pl) if (
-              str endsWith "#" /* escaped part */ ) =>
+        case prev :: groups =>
+          ps.headOption match {
+            case Some(v) =>
+              prev match {
+                case TokenGroup(StringToken(str) :: gts, pl) if str.endsWith("#") /* escaped part */ =>
+                  val before =
+                    if (str == "#") gts.reverse
+                    else {
+                      StringToken(str.dropRight(1)) :: gts.reverse
+                    }
+                  val ng = TokenGroup(
+                    (tks ::: StringToken(v.show) ::
+                      before),
+                    pl
+                  )
 
-              val before = if (str == "#") gts.reverse else {
-                StringToken(str dropRight 1) :: gts.reverse
+                  tokenize(ti, tks.tail, parts, ps.tail, (ng :: groups), ns, m)
+
+                case _ =>
+                  val ng = TokenGroup(tks, None)
+                  val n  = '_'.toString + ns.size
+                  tokenize(
+                    ti,
+                    tks.tail,
+                    parts,
+                    ps.tail,
+                    (ng :: prev.copy(placeholder = Some(n)) :: groups),
+                    (n +: ns),
+                    m + (n -> v)
+                  )
               }
-              val ng = TokenGroup((tks ::: StringToken(v.show) ::
-                before), pl)
-
-              tokenize(ti, tks.tail, parts, ps.tail, (ng :: groups), ns, m)
-
             case _ =>
-              val ng = TokenGroup(tks, None)
-              val n = '_'.toString + ns.size
-              tokenize(ti, tks.tail, parts, ps.tail,
-                (ng :: prev.copy(placeholder = Some(n)) :: groups),
-                (n +: ns), m + (n -> v))
+              sys.error(s"No parameter value for placeholder: ${gs.size}")
           }
-          case _ =>
-            sys.error(s"No parameter value for placeholder: ${gs.size}")
-        }
-        case _ => tokenize(ti, tks.tail, parts, ps,
-          List(TokenGroup(tks, None)), ns, m)
+        case _ => tokenize(ti, tks.tail, parts, ps, List(TokenGroup(tks, None)), ns, m)
       }
-    } else parts.headOption match {
-      case Some(part) =>
-        val it = Compat.javaEnumIterator[java.lang.Object](
-          new StringTokenizer(part, "%", true))
+    } else
+      parts.headOption match {
+        case Some(part) =>
+          val it = Compat.javaEnumIterator[java.lang.Object](new StringTokenizer(part, "%", true))
 
-        if (!it.hasNext /* empty */ ) {
-          tokenize(it, List(StringToken("")), parts.tail, ps, gs, ns, m)
-        } else tokenize(it, tks, parts.tail, ps, gs, ns, m)
+          if (!it.hasNext /* empty */ ) {
+            tokenize(it, List(StringToken("")), parts.tail, ps, gs, ns, m)
+          } else tokenize(it, tks, parts.tail, ps, gs, ns, m)
 
-      case _ =>
-        val groups = ((gs match {
-          case TokenGroup(List(StringToken("")), None) :: tgs => tgs // trim end
-          case _ => gs
-        }).collect {
-          case TokenGroup(pr, pl) => TokenGroup(pr.reverse, pl)
-        }).reverse
+        case _ =>
+          val groups = (gs match {
+            case TokenGroup(List(StringToken("")), None) :: tgs => tgs // trim end
+            case _                                              => gs
+          }).collect { case TokenGroup(pr, pl) =>
+            TokenGroup(pr.reverse, pl)
+          }.reverse
 
-        TokenizedStatement(groups, ns.reverse) -> m
-    }
+          TokenizedStatement(groups, ns.reverse) -> m
+      }
   }
 
   // Optimized resource typeclass not using reflection
-  object StatementResource
-    extends resource.Resource[java.sql.PreparedStatement] {
+  object StatementResource extends resource.Resource[java.sql.PreparedStatement] {
 
     def close(stmt: java.sql.PreparedStatement) = stmt.close()
 
@@ -190,6 +206,7 @@ package object anorm {
 
   /** Activable features */
   object features {
+
     /**
      * Column conversion that will accept `Byte` and `Short` values to represent booleans.
      * This is useful if the underlying database or driver does not support boolean datatype.
@@ -202,7 +219,6 @@ package object anorm {
      * {{{
      * import anorm.features.columnByteToBoolean
      * }}}
-     *
      */
 
     implicit val columnByteToBoolean: Column[Boolean] = Column.columnByteToBoolean

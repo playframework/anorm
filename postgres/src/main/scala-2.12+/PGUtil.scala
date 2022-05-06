@@ -9,6 +9,6 @@ private[anorm] object PGUtil {
     implicit val writeJsonToStatement: ToStatement[T] =
       jsValueToStatement[JsValue].contramap(w.writes(_))
 
-    ParameterValue from value
+    ParameterValue.from(value)
   }
 }

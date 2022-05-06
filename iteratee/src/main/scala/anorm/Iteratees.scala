@@ -36,13 +36,14 @@ object Iteratees {
 
     @annotation.tailrec
     def pushToChannel(cursor: Option[Cursor]): Unit = cursor match {
-      case Some(cursor) => cursor.row.as(parser) match {
-        case Success(elem) => {
-          chan.push(elem)
-          pushToChannel(cursor.next)
+      case Some(cursor) =>
+        cursor.row.as(parser) match {
+          case Success(elem) => {
+            chan.push(elem)
+            pushToChannel(cursor.next)
+          }
+          case Failure(err) => chan.end(err)
         }
-        case Failure(err) => chan.end(err)
-      }
       case _ => chan.eofAndEnd()
     }
 
@@ -58,6 +59,7 @@ object Iteratees {
    * @param ec the execution context
    * @param connection the JDBC connection, which must not be closed until the returned enumerator is [[https://www.playframework.com/documentation/2.4.0/api/scala/index.html#play.api.libs.iteratee.Enumerator@onDoneEnumerating%28callback:=%3EUnit%29%28implicitec:scala.concurrent.ExecutionContext%29:play.api.libs.iteratee.Enumerator[E] done]].
    */
-  def from(sql: => Sql)(implicit ec: ExecutionContext, connnection: Connection): Enumerator[Row] = from(sql, RowParser.successful)
+  def from(sql: => Sql)(implicit ec: ExecutionContext, connnection: Connection): Enumerator[Row] =
+    from(sql, RowParser.successful)
 
 }

@@ -3,6 +3,7 @@ package anorm
 /** Set value as prepared SQL statement fragment. */
 @annotation.implicitNotFound("No SQL renderer found for parameter of type ${A}: `anorm.ToSql[${A}]` required")
 trait ToSql[A] {
+
   /**
    * Prepares SQL fragment for value,
    * using `java.sql.PreparedStatement` syntax (with '?').
@@ -16,8 +17,7 @@ trait ToSql[A] {
 object ToSql {
   import scala.collection.immutable.SortedSet
 
-  private class FunctionalToSql[A](
-    f: A => (String, Int)) extends ToSql[A] {
+  private class FunctionalToSql[A](f: A => (String, Int)) extends ToSql[A] {
     def fragment(value: A): (String, Int) = f(value)
   }
 
@@ -64,12 +64,14 @@ object ToSql {
    * // "?, ?, ?"
    * }}}
    */
-  implicit def sortedSetToSql[A](implicit conv: ToSql[A] = ToSql.missing[A]): ToSql[SortedSet[A]] = traversableToSql[A, SortedSet[A]]
+  implicit def sortedSetToSql[A](implicit conv: ToSql[A] = ToSql.missing[A]): ToSql[SortedSet[A]] =
+    traversableToSql[A, SortedSet[A]]
 
   /**
    * Returns fragment for each value, separated by ", ".
    */
-  implicit def streamToSql[A](implicit conv: ToSql[A] = ToSql.missing[A]): ToSql[Compat.LazyLst[A]] = traversableToSql[A, Compat.LazyLst[A]]
+  implicit def streamToSql[A](implicit conv: ToSql[A] = ToSql.missing[A]): ToSql[Compat.LazyLst[A]] =
+    traversableToSql[A, Compat.LazyLst[A]]
 
   /**
    * Returns fragment for each value, separated by ", ".
@@ -79,23 +81,24 @@ object ToSql {
    * // "?, ?, ?"
    * }}}
    */
-  implicit def vectorToSql[A](implicit conv: ToSql[A] = ToSql.missing[A]): ToSql[Vector[A]] = traversableToSql[A, Vector[A]]
+  implicit def vectorToSql[A](implicit conv: ToSql[A] = ToSql.missing[A]): ToSql[Vector[A]] =
+    traversableToSql[A, Vector[A]]
 
   /** Returns fragment for each value, with custom formatting. */
   implicit def seqParamToSql[A](implicit conv: ToSql[A] = ToSql.missing[A]) =
     ToSql[SeqParameter[A]] { p =>
       val before = p.before.getOrElse("")
-      val after = p.after.getOrElse("")
+      val after  = p.after.getOrElse("")
       val c: A => (String, Int) =
         if (conv == null) _ => ("?" -> 1) else conv.fragment
 
-      val sql = p.values.foldLeft(new StringBuilder() -> 0) {
-        case ((sb, i), v) =>
-          val frag = c(v)
-          val st = if (i > 0) sb ++= p.separator ++= before ++= frag._1
+      val sql = p.values.foldLeft(new StringBuilder() -> 0) { case ((sb, i), v) =>
+        val frag = c(v)
+        val st =
+          if (i > 0) sb ++= p.separator ++= before ++= frag._1
           else sb ++= before ++= frag._1
 
-          (st ++= after, i + frag._2)
+        (st ++= after, i + frag._2)
       }
 
       sql._1.toString -> sql._2
@@ -105,12 +108,11 @@ object ToSql {
     val c: A => (String, Int) =
       if (conv == null) _ => ("?" -> 1) else conv.fragment
 
-    val sql = values.foldLeft(new StringBuilder() -> 0) {
-      case ((sb, i), v) =>
-        val frag = c(v)
-        val st = if (i > 0) sb ++= ", " ++= frag._1 else sb ++= frag._1
+    val sql = values.foldLeft(new StringBuilder() -> 0) { case ((sb, i), v) =>
+      val frag = c(v)
+      val st   = if (i > 0) sb ++= ", " ++= frag._1 else sb ++= frag._1
 
-        (st, i + frag._2)
+      (st, i + frag._2)
     }
 
     sql._1.toString -> sql._2

@@ -10,7 +10,7 @@ ThisBuild / dynverVTagPrefix := false
           case Some(previousVer) => {
             val current = (for {
               Seq(maj, min, patch) <- Stable.unapplySeq(previousVer)
-              nextPatch <- scala.util.Try(patch.toInt).map(_ + 1).toOption
+              nextPatch            <- scala.util.Try(patch.toInt).map(_ + 1).toOption
             } yield {
               val suffix = descr.commitSuffix.sha
               s"${maj}.${min}.${nextPatch}-${suffix}-SNAPSHOT"

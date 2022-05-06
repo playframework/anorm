@@ -38,6 +38,7 @@ object Macro {
    * Naming strategy, to map each class property to the corresponding column.
    */
   trait ColumnNaming extends (String => String) {
+
     /**
      * Returns the column name for the class property.
      *
@@ -48,6 +49,7 @@ object Macro {
 
   /** Naming companion */
   object ColumnNaming {
+
     /** Keep the original property name. */
     object Identity extends ColumnNaming {
       def apply(property: String) = property
@@ -72,6 +74,7 @@ object Macro {
   }
 
   trait Discriminate extends (String => String) {
+
     /**
      * Returns the value representing the specified type,
      * to be used as a discriminator within a sealed family.
@@ -95,6 +98,7 @@ object Macro {
   }
 
   trait DiscriminatorNaming extends (String => String) {
+
     /**
      * Returns the name for the discriminator column.
      * @param familyType the name of the famility type (sealed trait)
@@ -131,7 +135,8 @@ object Macro {
 
   @deprecated("Use [[namedParserImpl2]]", "2.5.2")
   @SuppressWarnings(Array("MethodNames" /*deprecated*/ ))
-  def namedParserImpl_[T: c.WeakTypeTag](c: whitebox.Context)(names: c.Expr[String]*): c.Expr[T] = namedParserImpl2[T](c)(names: _*)
+  def namedParserImpl_[T: c.WeakTypeTag](c: whitebox.Context)(names: c.Expr[String]*): c.Expr[T] =
+    namedParserImpl2[T](c)(names: _*)
 
   def namedParserImpl2[T: c.WeakTypeTag](c: whitebox.Context)(names: c.Expr[String]*): c.Expr[T] = {
     import c.universe._
@@ -139,26 +144,28 @@ object Macro {
     namedParserImpl4[T](c)(names) { n => q"$n" }
   }
 
-  def namedParserImpl3[T: c.WeakTypeTag](c: whitebox.Context)(naming: c.Expr[ColumnNaming], names: c.Expr[String]*): c.Expr[T] = {
+  def namedParserImpl3[T: c.WeakTypeTag](
+      c: whitebox.Context
+  )(naming: c.Expr[ColumnNaming], names: c.Expr[String]*): c.Expr[T] = {
     import c.universe._
 
     namedParserImpl4[T](c)(names) { n => q"$naming($n)" }
   }
 
-  private def namedParserImpl4[T: c.WeakTypeTag](c: whitebox.Context)(names: Seq[c.Expr[String]])(naming: c.Expr[String] => c.universe.Tree): c.Expr[T] = {
+  private def namedParserImpl4[T: c.WeakTypeTag](
+      c: whitebox.Context
+  )(names: Seq[c.Expr[String]])(naming: c.Expr[String] => c.universe.Tree): c.Expr[T] = {
     import c.universe._
 
-    val tpe = c.weakTypeTag[T].tpe
-    val ctor = tpe.decl(termNames.CONSTRUCTOR).asMethod
+    val tpe    = c.weakTypeTag[T].tpe
+    val ctor   = tpe.decl(termNames.CONSTRUCTOR).asMethod
     val params = ctor.paramLists.flatten
 
     @SuppressWarnings(Array("ListSize"))
     def psz = params.size
 
     if (names.size < psz) {
-      c.abort(
-        c.enclosingPosition,
-        s"no column name for parameters: ${show(names)} < $params")
+      c.abort(c.enclosingPosition, s"no column name for parameters: ${show(names)} < $params")
 
     } else {
       parserImpl[T](c) { (t, _, i) =>
@@ -168,9 +175,7 @@ object Macro {
             q"anorm.SqlParser.get[$t]($cn)"
           }
 
-          case _ => c.abort(
-            c.enclosingPosition,
-            s"missing column name for parameter $i")
+          case _ => c.abort(c.enclosingPosition, s"missing column name for parameter $i")
         }
       }
     }
@@ -196,18 +201,27 @@ object Macro {
     import c.universe.reify
 
     @silent def discriminator = reify(DiscriminatorNaming.Default)
-    @silent def discriminate = reify(Discriminate.Identity)
+    @silent def discriminate  = reify(Discriminate.Identity)
 
     sealedParserImpl(c)(discriminator, discriminate)
   }
 
-  def sealedParserImpl2[T: c.WeakTypeTag](c: whitebox.Context)(naming: c.Expr[DiscriminatorNaming]): c.Expr[RowParser[T]] = sealedParserImpl(c)(naming, c.universe.reify(Discriminate.Identity))
+  def sealedParserImpl2[T: c.WeakTypeTag](c: whitebox.Context)(
+      naming: c.Expr[DiscriminatorNaming]
+  ): c.Expr[RowParser[T]] = sealedParserImpl(c)(naming, c.universe.reify(Discriminate.Identity))
 
-  def sealedParserImpl3[T: c.WeakTypeTag](c: whitebox.Context)(discriminate: c.Expr[Discriminate]): c.Expr[RowParser[T]] = sealedParserImpl(c)(c.universe.reify(DiscriminatorNaming.Default), discriminate)
+  def sealedParserImpl3[T: c.WeakTypeTag](c: whitebox.Context)(
+      discriminate: c.Expr[Discriminate]
+  ): c.Expr[RowParser[T]] = sealedParserImpl(c)(c.universe.reify(DiscriminatorNaming.Default), discriminate)
 
-  def sealedParserImpl[T: c.WeakTypeTag](c: whitebox.Context)(naming: c.Expr[DiscriminatorNaming], discriminate: c.Expr[Discriminate]): c.Expr[RowParser[T]] = anorm.macros.SealedRowParserImpl[T](c)(naming, discriminate)
+  def sealedParserImpl[T: c.WeakTypeTag](
+      c: whitebox.Context
+  )(naming: c.Expr[DiscriminatorNaming], discriminate: c.Expr[Discriminate]): c.Expr[RowParser[T]] =
+    anorm.macros.SealedRowParserImpl[T](c)(naming, discriminate)
 
-  private def parserImpl[T: c.WeakTypeTag](c: whitebox.Context)(genGet: (c.universe.Type, String, Int) => c.universe.Tree): c.Expr[T] = anorm.macros.RowParserImpl[T](c)(genGet)
+  private def parserImpl[T: c.WeakTypeTag](c: whitebox.Context)(
+      genGet: (c.universe.Type, String, Int) => c.universe.Tree
+  ): c.Expr[T] = anorm.macros.RowParserImpl[T](c)(genGet)
 
   /**
    * Returns a row parser generated for a case class `T`,
@@ -351,7 +365,8 @@ object Macro {
    * @tparam T $familyTParam
    */
   @SuppressWarnings(Array("UnusedMethodParameter" /* macro */ ))
-  def sealedParser[T](naming: Macro.DiscriminatorNaming, discriminate: Macro.Discriminate): RowParser[T] = macro sealedParserImpl[T]
+  def sealedParser[T](naming: Macro.DiscriminatorNaming, discriminate: Macro.Discriminate): RowParser[T] =
+    macro sealedParserImpl[T]
 
   /**
    * Returns a column parser for specified value class.
@@ -389,7 +404,7 @@ object Macro {
   def toParameters[T]: ToParameterList[T] = macro defaultParameters[T]
 
   def defaultParameters[T: c.WeakTypeTag](c: whitebox.Context): c.Expr[ToParameterList[T]] = {
-    val tpe = c.weakTypeTag[T].tpe
+    val tpe    = c.weakTypeTag[T].tpe
     val tpeSym = tpe.typeSymbol.asClass
 
     @inline def abort(msg: String) = c.abort(c.enclosingPosition, msg)
@@ -401,8 +416,7 @@ object Macro {
     } else {
       @silent def p = c.universe.reify("_")
 
-      ToParameterListImpl.caseClass[T](c)(
-        Seq.empty[c.Expr[Macro.ParameterProjection]], p)
+      ToParameterListImpl.caseClass[T](c)(Seq.empty[c.Expr[Macro.ParameterProjection]], p)
     }
   }
 
@@ -423,7 +437,10 @@ object Macro {
   @SuppressWarnings(Array("UnusedMethodParameter" /*macro*/ ))
   def toParameters[T](separator: String): ToParameterList[T] = macro parametersDefaultNames[T]
 
-  def parametersDefaultNames[T: c.WeakTypeTag](c: whitebox.Context)(separator: c.Expr[String]): c.Expr[ToParameterList[T]] = ToParameterListImpl.caseClass[T](c)(Seq.empty[c.Expr[Macro.ParameterProjection]], separator)
+  def parametersDefaultNames[T: c.WeakTypeTag](
+      c: whitebox.Context
+  )(separator: c.Expr[String]): c.Expr[ToParameterList[T]] =
+    ToParameterListImpl.caseClass[T](c)(Seq.empty[c.Expr[Macro.ParameterProjection]], separator)
 
   /**
    * @param projection $projectionParam
@@ -442,7 +459,9 @@ object Macro {
   @SuppressWarnings(Array("UnusedMethodParameter" /*macro*/ ))
   def toParameters[T](projection: Macro.ParameterProjection*): ToParameterList[T] = macro configuredParameters[T]
 
-  def configuredParameters[T: c.WeakTypeTag](c: whitebox.Context)(projection: c.Expr[Macro.ParameterProjection]*): c.Expr[ToParameterList[T]] = {
+  def configuredParameters[T: c.WeakTypeTag](
+      c: whitebox.Context
+  )(projection: c.Expr[Macro.ParameterProjection]*): c.Expr[ToParameterList[T]] = {
     import c.universe.reify
 
     @silent def p = reify("_")
@@ -456,9 +475,13 @@ object Macro {
    * @tparam T $caseTParam
    */
   @SuppressWarnings(Array("UnusedMethodParameter" /*macro*/ ))
-  def toParameters[T](separator: String, projection: Macro.ParameterProjection*): ToParameterList[T] = macro parametersWithSeparator[T]
+  def toParameters[T](separator: String, projection: Macro.ParameterProjection*): ToParameterList[T] =
+    macro parametersWithSeparator[T]
 
-  def parametersWithSeparator[T: c.WeakTypeTag](c: whitebox.Context)(separator: c.Expr[String], projection: c.Expr[Macro.ParameterProjection]*): c.Expr[ToParameterList[T]] = ToParameterListImpl.caseClass[T](c)(projection, separator)
+  def parametersWithSeparator[T: c.WeakTypeTag](
+      c: whitebox.Context
+  )(separator: c.Expr[String], projection: c.Expr[Macro.ParameterProjection]*): c.Expr[ToParameterList[T]] =
+    ToParameterListImpl.caseClass[T](c)(projection, separator)
 
   /**
    * Returns a `ToStatement` for the specified ValueClass.
@@ -483,21 +506,20 @@ object Macro {
    * @param parameterName the name of for the parameter,
    * if different from the property one, otherwise `None`
    */
-  case class ParameterProjection(
-    propertyName: String,
-    parameterName: Option[String] = None)
+  case class ParameterProjection(propertyName: String, parameterName: Option[String] = None)
 
   object ParameterProjection {
-    def apply(
-      propertyName: String,
-      parameterName: String): ParameterProjection =
+    def apply(propertyName: String, parameterName: String): ParameterProjection =
       ParameterProjection(propertyName, Option(parameterName))
   }
 
   private[anorm] lazy val debugEnabled =
-    Option(System.getProperty("anorm.macro.debug")).
-      filterNot(_.isEmpty).map(_.toLowerCase).map { v =>
+    Option(System.getProperty("anorm.macro.debug"))
+      .filterNot(_.isEmpty)
+      .map(_.toLowerCase)
+      .map { v =>
         "true".equals(v) || v.substring(0, 1) == "y"
-      }.getOrElse(false)
+      }
+      .getOrElse(false)
 
 }
