@@ -6,8 +6,6 @@ addSbtPlugin("com.typesafe.play" % "interplay" % sys.props.get("interplay.versio
 
 addSbtPlugin("com.typesafe" % "sbt-mima-plugin" % "1.1.0")
 
-addSbtPlugin("org.scalariform" % "sbt-scalariform" % "1.8.3")
-
 addSbtPlugin("com.sksamuel.scapegoat" %% "sbt-scapegoat" % "1.1.1")
 
 addSbtPlugin("com.github.sbt" % "sbt-unidoc" % "0.5.0")
