@@ -7,7 +7,7 @@ object Scapegoat {
   import ScapegoatSbtPlugin.autoImport._
 
   val settings = Seq(
-    ThisBuild / scapegoatVersion             := "1.4.13",
+    ThisBuild / scapegoatVersion             := "1.4.14",
     ThisBuild / scapegoatReports             := Seq("text"),
     ThisBuild / scapegoatDisabledInspections := Seq("FinalModifierOnCaseClass"),
     pomPostProcess := transformPomDependencies { dep =>
