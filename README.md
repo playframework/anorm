@@ -1,5 +1,7 @@
 # Anorm
 
+[![Build Status](https://github.com/playframework/anorm/actions/workflows/build-test.yml/badge.svg)](https://github.com/playframework/anorm/actions/workflows/build-test.yml)
+
 Anorm is a simple data access layer that uses plain SQL to interact with the database and provides an API to parse and transform the resulting datasets.
 
 - [User guide](https://playframework.github.io/anorm/)
@@ -23,8 +25,6 @@ Anorm can be built from this source repository.
 To run the tests, use:
 
     sbt test
-
-[CircleCI](https://circleci.com/gh/playframework/anorm): ![CircleCI build status](https://circleci.com/gh/playframework/anorm.png?branch=main)
 
 ## Documentation
 

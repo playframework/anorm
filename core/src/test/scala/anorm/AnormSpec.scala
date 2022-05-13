@@ -285,9 +285,9 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
     ) { implicit c =>
 
       SQL("SELECT * FROM test")
-        .as((SqlParser.int("id") ~ SqlParser.str("val").?).map({ case id ~ v =>
+        .as((SqlParser.int("id") ~ SqlParser.str("val").?).map { case id ~ v =>
           (id -> v)
-        } *))
+        } *)
         .aka("parsed list") must_=== List(9 -> None, 2 -> Some("str"))
     }
 
