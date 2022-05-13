@@ -1,6 +1,6 @@
 ThisBuild / dynverVTagPrefix := false
 
-(ThisBuild / version) := {
+ThisBuild / version := {
   val Stable = """([0-9]+)\.([0-9]+)\.([0-9]+)""".r
 
   (ThisBuild / dynverGitDescribeOutput).value match {

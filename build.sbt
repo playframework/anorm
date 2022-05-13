@@ -52,17 +52,17 @@ val armShading = Seq(
   assembly / assemblyOption ~= {
     _.withIncludeScala(false) // java libraries shouldn't include scala
   },
-  (assembly / assemblyJarName) := {
+  assembly / assemblyJarName := {
     CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((maj, min)) => s"anorm_${maj}.${min}-${version.value}.jar"
-      case _                => "anorm.jar"
+      case Some(maj, min) => s"anorm_${maj}.${min}-${version.value}.jar"
+      case _              => "anorm.jar"
     }
   },
   assembly / assemblyShadeRules := Seq.empty,
-  (assembly / assemblyExcludedJars) := (assembly / fullClasspath).value.filter {
+  assembly / assemblyExcludedJars := (assembly / fullClasspath).value.filter {
     !_.data.getName.startsWith("scala-arm")
   },
-  (assembly / assemblyMergeStrategy) := {
+  assembly / assemblyMergeStrategy := {
     val tokPrefixes =
       Seq("PercentToken", "Show", "StatementToken", "StringShow", "StringToken", "TokenGroup", "TokenizedStatement")
 
@@ -84,8 +84,8 @@ val armShading = Seq(
       }
     }
   },
-  makePom                := makePom.dependsOn(assembly).value,
-  (Compile / packageBin) := assembly.value
+  makePom              := makePom.dependsOn(assembly).value,
+  Compile / packageBin := assembly.value
 )
 
 lazy val parserCombinatorsVer = Def.setting[String] {
@@ -101,14 +101,14 @@ lazy val `anorm-core` = project
   .settings(
     Seq(
       name := "anorm",
-      (Compile / sourceGenerators) += Def.task {
+      Compile / sourceGenerators += Def.task {
         Seq(GFA((Compile / sourceManaged).value / "anorm"))
       }.taskValue,
       scalacOptions ++= Seq(
         "-Xlog-free-terms",
         "-P:silencer:globalFilters=missing\\ in\\ object\\ ToSql\\ is\\ deprecated;possibilities\\ in\\ class\\ ColumnNotFound\\ is\\ deprecated;DeprecatedSqlParser\\ in\\ package\\ anorm\\ is\\ deprecated;constructor\\ deprecatedName\\ in\\ class\\ deprecatedName\\ is\\ deprecated"
       ),
-      (Test / scalacOptions) ++= {
+      Test / scalacOptions ++= {
         if (scalaBinaryVersion.value == "2.13") {
           Seq("-Ypatmat-exhaust-depth", "off", "-P:silencer:globalFilters=multiarg\\ infix\\ syntax")
         } else {
@@ -287,7 +287,7 @@ lazy val docs = project
   .configs(Docs)
   .settings(
     name := "anorm-docs",
-    (Test / unmanagedSourceDirectories) ++= {
+    Test / unmanagedSourceDirectories ++= {
       val manualDir = baseDirectory.value / "manual" / "working"
 
       (manualDir / "javaGuide" ** "code").get ++ (manualDir / "scalaGuide" ** "code").get

@@ -10,37 +10,37 @@ class ScalaAnorm extends org.specs2.mutable.Specification {
   "Code samples" title
 
   def createApp(additionalConfiguration: Map[String, _]): Application = {
-    new GuiceApplicationBuilder().configure(additionalConfiguration).build()
+    new GuiceApplicationBuilder.configure(additionalConfiguration).build()
   }
 
   "Anorm" should {
     "be usable in play" in new WithApplication(createApp(additionalConfiguration = inMemoryDatabase())) {
       val database = app.injector.instanceOf[Database]
-      //#playdb
+      // #playdb
       import anorm._
 
       database.withConnection { implicit c =>
         val _: Boolean = SQL("Select 1").execute()
       }
-      //#playdb
+      // #playdb
       ok
     }
   }
 }
 
 object MacroParsers {
-  //#macroSealedParser
+  // #macroSealedParser
   import anorm._
 
   sealed trait Family
   case class Bar(v: Int) extends Family
-  case object Lorem extends Family
+  case object Lorem      extends Family
 
   // First, RowParser instances for all the subtypes must be provided,
   // either by macros or by custom parsers
   implicit val barParser = Macro.namedParser[Bar]
-  implicit val loremParser = RowParser[Lorem.type] {
-    _ /*anyRowDiscriminatedAsLorem*/ => Success(Lorem)
+  implicit val loremParser = RowParser[Lorem.type] { _ /*anyRowDiscriminatedAsLorem*/ =>
+    Success(Lorem)
   }
 
   val familyParser = Macro.sealedParser[Family]
@@ -55,9 +55,16 @@ object MacroParsers {
         case "scalaguide.sql.MacroParsers.Lorem" =>
           implicitly[RowParser[Lorem.type]]
 
-        case (d) => RowParser.failed[Family](Error(SqlMappingError(
-          "unexpected row type \'%s\'; expected: %s".format(d, "scalaguide.sql.MacroParsers.Bar, scalaguide.sql.MacroParsers.Lorem"))))
+        case (d) =>
+          RowParser.failed[Family](
+            Error(
+              SqlMappingError(
+                "unexpected row type \'%s\'; expected: %s"
+                  .format(d, "scalaguide.sql.MacroParsers.Bar, scalaguide.sql.MacroParsers.Lorem")
+              )
+            )
+          )
       }
     }
-  //#macroSealedParser
+  // #macroSealedParser
 }
