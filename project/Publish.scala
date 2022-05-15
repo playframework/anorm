@@ -7,7 +7,6 @@ object Publish {
   val siteUrl = "https://playframework.github.io/anorm"
 
   lazy val settings = Seq(
-    publishMavenStyle      := true,
     Test / publishArtifact := false,
     pomIncludeRepository   := { _ => false },
     autoAPIMappings        := true,
