@@ -2,7 +2,7 @@ package anorm
 
 /** Convert to a list of [[NamedParameter]] */
 @annotation.implicitNotFound("No converter to SQL parameters for the type ${A}: `anorm.ToParameterList[${A}]` required")
-trait ToParameterList[A] extends (A => List[NamedParameter]) {
+trait ToParameterList[A] extends A => List[NamedParameter] {
   def apply(value: A): List[NamedParameter]
 }
 

@@ -582,7 +582,7 @@ object RowParser {
   }
 }
 
-trait RowParser[+A] extends (Row => SqlResult[A]) { parent =>
+trait RowParser[+A] extends Row => SqlResult[A] { parent =>
 
   /**
    * Returns a parser that will apply given function `f`
@@ -765,7 +765,7 @@ sealed trait ScalarRowParser[+A] extends RowParser[A] {
 }
 
 /** Parses result from the cursor. */
-sealed trait ResultSetParser[+A] extends (Option[Cursor] => SqlResult[A]) {
+sealed trait ResultSetParser[+A] extends Option[Cursor] => SqlResult[A] {
   parent =>
   def map[B](f: A => B): ResultSetParser[B] = ResultSetParser(parent(_).map(f))
 }
