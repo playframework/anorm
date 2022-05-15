@@ -26,7 +26,7 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
           .on(Symbol("id") -> 10L)
           .as(RowParser { row =>
             Success(row[String]("foo") -> row[Int]("bar"))
-          }.single) must_=== "Hello" -> 20
+          }.single) must_=== ("Hello" -> 20)
       }
     }
 
@@ -103,7 +103,7 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
           .as((SqlParser.int("id") ~ SqlParser.str("val").?).map { case id ~ v =>
             (id -> v)
           } single)
-          .aka("mapped data") must_=== 2 -> Some("str")
+          .aka("mapped data") must_=== (2 -> Some("str"))
 
       }
 
@@ -114,7 +114,7 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
             .as((SqlParser.long("id") ~ SqlParser.str("val").?).map { case id ~ v =>
               (id -> v)
             } single)
-            .aka("mapped data") must_=== 123L -> None
+            .aka("mapped data") must_=== (123L -> None)
 
       }
 
@@ -314,7 +314,7 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
 
       SQL"SELECT * FROM test"
         .fold(List.empty[(String, Int)], ColumnAliaser.empty) { (l, row) =>
-          l :+ row[String]("foo") -> row[Int]("bar")
+          l :+ (row[String]("foo") -> row[Int]("bar"))
         }
         .aka("tuple stream") must_=== Right(List("row1" -> 100, "row2" -> 200))
 
@@ -349,7 +349,7 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
 
       SQL"SELECT * FROM test"
         .foldWhile(List.empty[(String, Int)], ColumnAliaser.empty) { (l, row) =>
-          (l :+ row[String]("foo") -> row[Int]("bar")) -> true
+          (l :+ (row[String]("foo") -> row[Int]("bar"))) -> true
         }
         .aka("tuple stream") must_=== Right(List("row1" -> 100, "row2" -> 200))
     }
@@ -359,7 +359,7 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
 
       (SQL"SELECT str"
         .foldWhile(Set.empty[String], ColumnAliaser.empty) { (l, row) =>
-          if (i == 0) { i = i + 1; l + row[String]("foo") -> true }
+          if (i == 0) { i = i + 1; (l + row[String]("foo")) -> true }
           else sys.error("Failure")
 
         }
@@ -373,7 +373,7 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
 
       SQL"SELECT str"
         .foldWhile(Set.empty[String], ColumnAliaser.empty) { (l, row) =>
-          if (i == 0) { i = i + 1; l + row[String]("foo") -> true }
+          if (i == 0) { i = i + 1; (l + row[String]("foo")) -> true }
           else (l, false)
 
         }

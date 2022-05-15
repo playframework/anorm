@@ -27,7 +27,7 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
         b <- SqlParser.int("b")
       } yield (a -> b)
 
-      SQL("SELECT * FROM test").as(parser.single) must_=== "str" -> 2
+      SQL("SELECT * FROM test").as(parser.single) must_=== ("str" -> 2)
     }
 
     "fail with sub-parser when there is no data" >> {
@@ -88,7 +88,7 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
         bc <- sub.?
       } yield (a -> bc)
 
-      SQL("SELECT * FROM test").as(parser.single) must_=== "str" -> None
+      SQL("SELECT * FROM test").as(parser.single) must_=== ("str" -> None)
     }
   }
 

@@ -10,6 +10,6 @@ private[anorm] object PGUtil {
       jsValueToStatement[JsValue].set(s, i, w.writes(b))
     }
 
-    ParameterValue.from(value)
+    ParameterValue from value
   }
 }

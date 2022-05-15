@@ -31,7 +31,7 @@ class PostgreSQLSpec extends org.specs2.mutable.Specification {
 
       def withPgo[T](id: String, json: String)(f: Connection => T): T = {
         val JsVal = {
-          val pgo = new PGobject
+          val pgo = new PGobject()
           pgo.setType(JsObjectParameterMetaData.sqlType)
           pgo.setValue(json)
           pgo
@@ -94,7 +94,7 @@ class PostgreSQLSpec extends org.specs2.mutable.Specification {
     "be selected from JSONB" >> {
       val table = RowLists.rowList1(classOf[PGobject] -> "json")
       val jsonb = {
-        val pgo = new PGobject
+        val pgo = new PGobject()
         pgo.setType(JsObjectParameterMetaData.sqlType)
         pgo.setValue("""{"bar":1}""")
         pgo
