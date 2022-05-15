@@ -223,23 +223,7 @@ lazy val `anorm-iteratee` = (project in file("iteratee"))
       if (scalaBinaryVersion.value == "2.13") Set.empty[ModuleID]
       else Set(organization.value %% name.value % "2.6.0")
     },
-    publish := Def.taskDyn {
-      val p   = publish.value
-      val ver = scalaBinaryVersion.value
-
-      Def.task[Unit] {
-        if (ver == "2.13") ({})
-        else p
-      }
-    }.value,
-    publishTo := Def.taskDyn {
-      val p = publishTo.value
-
-      Def.task {
-        if (scalaBinaryVersion.value == "2.13") None
-        else p
-      }
-    }.value,
+    publish / skip := { scalaBinaryVersion.value == "2.13" },
     libraryDependencies ++= {
       if (scalaBinaryVersion.value == "2.13") Seq.empty[ModuleID]
       else
