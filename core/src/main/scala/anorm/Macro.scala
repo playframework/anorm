@@ -28,7 +28,7 @@ object Macro {
   /** Only for internal purposes */
   object Placeholder {
     implicit object Parser extends RowParser[Placeholder] {
-      val success = Success(new Placeholder)
+      val success = Success(new Placeholder())
 
       def apply(row: Row) = success
     }
@@ -37,7 +37,7 @@ object Macro {
   /**
    * Naming strategy, to map each class property to the corresponding column.
    */
-  trait ColumnNaming extends String => String {
+  trait ColumnNaming extends (String => String) {
 
     /**
      * Returns the column name for the class property.
@@ -73,7 +73,7 @@ object Macro {
       }
   }
 
-  trait Discriminate extends String => String {
+  trait Discriminate extends (String => String) {
 
     /**
      * Returns the value representing the specified type,
@@ -97,7 +97,7 @@ object Macro {
       new Function(discriminate)
   }
 
-  trait DiscriminatorNaming extends String => String {
+  trait DiscriminatorNaming extends (String => String) {
 
     /**
      * Returns the name for the discriminator column.

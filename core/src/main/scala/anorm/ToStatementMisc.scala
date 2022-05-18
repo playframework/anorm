@@ -614,7 +614,7 @@ sealed trait ToStatementPriority0 {
   @inline private def traversableToStatement[A, T <: Compat.Trav[A]](implicit c: ToStatement[A]) = new ToStatement[T]
     with NotNullGuard {
     def set(s: PreparedStatement, offset: Int, ps: T) =
-      if (ps == (null: Compat.Trav[A])) throw new IllegalArgumentException
+      if (ps == (null: Compat.Trav[A])) throw new IllegalArgumentException()
       else {
         ps.foldLeft(offset) { (i, p) => c.set(s, i, p); i + 1 }
         ()
@@ -632,7 +632,7 @@ sealed trait ToStatementPriority0 {
   implicit def arrayToParameter[A <: AnyRef](implicit m: ParameterMetaData[A]) =
     new ToStatement[Array[A]] with NotNullGuard {
       def set(s: PreparedStatement, i: Int, arr: Array[A]) =
-        if (arr == (null: AnyRef)) throw new IllegalArgumentException
+        if (arr == (null: AnyRef)) throw new IllegalArgumentException()
         else s.setArray(i, s.getConnection.createArrayOf(m.sqlType, arr.map(a => a: AnyRef)))
     }
 }

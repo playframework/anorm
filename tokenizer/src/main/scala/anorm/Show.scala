@@ -6,7 +6,7 @@ trait Show {
 }
 
 object Show {
-  trait Maker[T] extends T => Show {
+  trait Maker[T] extends (T => Show) {
 
     /** Show maker for the appropriate subject type. */
     def apply(subject: T): Show

@@ -77,7 +77,7 @@ case class SimpleSql[T](
   ): PreparedStatement = {
     @SuppressWarnings(Array("TryGet"))
     def unsafe = Sql
-      .query(sql.stmt.tokens, sql.paramsInitialOrder, params, 0, new StringBuilder, List.empty[(Int, ParameterValue)])
+      .query(sql.stmt.tokens, sql.paramsInitialOrder, params, 0, new StringBuilder(), List.empty[(Int, ParameterValue)])
       .get
 
     val (psql, vs): (String, Seq[(Int, ParameterValue)]) = unsafe
