@@ -86,15 +86,15 @@ class StatementParserSpec extends org.specs2.mutable.Specification {
       Option(c).fold("?" -> 1)(_.fragment(v))
 
     "give single-value '?' SQL fragment" in {
-      frag("str").aka("SQL fragment") must_=== ("?" -> 1)
+      frag("str").aka("SQL fragment") must_=== "?" -> 1
     }
 
     "give multi-value '?, ?, ?' SQL fragment" in {
-      frag(Seq("A", "B", "C")).aka("SQL fragment") must_=== ("?, ?, ?" -> 3)
+      frag(Seq("A", "B", "C")).aka("SQL fragment") must_=== "?, ?, ?" -> 3
     }
 
     "give multi-value 'x=? OR x=? OR x=?' SQL fragment" in {
-      frag(SeqParameter(Seq("A", "B", "C"), " OR ", "x=")).aka("SQL fragment") must_=== ("x=? OR x=? OR x=?" -> 3)
+      frag(SeqParameter(Seq("A", "B", "C"), " OR ", "x=")).aka("SQL fragment") must_=== "x=? OR x=? OR x=?" -> 3
     }
   }
 
@@ -140,7 +140,7 @@ class StatementParserSpec extends org.specs2.mutable.Specification {
         stmt1.names.toList,
         Map[String, ParameterValue]("cs" -> List("a", "b"), "id" -> 3),
         0,
-        new StringBuilder(),
+        new StringBuilder,
         List.empty[(Int, ParameterValue)]
       ) must beSuccessfulTry.like { case prepared1 =>
         (prepared1._2.aka("parameters #1") must_=== List[(Int, ParameterValue)](0 -> List("a", "b"), 2 -> 3))
@@ -150,11 +150,11 @@ class StatementParserSpec extends org.specs2.mutable.Specification {
               stmt2.names.toList,
               Map[String, ParameterValue]("cs_1" -> "a", "cs_2" -> "b", "id" -> 3),
               0,
-              new StringBuilder(),
+              new StringBuilder,
               List.empty[(Int, ParameterValue)]
             ) must beSuccessfulTry.like { case prepared2 =>
               (prepared1._1.aka("sql") must_=== prepared2._1).and(
-                prepared2._2.aka("parameters #2") must_=== (List[(Int, ParameterValue)](0 -> "a", 1 -> "b", 2 -> 3))
+                prepared2._2.aka("parameters #2") must_=== List[(Int, ParameterValue)](0 -> "a", 1 -> "b", 2 -> 3)
               )
             }
           }
@@ -164,7 +164,7 @@ class StatementParserSpec extends org.specs2.mutable.Specification {
               stmt3.names.toList,
               Map[String, ParameterValue]("cs" -> List("a", "b"), "id" -> 3),
               0,
-              new StringBuilder(),
+              new StringBuilder,
               List.empty[(Int, ParameterValue)]
             ) must beSuccessfulTry.like { case prepared3 =>
               (prepared3._1.aka("sql") must_=== prepared1._1)
@@ -197,7 +197,7 @@ class StatementParserSpec extends org.specs2.mutable.Specification {
         stmt.names.toList,
         Map.empty[String, ParameterValue],
         0,
-        new StringBuilder(),
+        new StringBuilder,
         List.empty[(Int, ParameterValue)]
       ) must beFailedTry.like { case err: Sql.MissingParameter =>
         err.getMessage must startWith("""Missing parameter value for 'id' after: "SELECT""")
@@ -210,9 +210,9 @@ class StatementParserSpec extends org.specs2.mutable.Specification {
         stmt.names.toList,
         Map[String, ParameterValue]("id" -> "foo"),
         0,
-        new StringBuilder(),
+        new StringBuilder,
         List.empty[(Int, ParameterValue)]
-      ) must beSuccessfulTry.like { case (sql, (0, pv) :: Nil) =>
+      ) must beSuccessfulTry.like { case (sql, 0, pv :: Nil) =>
         (sql must_=== "SELECT * FROM name LIKE '%strange' AND id = ?").and(
           pv must_=== ParameterValue.toParameterValue("foo")
         )

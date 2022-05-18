@@ -378,7 +378,7 @@ final class MacroSpec extends org.specs2.mutable.Specification {
         Macro.valueToStatement[ValidValueClass]
 
       withConnection { implicit c =>
-        (SQL("set-double {p}").on("p" -> new ValidValueClass(23.456d)).execute() must beFalse)
+        SQL("set-double {p}").on("p" -> new ValidValueClass(23.456d)).execute() must beFalse
       }
     }
   }

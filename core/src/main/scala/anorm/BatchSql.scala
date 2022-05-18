@@ -107,7 +107,7 @@ sealed trait BatchSql {
     @SuppressWarnings(Array("TryGet"))
     def unsafe(ps: Map[String, ParameterValue]) =
       Sql
-        .query(sql.stmt.tokens, sql.paramsInitialOrder, ps, 0, new StringBuilder(), List.empty[(Int, ParameterValue)])
+        .query(sql.stmt.tokens, sql.paramsInitialOrder, ps, 0, new StringBuilder, List.empty[(Int, ParameterValue)])
         .get
 
     (statement, pm.headOption) match {

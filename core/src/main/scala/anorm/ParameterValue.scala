@@ -68,7 +68,7 @@ object ParameterValue {
   @SuppressWarnings(Array("NullParameter"))
   @inline def apply[A](v: A, s: ToSql[A], toStmt: ToStatement[A]) =
     (v, toStmt) match {
-      case (null, _: NotNullGuard) => throw new IllegalArgumentException()
+      case (null, _: NotNullGuard) => throw new IllegalArgumentException
       case _                       => new DefaultParameterValue(v, s, toStmt)
     }
 
@@ -82,7 +82,7 @@ object ParameterValue {
 @annotation.implicitNotFound(
   "No converter found for type ${A} to `ParameterValue`; Please define appropriate `ToParameter` and `ParameterMetaData`."
 )
-sealed trait ToParameterValue[A] extends (A => ParameterValue) {
+sealed trait ToParameterValue[A] extends A => ParameterValue {
 
   /** Returns the parameter value corresponding to the given value */
   def apply(value: A): ParameterValue

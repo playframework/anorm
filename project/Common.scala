@@ -16,7 +16,7 @@ object Common extends AutoPlugin {
     organization       := "org.playframework.anorm",
     scalaVersion       := "2.12.15",
     crossScalaVersions := Seq("2.11.12", scalaVersion.value, "2.13.8"),
-    (Compile / unmanagedSourceDirectories) ++= {
+    Compile / unmanagedSourceDirectories ++= {
       val sv = scalaVersion.value
 
       Seq(
@@ -24,7 +24,7 @@ object Common extends AutoPlugin {
         scala2Unmanaged(sv, 13, (Compile / sourceDirectory).value)
       )
     },
-    (Test / unmanagedSourceDirectories) += scala2Unmanaged(scalaVersion.value, 12, (Test / sourceDirectory).value),
+    Test / unmanagedSourceDirectories += scala2Unmanaged(scalaVersion.value, 12, (Test / sourceDirectory).value),
     libraryDependencies ++= {
       val silencerVer = "1.7.8"
 
@@ -96,8 +96,8 @@ object Common extends AutoPlugin {
 
   def scala2Unmanaged(ver: String, minor: Int, base: File): File =
     CrossVersion.partialVersion(ver) match {
-      case Some((2, n)) if n >= minor => base / s"scala-2.${minor}+"
-      case _                          => base / s"scala-2.${minor}-"
+      case Some(2, n) if n >= minor => base / s"scala-2.${minor}+"
+      case _                        => base / s"scala-2.${minor}-"
     }
 
 }
