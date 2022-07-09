@@ -114,12 +114,15 @@ object AkkaStream {
 
     override def createLogicAndMaterializedValue(inheritedAttributes: Attributes): (GraphStageLogic, Future[Int]) = {
       val result = Promise[Int]()
+
       val logic = new GraphStageLogic(shape) with OutHandler {
         private var cursor: Option[Cursor] = None
         private var counter: Int           = 0
 
         override def preStart(): Unit = {
+          println("_pre_1")
           resultSet = sql.unsafeResultSet(connection)
+          println("_pre_2")
           nextCursor()
         }
 
@@ -172,7 +175,7 @@ object AkkaStream {
         setHandler(out, this)
       }
 
-      (logic, result.future)
+      logic -> result.future
     }
   }
 
