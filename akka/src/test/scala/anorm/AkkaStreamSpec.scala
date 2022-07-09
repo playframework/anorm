@@ -30,7 +30,9 @@ final class AkkaStreamSpec(implicit ee: ExecutionEnv) extends org.specs2.mutable
   "Akka Stream" should {
     "expose the query result as source" in assertAllStagesStopped {
       withQueryResult(stringList :+ "A" :+ "B" :+ "C") { implicit con =>
-        AkkaStream.source(SQL"SELECT * FROM Test", SqlParser.scalar[String]).runWith(Sink.seq[String]) must beTypedEqualTo(
+        AkkaStream
+          .source(SQL"SELECT * FROM Test", SqlParser.scalar[String])
+          .runWith(Sink.seq[String]) must beTypedEqualTo(
           Seq("A", "B", "C")
         ).await(0, 5.seconds)
       }
@@ -88,20 +90,19 @@ final class AkkaStreamSpec(implicit ee: ExecutionEnv) extends org.specs2.mutable
             import java.sql.PreparedStatement
 
             def unsafeStatement(
-              connection: Connection,
-              generatedColumn: String,
-              generatedColumns: scala.collection.Seq[String]): PreparedStatement = ???
+                connection: Connection,
+                generatedColumn: String,
+                generatedColumns: AkkaCompat.Seq[String]
+            ): PreparedStatement = ???
 
-            def unsafeStatement(
-              connection: Connection,
-              getGeneratedKeys: Boolean): PreparedStatement =
+            def unsafeStatement(connection: Connection, getGeneratedKeys: Boolean): PreparedStatement =
               throw new SQLException("Init failure")
 
             def resultSetOnFirstRow: Boolean = ???
           }
 
           val graph = source(failingSql, SqlParser.scalar[String])
-          val mat = Source.fromGraph(graph).toMat(Sink.ignore)(Keep.left).run()
+          val mat   = Source.fromGraph(graph).toMat(Sink.ignore)(Keep.left).run()
 
           mat must throwA[SQLException]("Init failure").awaitFor(3.seconds)
         }

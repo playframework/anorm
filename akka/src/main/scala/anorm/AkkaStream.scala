@@ -2,6 +2,8 @@ package anorm
 
 import java.sql.Connection
 
+import scala.util.control.NonFatal
+
 import scala.concurrent.{ Future, Promise }
 
 import akka.stream.Materializer
@@ -119,11 +121,19 @@ object AkkaStream {
         private var cursor: Option[Cursor] = None
         private var counter: Int           = 0
 
+        private def failWith(cause: Throwable): Unit = {
+          result.failure(cause)
+          fail(out, cause)
+          ()
+        }
+
         override def preStart(): Unit = {
-          println("_pre_1")
-          resultSet = sql.unsafeResultSet(connection)
-          println("_pre_2")
-          nextCursor()
+          try {
+            resultSet = sql.unsafeResultSet(connection)
+            nextCursor()
+          } catch {
+            case NonFatal(cause) => failWith(cause)
+          }
         }
 
         override def postStop() = release()
@@ -155,10 +165,8 @@ object AkkaStream {
                 nextCursor()
               }
 
-              case Failure(cause) => {
-                result.failure(cause)
-                fail(out, cause)
-              }
+              case Failure(cause) =>
+                failWith(cause)
             }
 
           case _ => {
