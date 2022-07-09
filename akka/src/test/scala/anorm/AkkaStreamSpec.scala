@@ -9,6 +9,7 @@ import scala.concurrent.duration._
 
 import akka.stream.scaladsl.{ Keep, Sink, Source }
 
+import acolyte.jdbc.QueryResult
 import acolyte.jdbc.AcolyteDSL.withQueryResult
 import acolyte.jdbc.Implicits._
 import acolyte.jdbc.RowLists.stringList
@@ -29,7 +30,9 @@ final class AkkaStreamSpec(implicit ee: ExecutionEnv) extends org.specs2.mutable
   "Akka Stream" should {
     "expose the query result as source" in assertAllStagesStopped {
       withQueryResult(stringList :+ "A" :+ "B" :+ "C") { implicit con =>
-        AkkaStream.source(SQL"SELECT * FROM Test", SqlParser.scalar[String]).runWith(Sink.seq[String]) must beEqualTo(
+        AkkaStream
+          .source(SQL"SELECT * FROM Test", SqlParser.scalar[String])
+          .runWith(Sink.seq[String]) must beTypedEqualTo(
           Seq("A", "B", "C")
         ).await(0, 5.seconds)
       }
@@ -40,7 +43,7 @@ final class AkkaStreamSpec(implicit ee: ExecutionEnv) extends org.specs2.mutable
         AkkaStream
           .source(SQL"SELECT * FROM Test", SqlParser.scalar[String])
           .toMat(Sink.ignore)(Keep.left)
-          .run() must beEqualTo(3).await(0, 3.seconds)
+          .run() must beTypedEqualTo(3).await(0, 3.seconds)
       }
     }
 
@@ -79,7 +82,33 @@ final class AkkaStreamSpec(implicit ee: ExecutionEnv) extends org.specs2.mutable
         }
       }
 
-      "on failure" in (withQueryResult(stringList :+ "A" :+ "B" :+ "C")) { implicit con =>
+      "on failed initialization" in {
+        import java.sql.SQLException
+
+        withQueryResult(QueryResult.Nil) { implicit con =>
+          val failingSql = new Sql {
+            import java.sql.PreparedStatement
+
+            def unsafeStatement(
+                connection: Connection,
+                generatedColumn: String,
+                generatedColumns: AkkaCompat.Seq[String]
+            ): PreparedStatement = ???
+
+            def unsafeStatement(connection: Connection, getGeneratedKeys: Boolean): PreparedStatement =
+              throw new SQLException("Init failure")
+
+            def resultSetOnFirstRow: Boolean = ???
+          }
+
+          val graph = source(failingSql, SqlParser.scalar[String])
+          val mat   = Source.fromGraph(graph).toMat(Sink.ignore)(Keep.left).run()
+
+          mat must throwA[SQLException]("Init failure").awaitFor(3.seconds)
+        }
+      }
+
+      "on failure" in withQueryResult(stringList :+ "A" :+ "B" :+ "C") { implicit con =>
         assertAllStagesStopped {
           val rSet = run(Sink.reduce[String] { (_, _) => sys.error("Foo") })
 

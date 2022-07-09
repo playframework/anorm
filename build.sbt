@@ -221,7 +221,17 @@ lazy val `anorm-akka` = (project in file("akka"))
     libraryDependencies ++= (acolyte +: specs2Test) ++ Seq(
       "com.typesafe.akka" %% "akka-stream-contrib" % akkaContribVer.value % Test
     ),
-    scalacOptions += "-P:silencer:globalFilters=deprecated"
+    scalacOptions += "-P:silencer:globalFilters=deprecated",
+    Test / unmanagedSourceDirectories ++= {
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, n)) if n < 13 =>
+          Seq((Test / sourceDirectory).value / "scala-2.13-")
+
+        case _ =>
+          Seq((Test / sourceDirectory).value / "scala-2.13+")
+
+      }
+    }
   )
   .dependsOn(`anorm-core`)
 
