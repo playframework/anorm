@@ -14,7 +14,7 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
       lazy val parser = for {
         a <- SqlParser.str("col1")
         b <- SqlParser.int("col2")
-      } yield (a -> b)
+      } yield a -> b
 
       SQL("SELECT * FROM test").as(parser.single) must throwA[Exception](message = "'col1' not found")
     }
@@ -25,7 +25,7 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
       lazy val parser = for {
         a <- SqlParser.str("a")
         b <- SqlParser.int("b")
-      } yield (a -> b)
+      } yield a -> b
 
       SQL("SELECT * FROM test").as(parser.single) must_=== ("str" -> 2)
     }
@@ -35,7 +35,7 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
         lazy val sub = for {
           b <- SqlParser.str("b")
           c <- SqlParser.int("c")
-        } yield (b -> c)
+        } yield b -> c
 
         lazy val parser = for {
           a  <- SqlParser.str("col1")
@@ -49,7 +49,7 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
         lazy val sub = for {
           b <- SqlParser.str("b")
           c <- SqlParser.int("c")
-        } yield (b -> c)
+        } yield b -> c
 
         lazy val parser = for {
           a  <- SqlParser.str("col1")
@@ -67,7 +67,7 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
         lazy val sub = for {
           b <- SqlParser.str("col2")
           c <- SqlParser.int("col3")
-        } yield (b -> c)
+        } yield b -> c
 
         lazy val parser = for {
           a  <- SqlParser.str("a")
@@ -81,12 +81,12 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
       lazy val sub = for {
         b <- SqlParser.str("b")
         c <- SqlParser.int("c")
-      } yield (b -> c)
+      } yield b -> c
 
       lazy val parser = for {
         a  <- SqlParser.str("a")
         bc <- sub.?
-      } yield (a -> bc)
+      } yield a -> bc
 
       SQL("SELECT * FROM test").as(parser.single) must_=== ("str" -> None)
     }
@@ -197,7 +197,7 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
     }
 
     "release resources on exception (with degraded result set)" in {
-      queryResultAndOptions((stringList :+ "A" :+ "B" :+ "C"), List("acolyte.resultSet.initOnFirstRow" -> "true")) {
+      queryResultAndOptions(stringList :+ "A" :+ "B" :+ "C", List("acolyte.resultSet.initOnFirstRow" -> "true")) {
         implicit c =>
 
           val res: SqlQueryResult =

@@ -41,7 +41,7 @@ trait Row {
     Compat.toMap(Compat.lazyZip(data, metaData.ms)) { case (v, m) =>
       val k = m.column.qualified
 
-      if (m.nullable) (k -> Option(v)) else k -> v
+      if (m.nullable) k -> Option(v) else k -> v
     }
 
   /**
