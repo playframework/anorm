@@ -26,7 +26,7 @@ object Common extends AutoPlugin {
     },
     (Test / unmanagedSourceDirectories) += scala2Unmanaged(scalaVersion.value, 12, (Test / sourceDirectory).value),
     libraryDependencies ++= {
-      val silencerVer = "1.7.8"
+      val silencerVer = "1.7.9"
 
       Seq(
         compilerPlugin(("com.github.ghik" %% "silencer-plugin" % silencerVer).cross(CrossVersion.full)),
