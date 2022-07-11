@@ -22,7 +22,7 @@ val specs2Test = Seq(
   "specs2-junit"
 ).map("org.specs2" %% _ % "4.10.6" % Test)
 
-lazy val acolyteVersion = "1.1.3"
+lazy val acolyteVersion = "1.1.4"
 lazy val acolyte        = "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test
 
 ThisBuild / resolvers ++= Seq("Tatami Snapshots".at("https://raw.github.com/cchantep/tatami/master/snapshots"))
@@ -168,7 +168,7 @@ lazy val `anorm-core` = project
         "joda-time"               % "joda-time"                % "2.10.14",
         "org.joda"                % "joda-convert"             % "2.2.2",
         "org.scala-lang.modules" %% "scala-parser-combinators" % parserCombinatorsVer.value,
-        "com.h2database"          % "h2"                       % "2.1.212" % Test,
+        "com.h2database"          % "h2"                       % "2.1.214" % Test,
         acolyte,
         "com.chuusai" %% "shapeless" % "2.3.9" % Test
       ) ++ specs2Test
