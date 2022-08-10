@@ -236,7 +236,7 @@ object BatchSql {
    */
   @inline private[anorm] def matchPlaceholders(query: SqlQuery, names: Set[String]): Boolean = {
     val pl = query.paramsInitialOrder.toSet
-    (pl.size == names.size && pl.intersect(names).size == names.size)
+    pl.size == names.size && pl.intersect(names).size == names.size
   }
 
   /** Get parameter names */

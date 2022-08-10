@@ -72,7 +72,7 @@ final class AkkaStreamSpec(implicit ee: ExecutionEnv) extends org.specs2.mutable
         }
       }
 
-      "on cancellation" in (withQueryResult(stringList :+ "A" :+ "B" :+ "C")) { implicit con =>
+      "on cancellation" in withQueryResult(stringList :+ "A" :+ "B" :+ "C") { implicit con =>
         assertAllStagesStopped {
           val rSet: Option[ResultSet] = run(Sink.cancelled[String])
 

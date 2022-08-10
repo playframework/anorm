@@ -101,7 +101,7 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
 
         SQL("SELECT * FROM test")
           .as((SqlParser.int("id") ~ SqlParser.str("val").?).map { case id ~ v =>
-            (id -> v)
+            id -> v
           } single)
           .aka("mapped data") must_=== (2 -> Some("str"))
 
@@ -112,7 +112,7 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
 
           SQL("SELECT * FROM test")
             .as((SqlParser.long("id") ~ SqlParser.str("val").?).map { case id ~ v =>
-              (id -> v)
+              id -> v
             } single)
             .aka("mapped data") must_=== (123L -> None)
 
@@ -122,7 +122,7 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
 
         SQL("SELECT * FROM test")
           .as((SqlParser.long("id") ~ SqlParser.int("foo").?).map { case id ~ v =>
-            (id -> v)
+            id -> v
           } single)
           .aka("parser") must throwA[Exception].like { case e: Exception =>
           e.getMessage.aka("error") must startWith("TypeDoesNotMatch(Cannot convert str:")
@@ -286,7 +286,7 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
 
       SQL("SELECT * FROM test")
         .as((SqlParser.int("id") ~ SqlParser.str("val").?).map { case id ~ v =>
-          (id -> v)
+          id -> v
         } *)
         .aka("parsed list") must_=== List(9 -> None, 2 -> Some("str"))
     }

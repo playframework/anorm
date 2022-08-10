@@ -90,7 +90,7 @@ object ToSql {
       val before = p.before.getOrElse("")
       val after  = p.after.getOrElse("")
       val c: A => (String, Int) =
-        if (conv == null) _ => ("?" -> 1) else conv.fragment
+        if (conv == null) _ => "?" -> 1 else conv.fragment
 
       val sql = p.values.foldLeft(new StringBuilder() -> 0) { case ((sb, i), v) =>
         val frag = c(v)
@@ -106,7 +106,7 @@ object ToSql {
 
   @inline private def traversableToSql[A, T <: Compat.Trav[A]](implicit conv: ToSql[A]) = ToSql[T] { values =>
     val c: A => (String, Int) =
-      if (conv == null) _ => ("?" -> 1) else conv.fragment
+      if (conv == null) _ => "?" -> 1 else conv.fragment
 
     val sql = values.foldLeft(new StringBuilder() -> 0) { case ((sb, i), v) =>
       val frag = c(v)

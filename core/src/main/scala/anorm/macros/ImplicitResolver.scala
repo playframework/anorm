@@ -60,12 +60,12 @@ object ImplicitResolver {
         case tpe :: ts =>
           boundTypes.getOrElse(tpe.typeSymbol.fullName, tpe) match {
             case t if filter(t) =>
-              refactor(ts, base, (replacement :: out), tail, filter, replacement, true)
+              refactor(ts, base, replacement :: out, tail, filter, replacement, true)
 
             case TypeRef(_, sym, as) if as.nonEmpty =>
               refactor(as, sym.asType, List.empty, (ts, base, out) :: tail, filter, replacement, altered)
 
-            case t => refactor(ts, base, (t :: out), tail, filter, replacement, altered)
+            case t => refactor(ts, base, t :: out, tail, filter, replacement, altered)
           }
 
         case _ => {
@@ -73,7 +73,7 @@ object ImplicitResolver {
 
           tail match {
             case (x, y, more) :: ts =>
-              refactor(x, y, (tpe :: more), ts, filter, replacement, altered)
+              refactor(x, y, tpe :: more, ts, filter, replacement, altered)
 
             case _ => tpe -> altered
           }

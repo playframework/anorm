@@ -31,7 +31,7 @@ final class DefaultParameterValue[A](val value: A, s: ToSql[A], toStmt: ToStatem
 
   lazy val toSql: (String, Int) = {
     @SuppressWarnings(Array("NullParameter"))
-    def to = if (s == null) ("?" -> 1) else s.fragment(value)
+    def to = if (s == null) "?" -> 1 else s.fragment(value)
 
     to
   }
@@ -43,7 +43,7 @@ final class DefaultParameterValue[A](val value: A, s: ToSql[A], toStmt: ToStatem
   override lazy val hashCode = value.hashCode
 
   override def equals(that: Any) = that match {
-    case o: DefaultParameterValue[_] => (o.value == value)
+    case o: DefaultParameterValue[_] => o.value == value
     case _                           => false
   }
 }

@@ -141,12 +141,12 @@ package object anorm {
                       StringToken(str.dropRight(1)) :: gts.reverse
                     }
                   val ng = TokenGroup(
-                    (tks ::: StringToken(v.show) ::
-                      before),
+                    tks ::: StringToken(v.show) ::
+                      before,
                     pl
                   )
 
-                  tokenize(ti, tks.tail, parts, ps.tail, (ng :: groups), ns, m)
+                  tokenize(ti, tks.tail, parts, ps.tail, ng :: groups, ns, m)
 
                 case _ =>
                   val ng = TokenGroup(tks, None)
@@ -156,8 +156,8 @@ package object anorm {
                     tks.tail,
                     parts,
                     ps.tail,
-                    (ng :: prev.copy(placeholder = Some(n)) :: groups),
-                    (n +: ns),
+                    ng :: prev.copy(placeholder = Some(n)) :: groups,
+                    n +: ns,
                     m + (n -> v)
                   )
               }
