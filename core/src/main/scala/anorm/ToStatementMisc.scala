@@ -86,7 +86,7 @@ sealed trait ToStatementPriority0 {
    * Sets boolean value on statement.
    *
    * {{{
-   * anorm.SQL("SELECT * FROM Test WHERE enabled = {b}").on('b -> true)
+   * anorm.SQL("SELECT * FROM Test WHERE enabled = {b}").on("b" -> true)
    * }}}
    */
   implicit object booleanToStatement extends ToStatement[Boolean] {
@@ -99,7 +99,7 @@ sealed trait ToStatementPriority0 {
    *
    * {{{
    * anorm.SQL("SELECT * FROM Test WHERE enabled = {b}").
-   *   on('b -> java.lang.Boolean.TRUE)
+   *   on("b" -> java.lang.Boolean.TRUE)
    * }}}
    */
   implicit object javaBooleanToStatement extends ToStatement[JBool] {
@@ -112,7 +112,7 @@ sealed trait ToStatementPriority0 {
    * Sets byte value on statement.
    *
    * {{{
-   * anorm.SQL("SELECT * FROM Test WHERE flag = {b}").on('b -> 1.toByte)
+   * anorm.SQL("SELECT * FROM Test WHERE flag = {b}").on("b" -> 1.toByte)
    * }}}
    */
   implicit object byteToStatement extends ToStatement[Byte] {
@@ -125,7 +125,7 @@ sealed trait ToStatementPriority0 {
    *
    * {{{
    * anorm.SQL("SELECT * FROM Test WHERE flag = {b}").
-   *   on('b -> new java.lang.Byte(1: Byte))
+   *   on("b" -> new java.lang.Byte(1: Byte))
    * }}}
    */
   implicit object javaByteToStatement extends ToStatement[JByte] {
@@ -138,7 +138,7 @@ sealed trait ToStatementPriority0 {
    * Sets double value on statement.
    *
    * {{{
-   * anorm.SQL("SELECT * FROM Test WHERE flag = {b}").on('b -> 1D)
+   * anorm.SQL("SELECT * FROM Test WHERE flag = {b}").on("b" -> 1D)
    * }}}
    */
   implicit object doubleToStatement extends ToStatement[Double] {
@@ -151,7 +151,7 @@ sealed trait ToStatementPriority0 {
    *
    * {{{
    * anorm.SQL("SELECT * FROM Test WHERE flag = {b}").
-   *   on('b -> new java.lang.Double(1D))
+   *   on("b" -> new java.lang.Double(1D))
    * }}}
    */
   implicit object javaDoubleToStatement extends ToStatement[JDouble] {
@@ -164,7 +164,7 @@ sealed trait ToStatementPriority0 {
    * Sets float value on statement.
    *
    * {{{
-   * anorm.SQL("SELECT * FROM Test WHERE flag = {b}").on('b -> 1F)
+   * anorm.SQL("SELECT * FROM Test WHERE flag = {b}").on("b" -> 1F)
    * }}}
    */
   implicit object floatToStatement extends ToStatement[Float] {
@@ -177,7 +177,7 @@ sealed trait ToStatementPriority0 {
    *
    * {{{
    * anorm.SQL("SELECT * FROM Test WHERE flag = {b}").
-   *   on('b -> new java.lang.Float(1F))
+   *   on("b" -> new java.lang.Float(1F))
    * }}}
    */
   implicit object javaFloatToStatement extends ToStatement[JFloat] {
@@ -190,7 +190,7 @@ sealed trait ToStatementPriority0 {
    * Sets long value on statement.
    *
    * {{{
-   * anorm.SQL("SELECT * FROM Test WHERE flag = {b}").on('b -> 1L)
+   * anorm.SQL("SELECT * FROM Test WHERE flag = {b}").on("b" -> 1L)
    * }}}
    */
   implicit object longToStatement extends ToStatement[Long] {
@@ -203,7 +203,7 @@ sealed trait ToStatementPriority0 {
    *
    * {{{
    * anorm.SQL("SELECT * FROM Test WHERE flag = {b}").
-   *   on('b -> new java.lang.Long(1L))
+   *   on("b" -> new java.lang.Long(1L))
    * }}}
    */
   implicit object javaLongToStatement extends ToStatement[JLong] {
@@ -216,7 +216,7 @@ sealed trait ToStatementPriority0 {
    * Sets integer value on statement.
    *
    * {{{
-   * anorm.SQL("SELECT * FROM Test WHERE flag = {b}").on('b -> 1)
+   * anorm.SQL("SELECT * FROM Test WHERE flag = {b}").on("b" -> 1)
    * }}}
    */
   implicit object intToStatement extends ToStatement[Int] {
@@ -229,7 +229,7 @@ sealed trait ToStatementPriority0 {
    *
    * {{{
    * anorm.SQL("SELECT * FROM Test WHERE flag = {b}").
-   *   on('b -> new java.lang.Integer(1))
+   *   on("b" -> new java.lang.Integer(1))
    * }}}
    */
   implicit object integerToStatement extends ToStatement[Integer] {
@@ -242,7 +242,7 @@ sealed trait ToStatementPriority0 {
    * Sets short value on statement.
    *
    * {{{
-   * anorm.SQL("SELECT * FROM Test WHERE flag = {b}").on('b -> 1.toShort)
+   * anorm.SQL("SELECT * FROM Test WHERE flag = {b}").on("b" -> 1.toShort)
    * }}}
    */
   implicit object shortToStatement extends ToStatement[Short] {
@@ -255,7 +255,7 @@ sealed trait ToStatementPriority0 {
    *
    * {{{
    * anorm.SQL("SELECT * FROM Test WHERE flag = {b}").
-   *   on('b -> new java.lang.Short(1.toShort))
+   *   on("b" -> new java.lang.Short(1.toShort))
    * }}}
    */
   implicit object javaShortToStatement extends ToStatement[JShort] {
@@ -308,11 +308,11 @@ sealed trait ToStatementPriority0 {
    * Sets null for None value.
    *
    * {{{
-   * anorm.SQL("SELECT * FROM Test WHERE category = {c}").on('c -> None)
+   * anorm.SQL("SELECT * FROM Test WHERE category = {c}").on("c" -> None)
    *
    * // Rather use:
    * anorm.SQL("SELECT * FROM Test WHERE category = {c}").
-   *   on('c -> Option.empty[String]) // Not deprecated
+   *   on("c" -> Option.empty[String]) // Not deprecated
    * }}}
    */
   @deprecated("Parameter value should be passed using `Option.empty[T]`", since = "2.3.7")
@@ -325,7 +325,7 @@ sealed trait ToStatementPriority0 {
    * Sets not empty optional A inferred as Some[A].
    *
    * {{{
-   * anorm.SQL("SELECT * FROM Test WHERE category = {c}").on('c -> Some("cat"))
+   * anorm.SQL("SELECT * FROM Test WHERE category = {c}").on("c" -> Some("cat"))
    * }}}
    */
   implicit def someToStatement[A](implicit c: ToStatement[A]): ToStatement[Some[A]] =
@@ -340,7 +340,7 @@ sealed trait ToStatementPriority0 {
    * {{{
    * import anorm._
    *
-   * SQL("SELECT * FROM Test WHERE category = {c}").on('c -> Option("cat"))
+   * SQL("SELECT * FROM Test WHERE category = {c}").on("c" -> Option("cat"))
    * SQL"SELECT * FROM Test WHERE nullable_int = \\${Option.empty[Int]}"
    * }}}
    */
@@ -357,7 +357,7 @@ sealed trait ToStatementPriority0 {
    *
    * {{{
    * anorm.SQL("UPDATE tbl SET max = {m}").
-   *   on('m -> new java.math.BigInteger("15"))
+   *   on("m" -> new java.math.BigInteger("15"))
    * }}}
    */
   implicit object javaBigIntegerToStatement extends ToStatement[BigInteger] {
@@ -372,7 +372,7 @@ sealed trait ToStatementPriority0 {
    * For `null` value, `setNull` with `NUMERIC` is called on statement.
    *
    * {{{
-   * anorm.SQL("UPDATE tbl SET max = {m}").on('m -> BigInt(15))
+   * anorm.SQL("UPDATE tbl SET max = {m}").on("m" -> BigInt(15))
    * }}}
    */
   implicit object scalaBigIntegerToStatement extends ToStatement[BigInt] {
@@ -388,7 +388,7 @@ sealed trait ToStatementPriority0 {
    *
    * {{{
    * anorm.SQL("UPDATE tbl SET max = {m}").
-   *   on('m -> new java.math.BigDecimal(10.02F))
+   *   on("m" -> new java.math.BigDecimal(10.02F))
    * }}}
    */
   implicit object javaBigDecimalToStatement extends ToStatement[JBigDec] {
@@ -401,7 +401,7 @@ sealed trait ToStatementPriority0 {
    * For `null` value, `setNull` with `DECIMAL` is called on statement.
    *
    * {{{
-   * anorm.SQL("UPDATE tbl SET max = {m}").on('m -> BigDecimal(10.02F))
+   * anorm.SQL("UPDATE tbl SET max = {m}").on("m" -> BigDecimal(10.02F))
    * }}}
    */
   implicit object scalaBigDecimalToStatement extends ToStatement[BigDecimal] {
@@ -418,7 +418,7 @@ sealed trait ToStatementPriority0 {
    * {{{
    * def foo(date: java.util.Date) =
    *   anorm.SQL("UPDATE tbl SET modified = {ts}").
-   *     on('ts -> new java.sql.Timestamp(date.getTime))
+   *     on("ts" -> new java.sql.Timestamp(date.getTime))
    * }}}
    */
   implicit object timestampToStatement extends ToStatement[Timestamp] {
@@ -431,7 +431,7 @@ sealed trait ToStatementPriority0 {
    * For `null` value, `setNull` with `TIMESTAMP` is called on statement.
    *
    * {{{
-   * anorm.SQL("UPDATE tbl SET modified = {d}").on('d -> new java.util.Date())
+   * anorm.SQL("UPDATE tbl SET modified = {d}").on("d" -> new java.util.Date())
    * }}}
    */
   implicit object dateToStatement extends ToStatement[java.util.Date] {
@@ -452,7 +452,7 @@ sealed trait ToStatementPriority0 {
    *   val getTimestamp = new java.sql.Timestamp(123L)
    * }
    *
-   * anorm.SQL("UPDATE tbl SET modified = {ts}").on('ts -> wrapper)
+   * anorm.SQL("UPDATE tbl SET modified = {ts}").on("ts" -> wrapper)
    * }}}
    */
   implicit def timestampWrapper1ToStatement[T <: TimestampWrapper1]: ToStatement[T] = new ToStatement[T] {
@@ -523,7 +523,7 @@ sealed trait ToStatementPriority0 {
    *
    * {{{
    * anorm.SQL("EXEC indexed_at {d}").
-   *   on('d -> anorm.Object(new java.util.Date()))
+   *   on("d" -> anorm.Object(new java.util.Date()))
    * }}}
    */
   implicit object objectToStatement extends ToStatement[anorm.Object] {
@@ -536,7 +536,7 @@ sealed trait ToStatementPriority0 {
    *
    * {{{
    * anorm.SQL("SELECT * FROM Test WHERE cat IN ({categories})").
-   *   on('categories -> List(1, 3, 4))
+   *   on("categories" -> List(1, 3, 4))
    * }}}
    */
   implicit def listToStatement[A](implicit c: ToStatement[A]): ToStatement[List[A]] = traversableToStatement[A, List[A]]
@@ -546,7 +546,7 @@ sealed trait ToStatementPriority0 {
    *
    * {{{
    * anorm.SQL("SELECT * FROM Test WHERE cat IN ({categories})").
-   *   on('categories -> Seq("a", "b", "c"))
+   *   on("categories" -> Seq("a", "b", "c"))
    * }}}
    */
   implicit def seqToStatement[A](implicit c: ToStatement[A]): ToStatement[Seq[A]] = traversableToStatement[A, Seq[A]]
@@ -556,7 +556,7 @@ sealed trait ToStatementPriority0 {
    *
    * {{{
    * anorm.SQL("SELECT * FROM Test WHERE cat IN ({categories})").
-   *   on('categories -> Set(1, 3, 4))
+   *   on("categories" -> Set(1, 3, 4))
    * }}}
    */
   implicit def setToStatement[A](implicit c: ToStatement[A]): ToStatement[Set[A]] = traversableToStatement[A, Set[A]]
@@ -568,7 +568,7 @@ sealed trait ToStatementPriority0 {
    * import scala.collection.immutable.SortedSet
    *
    * anorm.SQL("SELECT * FROM Test WHERE cat IN ({categories})").
-   *   on('categories -> SortedSet("a", "b", "c"))
+   *   on("categories" -> SortedSet("a", "b", "c"))
    * }}}
    */
   implicit def sortedSetToStatement[A](implicit c: ToStatement[A]): ToStatement[SortedSet[A]] =
@@ -585,7 +585,7 @@ sealed trait ToStatementPriority0 {
    *
    * {{{
    * anorm.SQL("SELECT * FROM Test WHERE cat IN ({categories})").
-   *   on('categories -> Vector("a", "b", "c"))
+   *   on("categories" -> Vector("a", "b", "c"))
    * }}}
    */
   implicit def vectorToStatement[A](implicit c: ToStatement[A]): ToStatement[Vector[A]] =
@@ -599,7 +599,7 @@ sealed trait ToStatementPriority0 {
    * import anorm.SeqParameter
    *
    * anorm.SQL("SELECT * FROM Test t WHERE {categories}").
-   *   on('categories -> SeqParameter(
+   *   on("categories" -> SeqParameter(
    *     seq = Seq("a", "b", "c"), sep = " OR ",
    *     pre = "EXISTS (SELECT NULL FROM j WHERE t.id=j.id AND name=",
    *     post = ")"))
@@ -720,7 +720,7 @@ sealed trait JavaTimeToStatement {
    * import java.time.Instant
    * import anorm._
    *
-   * SQL("SELECT * FROM Test WHERE time < {b}").on('b -> Instant.now)
+   * SQL("SELECT * FROM Test WHERE time < {b}").on("b" -> Instant.now)
    * }}}
    */
   implicit def instantToStatement(implicit meta: ParameterMetaData[Instant]): ToStatement[Instant] =
@@ -737,7 +737,7 @@ sealed trait JavaTimeToStatement {
    * import java.time.LocalDateTime
    * import anorm._
    *
-   * SQL("SELECT * FROM Test WHERE time < {b}").on('b -> LocalDateTime.now)
+   * SQL("SELECT * FROM Test WHERE time < {b}").on("b" -> LocalDateTime.now)
    * }}}
    */
   implicit def localDateTimeToStatement(implicit meta: ParameterMetaData[LocalDateTime]): ToStatement[LocalDateTime] =
@@ -754,7 +754,7 @@ sealed trait JavaTimeToStatement {
    * import java.time.LocalDate
    * import anorm._
    *
-   * SQL("SELECT * FROM Test WHERE time < {b}").on('b -> LocalDate.now)
+   * SQL("SELECT * FROM Test WHERE time < {b}").on("b" -> LocalDate.now)
    * }}}
    */
   implicit def localDateToStatement(implicit meta: ParameterMetaData[LocalDate]): ToStatement[LocalDate] =
@@ -771,7 +771,7 @@ sealed trait JavaTimeToStatement {
    * import java.time.ZonedDateTime
    * import anorm._
    *
-   * SQL("SELECT * FROM Test WHERE time < {b}").on('b -> ZonedDateTime.now)
+   * SQL("SELECT * FROM Test WHERE time < {b}").on("b" -> ZonedDateTime.now)
    * }}}
    */
   implicit def zonedDateTimeToStatement(implicit meta: ParameterMetaData[ZonedDateTime]): ToStatement[ZonedDateTime] =

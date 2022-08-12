@@ -11,8 +11,10 @@ import resource.ManagedResource
  * @constructor create a result with a result set
  * @param resultSet Result set from executed query
  */
-final case class SqlQueryResult(resultSet: ManagedResource[java.sql.ResultSet], resultSetOnFirstRow: Boolean = false)
-    extends WithResult {
+final case class SqlQueryResult(
+    resultSet: ManagedResource[java.sql.ResultSet],
+    resultSetOnFirstRow: Boolean = false
+) extends WithResult {
 
   protected def resultSet(c: Connection) = resultSet
 

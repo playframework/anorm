@@ -1,7 +1,8 @@
 package anorm
 
-import java.sql.Timestamp
-import java.time.{ Instant, LocalDate, LocalDateTime, ZoneId, ZonedDateTime }
+import java.sql.{ Connection, Timestamp }
+
+import java.time.{ Instant, LocalDate, LocalDateTime, ZonedDateTime, ZoneId }
 
 import acolyte.jdbc.AcolyteDSL._
 import acolyte.jdbc.Implicits._
@@ -9,7 +10,9 @@ import acolyte.jdbc.RowLists._
 
 import org.specs2.mutable.Specification
 
-class JavaTimeColumnSpec extends Specification {
+final class JavaTimeColumnSpec extends Specification {
+  "Java time column".title
+
   import SqlParser.scalar
 
   "Column mapped as Java8+ instant" should {
@@ -20,38 +23,40 @@ class JavaTimeColumnSpec extends Specification {
 
     val time = instant.toEpochMilli
 
-    "be parsed from date" in withQueryResult(dateList :+ new java.sql.Date(time)) { implicit con =>
-      SQL("SELECT d").as(scalar[Instant].single).aka("parsed instant") must_=== instant
+    "be parsed from date" in withQueryResult(dateList :+ new java.sql.Date(time)) { implicit c: Connection =>
+      SQL("SELECT d").as(scalar[Instant].single)(c).aka("parsed instant") must_=== instant
     }
 
-    "be parsed from time" in withQueryResult(timeList :+ new java.sql.Time(time)) { implicit con =>
+    "be parsed from time" in withQueryResult(timeList :+ new java.sql.Time(time)) { implicit c: Connection =>
       SQL("SELECT ts").as(scalar[Instant].single).aka("parsed instant") must_=== instant
     }
 
-    "be parsed from timestamp" in withQueryResult(timestampList :+ new java.sql.Timestamp(time)) { implicit con =>
-      SQL("SELECT ts").as(scalar[Instant].single).aka("parsed instant") must_=== instant
+    "be parsed from timestamp" in withQueryResult(timestampList :+ new java.sql.Timestamp(time)) {
+      implicit c: Connection =>
+        SQL("SELECT ts").as(scalar[Instant].single).aka("parsed instant") must_=== instant
     }
 
     "be parsed from timestamp with nano precision" in {
       val instantWithNanoPrecision = Instant.parse("2021-01-06T08:45:26.441477Z")
 
-      withQueryResult(timestampList :+ Timestamp.from(instantWithNanoPrecision)) { implicit con =>
+      withQueryResult(timestampList :+ Timestamp.from(instantWithNanoPrecision)) { implicit c: Connection =>
         SQL("SELECT ts").as(scalar[Instant].single).aka("parsed instant") must_=== instantWithNanoPrecision
       }
     }
 
-    "be parsed from numeric time" in withQueryResult(longList :+ time) { implicit con =>
+    "be parsed from numeric time" in withQueryResult(longList :+ time) { implicit c: Connection =>
       SQL("SELECT time").as(scalar[Instant].single).aka("parsed instant") must_=== instant
 
     }
 
     "be parsed from timestamp wrapper" >> {
-      "with not null value" in withQueryResult(rowList1(classOf[TWrapper]) :+ tsw1(time)) { implicit con =>
+      "with not null value" in withQueryResult(rowList1(classOf[TWrapper]) :+ tsw1(time)) { implicit c: Connection =>
         SQL("SELECT ts").as(scalar[Instant].single).aka("parsed instant") must_=== instant
       }
 
-      "with null value" in withQueryResult(rowList1(classOf[TWrapper]) :+ null.asInstanceOf[TWrapper]) { implicit con =>
-        SQL("SELECT ts").as(scalar[Instant].singleOpt).aka("parsed instant") must beNone
+      "with null value" in withQueryResult(rowList1(classOf[TWrapper]) :+ null.asInstanceOf[TWrapper]) {
+        implicit c: Connection =>
+          SQL("SELECT ts").as(scalar[Instant].singleOpt).aka("parsed instant") must beNone
       }
     }
   }
@@ -65,30 +70,32 @@ class JavaTimeColumnSpec extends Specification {
     val date = LocalDateTime.ofInstant(instant, ZoneId.systemDefault)
     val time = instant.toEpochMilli
 
-    "be parsed from date" in withQueryResult(dateList :+ new java.sql.Date(time)) { implicit con =>
+    "be parsed from date" in withQueryResult(dateList :+ new java.sql.Date(time)) { implicit c: Connection =>
       SQL("SELECT d").as(scalar[LocalDateTime].single).aka("parsed local date/time") must_=== date
     }
 
-    "be parsed from time" in withQueryResult(timeList :+ new java.sql.Time(time)) { implicit con =>
+    "be parsed from time" in withQueryResult(timeList :+ new java.sql.Time(time)) { implicit c: Connection =>
       SQL("SELECT ts").as(scalar[LocalDateTime].single).aka("parsed local date/time") must_=== date
     }
 
-    "be parsed from timestamp" in withQueryResult(timestampList :+ new java.sql.Timestamp(time)) { implicit con =>
-      SQL("SELECT ts").as(scalar[LocalDateTime].single).aka("parsed local date/time") must_=== date
+    "be parsed from timestamp" in withQueryResult(timestampList :+ new java.sql.Timestamp(time)) {
+      implicit c: Connection =>
+        SQL("SELECT ts").as(scalar[LocalDateTime].single).aka("parsed local date/time") must_=== date
     }
 
-    "be parsed from numeric time" in withQueryResult(longList :+ time) { implicit con =>
+    "be parsed from numeric time" in withQueryResult(longList :+ time) { implicit c: Connection =>
       SQL("SELECT time").as(scalar[LocalDateTime].single).aka("parsed local date/time") must_=== date
 
     }
 
     "be parsed from timestamp wrapper" >> {
-      "with not null value" in withQueryResult(rowList1(classOf[TWrapper]) :+ tsw1(time)) { implicit con =>
+      "with not null value" in withQueryResult(rowList1(classOf[TWrapper]) :+ tsw1(time)) { implicit c: Connection =>
         SQL("SELECT ts").as(scalar[LocalDateTime].single).aka("parsed local date/time") must_=== date
       }
 
-      "with null value" in withQueryResult(rowList1(classOf[TWrapper]) :+ null.asInstanceOf[TWrapper]) { implicit con =>
-        SQL("SELECT ts").as(scalar[LocalDateTime].singleOpt).aka("parsed local date/time") must beNone
+      "with null value" in withQueryResult(rowList1(classOf[TWrapper]) :+ null.asInstanceOf[TWrapper]) {
+        implicit c: Connection =>
+          SQL("SELECT ts").as(scalar[LocalDateTime].singleOpt).aka("parsed local date/time") must beNone
       }
     }
   }
@@ -98,30 +105,32 @@ class JavaTimeColumnSpec extends Specification {
     val date    = LocalDate.now()
     val time    = instant.toEpochMilli
 
-    "be parsed from date" in withQueryResult(dateList :+ new java.sql.Date(time)) { implicit con =>
+    "be parsed from date" in withQueryResult(dateList :+ new java.sql.Date(time)) { implicit c: Connection =>
       SQL("SELECT d").as(scalar[LocalDate].single).aka("parsed local date/time") must_=== date
     }
 
-    "be parsed from time" in withQueryResult(timeList :+ new java.sql.Time(time)) { implicit con =>
+    "be parsed from time" in withQueryResult(timeList :+ new java.sql.Time(time)) { implicit c: Connection =>
       SQL("SELECT ts").as(scalar[LocalDate].single).aka("parsed local date/time") must_=== date
     }
 
-    "be parsed from timestamp" in withQueryResult(timestampList :+ new java.sql.Timestamp(time)) { implicit con =>
-      SQL("SELECT ts").as(scalar[LocalDate].single).aka("parsed local date/time") must_=== date
+    "be parsed from timestamp" in withQueryResult(timestampList :+ new java.sql.Timestamp(time)) {
+      implicit c: Connection =>
+        SQL("SELECT ts").as(scalar[LocalDate].single).aka("parsed local date/time") must_=== date
     }
 
-    "be parsed from numeric time" in withQueryResult(longList :+ time) { implicit con =>
+    "be parsed from numeric time" in withQueryResult(longList :+ time) { implicit c: Connection =>
       SQL("SELECT time").as(scalar[LocalDate].single).aka("parsed local date/time") must_=== date
 
     }
 
     "be parsed from timestamp wrapper" >> {
-      "with not null value" in withQueryResult(rowList1(classOf[TWrapper]) :+ tsw1(time)) { implicit con =>
+      "with not null value" in withQueryResult(rowList1(classOf[TWrapper]) :+ tsw1(time)) { implicit c: Connection =>
         SQL("SELECT ts").as(scalar[LocalDate].single).aka("parsed local date/time") must_=== date
       }
 
-      "with null value" in withQueryResult(rowList1(classOf[TWrapper]) :+ null.asInstanceOf[TWrapper]) { implicit con =>
-        SQL("SELECT ts").as(scalar[LocalDate].singleOpt).aka("parsed local date/time") must beNone
+      "with null value" in withQueryResult(rowList1(classOf[TWrapper]) :+ null.asInstanceOf[TWrapper]) {
+        implicit c: Connection =>
+          SQL("SELECT ts").as(scalar[LocalDate].singleOpt).aka("parsed local date/time") must beNone
       }
     }
   }
@@ -135,38 +144,40 @@ class JavaTimeColumnSpec extends Specification {
     val date = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault)
     val time = instant.toEpochMilli
 
-    "be parsed from date" in withQueryResult(dateList :+ new java.sql.Date(time)) { implicit con =>
+    "be parsed from date" in withQueryResult(dateList :+ new java.sql.Date(time)) { implicit c: Connection =>
       SQL("SELECT d").as(scalar[ZonedDateTime].single).aka("parsed zoned date/time") must_=== date
     }
 
-    "be parsed from time" in withQueryResult(timeList :+ new java.sql.Time(time)) { implicit con =>
+    "be parsed from time" in withQueryResult(timeList :+ new java.sql.Time(time)) { implicit c: Connection =>
       SQL("SELECT ts").as(scalar[ZonedDateTime].single).aka("parsed zoned date/time") must_=== date
     }
 
-    "be parsed from timestamp" in withQueryResult(timestampList :+ new java.sql.Timestamp(time)) { implicit con =>
-      SQL("SELECT ts").as(scalar[ZonedDateTime].single).aka("parsed zoned date/time") must_=== date
+    "be parsed from timestamp" in withQueryResult(timestampList :+ new java.sql.Timestamp(time)) {
+      implicit c: Connection =>
+        SQL("SELECT ts").as(scalar[ZonedDateTime].single).aka("parsed zoned date/time") must_=== date
     }
 
     "be parsed from timestamp with nano precision" in {
       val instantWithNanoPrecision = Instant.parse("2021-01-06T08:45:26.441477Z")
-      withQueryResult(timestampList :+ java.sql.Timestamp.from(instantWithNanoPrecision)) { implicit con =>
+      withQueryResult(timestampList :+ java.sql.Timestamp.from(instantWithNanoPrecision)) { implicit c: Connection =>
         SQL("SELECT ts").as(scalar[ZonedDateTime].single).aka("parsed zoned date/time") must_=== ZonedDateTime
           .ofInstant(instantWithNanoPrecision, ZoneId.systemDefault)
       }
     }
 
-    "be parsed from numeric time" in withQueryResult(longList :+ time) { implicit con =>
+    "be parsed from numeric time" in withQueryResult(longList :+ time) { implicit c: Connection =>
       SQL("SELECT time").as(scalar[ZonedDateTime].single).aka("parsed zoned date/time") must_=== date
 
     }
 
     "be parsed from timestamp wrapper" >> {
-      "with not null value" in withQueryResult(rowList1(classOf[TWrapper]) :+ tsw1(time)) { implicit con =>
+      "with not null value" in withQueryResult(rowList1(classOf[TWrapper]) :+ tsw1(time)) { implicit c: Connection =>
         SQL("SELECT ts").as(scalar[ZonedDateTime].single).aka("parsed zoned date/time") must_=== date
       }
 
-      "with null value" in withQueryResult(rowList1(classOf[TWrapper]) :+ null.asInstanceOf[TWrapper]) { implicit con =>
-        SQL("SELECT ts").as(scalar[ZonedDateTime].singleOpt).aka("parsed zoned date/time") must beNone
+      "with null value" in withQueryResult(rowList1(classOf[TWrapper]) :+ null.asInstanceOf[TWrapper]) {
+        implicit c: Connection =>
+          SQL("SELECT ts").as(scalar[ZonedDateTime].singleOpt).aka("parsed zoned date/time") must beNone
       }
     }
   }

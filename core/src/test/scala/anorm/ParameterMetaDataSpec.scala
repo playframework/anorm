@@ -18,8 +18,8 @@ import java.lang.{
 }
 import java.sql.Timestamp
 
-class ParameterMetaDataSpec extends org.specs2.mutable.Specification {
-  "Parameter metadata" title
+final class ParameterMetaDataSpec extends org.specs2.mutable.Specification {
+  "Parameter metadata".title
 
   "Metadata" should {
     shapeless.test.illTyped("implicitly[ParameterMetaData[Any]]")

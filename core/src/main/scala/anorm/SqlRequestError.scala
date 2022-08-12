@@ -43,10 +43,6 @@ case class ColumnNotFound(
   @deprecated("Use `available`", "2.5.4")
   def possibilities = available.toList
 
-  @deprecated("Use copy with `available`", "2.5.4")
-  def copy(column: String, possibilities: List[String]): ColumnNotFound =
-    ColumnNotFound(column, possibilities.toSeq)
-
   override lazy val toString = message
 }
 

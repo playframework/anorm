@@ -1,5 +1,7 @@
 package anorm
 
+import java.sql.Connection
+
 import acolyte.jdbc.AcolyteDSL.withQueryResult
 import acolyte.jdbc.Implicits._
 import acolyte.jdbc.RowLists._
@@ -9,11 +11,11 @@ import com.github.ghik.silencer.silent
 import SqlParser.{ bool, str, int, long, get }
 
 final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
-  "Function flattener" title
+  "Function flattener".title
 
   "Single column" should {
-    "be applied with parser function" in withQueryResult(intList :+ 123) { implicit c =>
-      SQL("SELECT * FROM test").as(int(1).map(SqlParser.to(_.toString)) single) must_=== "123"
+    "be applied with parser function" in withQueryResult(intList :+ 123) { implicit c: Connection =>
+      SQL("SELECT * FROM test").as(int(1).map(SqlParser.to(_.toString)).single) must_=== "123"
     }
   }
 
@@ -23,9 +25,9 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
 
       val schema = rowList2(classOf[String] -> "A", classOf[Int] -> "B")
 
-      withQueryResult(schema :+ ("A", 2)) { implicit c =>
+      withQueryResult(schema.append("A", 2)) { implicit c: Connection =>
         SQL("SELECT * FROM test")
-          .as((str("A") ~ int("B")).map(SqlParser.to(foo _)) single)
+          .as((str("A") ~ int("B")).map(SqlParser.to(foo _)).single)
           .aka("function result") must_=== "Fn2"
 
       }
@@ -35,9 +37,9 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
       case class Foo(a: String, b: Int, c: Long)
       val schema = rowList3(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C")
 
-      withQueryResult(schema :+ ("A", 2, 3L)) { implicit c =>
+      withQueryResult(schema.append("A", 2, 3L)) { implicit c: Connection =>
         SQL("SELECT * FROM test")
-          .as((str("A") ~ int("B") ~ long("C")).map(SqlParser.to(Foo.apply _)) single)
+          .as((str("A") ~ int("B") ~ long("C")).map(SqlParser.to(Foo.apply _)).single)
           .aka("function result") must_=== Foo("A", 2, 3L)
 
       }
@@ -48,9 +50,9 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
 
       val schema = rowList4(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D")
 
-      withQueryResult(schema :+ ("A", 2, 3L, 4.56d)) { implicit c =>
+      withQueryResult(schema.append("A", 2, 3L, 4.56d)) { implicit c: Connection =>
         SQL("SELECT * FROM test")
-          .as((str("A") ~ int("B") ~ long("C") ~ get[Double]("D")).map(SqlParser.to(foo _)) single)
+          .as((str("A") ~ int("B") ~ long("C") ~ get[Double]("D")).map(SqlParser.to(foo _)).single)
           .aka("function result") must_=== "Fn4"
 
       }
@@ -67,9 +69,9 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
         classOf[Short]  -> "E"
       )
 
-      withQueryResult(schema :+ ("A", 2, 3L, 4.56d, 9.toShort)) { implicit c =>
+      withQueryResult(schema.append("A", 2, 3L, 4.56d, 9.toShort)) { implicit c: Connection =>
         SQL("SELECT * FROM test")
-          .as((str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E")).map(SqlParser.to(foo _)) single)
+          .as((str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E")).map(SqlParser.to(foo _)).single)
           .aka("function result") must_=== "Fn5"
 
       }
@@ -87,11 +89,12 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
         classOf[Byte]   -> "F"
       )
 
-      withQueryResult(schema :+ ("A", 2, 3L, 4.56d, 9.toShort, 10.toByte)) { implicit c =>
+      withQueryResult(schema.append("A", 2, 3L, 4.56d, 9.toShort, 10.toByte)) { implicit c: Connection =>
         SQL("SELECT * FROM test")
           .as(
             (str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F"))
-              .map(SqlParser.to(foo _)) single
+              .map(SqlParser.to(foo _))
+              .single
           )
           .aka("function result") must_=== "Fn6"
 
@@ -111,11 +114,12 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
         classOf[Boolean] -> "G"
       )
 
-      withQueryResult(schema :+ ("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true)) { implicit c =>
+      withQueryResult(schema.append("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true)) { implicit c: Connection =>
         SQL("SELECT * FROM test")
           .as(
             (str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G"))
-              .map(SqlParser.to(foo _)) single
+              .map(SqlParser.to(foo _))
+              .single
           )
           .aka("function result") must_=== "Fn7"
 
@@ -136,12 +140,12 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
         classOf[String]  -> "H"
       )
 
-      withQueryResult(schema :+ ("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true, "B")) { implicit c =>
+      withQueryResult(schema.append("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true, "B")) { implicit c: Connection =>
         SQL("SELECT * FROM test")
           .as(
             (str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str(
               "H"
-            )).map(SqlParser.to(foo _)) single
+            )).map(SqlParser.to(foo _)).single
           )
           .aka("function result") must_=== "Fn8"
 
@@ -163,12 +167,12 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
         classOf[Int]     -> "I"
       )
 
-      withQueryResult(schema :+ ("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true, "B", 3)) { implicit c =>
+      withQueryResult(schema.append("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true, "B", 3)) { implicit c: Connection =>
         SQL("SELECT * FROM test")
           .as(
             (str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str(
               "H"
-            ) ~ int("I")).map(SqlParser.to(foo _)) single
+            ) ~ int("I")).map(SqlParser.to(foo _)).single
           )
           .aka("function result") must_=== "Fn9"
 
@@ -202,14 +206,15 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
         classOf[Long]    -> "J"
       )
 
-      withQueryResult(schema :+ ("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4L)) { implicit c =>
-        SQL("SELECT * FROM test")
-          .as(
-            (str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str(
-              "H"
-            ) ~ int("I") ~ long("J")).map(SqlParser.to(foo _)) single
-          )
-          .aka("function result") must_=== "Fn10"
+      withQueryResult(schema.append("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4L)) {
+        implicit c: Connection =>
+          SQL("SELECT * FROM test")
+            .as(
+              (str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str(
+                "H"
+              ) ~ int("I") ~ long("J")).map(SqlParser.to(foo _)).single
+            )
+            .aka("function result") must_=== "Fn10"
 
       }
     }
@@ -243,14 +248,15 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
         classOf[Double]  -> "K"
       )
 
-      withQueryResult(schema :+ ("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67d)) { implicit c =>
-        SQL("SELECT * FROM test")
-          .as(
-            (str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str(
-              "H"
-            ) ~ int("I") ~ long("J") ~ get[Double]("K")).map(SqlParser.to(foo _)) single
-          )
-          .aka("function result") must_=== "Fn11"
+      withQueryResult(schema.append("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67d)) {
+        implicit c: Connection =>
+          SQL("SELECT * FROM test")
+            .as(
+              (str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str(
+                "H"
+              ) ~ int("I") ~ long("J") ~ get[Double]("K")).map(SqlParser.to(foo _)).single
+            )
+            .aka("function result") must_=== "Fn11"
 
       }
     }
@@ -286,13 +292,13 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
         classOf[Short]   -> "L"
       )
 
-      withQueryResult(schema :+ ("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67d, 10.toShort)) {
-        implicit c =>
+      withQueryResult(schema.append("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67d, 10.toShort)) {
+        implicit c: Connection =>
           SQL("SELECT * FROM test")
             .as(
               (str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str(
                 "H"
-              ) ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L")).map(SqlParser.to(foo _)) single
+              ) ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L")).map(SqlParser.to(foo _)).single
             )
             .aka("function result") must_=== "Fn12"
 
@@ -333,14 +339,15 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
       )
 
       withQueryResult(
-        schema :+ ("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67d, 10.toShort, 11.toByte)
-      ) { implicit c =>
+        schema.append("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67d, 10.toShort, 11.toByte)
+      ) { implicit c: Connection =>
         SQL("SELECT * FROM test")
           .as(
             (str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str(
               "H"
             ) ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M"))
-              .map(SqlParser.to(foo _)) single
+              .map(SqlParser.to(foo _))
+              .single
           )
           .aka("function result") must_=== "Fn13"
 
@@ -383,14 +390,15 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
       )
 
       withQueryResult(
-        schema :+ ("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67d, 10.toShort, 11.toByte, false)
-      ) { implicit c =>
+        schema.append("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67d, 10.toShort, 11.toByte, false)
+      ) { implicit c: Connection =>
         SQL("SELECT * FROM test")
           .as(
             (str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str(
               "H"
             ) ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N"))
-              .map(SqlParser.to(foo _)) single
+              .map(SqlParser.to(foo _))
+              .single
           )
           .aka("function result") must_=== "Fn14"
 
@@ -435,14 +443,16 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
       )
 
       withQueryResult(
-        schema :+ ("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67d, 10.toShort, 11.toByte, false, "C")
-      ) { implicit c =>
+        schema
+          .append("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67d, 10.toShort, 11.toByte, false, "C")
+      ) { implicit c: Connection =>
         SQL("SELECT * FROM test")
           .as(
             (str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str(
               "H"
             ) ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N") ~ str("O"))
-              .map(SqlParser.to(foo _)) single
+              .map(SqlParser.to(foo _))
+              .single
           )
           .aka("function result") must_=== "Fn15"
 
@@ -489,15 +499,32 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
       )
 
       withQueryResult(
-        schema :+ ("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67d, 10.toShort, 11.toByte, false, "C", 3)
-      ) { implicit c =>
+        schema.append(
+          "A",
+          2,
+          3L,
+          4.56d,
+          9.toShort,
+          10.toByte,
+          true,
+          "B",
+          3,
+          4L,
+          5.67d,
+          10.toShort,
+          11.toByte,
+          false,
+          "C",
+          3
+        )
+      ) { implicit c: Connection =>
         SQL("SELECT * FROM test")
           .as(
             (str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str(
               "H"
             ) ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N") ~ str("O") ~ int(
               "P"
-            )).map(SqlParser.to(foo _)) single
+            )).map(SqlParser.to(foo _)).single
           )
           .aka("function result") must_=== "Fn16"
 
@@ -546,15 +573,33 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
       )
 
       withQueryResult(
-        schema :+ ("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67d, 10.toShort, 11.toByte, false, "C", 3, 4L)
-      ) { implicit c =>
+        schema.append(
+          "A",
+          2,
+          3L,
+          4.56d,
+          9.toShort,
+          10.toByte,
+          true,
+          "B",
+          3,
+          4L,
+          5.67d,
+          10.toShort,
+          11.toByte,
+          false,
+          "C",
+          3,
+          4L
+        )
+      ) { implicit c: Connection =>
         SQL("SELECT * FROM test")
           .as(
             (str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str(
               "H"
             ) ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N") ~ str("O") ~ int(
               "P"
-            ) ~ long("Q")).map(SqlParser.to(foo _)) single
+            ) ~ long("Q")).map(SqlParser.to(foo _)).single
           )
           .aka("function result") must_=== "Fn17"
 
@@ -605,15 +650,34 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
       )
 
       withQueryResult(
-        schema :+ ("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67d, 10.toShort, 11.toByte, false, "C", 3, 4L, 5.678d)
-      ) { implicit c =>
+        schema.append(
+          "A",
+          2,
+          3L,
+          4.56d,
+          9.toShort,
+          10.toByte,
+          true,
+          "B",
+          3,
+          4L,
+          5.67d,
+          10.toShort,
+          11.toByte,
+          false,
+          "C",
+          3,
+          4L,
+          5.678d
+        )
+      ) { implicit c: Connection =>
         SQL("SELECT * FROM test")
           .as(
             (str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str(
               "H"
             ) ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N") ~ str("O") ~ int(
               "P"
-            ) ~ long("Q") ~ get[Double]("R")).map(SqlParser.to(foo _)) single
+            ) ~ long("Q") ~ get[Double]("R")).map(SqlParser.to(foo _)).single
           )
           .aka("function result") must_=== "Fn18"
 
@@ -666,15 +730,35 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
       )
 
       withQueryResult(
-        schema :+ ("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67d, 10.toShort, 11.toByte, false, "C", 3, 4L, 5.678d, 16.toShort)
-      ) { implicit c =>
+        schema.append(
+          "A",
+          2,
+          3L,
+          4.56d,
+          9.toShort,
+          10.toByte,
+          true,
+          "B",
+          3,
+          4L,
+          5.67d,
+          10.toShort,
+          11.toByte,
+          false,
+          "C",
+          3,
+          4L,
+          5.678d,
+          16.toShort
+        )
+      ) { implicit c: Connection =>
         SQL("SELECT * FROM test")
           .as(
             (str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str(
               "H"
             ) ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N") ~ str("O") ~ int(
               "P"
-            ) ~ long("Q") ~ get[Double]("R") ~ get[Short]("S")).map(SqlParser.to(foo _)) single
+            ) ~ long("Q") ~ get[Double]("R") ~ get[Short]("S")).map(SqlParser.to(foo _)).single
           )
           .aka("function result") must_=== "Fn19"
 
@@ -729,15 +813,36 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
       )
 
       withQueryResult(
-        schema :+ ("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67d, 10.toShort, 11.toByte, false, "C", 3, 4L, 5.678d, 16.toShort, "D")
-      ) { implicit c =>
+        schema.append(
+          "A",
+          2,
+          3L,
+          4.56d,
+          9.toShort,
+          10.toByte,
+          true,
+          "B",
+          3,
+          4L,
+          5.67d,
+          10.toShort,
+          11.toByte,
+          false,
+          "C",
+          3,
+          4L,
+          5.678d,
+          16.toShort,
+          "D"
+        )
+      ) { implicit c: Connection =>
         SQL("SELECT * FROM test")
           .as(
             (str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str(
               "H"
             ) ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N") ~ str("O") ~ int(
               "P"
-            ) ~ long("Q") ~ get[Double]("R") ~ get[Short]("S") ~ str("T")).map(SqlParser.to(foo _)) single
+            ) ~ long("Q") ~ get[Double]("R") ~ get[Short]("S") ~ str("T")).map(SqlParser.to(foo _)).single
           )
           .aka("function result") must_=== "Fn20"
 
@@ -794,15 +899,37 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
       )
 
       withQueryResult(
-        schema :+ ("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67d, 10.toShort, 11.toByte, false, "C", 3, 4L, 5.678d, 16.toShort, "D", 4)
-      ) { implicit c =>
+        schema.append(
+          "A",
+          2,
+          3L,
+          4.56d,
+          9.toShort,
+          10.toByte,
+          true,
+          "B",
+          3,
+          4L,
+          5.67d,
+          10.toShort,
+          11.toByte,
+          false,
+          "C",
+          3,
+          4L,
+          5.678d,
+          16.toShort,
+          "D",
+          4
+        )
+      ) { implicit c: Connection =>
         SQL("SELECT * FROM test")
           .as(
             (str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str(
               "H"
             ) ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N") ~ str("O") ~ int(
               "P"
-            ) ~ long("Q") ~ get[Double]("R") ~ get[Short]("S") ~ str("T") ~ int("U")).map(SqlParser.to(foo _)) single
+            ) ~ long("Q") ~ get[Double]("R") ~ get[Short]("S") ~ str("T") ~ int("U")).map(SqlParser.to(foo _)).single
           )
           .aka("function result") must_=== "Fn21"
 
@@ -861,8 +988,31 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
       )
 
       withQueryResult(
-        schema :+ ("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67d, 10.toShort, 11.toByte, false, "C", 3, 4L, 5.678d, 16.toShort, "D", 4, 5L)
-      ) { implicit c =>
+        schema.append(
+          "A",
+          2,
+          3L,
+          4.56d,
+          9.toShort,
+          10.toByte,
+          true,
+          "B",
+          3,
+          4L,
+          5.67d,
+          10.toShort,
+          11.toByte,
+          false,
+          "C",
+          3,
+          4L,
+          5.678d,
+          16.toShort,
+          "D",
+          4,
+          5L
+        )
+      ) { implicit c: Connection =>
         SQL("SELECT * FROM test")
           .as(
             (str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str(
@@ -870,7 +1020,8 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
             ) ~ int("I") ~ long("J") ~ get[Double]("K") ~ get[Short]("L") ~ get[Byte]("M") ~ bool("N") ~ str("O") ~ int(
               "P"
             ) ~ long("Q") ~ get[Double]("R") ~ get[Short]("S") ~ str("T") ~ int("U") ~ long("V"))
-              .map(SqlParser.to(foo _)) single
+              .map(SqlParser.to(foo _))
+              .single
           )
           .aka("function result") must_=== "Fn22"
 

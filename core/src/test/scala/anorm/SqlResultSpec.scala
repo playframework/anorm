@@ -1,5 +1,11 @@
 package anorm
 
+import java.io.Closeable
+
+import java.sql.Connection
+
+import scala.reflect.ClassTag
+
 import acolyte.jdbc.AcolyteDSL.{ connection, handleQuery, withQueryResult }
 import acolyte.jdbc.Implicits._
 import acolyte.jdbc.QueryResult
@@ -7,10 +13,16 @@ import acolyte.jdbc.RowLists.{ rowList1, rowList2, stringList }
 
 final class SqlResultSpec extends org.specs2.mutable.Specification with H2Database {
 
-  "SQL result" title
+  "SQL result".title
+
+  object Resources {
+    val closeableTag = implicitly[ClassTag[Closeable]]
+  }
+
+  private implicit val tag: ClassTag[Closeable] = Resources.closeableTag
 
   "For-comprehension over result" should {
-    "fail when there is no data" in withQueryResult("scalar") { implicit c =>
+    "fail when there is no data" in withQueryResult("scalar") { implicit c: Connection =>
       lazy val parser = for {
         a <- SqlParser.str("col1")
         b <- SqlParser.int("col2")
@@ -20,8 +32,8 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
     }
 
     "return expected mandatory single result" in withQueryResult(
-      rowList2(classOf[String] -> "a", classOf[Int] -> "b") :+ ("str", 2)
-    ) { implicit c =>
+      rowList2(classOf[String] -> "a", classOf[Int] -> "b").append("str", 2)
+    ) { implicit c: Connection =>
       lazy val parser = for {
         a <- SqlParser.str("a")
         b <- SqlParser.int("b")
@@ -31,7 +43,7 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
     }
 
     "fail with sub-parser when there is no data" >> {
-      "by throwing exception" in withQueryResult("scalar") { implicit c =>
+      "by throwing exception" in withQueryResult("scalar") { implicit c: Connection =>
         lazy val sub = for {
           b <- SqlParser.str("b")
           c <- SqlParser.int("c")
@@ -45,7 +57,7 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
         SQL("SELECT * FROM test").as(parser.single) must throwA[Exception](message = "'col1' not found")
       }
 
-      "with captured failure" in withQueryResult("scalar") { implicit c =>
+      "with captured failure" in withQueryResult("scalar") { implicit c: Connection =>
         lazy val sub = for {
           b <- SqlParser.str("b")
           c <- SqlParser.int("c")
@@ -63,7 +75,7 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
     }
 
     "fail when column is missing for sub-parser" in withQueryResult(rowList1(classOf[String] -> "a") :+ "str") {
-      implicit c =>
+      implicit c: Connection =>
         lazy val sub = for {
           b <- SqlParser.str("col2")
           c <- SqlParser.int("col3")
@@ -77,7 +89,7 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
         SQL("SELECT * FROM test").as(parser.single) must throwA[Exception](message = "'col2' not found")
     }
 
-    "return None from optional sub-parser" in withQueryResult(rowList1(classOf[String] -> "a") :+ "str") { implicit c =>
+    "return None from optional sub-parser" in withQueryResult(rowList1(classOf[String] -> "a") :+ "str") { implicit c: Connection =>
       lazy val sub = for {
         b <- SqlParser.str("b")
         c <- SqlParser.int("c")
@@ -93,40 +105,40 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
   }
 
   "Column" should {
-    "be found in result" in withQueryResult(rowList1(classOf[Float] -> "f") :+ 1.2f) { implicit c =>
+    "be found in result" in withQueryResult(rowList1(classOf[Float] -> "f") :+ 1.2f) { implicit c: Connection =>
       SQL("SELECT f").as(SqlParser.matches("f", 1.2f).single) must beTrue
     }
 
     "not be found in result when value not matching" in withQueryResult(rowList1(classOf[Float] -> "f") :+ 1.2f) {
-      implicit c =>
+      implicit c: Connection =>
         SQL("SELECT f").as(SqlParser.matches("f", 2.34f).single) must beFalse
     }
 
     "not be found in result when column missing" in withQueryResult(rowList1(classOf[Float] -> "f") :+ 1.2f) {
-      implicit c =>
+      implicit c: Connection =>
         SQL("SELECT f").as(SqlParser.matches("x", 1.2f).single) must beFalse
     }
 
-    "be matching in result" in withQueryResult(rowList1(classOf[Float] -> "f") :+ 1.2f) { implicit c =>
+    "be matching in result" in withQueryResult(rowList1(classOf[Float] -> "f") :+ 1.2f) { implicit c: Connection =>
       SQL("SELECT f").as(SqlParser.matches("f", 1.2f).single) must beTrue
     }
 
     "not be found in result when value not matching" in withQueryResult(rowList1(classOf[Float] -> "f") :+ 1.2f) {
-      implicit c =>
+      implicit c: Connection =>
         SQL("SELECT f").as(SqlParser.matches("f", 2.34f).single) must beFalse
     }
 
     "not be found in result when column missing" in withQueryResult(rowList1(classOf[Float] -> "f") :+ 1.2f) {
-      implicit c =>
+      implicit c: Connection =>
         SQL("SELECT f").as(SqlParser.matches("x", 1.2f).single) must beFalse
     }
 
-    "be None when missing" in withQueryResult(rowList1(classOf[String] -> "foo") :+ "bar") { implicit c =>
+    "be None when missing" in withQueryResult(rowList1(classOf[String] -> "foo") :+ "bar") { implicit c: Connection =>
       SQL"SELECT *".as(SqlParser.str("lorem").?.single).aka("result") must beNone
     }
 
     "be None when NULL" in withQueryResult(rowList1(classOf[String] -> "foo") :+ null.asInstanceOf[String]) {
-      implicit c =>
+      implicit c: Connection =>
 
         SQL"SELECT *".as(SqlParser.str("foo").?.single) must beNone
     }
@@ -141,15 +153,15 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
       case "XB" => Xb
     }
 
-    "return Xa object" in withQueryResult(stringList :+ "XA") { implicit c =>
+    "return Xa object" in withQueryResult(stringList :+ "XA") { implicit c: Connection =>
       SQL"SELECT str".as(SqlParser.str(1).collect("ERR")(pf).single).aka("collected") must_=== Xa
     }
 
-    "return Xb object" in withQueryResult(stringList :+ "XB") { implicit c =>
+    "return Xb object" in withQueryResult(stringList :+ "XB") { implicit c: Connection =>
       SQL"SELECT str".as(SqlParser.str(1).collect("ERR")(pf).single).aka("collected") must_=== Xb
     }
 
-    "fail" in withQueryResult(stringList :+ "XC") { implicit c =>
+    "fail" in withQueryResult(stringList :+ "XC") { implicit c: Connection =>
       SQL"SELECT str".as(SqlParser.str(1).collect("ERR")(pf).single).aka("collecting") must throwA[Exception](
         "SqlMappingError\\(ERR\\)"
       )
@@ -157,7 +169,7 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
   }
 
   "Aggregation over all rows" should {
-    "release resources" in withQueryResult(stringList :+ "A" :+ "B" :+ "C") { implicit c =>
+    "release resources" in withQueryResult(stringList :+ "A" :+ "B" :+ "C") { implicit c: Connection =>
 
       val res: SqlQueryResult = SQL"SELECT str".executeQuery()
       var closed              = false
@@ -168,17 +180,20 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
 
       // .fold w/o ColumnAliaser is deprecated
       @com.github.ghik.silencer.silent
-      def agg = sqlResult.fold(List[Int]()) { (l, _) =>
+      def agg = sqlResult.fold(List[Int](), ColumnAliaser.empty) { (l, _) =>
         i = i + 1; l :+ i
       }
 
-      (agg.aka("aggregation") must beRight(List(1, 2, 3)))
-        .and(closed.aka("resource release") must beTrue)
-        .and(i.aka("row count") must_=== 3)
-
+      agg.aka("aggregation") must beRight[List[Int]].which {
+        _ must_=== List(1, 2, 3) and {
+          closed.aka("resource release") must beTrue
+        } and {
+          i.aka("row count") must_=== 3
+        }
+      }
     }
 
-    "release resources" in withQueryResult(stringList :+ "A" :+ "B" :+ "C") { implicit c =>
+    "release resources" in withQueryResult(stringList :+ "A" :+ "B" :+ "C") { implicit c: Connection =>
 
       val res: SqlQueryResult = SQL"SELECT str".executeQuery()
       var closed              = false
@@ -190,15 +205,18 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
           i = i + 1; l :+ i
         }
 
-      (agg.aka("aggregation") must beRight(List(1, 2, 3)))
-        .and(closed.aka("resource release") must beTrue)
-        .and(i.aka("row count") must_=== 3)
-
+      agg.aka("aggregation") must beRight[List[Int]].which {
+        _ must_=== List(1, 2, 3) and {
+          closed.aka("resource release") must beTrue
+        } and {
+          i.aka("row count") must_=== 3
+        }
+      }
     }
 
     "release resources on exception (with degraded result set)" in {
       queryResultAndOptions(stringList :+ "A" :+ "B" :+ "C", List("acolyte.resultSet.initOnFirstRow" -> "true")) {
-        implicit c =>
+        implicit c: Connection =>
 
           val res: SqlQueryResult =
             SQL"SELECT str".withResultSetOnFirstRow(true).executeQuery()
@@ -221,26 +239,29 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
   }
 
   "Aggregation over variable number of rows" should {
-    "support user alias in fold" in withQueryResult(stringList :+ "A" :+ "B" :+ "C") { implicit c =>
+    "support user alias in fold" in withQueryResult(stringList :+ "A" :+ "B" :+ "C") { implicit c: Connection =>
       val parser = SqlParser.str("foo")
 
       SQL"SELECT str".executeQuery().fold(List.empty[String], ColumnAliaser.withPattern(Set(1), "foo")) { (ls, row) =>
         parser(row).fold(_ => ls, _ :: ls)
-      } must beRight(List("C", "B", "A"))
+      } must beRight[List[String]].which {
+        _ must_=== List("C", "B", "A")
+      }
     }
 
-    "support user alias in foldWhile" in withQueryResult(rowList1(classOf[String] -> "bar") :+ "A" :+ "B" :+ "C") {
-      implicit c =>
+    "support user alias in foldWhile" in withQueryResult(rowList1(classOf[String] -> "bar") :+ "A" :+ "B" :+ "C") { implicit c: Connection =>
         val parser = SqlParser.str("foo.bar.lorem")
 
         SQL"SELECT str"
           .executeQuery()
           .foldWhile(List.empty[String], ColumnAliaser.withPattern(Set(1), "foo.", ".lorem")) { (ls, row) =>
             parser(row).fold(_ => ls, _ :: ls) -> true
-          } must beRight(List("C", "B", "A"))
+        } must beRight[List[String]].which {
+          _ must_=== List("C", "B", "A")
+        }
     }
 
-    "release resources" in withQueryResult(stringList :+ "A" :+ "B" :+ "C") { implicit c =>
+    "release resources" in withQueryResult(stringList :+ "A" :+ "B" :+ "C") { implicit c: Connection =>
 
       val res: SqlQueryResult = SQL"SELECT str".executeQuery()
       var closed              = false
@@ -252,13 +273,16 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
           (l, _) => i = i + 1; (l :+ i) -> true
         }
 
-      (agg.aka("aggregation") must beRight(List(1, 2, 3)))
-        .and(closed.aka("resource release") must beTrue)
-        .and(i.aka("row count") must_=== 3)
-
+      agg.aka("aggregation") must beRight[List[Int]].which {
+        _ must_=== List(1, 2, 3) and {
+          closed.aka("resource release") must beTrue
+        } and {
+          i.aka("row count") must_=== 3
+        }
+      }
     }
 
-    "release resources on exception" in withQueryResult(stringList :+ "A" :+ "B" :+ "C") { implicit c =>
+    "release resources on exception" in withQueryResult(stringList :+ "A" :+ "B" :+ "C") { implicit c: Connection =>
 
       val res: SqlQueryResult = SQL"SELECT str".executeQuery()
       var closed              = false
@@ -280,7 +304,7 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
 
     }
 
-    "stop after second row & release resources" in withQueryResult(stringList :+ "A" :+ "B" :+ "C") { implicit c =>
+    "stop after second row & release resources" in withQueryResult(stringList :+ "A" :+ "B" :+ "C") { implicit c: Connection =>
 
       val res: SqlQueryResult = SQL"SELECT str".executeQuery()
       var closed              = false
@@ -293,10 +317,13 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
             if (i == 2) (l, false) else { i = i + 1; (l :+ i) -> true }
         }
 
-      (agg.aka("aggregation") must beRight(List(1, 2)))
-        .and(closed.aka("resource release") must beTrue)
-        .and(i.aka("row count") must_=== 2)
-
+      agg.aka("aggregation") must beRight[List[Int]].which {
+        _ must_=== List(1, 2) and {
+          closed.aka("resource release") must beTrue
+        } and {
+          i.aka("row count") must_=== 2
+        }
+      }
     }
   }
 
@@ -307,13 +334,13 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
       case _            => l
     }
 
-    "do nothing when there is no result" in withQueryResult(QueryResult.Nil) { implicit c =>
-      SQL"EXEC test".executeQuery().withResult(go(_)).aka("iteration") must beRight.which(
+    "do nothing when there is no result" in withQueryResult(QueryResult.Nil) { implicit c: Connection =>
+      SQL"EXEC test".executeQuery().withResult(go(_)).aka("iteration") must beRight[List[Row]].which {
         _.aka("result list") must beEmpty
-      )
+      }
     }
 
-    "handle failure" in withQueryResult(rowList1(classOf[String] -> "foo") :+ "A" :+ "B") { implicit c =>
+    "handle failure" in withQueryResult(rowList1(classOf[String] -> "foo") :+ "A" :+ "B") { implicit c: Connection =>
       var first = false
       (SQL"SELECT str"
         .executeQuery()
@@ -328,28 +355,28 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
     }
 
     "stop after first row without failure" in withQueryResult(rowList1(classOf[String] -> "foo") :+ "A" :+ "B") {
-      implicit c =>
+      implicit c: Connection =>
         SQL"SELECT str"
           .executeQuery()
           .withResult {
             case Some(first) => Set(first.row[String]("foo"))
             case _           => Set.empty[String]
           }
-          .aka("partial processing") must beRight.which { r =>
-          r must_=== Set("A")
+          .aka("partial processing") must beRight[Set[String]].which {
+          _ must_=== Set("A")
         }
     }
   }
 
   "SQL warning" should {
-    "not be there on success" in withQueryResult(stringList :+ "A") { implicit c =>
+    "not be there on success" in withQueryResult(stringList :+ "A") { implicit c: Connection =>
 
       SQL"SELECT str".executeQuery().statementWarning.aka("statement warning") must beNone
 
     }
 
     "be handled from executed query" in withQueryResult(QueryResult.Nil.withWarning("Warning for test-proc-2")) {
-      implicit c =>
+      implicit c: Connection =>
 
         SQL("EXEC stored_proc({param})")
           .on("param" -> "test-proc-2")
@@ -365,19 +392,19 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
     val foo      = s"alias-${System.identityHashCode(this)}"
     val (v1, v2) = (s"1-$foo", s"2-$foo")
 
-    "be found by name" in withTestDB(v1) { implicit c =>
+    "be found by name" in withTestDB(v1) { implicit c: Connection =>
       SQL"SELECT foo AS AL, bar FROM test1".as(SqlParser.str("foo").single).aka("by name") must_=== v1
 
     }
 
-    "be found by alias" in withTestDB(v2) { implicit c =>
+    "be found by alias" in withTestDB(v2) { implicit c: Connection =>
       (SQL"SELECT foo AS AL, bar FROM test1".as(SqlParser.str("foo").single).aka("by name") must_=== v2)
         .and(SQL"SELECT foo AS AL, bar FROM test1".as(SqlParser.str("AL").single).aka("by alias") must_=== v2)
 
     }
 
     "be found by alias when column name is duplicated" in {
-      withH2Database { implicit c =>
+      withH2Database { implicit c: Connection =>
         createTest1Table()
 
         val id1 = System.identityHashCode(c).toLong
@@ -393,7 +420,7 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
       }
     }
 
-    "be found by user alias" in withTestDB(v2) { implicit c =>
+    "be found by user alias" in withTestDB(v2) { implicit c: Connection =>
       (SQL"SELECT foo AS AL, bar FROM test1"
         .asTry(SqlParser.str("pre.AL").single, ColumnAliaser.withPattern1("pre.")(1))
         .aka("by user alias") must beSuccessfulTry(v2)).and(
@@ -408,7 +435,7 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
   // ---
 
   def withTestDB[T](foo: String)(f: java.sql.Connection => T): T =
-    withH2Database { implicit c =>
+    withH2Database { implicit c: Connection =>
       createTest1Table()
 
       SQL("insert into test1(id, foo, bar) values ({id}, {foo}, {bar})")

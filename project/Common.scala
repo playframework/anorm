@@ -10,7 +10,7 @@ object Common extends AutoPlugin {
   override def trigger  = allRequirements
   override def requires = JvmPlugin
 
-  val previousVersion = "2.6.0"
+  val previousVersion = "2.6.10"
 
   override def projectSettings = Seq(
     organization       := "org.playframework.anorm",
@@ -87,7 +87,10 @@ object Common extends AutoPlugin {
     Test / console / scalacOptions ~= {
       _.filterNot { opt => opt.startsWith("-X") || opt.startsWith("-Y") }
     },
-    Test / scalacOptions ++= Seq("-Yrangepos"),
+    Test / scalacOptions ++= {
+      if (scalaBinaryVersion.value != "3") Seq("-Yrangepos")
+      else Seq.empty
+    },
     Test / scalacOptions ~= (_.filterNot(_ == "-Werror")),
     scalacOptions ~= (_.filterNot(_ == "-Xfatal-warnings")),
     Test / fork           := true,

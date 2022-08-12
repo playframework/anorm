@@ -4,7 +4,6 @@ import Common._
 import com.typesafe.tools.mima.core._
 import com.typesafe.tools.mima.plugin.MimaKeys.{ mimaBinaryIssueFilters, mimaPreviousArtifacts }
 
-/* TODO
 // Scalafix
 inThisBuild(
   List(
@@ -15,14 +14,13 @@ inThisBuild(
       "com.github.liancheng" %% "organize-imports" % "0.5.0")
   )
 )
- */
 
 val specs2Test = Seq(
   "specs2-core",
   "specs2-junit"
 ).map("org.specs2" %% _ % "4.10.6" % Test cross(CrossVersion.for3Use2_13))
 
-lazy val acolyteVersion = "1.2.0"
+lazy val acolyteVersion = "1.2.1-6331b1f9-SNAPSHOT" // TODO: "1.2.1"
 lazy val acolyte        = "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test
 
 ThisBuild / resolvers ++= Seq("Tatami Snapshots".at("https://raw.github.com/cchantep/tatami/master/snapshots"))
@@ -33,7 +31,7 @@ lazy val `anorm-tokenizer` = project
   .in(file("tokenizer"))
   .settings(
     mimaPreviousArtifacts := {
-      if (scalaBinaryVersion.value == "2.13") {
+      if (scalaBinaryVersion.value == "3") {
         Set.empty
       } else {
         mimaPreviousArtifacts.value
@@ -101,6 +99,15 @@ lazy val parserCombinatorsVer = Def.setting[String] {
   }
 }
 
+lazy val coreMimaFilter: ProblemFilter = {
+  case MissingClassProblem(old) =>
+    !old.fullName.startsWith("resource.") &&
+    old.fullName.indexOf("Macro") == -1 &&
+    !old.fullName.startsWith("anorm.macros.")
+
+  case _ => true
+}
+
 lazy val `anorm-core` = project
   .in(file("core"))
   .settings(
@@ -128,7 +135,7 @@ lazy val `anorm-core` = project
         }
       },
       mimaPreviousArtifacts := {
-        if (scalaBinaryVersion.value == "2.13") {
+        if (scalaBinaryVersion.value == "3") {
           Set.empty
         } else {
           mimaPreviousArtifacts.value
@@ -162,27 +169,20 @@ lazy val `anorm-core` = project
           "anorm.SqlQuery.statement"
         ),
         // private:
-        ProblemFilters.exclude[MissingClassProblem]( // macro
-          "anorm.Macro$ImplicitResolver$2$ImplicitTransformer$"
-        ),
-        ProblemFilters.exclude[MissingClassProblem]( // macro
-          "anorm.Macro$ImplicitResolver$2$Implicit$"
-        ),
-        ProblemFilters.exclude[MissingClassProblem]( // macro
-          "anorm.Macro$ImplicitResolver$2$Implicit"
-        ),
         ProblemFilters.exclude[DirectMissingMethodProblem]( // private
           "anorm.Sql.asTry"
         ),
         ProblemFilters.exclude[ReversedMissingMethodProblem]("anorm.JavaTimeToStatement.localDateToStatement"),
-        // Scala 3
-        ProblemFilters.exclude[DirectMissingMethodProblem]("anorm.ColumnNotFound.copy$default$1"),
-        ProblemFilters.exclude[DirectMissingMethodProblem]("anorm.ColumnNotFound.copy$default$2")
+        coreMimaFilter,
+        // was deprecated
+        ProblemFilters.exclude[IncompatibleMethTypeProblem]("anorm.ColumnNotFound.copy"),
+        ProblemFilters.exclude[IncompatibleResultTypeProblem]("anorm.ColumnNotFound.copy$default$2")
       ),
       libraryDependencies ++= Seq(
         "joda-time"               % "joda-time"                % "2.11.0",
         "org.joda"                % "joda-convert"             % "2.2.2",
         "org.scala-lang.modules" %% "scala-parser-combinators" % parserCombinatorsVer.value,
+        "org.scala-lang.modules" %% "scala-xml" % "2.1.0" % Test,
         "com.h2database"          % "h2"                       % "2.1.214" % Test,
         acolyte
       ) ++ specs2Test.map(_.exclude("org.scala-lang.modules", "*")),
@@ -204,8 +204,8 @@ lazy val `anorm-iteratee` = (project in file("iteratee"))
       else sourceDirectory.value
     },
     mimaPreviousArtifacts := {
-      if (scalaBinaryVersion.value == "2.13") Set.empty[ModuleID]
-      else Set(organization.value %% name.value % "2.6.0")
+      if (scalaBinaryVersion.value == "3") Set.empty[ModuleID]
+      else Set(organization.value %% name.value % "2.6.10")
     },
     publish / skip := { scalaBinaryVersion.value == "2.13" },
     libraryDependencies ++= {
@@ -235,7 +235,13 @@ val akkaContribVer = Def.setting[String] {
 
 lazy val `anorm-akka` = (project in file("akka"))
   .settings(
-    mimaPreviousArtifacts := Set.empty,
+    mimaPreviousArtifacts := {
+      if (scalaBinaryVersion.value == "3") {
+        Set.empty
+      } else {
+        mimaPreviousArtifacts.value
+      }
+    },
     libraryDependencies ++= Seq("akka-testkit", "akka-stream").map { m =>
       "com.typesafe.akka" %% m % akkaVer.value % Provided
     },

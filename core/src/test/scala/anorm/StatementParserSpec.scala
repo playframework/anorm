@@ -5,8 +5,8 @@ import acolyte.jdbc.AcolyteDSL.{ connection, handleQuery, withQueryResult }
 import acolyte.jdbc.Implicits._
 import acolyte.jdbc.RowLists.stringList
 
-class StatementParserSpec extends org.specs2.mutable.Specification {
-  "SQL statement parser" title
+final class StatementParserSpec extends org.specs2.mutable.Specification {
+  "SQL statement parser".title
 
   "Statement" should {
     "be parsed with 'name' and 'cat' parameters and support multiple lines" in {
@@ -214,7 +214,7 @@ class StatementParserSpec extends org.specs2.mutable.Specification {
         List.empty[(Int, ParameterValue)]
       ) must beSuccessfulTry.like { case (sql, (0, pv) :: Nil) =>
         (sql must_=== "SELECT * FROM name LIKE '%strange' AND id = ?").and(
-          pv must_=== ParameterValue.toParameterValue("foo")
+          pv must_=== ParameterValue.from("foo")
         )
       }
     }
@@ -252,7 +252,7 @@ class StatementParserSpec extends org.specs2.mutable.Specification {
       val cmd    = "SELECT"
       val clause = "FROM"
       val table  = "Test"
-      implicit val con = connection(handleQuery {
+      implicit val con: java.sql.Connection = connection(handleQuery {
         case QueryExecution(
               "SELECT * FROM Test WHERE id = ? AND code IN (?, ?)",
               DParam("id1", ParamMeta.Str) :: DParam(2, ParamMeta.Int) ::

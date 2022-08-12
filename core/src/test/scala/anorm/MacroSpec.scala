@@ -15,7 +15,7 @@ import Macro.ColumnNaming
 import SqlParser.scalar
 
 final class MacroSpec extends org.specs2.mutable.Specification {
-  "Macro" title
+  "Macro".title
 
   val barRow1 = RowLists.rowList1(classOf[Int] -> "v")
 
@@ -74,10 +74,11 @@ final class MacroSpec extends org.specs2.mutable.Specification {
       }
 
       "using the default column naming" in withQueryResult(
-        fooRow1 :+ (1.2f, "str1", 1, 2L, true) :+ (2.3f, "str2", 4,
-        nullLong, nullBoolean) :+ (3.4f, "str3",
-        5, 3L, nullBoolean) :+ (5.6f, "str4", 6,
-        nullLong, false)
+        fooRow1
+          .append(1.2f, "str1", 1, 2L, true)
+          .append(2.3f, "str2", 4, nullLong, nullBoolean)
+          .append(3.4f, "str3", 5, 3L, nullBoolean)
+          .append(5.6f, "str4", 6, nullLong, false)
       ) { implicit con =>
 
         spec(Macro.namedParser[Foo[Int]], Macro.parser[Foo[Int]]("r", "bar", "loremIpsum", "opt", "x"))
@@ -85,10 +86,11 @@ final class MacroSpec extends org.specs2.mutable.Specification {
       }
 
       "using the snake case naming" in withQueryResult(
-        fooRow2 :+ (1.2f, "str1", 1, 2L, true) :+ (2.3f, "str2", 4,
-        nullLong, nullBoolean) :+ (3.4f, "str3",
-        5, 3L, nullBoolean) :+ (5.6f, "str4", 6,
-        nullLong, false)
+        fooRow2
+          .append(1.2f, "str1", 1, 2L, true)
+          .append(2.3f, "str2", 4, nullLong, nullBoolean)
+          .append(3.4f, "str3", 5, 3L, nullBoolean)
+          .append(5.6f, "str4", 6, nullLong, false)
       ) { implicit con =>
 
         spec(
@@ -112,7 +114,7 @@ final class MacroSpec extends org.specs2.mutable.Specification {
         classOf[Int]     -> "v"
       )
 
-      withQueryResult(row :+ (1.2f, "str1", 1, 2L, true, 6)) { implicit c =>
+      withQueryResult(row.append(1.2f, "str1", 1, 2L, true, 6)) { implicit c =>
         SQL"TEST".as(fooBar.singleOpt) must beSome(Foo(1.2f, "str1")(Bar(6), Some(2))(Some(true)))
       }
     }
@@ -133,11 +135,11 @@ final class MacroSpec extends org.specs2.mutable.Specification {
     }
 
     "be successful for Foo[Int]" in withQueryResult(
-      fooRow1 :+ (1.2f, "str1", 1, 2L, true) :+ (2.3f, "str2", 4,
-      nullLong,
-      nullBoolean) :+ (3.4f, "str3", 5, 3L,
-      nullBoolean) :+ (5.6f, "str4", 6,
-      nullLong, false)
+      fooRow1
+        .append(1.2f, "str1", 1, 2L, true)
+        .append(2.3f, "str2", 4, nullLong, nullBoolean)
+        .append(3.4f, "str3", 5, 3L, nullBoolean)
+        .append(5.6f, "str4", 6, nullLong, false)
     ) { implicit con =>
       val parser: RowParser[Foo[Int]] = Macro.indexedParser[Foo[Int]]
 
@@ -159,11 +161,11 @@ final class MacroSpec extends org.specs2.mutable.Specification {
     }
 
     "be successful for Foo[Int]" in withQueryResult(
-      fooRow1 :+ (1.2f, "str1", 1, 2L, true) :+ (2.3f, "str2", 4,
-      nullLong,
-      nullBoolean) :+ (3.4f, "str3", 5, 3L,
-      nullBoolean) :+ (5.6f, "str4", 6,
-      nullLong, false)
+      fooRow1
+        .append(1.2f, "str1", 1, 2L, true)
+        .append(2.3f, "str2", 4, nullLong, nullBoolean)
+        .append(3.4f, "str3", 5, 3L, nullBoolean)
+        .append(5.6f, "str4", 6, nullLong, false)
     ) { implicit con =>
       val parser: RowParser[Foo[Int]] = Macro.offsetParser[Foo[Int]](0)
 
@@ -176,7 +178,11 @@ final class MacroSpec extends org.specs2.mutable.Specification {
     }
 
     "be successful for Goo[T] with offset = 2" in withQueryResult(
-      fooRow1 :+ (1.2f, "str1", 1, 2L, true) :+ (2.3f, "str2", 4, nullLong, nullBoolean) :+ (3.4f, "str3", 5, 3L, nullBoolean) :+ (5.6f, "str4", 6, nullLong, false)
+      fooRow1
+        .append(1.2f, "str1", 1, 2L, true)
+        .append(2.3f, "str2", 4, nullLong, nullBoolean)
+        .append(3.4f, "str3", 5, 3L, nullBoolean)
+        .append(5.6f, "str4", 6, nullLong, false)
     ) { implicit con =>
       val parser: RowParser[Goo[Int]] = Macro.offsetParser[Goo[Int]](2)
 
@@ -230,7 +236,7 @@ final class MacroSpec extends org.specs2.mutable.Specification {
       "with the default discrimination" in {
         val barRow2 = RowLists.rowList2(classOf[String] -> "classname", classOf[Int] -> "v")
 
-        withQueryResult(barRow2 :+ ("anorm.MacroSpec.Bar", 1) :+ ("anorm.MacroSpec.CaseObj", -1)) { implicit c =>
+        withQueryResult(barRow2.append("anorm.MacroSpec.Bar", 1).append("anorm.MacroSpec.CaseObj", -1)) { implicit c =>
           implicit val caseObjParser =
             RowParser[CaseObj.type] { _ => Success(CaseObj) }
 
@@ -246,7 +252,7 @@ final class MacroSpec extends org.specs2.mutable.Specification {
       "with a customized discrimination" in {
         val barRow2 = RowLists.rowList2(classOf[String] -> "foo", classOf[Int] -> "v")
 
-        withQueryResult(barRow2 :+ ("Bar", 1) :+ ("CaseObj", -1)) { implicit c =>
+        withQueryResult(barRow2.append("Bar", 1).append("CaseObj", -1)) { implicit c =>
           implicit val caseObjParser =
             RowParser[CaseObj.type] { _ => Success(CaseObj) }
 

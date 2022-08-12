@@ -1,35 +1,40 @@
 package anorm
 
+import java.sql.Connection
+
 import scala.util.Try
 
 import acolyte.jdbc.AcolyteDSL.withQueryResult
 import acolyte.jdbc.Implicits._
 import acolyte.jdbc.RowLists.{ rowList1, rowList2, stringList }
 
-class RowSpec extends org.specs2.mutable.Specification {
-  "Row" title
+final class RowSpec extends org.specs2.mutable.Specification {
+  "Row".title
 
   "List of column values" should {
-    "be expected one" in withQueryResult(rowList2(classOf[String] -> "foo", classOf[Int] -> "bar") :+ ("row1", 100)) {
-      implicit c =>
-        SQL("SELECT * FROM test").as(RowParser(r => Success(r.asList)).single).aka("column list") must_=== List(
-          "row1",
-          100
-        )
+    "be expected one" in withQueryResult(
+      rowList2(classOf[String] -> "foo", classOf[Int] -> "bar").append("row1", 100)
+    ) { implicit c: Connection =>
+      SQL("SELECT * FROM test").as(RowParser(r => Success(r.asList)).single).aka("column list") must_=== List(
+        "row1",
+        100
+      )
     }
 
-    "keep null if not nullable" in withQueryResult(stringList :+ null) { implicit c =>
-      SQL("SELECT 1").as(RowParser(r => Success(r.asList)).single).aka("column list") must_=== List(null)
-
-    }
-
-    "turn null into None if nullable" in withQueryResult(stringList.withNullable(1, true) :+ null) { implicit c =>
-      SQL("SELECT 1").as(RowParser(r => Success(r.asList)).single).aka("column list") must_=== List(None)
+    "keep null if not nullable" in withQueryResult(stringList :+ null) { implicit c: Connection =>
+      SQL("SELECT 1").as(RowParser(r => Success(r.asList)).single)(c).aka("column list") must_=== List(null)
 
     }
 
-    "turn value into Some(X) if nullable" in withQueryResult(stringList.withNullable(1, true) :+ "str") { implicit c =>
-      SQL("SELECT 1").as(RowParser(r => Success(r.asList)).single).aka("column list") must_=== List(Some("str"))
+    "turn null into None if nullable" in withQueryResult(stringList.withNullable(1, true) :+ null) {
+      implicit c: Connection =>
+        SQL("SELECT 1").as(RowParser(r => Success(r.asList)).single).aka("column list") must_=== List(None)
+
+    }
+
+    "turn value into Some(X) if nullable" in withQueryResult(stringList.withNullable(1, true) :+ "str") {
+      implicit c: Connection =>
+        SQL("SELECT 1").as(RowParser(r => Success(r.asList)).single).aka("column list") must_=== List(Some("str"))
 
     }
 
@@ -53,49 +58,52 @@ class RowSpec extends org.specs2.mutable.Specification {
   }
 
   "Column dictionary" should {
-    "be expected one" in withQueryResult(rowList2(classOf[String] -> "foo", classOf[Int] -> "bar") :+ ("row1", 100)) {
-      implicit c =>
-        SQL("SELECT * FROM test").as(RowParser(r => Success(r.asMap)).single).aka("column map") must_=== Map(
-          ".foo" -> "row1",
-          ".bar" -> 100
-        )
+    "be expected one" in withQueryResult(
+      rowList2(classOf[String] -> "foo", classOf[Int] -> "bar").append("row1", 100)
+    ) { implicit c: Connection =>
+      SQL("SELECT * FROM test").as(RowParser(r => Success(r.asMap)).single).aka("column map") must_=== Map(
+        ".foo" -> "row1",
+        ".bar" -> 100
+      )
 
     }
 
-    "keep null if not nullable" in withQueryResult(rowList1(classOf[String] -> "foo") :+ null) { implicit c =>
-      SQL("SELECT 1").as(RowParser(r => Success(r.asMap)).single).aka("column map") must_=== Map(".foo" -> null)
+    "keep null if not nullable" in withQueryResult(rowList1(classOf[String] -> "foo") :+ null) {
+      implicit c: Connection =>
+        SQL("SELECT 1").as(RowParser(r => Success(r.asMap)).single).aka("column map") must_=== Map(".foo" -> null)
 
     }
 
     "turn null into None if nullable" in withQueryResult(
       rowList1(classOf[String] -> "foo").withNullable(1, true) :+ null
-    ) { implicit c =>
+    ) { implicit c: Connection =>
       SQL("SELECT 1").as(RowParser(r => Success(r.asMap)).single).aka("column map") must_=== Map(".foo" -> None)
 
     }
 
     "turn value into Some(X) if nullable" in withQueryResult(
       rowList1(classOf[String] -> "foo").withNullable(1, true) :+ "str"
-    ) { implicit c =>
+    ) { implicit c: Connection =>
       SQL("SELECT 1").as(RowParser(r => Success(r.asMap)).single).aka("column map") must_=== Map(".foo" -> Some("str"))
 
     }
   }
 
   "Column" should {
-    "be extracted by name" in withQueryResult(rowList1(classOf[String] -> "foo") :+ "byName") { implicit c =>
-      SQL("SELECT *").as(RowParser(r => Success(r[String]("foo"))).single).aka("column by name") must_=== "byName"
+    "be extracted by name" in withQueryResult(rowList1(classOf[String] -> "foo") :+ "byName") {
+      implicit c: Connection =>
+        SQL("SELECT *").as(RowParser(r => Success(r[String]("foo"))).single).aka("column by name") must_=== "byName"
     }
 
-    "be extracted by position" in withQueryResult(stringList :+ "byPos") { implicit c =>
+    "be extracted by position" in withQueryResult(stringList :+ "byPos") { implicit c: Connection =>
       SQL("SELECT *").as(RowParser(r => Success(r[String](1))).single).aka("column by name") must_=== "byPos"
     }
   }
 
   "Row" should {
     "successfully be parsed" in withQueryResult(
-      rowList2(classOf[String] -> "foo", classOf[Int] -> "num") :+ ("str", 2)
-    ) { implicit c =>
+      rowList2(classOf[String] -> "foo", classOf[Int] -> "num").append("str", 2)
+    ) { implicit c: Connection =>
 
       SQL"SELECT *"
         .withResult(_.map(_.row.as((SqlParser.str("foo") ~ SqlParser.int(2)).map { case a ~ b =>

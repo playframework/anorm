@@ -5,6 +5,7 @@
 import java.util.StringTokenizer
 
 import java.sql.{ PreparedStatement, ResultSet, SQLException }
+import java.lang.reflect.InvocationTargetException
 
 import scala.reflect.ClassTag
 
@@ -19,8 +20,7 @@ import scala.reflect.ClassTag
  * SQL("Select 1")
  * }}}
  */
-package object anorm {
-  import scala.language.implicitConversions
+package object anorm extends PackageCompat {
 
   /** Structural type for timestamp wrapper. */
   type TimestampWrapper1 = { def getTimestamp: java.sql.Timestamp }
@@ -32,7 +32,18 @@ package object anorm {
     def unapply(that: Any): Option[java.sql.Timestamp] = try {
       Some(that.asInstanceOf[TimestampWrapper1].getTimestamp)
     } catch {
-      case _: NoSuchMethodException => None
+      case _: NoSuchMethodException => 
+        None
+
+      case ie: InvocationTargetException => {
+        val cause = ie.getCause
+
+        if (cause != null) {
+          throw cause
+        }
+
+        throw ie
+      }
     }
   }
 
@@ -48,6 +59,16 @@ package object anorm {
     } catch {
       case _: NoSuchMethodException => None
       case _: SQLException          => None
+
+      case ie: InvocationTargetException => {
+        val cause = ie.getCause
+
+        if (cause != null) {
+          throw cause
+        }
+
+        throw ie
+      }
     }
   }
 
@@ -63,12 +84,18 @@ package object anorm {
     } catch {
       case _: NoSuchMethodException => None
       case _: SQLException          => None
+
+      case ie: InvocationTargetException => {
+        val cause = ie.getCause
+
+        if (cause != null) {
+          throw cause
+        }
+
+        throw ie
+      }
     }
   }
-
-  // TODO: Review implicit usage there
-  // (add explicit functions on SqlQuery?)
-  implicit def sqlToSimple(sql: SqlQuery): SimpleSql[Row] = sql.asSimple
 
   /**
    * Creates an SQL query with given statement.
