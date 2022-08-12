@@ -41,7 +41,9 @@ final case class SqlQueryResult(resultSet: ManagedResource[java.sql.ResultSet], 
    * }
    * }}}
    */
-  def statementWarning: Option[SQLWarning] =
-    statement.acquireFor(_.getWarnings).fold[Option[SQLWarning]](_.headOption.map(new SQLWarning(_)), Option(_))
+  def statementWarning: Option[SQLWarning] = {
+    import resource.extractedEitherToEither
 
+    statement.acquireFor(_.getWarnings).fold[Option[SQLWarning]](_.headOption.map(new SQLWarning(_)), Option(_))
+  }
 }

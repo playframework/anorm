@@ -15,37 +15,44 @@ object Common extends AutoPlugin {
   override def projectSettings = Seq(
     organization       := "org.playframework.anorm",
     scalaVersion       := "2.12.16",
-    crossScalaVersions := Seq("2.11.12", scalaVersion.value, "2.13.8"),
+    crossScalaVersions := Seq("2.11.12", scalaVersion.value, "2.13.8", "3.1.3"),
     (Compile / unmanagedSourceDirectories) ++= {
       val sv = scalaVersion.value
 
-      Seq(
-        scala2Unmanaged(sv, 12, (Compile / sourceDirectory).value),
-        scala2Unmanaged(sv, 13, (Compile / sourceDirectory).value)
-      )
+      scalaUnmanaged(sv, (Compile / sourceDirectory).value)
     },
-    (Test / unmanagedSourceDirectories) += scala2Unmanaged(scalaVersion.value, 12, (Test / sourceDirectory).value),
-    libraryDependencies ++= {
-      val silencerVer = "1.7.9"
+    (Test / unmanagedSourceDirectories) ++= scalaUnmanaged(scalaVersion.value, (Test / sourceDirectory).value),
+    ThisBuild / libraryDependencies ++= {
+      if (scalaBinaryVersion.value != "3") {
+        val silencerVersion = "1.7.9"
 
-      Seq(
-        compilerPlugin(("com.github.ghik" %% "silencer-plugin" % silencerVer).cross(CrossVersion.full)),
-        ("com.github.ghik"                %% "silencer-lib"    % silencerVer % Provided).cross(CrossVersion.full)
-      )
+        Seq(
+          compilerPlugin(
+            ("com.github.ghik" %% "silencer-plugin" % silencerVersion)
+              .cross(CrossVersion.full)
+          ),
+      ("com.github.ghik" %% "silencer-lib" % silencerVersion % Provided)
+        .cross(CrossVersion.full)
+        )
+      } else Seq.empty
     },
-    scalacOptions ++= Seq(
-      "-encoding",
-      "UTF-8",
-      "-target:jvm-1.8",
-      "-unchecked",
-      "-deprecation",
-      "-feature",
-      "-Xfatal-warnings",
-      "-Xlint",
-      "-g:vars"
-    ),
+    scalacOptions ++= Seq("-Xfatal-warnings"),
     scalacOptions ++= {
-      if (scalaBinaryVersion.value == "2.12") {
+      if (scalaBinaryVersion.value != "3") {
+        Seq(
+          "-target:jvm-1.8",
+          "-Xlint",
+          "-g:vars")
+      } else {
+        Seq.empty
+      }
+    },
+    scalacOptions ++= {
+      val v = scalaBinaryVersion.value
+
+      if (v == "3") {
+        Seq("-explaintypes", "-Werror")
+      } else if (v == "2.12") {
         Seq(
           "-Xmax-classfile-name",
           "128",
@@ -57,17 +64,19 @@ object Common extends AutoPlugin {
           "-Ywarn-unused-import",
           "-Ywarn-macros:after"
         )
-      } else if (scalaBinaryVersion.value == "2.11") {
-        Seq("-Xmax-classfile-name", "128", "-Yopt:_", "-Ydead-code", "-Yclosure-elim", "-Yconst-opt")
+      } else if (v == "2.11") {
+        Seq(
+          "-Xmax-classfile-name", "128",
+          "-Yopt:_", "-Ydead-code", "-Yclosure-elim", "-Yconst-opt")
       } else {
         Seq(
           "-explaintypes",
           "-Werror",
+          "-Wunused",
           "-Wnumeric-widen",
           "-Wdead-code",
           "-Wvalue-discard",
           "-Wextra-implicit",
-          "-Wunused",
           "-Wmacros:after"
         )
       }
@@ -94,10 +103,19 @@ object Common extends AutoPlugin {
   @inline def incoRet(n: String) =
     ProblemFilters.exclude[IncompatibleResultTypeProblem](n)
 
-  def scala2Unmanaged(ver: String, minor: Int, base: File): File =
+  def scalaUnmanaged(ver: String, base: File): Seq[File] =
     CrossVersion.partialVersion(ver) match {
-      case Some((2, n)) if n >= minor => base / s"scala-2.${minor}+"
-      case _                          => base / s"scala-2.${minor}-"
+      case Some((2, 12)) =>
+        Seq(base / "scala-2.12+", base / "scala-2.13-")
+
+      case Some((3, _) | (2, 13)) =>
+        Seq(base / "scala-2.12+", base / "scala-2.13+")
+
+      case Some((_, minor))                           =>
+        Seq(base / s"scala-2.${minor}-")
+
+      case _ =>
+        sys.error(s"Unexpected version: $ver")
     }
 
 }

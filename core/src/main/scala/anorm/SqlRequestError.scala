@@ -28,8 +28,11 @@ object SqlRequestError {
  * @param column the name of the not found column
  * @param available the names of the available columns
  */
-case class ColumnNotFound(column: String, @deprecatedName(Symbol("possibilities")) available: Seq[String])
-    extends SqlRequestError {
+case class ColumnNotFound(
+    column: String,
+    @deprecatedName(Symbol("possibilities")) available: Seq[String]
+) extends SqlRequestError {
+
   @deprecated("Use constructor with `available` sequence", "2.5.4")
   def this(column: String, possibilities: List[String]) =
     this(column, available = possibilities.toSeq)
@@ -41,7 +44,7 @@ case class ColumnNotFound(column: String, @deprecatedName(Symbol("possibilities"
   def possibilities = available.toList
 
   @deprecated("Use copy with `available`", "2.5.4")
-  def copy(column: String = this.column, possibilities: List[String] = this.possibilities): ColumnNotFound =
+  def copy(column: String, possibilities: List[String]): ColumnNotFound =
     ColumnNotFound(column, possibilities.toSeq)
 
   override lazy val toString = message

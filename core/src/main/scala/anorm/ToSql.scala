@@ -85,7 +85,7 @@ object ToSql {
     traversableToSql[A, Vector[A]]
 
   /** Returns fragment for each value, with custom formatting. */
-  implicit def seqParamToSql[A](implicit conv: ToSql[A] = ToSql.missing[A]) =
+  implicit def seqParamToSql[A](implicit conv: ToSql[A] = ToSql.missing[A]): ToSql[SeqParameter[A]] =
     ToSql[SeqParameter[A]] { p =>
       val before = p.before.getOrElse("")
       val after  = p.after.getOrElse("")

@@ -4,7 +4,9 @@
 
 import java.util.StringTokenizer
 
-import java.sql.SQLException
+import java.sql.{ PreparedStatement, ResultSet, SQLException }
+
+import scala.reflect.ClassTag
 
 /**
  * Anorm API
@@ -188,21 +190,25 @@ package object anorm {
   }
 
   // Optimized resource typeclass not using reflection
-  object StatementResource extends resource.Resource[java.sql.PreparedStatement] {
-
-    def close(stmt: java.sql.PreparedStatement) = stmt.close()
+  object StatementResource extends resource.Resource[PreparedStatement] {
+    def close(stmt: PreparedStatement) = stmt.close()
 
     @deprecated("Deprecated by Scala-ARM upgrade", "2.5.4")
     def fatalExceptions = Seq[Class[_]](classOf[Exception])
   }
+
+  private[anorm] lazy val statementClassTag =
+    implicitly[ClassTag[PreparedStatement]]
 
   // Optimized resource typeclass not using reflection
-  object ResultSetResource extends resource.Resource[java.sql.ResultSet] {
-    def close(rs: java.sql.ResultSet) = rs.close()
+  object ResultSetResource extends resource.Resource[ResultSet] {
+    def close(rs: ResultSet) = rs.close()
 
     @deprecated("Deprecated by Scala-ARM upgrade", "2.5.4")
     def fatalExceptions = Seq[Class[_]](classOf[Exception])
   }
+
+  private[anorm] lazy val resultSetClassTag = implicitly[ClassTag[ResultSet]]
 
   /** Activable features */
   object features {

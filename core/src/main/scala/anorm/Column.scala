@@ -13,6 +13,8 @@ import java.net.{ URI, URL }
 
 import java.sql.Timestamp
 
+import scala.reflect.ClassTag
+
 import scala.util.{ Failure, Success => TrySuccess, Try }
 import scala.util.control.NonFatal
 
@@ -610,14 +612,19 @@ object Column extends JodaColumn with JavaTimeColumn {
     unsafe
   }
 
-  @inline private def streamBytes(in: InputStream): Either[SqlRequestError, Array[Byte]] = managed(in)
-    .acquireFor(streamToBytes(_))
-    .fold(
-      { errs =>
-        Left(TypeDoesNotMatch(errs.headOption.fold("Fails to read binary stream")(_.getMessage)))
-      },
-      Right(_)
-    )
+  @inline private def streamBytes(in: InputStream): Either[SqlRequestError, Array[Byte]] = {
+    import resource.extractedEitherToEither
+    implicit val cls: ClassTag[InputStream] = inputStreamClassTag
+
+    managed(in)
+      .acquireFor(streamToBytes(_))
+      .fold(
+        { errs =>
+          Left(TypeDoesNotMatch(errs.headOption.fold("Fails to read binary stream")(_.getMessage)))
+        },
+        Right(_)
+      )
+  }
 
   @annotation.tailrec
   private def streamToBytes(
@@ -630,6 +637,9 @@ object Column extends JodaColumn with JavaTimeColumn {
     if (count == -1) bytes
     else streamToBytes(in, bytes ++ buffer.take(count), buffer)
   }
+
+  private[anorm] lazy val inputStreamClassTag =
+    implicitly[ClassTag[InputStream]]
 }
 
 sealed trait JodaColumn {

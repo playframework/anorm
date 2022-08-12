@@ -20,9 +20,9 @@ inThisBuild(
 val specs2Test = Seq(
   "specs2-core",
   "specs2-junit"
-).map("org.specs2" %% _ % "4.10.6" % Test)
+).map("org.specs2" %% _ % "4.10.6" % Test cross(CrossVersion.for3Use2_13))
 
-lazy val acolyteVersion = "1.1.4"
+lazy val acolyteVersion = "1.2.0"
 lazy val acolyte        = "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test
 
 ThisBuild / resolvers ++= Seq("Tatami Snapshots".at("https://raw.github.com/cchantep/tatami/master/snapshots"))
@@ -39,18 +39,20 @@ lazy val `anorm-tokenizer` = project
         mimaPreviousArtifacts.value
       }
     },
-    libraryDependencies ++= {
-      if (isDotty.value) Seq.empty
-      else Seq(
+    libraryDependencies += {
+      if (scalaBinaryVersion.value == "3") {
+        "org.scala-lang" %% "scala3-compiler" % scalaVersion.value % Provided
+      } else {
         "org.scala-lang" % "scala-reflect" % scalaVersion.value
-      )
+      }
     }
   )
 
 // ---
 
 val armShading = Seq(
-  libraryDependencies += "com.jsuereth" %% "scala-arm" % "2.1-SNAPSHOT",
+  libraryDependencies += ("com.jsuereth" %% "scala-arm" % "2.1-SNAPSHOT").
+    cross(CrossVersion.for3Use2_13),
   assembly / test                       := {},
   assembly / assemblyOption ~= {
     _.withIncludeScala(false) // java libraries shouldn't include scala
@@ -107,11 +109,18 @@ lazy val `anorm-core` = project
       (Compile / sourceGenerators) += Def.task {
         Seq(GFA((Compile / sourceManaged).value / "anorm"))
       }.taskValue,
-      scalacOptions ++= Seq(
-        "-Xlog-free-terms",
-        "-P:silencer:globalFilters=missing\\ in\\ object\\ ToSql\\ is\\ deprecated;possibilities\\ in\\ class\\ ColumnNotFound\\ is\\ deprecated;DeprecatedSqlParser\\ in\\ package\\ anorm\\ is\\ deprecated;constructor\\ deprecatedName\\ in\\ class\\ deprecatedName\\ is\\ deprecated"
-      ),
-      (Test / scalacOptions) ++= {
+      scalacOptions ++= {
+        if (scalaBinaryVersion.value == "3") {
+          Seq.empty
+            Seq("-Wconf:cat=deprecation&msg=.*(reflectiveSelectableFromLangReflectiveCalls|DeprecatedSqlParser|missing .*ToSql).*:s")
+        } else {
+          Seq(
+            "-Xlog-free-terms",
+            "-P:silencer:globalFilters=missing\\ in\\ object\\ ToSql\\ is\\ deprecated;possibilities\\ in\\ class\\ ColumnNotFound\\ is\\ deprecated;DeprecatedSqlParser\\ in\\ package\\ anorm\\ is\\ deprecated;constructor\\ deprecatedName\\ in\\ class\\ deprecatedName\\ is\\ deprecated"
+          )
+        }
+      },
+      Test / scalacOptions ++= {
         if (scalaBinaryVersion.value == "2.13") {
           Seq("-Ypatmat-exhaust-depth", "off", "-P:silencer:globalFilters=multiarg\\ infix\\ syntax")
         } else {
@@ -165,16 +174,25 @@ lazy val `anorm-core` = project
         ProblemFilters.exclude[DirectMissingMethodProblem]( // private
           "anorm.Sql.asTry"
         ),
-        ProblemFilters.exclude[ReversedMissingMethodProblem]("anorm.JavaTimeToStatement.localDateToStatement")
+        ProblemFilters.exclude[ReversedMissingMethodProblem]("anorm.JavaTimeToStatement.localDateToStatement"),
+        // Scala 3
+        ProblemFilters.exclude[DirectMissingMethodProblem]("anorm.ColumnNotFound.copy$default$1"),
+        ProblemFilters.exclude[DirectMissingMethodProblem]("anorm.ColumnNotFound.copy$default$2")
       ),
       libraryDependencies ++= Seq(
         "joda-time"               % "joda-time"                % "2.11.0",
         "org.joda"                % "joda-convert"             % "2.2.2",
         "org.scala-lang.modules" %% "scala-parser-combinators" % parserCombinatorsVer.value,
         "com.h2database"          % "h2"                       % "2.1.214" % Test,
-        acolyte,
-        "com.chuusai" %% "shapeless" % "2.3.9" % Test
-      ) ++ specs2Test
+        acolyte
+      ) ++ specs2Test.map(_.exclude("org.scala-lang.modules", "*")),
+      libraryDependencies += {
+        if (scalaBinaryVersion.value == "3") {
+          "org.typelevel" %% "shapeless3-test" % "3.0.4"
+        } else {
+          "com.chuusai" %% "shapeless" % "2.3.9",
+        }
+      }
     ) ++ armShading
   )
   .dependsOn(`anorm-tokenizer`)
@@ -296,8 +314,6 @@ lazy val docs = project
     )
   )
   .dependsOn(`anorm-core`)
-
-Scapegoat.settings
 
 ThisBuild / playBuildRepoName := "anorm"
 

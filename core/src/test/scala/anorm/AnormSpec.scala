@@ -30,7 +30,7 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
       }
     }
 
-    "return defined option of case class" in withQueryResult(fooBarTable :+ (11L, "World", 21)) { implicit c =>
+    "return defined option of case class" in withQueryResult(fooBarTable.apped(11L, "World", 21)) { implicit c =>
 
       SQL("SELECT * FROM test WHERE id = {id}")
         .on("id" -> 11L)

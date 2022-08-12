@@ -328,7 +328,7 @@ sealed trait ToStatementPriority0 {
    * anorm.SQL("SELECT * FROM Test WHERE category = {c}").on('c -> Some("cat"))
    * }}}
    */
-  implicit def someToStatement[A](implicit c: ToStatement[A]) =
+  implicit def someToStatement[A](implicit c: ToStatement[A]): ToStatement[Some[A]] =
     new ToStatement[Some[A]] with NotNullGuard {
       def set(s: PreparedStatement, index: Int, v: Some[A]): Unit =
         c.set(s, index, v.get)
@@ -344,12 +344,12 @@ sealed trait ToStatementPriority0 {
    * SQL"SELECT * FROM Test WHERE nullable_int = \\${Option.empty[Int]}"
    * }}}
    */
-  implicit def optionToStatement[A](implicit c: ToStatement[A], meta: ParameterMetaData[A]) = new ToStatement[Option[A]]
-    with NotNullGuard {
-    def set(s: PreparedStatement, index: Int, o: Option[A]) = {
-      o.fold[Unit](s.setNull(index, meta.jdbcType))(c.set(s, index, _))
+  implicit def optionToStatement[A](implicit c: ToStatement[A], meta: ParameterMetaData[A]): ToStatement[Option[A]] =
+    new ToStatement[Option[A]] with NotNullGuard {
+      def set(s: PreparedStatement, index: Int, o: Option[A]) = {
+        o.fold[Unit](s.setNull(index, meta.jdbcType))(c.set(s, index, _))
+      }
     }
-  }
 
   /**
    * Sets Java big integer on statement.
@@ -605,7 +605,7 @@ sealed trait ToStatementPriority0 {
    *     post = ")"))
    * }}}
    */
-  implicit def seqParamToStatement[A](implicit c: ToStatement[Seq[A]]) =
+  implicit def seqParamToStatement[A](implicit c: ToStatement[Seq[A]]): ToStatement[SeqParameter[A]] =
     new ToStatement[SeqParameter[A]] with NotNullGuard {
       def set(s: PreparedStatement, offset: Int, ps: SeqParameter[A]): Unit =
         c.set(s, offset, ps.values)
@@ -629,7 +629,7 @@ sealed trait ToStatementPriority0 {
    *   on("a" -> Array("A", "2", "C"))
    * }}}
    */
-  implicit def arrayToParameter[A <: AnyRef](implicit m: ParameterMetaData[A]) =
+  implicit def arrayToParameter[A <: AnyRef](implicit m: ParameterMetaData[A]): ToStatement[Array[A]] =
     new ToStatement[Array[A]] with NotNullGuard {
       def set(s: PreparedStatement, i: Int, arr: Array[A]) =
         if (arr == (null: AnyRef)) throw new IllegalArgumentException()

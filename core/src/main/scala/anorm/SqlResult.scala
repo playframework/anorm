@@ -174,8 +174,11 @@ private[anorm] trait WithResult {
    */
   def withResult[T](op: Option[Cursor] => T, aliaser: ColumnAliaser)(implicit
       connection: Connection
-  ): Either[List[Throwable], T] =
+  ): Either[List[Throwable], T] = {
+    import resource.extractedEitherToEither
+
     Sql.withResult(resultSet(connection), resultSetOnFirstRow, aliaser)(op).acquireFor(identity)
+  }
 
   /**
    * Converts this query result as `T`, using parser.

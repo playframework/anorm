@@ -551,7 +551,7 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
 }
 
 @deprecated("Do not use these combinators", "2.5.4")
-sealed trait DeprecatedSqlParser { _: SqlParser.type =>
+sealed trait DeprecatedSqlParser { _parser: SqlParser.type =>
 
   @deprecated("Use `matches[T]`", "2.5.4")
   @SuppressWarnings(Array("AsInstanceOf"))
