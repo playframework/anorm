@@ -22,7 +22,7 @@ val specs2Test = Seq(
   "specs2-junit"
 ).map("org.specs2" %% _ % "4.10.6" % Test)
 
-lazy val acolyteVersion = "1.1.4"
+lazy val acolyteVersion = "1.2.0"
 lazy val acolyte        = "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test
 
 ThisBuild / resolvers ++= Seq("Tatami Snapshots".at("https://raw.github.com/cchantep/tatami/master/snapshots"))
