@@ -14,11 +14,6 @@ private[anorm] object ValueColumnImpl {
 
     ctor.paramSymss match {
       case List(v) :: Nil => {
-        /* TODO: Remove;
-        val resolveImplicit = ImplicitResolver[A](q).resolver[Column, T](
-          forwardExpr, Map.empty, debug = report.info(_))
-         */
-
         v.tree match {
           case vd: ValDef => {
             val tpr = vd.tpt.tpe
@@ -58,7 +53,7 @@ private[anorm] object ValueColumnImpl {
 
       case _ =>
         report.errorAndAbort(
-          s"Cannot resolve value reader for '${aTpr.typeSymbol.name}'"
+          s"Cannot resolve value Column for '${aTpr.typeSymbol.name}'"
         )
     }
   }

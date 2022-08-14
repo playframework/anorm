@@ -35,6 +35,7 @@ final class MacroSpec extends org.specs2.mutable.Specification {
     classOf[JBool]  -> "x"
   ) // java types to avoid conv
 
+  /* TODO
   "Column naming" should {
     import ColumnNaming._
 
@@ -352,6 +353,7 @@ final class MacroSpec extends org.specs2.mutable.Specification {
       }
     }
   }
+*/
 
   "Generated column" should {
     shapeless.test.illTyped("anorm.Macro.valueColumn[Bar]") // case class

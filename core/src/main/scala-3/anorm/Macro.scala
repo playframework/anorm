@@ -183,8 +183,6 @@ object Macro extends MacroOptions:
 
   // --- ToParameter ---
 
-  // TODO: import anorm.macros.ToParameterListImpl
-
   /**
    * @param separator $separatorParam
    * @tparam T $caseTParam
@@ -258,7 +256,7 @@ object Macro extends MacroOptions:
    * @tparam T $valueClassTParam
    */
   inline def valueToStatement[T <: AnyVal]: ToStatement[T] =
-    ??? // TODO: macro anorm.macros.ValueToStatement[T]
+    ${ macros.ValueToStatement[T] }
 
   // ---
 
@@ -358,6 +356,7 @@ object Macro extends MacroOptions:
 
   private def defaultParameters[T](using Quotes, Type[T]): Expr[ToParameterList[T]] = {
     /* TODO
+import macros.ToParameterListImpl
     val tpe    = c.weakTypeTag[T].tpe
     val tpeSym = tpe.typeSymbol.asClass
 
@@ -377,7 +376,7 @@ object Macro extends MacroOptions:
   }
 
   private def parametersDefaultNames[T](separator: Expr[String])(using Quotes, Type[T]): Expr[ToParameterList[T]] =
-    '{ ??? } /* TODO: ToParameterListImpl.caseClass[T](
+    '{ ??? } /* TODO: import macros.ToParameterListImpl; ToParameterListImpl.caseClass[T](
       Seq.empty[c.Expr[Macro.ParameterProjection]], separator) */
 
   private def configuredParameters[T](
@@ -385,6 +384,7 @@ object Macro extends MacroOptions:
   )(using Quotes, Type[T]): Expr[ToParameterList[T]] = {
     /* TODO:
     @silent def p = reify("_")
+import macros.ToParameterListImpl
 
     ToParameterListImpl.caseClass[T](c)(projection, p)
      */
@@ -395,7 +395,7 @@ object Macro extends MacroOptions:
       separator: Expr[String],
       projection: Expr[Seq[Macro.ParameterProjection]]
   )(using Quotes, Type[T]): Expr[ToParameterList[T]] =
-    '{ ??? } // TODO: ToParameterListImpl.caseClass[T](c)(projection, separator)
+    '{ ??? } // TODO: import macros.ToParameterListImpl; ToParameterListImpl.caseClass[T](c)(projection, separator)
 
   private def withColumn[T](
       f: Expr[Column[T]] => Expr[RowParser[T]]
