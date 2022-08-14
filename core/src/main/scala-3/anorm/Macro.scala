@@ -179,7 +179,7 @@ object Macro extends MacroOptions:
    * @tparam T $valueClassTParam
    */
   inline def valueColumn[T <: AnyVal]: Column[T] =
-    ??? // TODO: macro anorm.macros.ValueColumnImpl[T]
+    ${ macros.ValueColumnImpl[T] }
 
   // --- ToParameter ---
 
@@ -413,5 +413,35 @@ object Macro extends MacroOptions:
       }
     }
   }
+
+  inline private[anorm] def withSelfColumn[T](
+      f: Column[T] => Column[T]
+  ): Column[T] = new Column[T] { self =>
+    lazy val underlying = f(self)
+
+    def apply(input: Any, meta: MetaDataItem): Either[SqlRequestError, T] =
+      underlying(input, meta)
+  }
+
+  /** Only for internal purposes */
+  final class Placeholder {}
+
+  /** Only for internal purposes */
+  object Placeholder {
+    implicit object Parser extends RowParser[Placeholder] {
+      val success = Success(new Placeholder())
+
+      def apply(row: Row) = success
+    }
+  }
+
+  private[anorm] lazy val debugEnabled =
+    Option(System.getProperty("anorm.macro.debug"))
+      .filterNot(_.isEmpty)
+      .map(_.toLowerCase)
+      .map { v =>
+        "true".equals(v) || v.substring(0, 1) == "y"
+      }
+      .getOrElse(false)
 
 end Macro

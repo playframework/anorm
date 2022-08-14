@@ -20,10 +20,7 @@ trait H2Database {
 
   implicit val testToParams: ToParameterList[TestTable] =
     ToParameterList[TestTable] { table =>
-      List[NamedParameter](
-        "id" -> table.id,
-        "foo" -> table.foo,
-        "bar" -> table.bar)
+      List[NamedParameter]("id" -> table.id, "foo" -> table.foo, "bar" -> table.bar)
     }
 
   /** Create a simple 'test1' table for testing with. */

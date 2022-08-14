@@ -89,18 +89,19 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
         SQL("SELECT * FROM test").as(parser.single) must throwA[Exception](message = "'col2' not found")
     }
 
-    "return None from optional sub-parser" in withQueryResult(rowList1(classOf[String] -> "a") :+ "str") { implicit c: Connection =>
-      lazy val sub = for {
-        b <- SqlParser.str("b")
-        c <- SqlParser.int("c")
-      } yield b -> c
+    "return None from optional sub-parser" in withQueryResult(rowList1(classOf[String] -> "a") :+ "str") {
+      implicit c: Connection =>
+        lazy val sub = for {
+          b <- SqlParser.str("b")
+          c <- SqlParser.int("c")
+        } yield b -> c
 
-      lazy val parser = for {
-        a  <- SqlParser.str("a")
-        bc <- sub.?
-      } yield a -> bc
+        lazy val parser = for {
+          a  <- SqlParser.str("a")
+          bc <- sub.?
+        } yield a -> bc
 
-      SQL("SELECT * FROM test").as(parser.single) must_=== ("str" -> None)
+        SQL("SELECT * FROM test").as(parser.single) must_=== ("str" -> None)
     }
   }
 
@@ -249,14 +250,15 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
       }
     }
 
-    "support user alias in foldWhile" in withQueryResult(rowList1(classOf[String] -> "bar") :+ "A" :+ "B" :+ "C") { implicit c: Connection =>
+    "support user alias in foldWhile" in withQueryResult(rowList1(classOf[String] -> "bar") :+ "A" :+ "B" :+ "C") {
+      implicit c: Connection =>
         val parser = SqlParser.str("foo.bar.lorem")
 
         SQL"SELECT str"
           .executeQuery()
           .foldWhile(List.empty[String], ColumnAliaser.withPattern(Set(1), "foo.", ".lorem")) { (ls, row) =>
             parser(row).fold(_ => ls, _ :: ls) -> true
-        } must beRight[List[String]].which {
+          } must beRight[List[String]].which {
           _ must_=== List("C", "B", "A")
         }
     }
@@ -304,26 +306,27 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
 
     }
 
-    "stop after second row & release resources" in withQueryResult(stringList :+ "A" :+ "B" :+ "C") { implicit c: Connection =>
+    "stop after second row & release resources" in withQueryResult(stringList :+ "A" :+ "B" :+ "C") {
+      implicit c: Connection =>
 
-      val res: SqlQueryResult = SQL"SELECT str".executeQuery()
-      var closed              = false
-      val probe               = resource.managed(new java.io.Closeable { def close() = closed = true })
+        val res: SqlQueryResult = SQL"SELECT str".executeQuery()
+        var closed              = false
+        val probe               = resource.managed(new java.io.Closeable { def close() = closed = true })
 
-      var i = 0
-      lazy val agg =
-        res.copy(resultSet = res.resultSet.and(probe).map(_._1)).foldWhile(List.empty[Int], ColumnAliaser.empty) {
-          (l, _) =>
-            if (i == 2) (l, false) else { i = i + 1; (l :+ i) -> true }
+        var i = 0
+        lazy val agg =
+          res.copy(resultSet = res.resultSet.and(probe).map(_._1)).foldWhile(List.empty[Int], ColumnAliaser.empty) {
+            (l, _) =>
+              if (i == 2) (l, false) else { i = i + 1; (l :+ i) -> true }
+          }
+
+        agg.aka("aggregation") must beRight[List[Int]].which {
+          _ must_=== List(1, 2) and {
+            closed.aka("resource release") must beTrue
+          } and {
+            i.aka("row count") must_=== 2
+          }
         }
-
-      agg.aka("aggregation") must beRight[List[Int]].which {
-        _ must_=== List(1, 2) and {
-          closed.aka("resource release") must beTrue
-        } and {
-          i.aka("row count") must_=== 2
-        }
-      }
     }
   }
 

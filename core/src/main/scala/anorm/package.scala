@@ -32,7 +32,7 @@ package object anorm extends PackageCompat {
     def unapply(that: Any): Option[java.sql.Timestamp] = try {
       Some(that.asInstanceOf[TimestampWrapper1].getTimestamp)
     } catch {
-      case _: NoSuchMethodException => 
+      case _: NoSuchMethodException =>
         None
 
       case ie: InvocationTargetException => {

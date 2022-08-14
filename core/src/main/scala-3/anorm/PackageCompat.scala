@@ -41,13 +41,13 @@ private[anorm] trait PackageCompat:
     }
 
     /**
-      * Returns the query prepared with the named parameters,
-      * provided by the appropriate `converter`.
-      *
-      * @param value the value to be converted as list of [[NamedParameter]]
-      * @param converter the function used to convert the `value`
-      * @tparam U the type of the value
-      */
+     * Returns the query prepared with the named parameters,
+     * provided by the appropriate `converter`.
+     *
+     * @param value the value to be converted as list of [[NamedParameter]]
+     * @param converter the function used to convert the `value`
+     * @tparam U the type of the value
+     */
     def bind[U](value: U)(using converter: ToParameterList[U]): SimpleSql[Row] =
       query.asSimple.bind[U](value)
 
@@ -178,24 +178,24 @@ private[anorm] trait PackageCompat:
     ): Try[T] = query.asSimple.asTry[T](parser, aliaser)(connection)
 
     /**
-      * Executes this SQL statement.
-      * @return true if resultset was returned from execution
-      * (statement is query), or false if it executed update.
-      *
-      * {{{
-      * import anorm._
-      *
-      * def res(implicit con: java.sql.Connection): Boolean =
-      *   SQL"""INSERT INTO Test(a, b) VALUES(\\${"A"}, \\${"B"}""".execute()
-      * }}}
-      */
+     * Executes this SQL statement.
+     * @return true if resultset was returned from execution
+     * (statement is query), or false if it executed update.
+     *
+     * {{{
+     * import anorm._
+     *
+     * def res(implicit con: java.sql.Connection): Boolean =
+     *   SQL"""INSERT INTO Test(a, b) VALUES(\\${"A"}, \\${"B"}""".execute()
+     * }}}
+     */
     def execute()(using connection: Connection): Boolean =
       query.asSimple.execute()
 
     /**
-      * Executes this SQL as an update statement.
-      * @return Count of updated row(s)
-      */
+     * Executes this SQL as an update statement.
+     * @return Count of updated row(s)
+     */
     @throws[java.sql.SQLException]("If statement is query not update")
     def executeUpdate()(using connection: Connection): Int =
       query.asSimple.executeUpdate()

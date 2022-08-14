@@ -1,4 +1,3 @@
 package anorm
 
-private[anorm] trait AnormCompatSpec { _self: AnormSpec =>
-}
+private[anorm] trait AnormCompatSpec { _self: AnormSpec => }
