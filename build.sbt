@@ -17,10 +17,11 @@ inThisBuild(
 
 val specs2Test = Seq(
   "specs2-core",
-  "specs2-junit"
+  "specs2-junit",
+  "specs2-matcher-extra"
 ).map("org.specs2" %% _ % "4.10.6" % Test cross(CrossVersion.for3Use2_13))
 
-lazy val acolyteVersion = "1.2.1-6331b1f9-SNAPSHOT" // TODO: "1.2.1"
+lazy val acolyteVersion = "1.2.1"
 lazy val acolyte        = "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test
 
 ThisBuild / resolvers ++= Seq("Tatami Snapshots".at("https://raw.github.com/cchantep/tatami/master/snapshots"))
@@ -186,13 +187,6 @@ lazy val `anorm-core` = project
         "com.h2database"          % "h2"                       % "2.1.214" % Test,
         acolyte
       ) ++ specs2Test.map(_.exclude("org.scala-lang.modules", "*")),
-      libraryDependencies += {
-        if (scalaBinaryVersion.value == "3") {
-          "org.typelevel" %% "shapeless3-test" % "3.0.4"
-        } else {
-          "com.chuusai" %% "shapeless" % "2.3.9",
-        }
-      }
     ) ++ armShading
   )
   .dependsOn(`anorm-tokenizer`)

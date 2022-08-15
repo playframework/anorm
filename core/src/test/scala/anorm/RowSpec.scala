@@ -106,8 +106,9 @@ final class RowSpec extends org.specs2.mutable.Specification {
     ) { implicit c: Connection =>
 
       SQL"SELECT *"
-        .withResult(_.map(_.row.as((SqlParser.str("foo") ~ SqlParser.int(2)).map { case a ~ b =>
-          b -> a
+        .withResult(_.map(_.row.as((SqlParser.str("foo") ~ SqlParser.int(2)).map {
+          case a ~ b =>
+            b -> a
         })))
         .aka("streaming result") must beRight[Option[Try[(Int, String)]]].which {
         _.aka("first row") must beSome[Try[(Int, String)]].which {

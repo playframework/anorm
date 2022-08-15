@@ -73,15 +73,17 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
 
           (sql
             .as(scalar[String].single)
-            .aka("single parser") must throwA[Exception].like { case e: Exception =>
-            e.getMessage.aka("error") must_===
-              "SqlMappingError(too many rows when expecting a single one)"
+            .aka("single parser") must throwA[Exception].like {
+            case e: Exception =>
+              e.getMessage.aka("error") must_===
+                "SqlMappingError(too many rows when expecting a single one)"
           }).and(
             sql
               .as(scalar[String].singleOpt)
-              .aka("singleOpt parser") must throwA[Exception].like { case e: Exception =>
-              e.getMessage.aka("error") must_===
-                "SqlMappingError(too many rows when expecting a single one)"
+              .aka("singleOpt parser") must throwA[Exception].like {
+              case e: Exception =>
+                e.getMessage.aka("error") must_===
+                  "SqlMappingError(too many rows when expecting a single one)"
             }
           )
         }
@@ -104,8 +106,9 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
       ) { implicit c: Connection =>
 
         SQL("SELECT * FROM test")
-          .as((SqlParser.int("id") ~ SqlParser.str("val").?).map { case id ~ v =>
-            id -> v
+          .as((SqlParser.int("id") ~ SqlParser.str("val").?).map {
+            case id ~ v =>
+              id -> v
           }.single)
           .aka("mapped data") must_=== (2 -> Some("str"))
 
@@ -115,8 +118,9 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
         implicit c: Connection =>
 
           SQL("SELECT * FROM test")
-            .as((SqlParser.long("id") ~ SqlParser.str("val").?).map { case id ~ v =>
-              id -> v
+            .as((SqlParser.long("id") ~ SqlParser.str("val").?).map {
+              case id ~ v =>
+                id -> v
             }.single)
             .aka("mapped data") must_=== (123L -> None)
 
@@ -126,11 +130,13 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
         implicit c: Connection =>
 
           SQL("SELECT * FROM test")
-            .as((SqlParser.long("id") ~ SqlParser.int("foo").?).map { case id ~ v =>
-              id -> v
+            .as((SqlParser.long("id") ~ SqlParser.int("foo").?).map {
+              case id ~ v =>
+                id -> v
             }.single)
-            .aka("parser") must throwA[Exception].like { case e: Exception =>
-            e.getMessage.aka("error") must startWith("TypeDoesNotMatch(Cannot convert str:")
+            .aka("parser") must throwA[Exception].like {
+            case e: Exception =>
+              e.getMessage.aka("error") must startWith("TypeDoesNotMatch(Cannot convert str:")
           }
       }
     }
@@ -295,8 +301,9 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
     ) { implicit c: Connection =>
 
       SQL("SELECT * FROM test")
-        .as((SqlParser.int("id") ~ SqlParser.str("val").?).map { case id ~ v =>
-          id -> v
+        .as((SqlParser.int("id") ~ SqlParser.str("val").?).map {
+          case id ~ v =>
+            id -> v
         }.*)
         .aka("parsed list") must_=== List(9 -> None, 2 -> Some("str"))
     }
@@ -339,8 +346,9 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
           else sys.error("Failure")
 
         }
-        .aka("aggregate on failure") must beLike { case Left(err :: Nil) =>
-        err.getMessage.aka("failure") must_=== "Failure"
+        .aka("aggregate on failure") must beLike {
+        case Left(err :: Nil) =>
+          err.getMessage.aka("failure") must_=== "Failure"
       }).and(i.aka("row count") must_=== 1)
     }
   }
@@ -373,8 +381,9 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
           else sys.error("Failure")
 
         }
-        .aka("aggregate on failure") must beLike { case Left(err :: Nil) =>
-        err.getMessage.aka("failure") must_=== "Failure"
+        .aka("aggregate on failure") must beLike {
+        case Left(err :: Nil) =>
+          err.getMessage.aka("failure") must_=== "Failure"
       }).and(i.aka("row count") must_=== 1)
     }
 
@@ -424,8 +433,9 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
             first = true; sys.error("Failure")
           case _ => sys.error("Unexpected")
         }
-        .aka("processing with failure") must beLeft.like { case err :: Nil =>
-        err.getMessage.aka("failure") must_=== "Failure"
+        .aka("processing with failure") must beLeft.like {
+        case err :: Nil =>
+          err.getMessage.aka("failure") must_=== "Failure"
       }).and(first.aka("first read") must beTrue)
     }
 
@@ -439,8 +449,9 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
               first = true; sys.error("Failure")
             case _ => sys.error("Unexpected")
           }
-          .aka("processing with failure") must beLeft.like { case err :: Nil =>
-          err.getMessage.aka("failure") must_=== "Failure"
+          .aka("processing with failure") must beLeft.like {
+          case err :: Nil =>
+            err.getMessage.aka("failure") must_=== "Failure"
         }).and(first.aka("first read") must beTrue)
     }
 
@@ -580,24 +591,29 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
 sealed trait AnormTest { db: H2Database =>
   import SqlParser.{ get, int, long, str }
 
-  val fooBarParser1 = (long("id") ~ str("foo") ~ int("bar")).map { case id ~ foo ~ bar =>
-    TestTable(id, foo, bar)
+  val fooBarParser1 = (long("id") ~ str("foo") ~ int("bar")).map {
+    case id ~ foo ~ bar =>
+      TestTable(id, foo, bar)
   }
 
   val fooBarParser2 =
-    (get[Long]("id") ~ get[String]("foo") ~ get[Int]("bar")).map { case id ~ foo ~ bar =>
-      TestTable(id, foo, bar)
+    (get[Long]("id") ~ get[String]("foo") ~ get[Int]("bar")).map {
+      case id ~ foo ~ bar =>
+        TestTable(id, foo, bar)
     }
 
-  val fooBarParser3 = (long(1) ~ str(2) ~ int(3)).map { case id ~ foo ~ bar =>
-    TestTable(id, foo, bar)
+  val fooBarParser3 = (long(1) ~ str(2) ~ int(3)).map {
+    case id ~ foo ~ bar =>
+      TestTable(id, foo, bar)
   }
 
-  val fooBarParser4 = (get[Long](1) ~ get[String](2) ~ get[Int](3)).map { case id ~ foo ~ bar =>
-    TestTable(id, foo, bar)
+  val fooBarParser4 = (get[Long](1) ~ get[String](2) ~ get[Int](3)).map {
+    case id ~ foo ~ bar =>
+      TestTable(id, foo, bar)
   }
 
-  val mixedParser1 = (str(1) ~ str("named") ~ str(3)).map { case i ~ j ~ k =>
-    (i, j, k)
+  val mixedParser1 = (str(1) ~ str("named") ~ str(3)).map {
+    case i ~ j ~ k =>
+      (i, j, k)
   }
 }

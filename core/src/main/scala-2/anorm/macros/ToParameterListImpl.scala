@@ -88,8 +88,9 @@ private[anorm] object ToParameterListImpl {
     }
 
     // All supported class properties
-    val properties = ctor.paramLists.take(1).flatten.collect { case term: TermSymbol =>
-      term
+    val properties = ctor.paramLists.take(1).flatten.collect {
+      case term: TermSymbol =>
+        term
     }
 
     // Among the properties, according the specified projection
@@ -215,12 +216,14 @@ private[anorm] object ToParameterListImpl {
         }
     }
 
-    val appendCalls = effectiveProj.flatMap { case (propName, paramName) =>
-      appendParameters.get(propName).map { case (append, _) =>
-        // Find the previously generated append function for the property,
-        // and applies it with the parameter name
-        q"${append}(${paramName})"
-      }
+    val appendCalls = effectiveProj.flatMap {
+      case (propName, paramName) =>
+        appendParameters.get(propName).map {
+          case (append, _) =>
+            // Find the previously generated append function for the property,
+            // and applies it with the parameter name
+            q"${append}(${paramName})"
+        }
     }
 
     val resultCall = q"${bufName}.result()"

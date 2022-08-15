@@ -73,8 +73,9 @@ final class BatchSqlSpec extends org.specs2.mutable.Specification with H2Databas
       val b1 = BatchSql("SELECT * FROM tbl WHERE a = {a}, b = {b}", Seq[NamedParameter]("a" -> 0, "b" -> 1), Nil)
 
       implicit val toParams: ToParameterList[(Int, Int)] =
-        ToParameterList[(Int, Int)] { case (a, b) =>
-          List[NamedParameter](NamedParameter.namedWithString("a" -> a), NamedParameter.namedWithString("b" -> b))
+        ToParameterList[(Int, Int)] {
+          case (a, b) =>
+            List[NamedParameter](NamedParameter.namedWithString("a" -> a), NamedParameter.namedWithString("b" -> b))
         }
 
       lazy val b2 = b1.bind(2 -> 3)

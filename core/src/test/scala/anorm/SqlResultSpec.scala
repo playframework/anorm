@@ -231,8 +231,9 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
                 if (i == 1) sys.error("Unexpected") else { i = i + 1; l :+ i }
             }
 
-          (agg.aka("aggregation") must beLike { case Left(err :: Nil) =>
-            err.getMessage.aka("failure") must_=== "Unexpected"
+          (agg.aka("aggregation") must beLike {
+            case Left(err :: Nil) =>
+              err.getMessage.aka("failure") must_=== "Unexpected"
           }).and(closed.aka("resource release") must beTrue).and(i.aka("row count") must_=== 1)
 
       }
@@ -272,7 +273,8 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
       var i = 0
       lazy val agg =
         res.copy(resultSet = res.resultSet.and(probe).map(_._1)).foldWhile(List.empty[Int], ColumnAliaser.empty) {
-          (l, _) => i = i + 1; (l :+ i) -> true
+          (l, _) =>
+            i = i + 1; (l :+ i) -> true
         }
 
       agg.aka("aggregation") must beRight[List[Int]].which {
@@ -300,8 +302,9 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
             }
         }
 
-      (agg.aka("aggregation") must beLike { case Left(err :: Nil) =>
-        err.getMessage.aka("failure") must_=== "Unexpected"
+      (agg.aka("aggregation") must beLike {
+        case Left(err :: Nil) =>
+          err.getMessage.aka("failure") must_=== "Unexpected"
       }).and(closed.aka("resource release") must beTrue).and(i.aka("row count") must_=== 1)
 
     }
@@ -352,8 +355,9 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
             first = true; sys.error("Failure")
           case _ => sys.error("Unexpected")
         }
-        .aka("processing with failure") must beLeft.like { case err :: Nil =>
-        err.getMessage.aka("failure") must_=== "Failure"
+        .aka("processing with failure") must beLeft.like {
+        case err :: Nil =>
+          err.getMessage.aka("failure") must_=== "Failure"
       }).and(first.aka("first read") must beTrue)
     }
 

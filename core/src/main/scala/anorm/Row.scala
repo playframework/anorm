@@ -38,10 +38,11 @@ trait Row {
    * @see #as
    */
   lazy val asMap: Map[String, Any] =
-    Compat.toMap(Compat.lazyZip(data, metaData.ms)) { case (v, m) =>
-      val k = m.column.qualified
+    Compat.toMap(Compat.lazyZip(data, metaData.ms)) {
+      case (v, m) =>
+        val k = m.column.qualified
 
-      if (m.nullable) k -> Option(v) else k -> v
+        if (m.nullable) k -> Option(v) else k -> v
     }
 
   /**
@@ -114,8 +115,9 @@ trait Row {
 
   // Data per column name
   private lazy val columnsDictionary: Map[String, Any] =
-    Compat.toMap(Compat.lazyZip(metaData.ms, data)) { case (m, v) =>
-      m.column.qualified.toUpperCase -> v
+    Compat.toMap(Compat.lazyZip(metaData.ms, data)) {
+      case (m, v) =>
+        m.column.qualified.toUpperCase -> v
     }
 
   // Data per column alias

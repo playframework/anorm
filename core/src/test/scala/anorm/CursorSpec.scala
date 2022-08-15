@@ -34,8 +34,9 @@ final class CursorSpec extends org.specs2.mutable.Specification {
     "match pattern" in {
       Cursor((stringList :+ "Foo" :+ "Bar").resultSet, ColumnAliaser.empty).aka("cursor") must beSome[Cursor].like {
         case Cursor(row1, b) =>
-          (row1[String](1) must_=== "Foo").and(b must beSome[Cursor].like { case Cursor(row2, None) =>
-            row2[String](1) must_=== "Bar"
+          (row1[String](1) must_=== "Foo").and(b must beSome[Cursor].like {
+            case Cursor(row2, None) =>
+              row2[String](1) must_=== "Bar"
           })
       }
     }

@@ -1,16 +1,16 @@
 package anorm.macros
 
-import scala.quoted.{Expr,Quotes,Type}
+import scala.quoted.{ Expr, Quotes, Type }
 
 import anorm.Column
-import anorm.Macro.{debugEnabled,withSelfColumn}
+import anorm.Macro.debugEnabled
 
-private[anorm] object ValueColumnImpl {
-  def apply[A <: AnyVal](using q: Quotes, tpe: Type[A]): Expr[Column[A]] = {
+private[anorm] trait ValueColumn {
+  def valueColumnImpl[A <: AnyVal](using q: Quotes, tpe: Type[A]): Expr[Column[A]] = {
     import q.reflect.*
 
-    val aTpr       = TypeRepr.of[A](using tpe)
-    val ctor      = aTpr.typeSymbol.primaryConstructor
+    val aTpr = TypeRepr.of[A](using tpe)
+    val ctor = aTpr.typeSymbol.primaryConstructor
 
     ctor.paramSymss match {
       case List(v) :: Nil => {
@@ -28,18 +28,19 @@ private[anorm] object ValueColumnImpl {
                         .appliedTo(in.asTerm)
                         .asExprOf[A]
 
-                    val generated = '{ ${col}.map(in => ${mapf('in)}) }
+                    val generated = '{ ${ col }.map(in => ${ mapf('in) }) }
 
                     if (debugEnabled) {
-                      report.info(
-                        s"column generated for ${aTpr.show}: ${generated.show}")
+                      report.info(s"column generated for ${aTpr.show}: ${generated.show}")
                     }
 
                     generated
                   }
 
                   case _ =>
-                    report.errorAndAbort(s"Instance not found: ${classOf[Column[_]].getName}[${tpr.typeSymbol.fullName}]")
+                    report.errorAndAbort(
+                      s"Instance not found: ${classOf[Column[_]].getName}[${tpr.typeSymbol.fullName}]"
+                    )
                 }
             }
           }

@@ -1,6 +1,6 @@
 package anorm
 
-import scala.quoted.{ Expr, Quotes, Type }
+import scala.quoted.{ Expr, FromExpr, Quotes, ToExpr, Type }
 
 /**
  * @define caseTParam the type of case class
@@ -18,7 +18,8 @@ import scala.quoted.{ Expr, Quotes, Type }
  * @define projectionParam The optional projection for the properties as parameters; If none, using the all the class properties.
  * @define valueClassTParam the type of the value class
  */
-object Macro extends MacroOptions:
+object Macro extends MacroOptions with macros.ValueColumn with macros.ValueToStatement:
+
   /**
    * Returns a row parser generated for a case class `T`,
    * getting column values by name.
@@ -50,7 +51,7 @@ object Macro extends MacroOptions:
    * val p: RowParser[YourCaseClass] = Macro.namedParser[YourCaseClass]
    * }}}
    */
-  inline def namedParser[T](naming: Macro.ColumnNaming): RowParser[T] =
+  inline def namedParser[T](naming: ColumnNaming): RowParser[T] =
     ${ namedParserImpl1[T]('naming) }
 
   /**
@@ -70,7 +71,7 @@ object Macro extends MacroOptions:
    * }}}
    */
   inline def parser[T](names: String*): RowParser[T] =
-    ${ namedParserImpl2[T]('names) }
+    ${ namedParserImpl3[T]('names) }
 
   /**
    * Returns a row parser generated for a case class `T`,
@@ -90,9 +91,8 @@ object Macro extends MacroOptions:
    *   Macro.parser[YourCaseClass]("foo", "loremIpsum")
    * }}}
    */
-  inline def parser[T](naming: Macro.ColumnNaming, names: String*): RowParser[T] = ${
-    namedParserImpl3[T]('naming, 'names)
-  }
+  inline def parser[T](naming: ColumnNaming, names: String*): RowParser[T] = 
+    ${ namedParserImpl2[T]('naming, 'names) }
 
   /**
    * Returns a row parser generated for a case class `T`,
@@ -142,7 +142,7 @@ object Macro extends MacroOptions:
    * @param naming $discriminatorNamingParam
    * @tparam T $familyTParam
    */
-  inline def sealedParser[T](naming: Macro.DiscriminatorNaming): RowParser[T] =
+  inline def sealedParser[T](naming: DiscriminatorNaming): RowParser[T] =
     ${ sealedParserImpl2[T]('naming) }
 
   /**
@@ -151,7 +151,7 @@ object Macro extends MacroOptions:
    * @param discriminate $discriminateParam
    * @tparam T $familyTParam
    */
-  inline def sealedParser[T](discriminate: Macro.Discriminate): RowParser[T] =
+  inline def sealedParser[T](discriminate: Discriminate): RowParser[T] =
     ${ sealedParserImpl3[T]('discriminate) }
 
   /**
@@ -161,8 +161,10 @@ object Macro extends MacroOptions:
    * @param discriminate $discriminateParam
    * @tparam T $familyTParam
    */
-  inline def sealedParser[T](naming: Macro.DiscriminatorNaming, discriminate: Macro.Discriminate): RowParser[T] =
+  inline def sealedParser[T](naming: DiscriminatorNaming, discriminate: Discriminate): RowParser[T] =
     ${ sealedParserImpl[T]('naming, 'discriminate) }
+
+  // ---
 
   /**
    * Returns a column parser for specified value class.
@@ -179,9 +181,9 @@ object Macro extends MacroOptions:
    * @tparam T $valueClassTParam
    */
   inline def valueColumn[T <: AnyVal]: Column[T] =
-    ${ macros.ValueColumnImpl[T] }
+    ${ valueColumnImpl[T] }
 
-  // --- ToParameter ---
+  // ---
 
   /**
    * @param separator $separatorParam
@@ -212,7 +214,7 @@ object Macro extends MacroOptions:
    *   Macro.toParameters[Bar]("_")
    * }}}
    */
-  inline def toParameters[T](separator: String): ToParameterList[T] =
+  inline def toParameters[T](inline separator: String): ToParameterList[T] =
     ${ parametersDefaultNames[T]('separator) }
 
   /**
@@ -229,7 +231,7 @@ object Macro extends MacroOptions:
    *   Macro.toParameters[Bar]()
    * }}}
    */
-  inline def toParameters[T](projection: Macro.ParameterProjection*): ToParameterList[T] = ${
+  inline def toParameters[T](inline projection: ParameterProjection*): ToParameterList[T] = ${
     configuredParameters[T]('projection)
   }
 
@@ -238,8 +240,11 @@ object Macro extends MacroOptions:
    * @param projection $projectionParam
    * @tparam T $caseTParam
    */
-  inline def toParameters[T](separator: String, projection: Macro.ParameterProjection*): ToParameterList[T] =
-    ${ parametersWithSeparator[T]('separator, 'projection) }
+  inline def toParameters[T](inline separator: String, inline projection: ParameterProjection*): ToParameterList[T] = ${
+    parametersWithSeparator[T]('separator, 'projection)
+  }
+
+  // ---
 
   /**
    * Returns a `ToStatement` for the specified ValueClass.
@@ -256,7 +261,7 @@ object Macro extends MacroOptions:
    * @tparam T $valueClassTParam
    */
   inline def valueToStatement[T <: AnyVal]: ToStatement[T] =
-    ${ macros.ValueToStatement[T] }
+    ${ valueToStatementImpl[T] }
 
   // ---
 
@@ -269,22 +274,28 @@ object Macro extends MacroOptions:
 
   private def namedParserImpl1[T](
       naming: Expr[ColumnNaming]
-  )(using Quotes, Type[T], Type[Macro.ColumnNaming]): Expr[RowParser[T]] =
+  )(using Quotes, Type[T], Type[ColumnNaming]): Expr[RowParser[T]] =
     withColumn[T] { col =>
       parserImpl[T] { (n, _) =>
         '{ anorm.SqlParser.get[T]($naming(${ Expr(n) }))($col) }
       }
     }
 
-  private def namedParserImpl2[T](names: Expr[Seq[String]])(using Quotes, Type[T]): Expr[RowParser[T]] =
-    namedParserImpl4[T](names)(identity)
-
-  private def namedParserImpl3[T](naming: Expr[ColumnNaming], names: Expr[Seq[String]])(using
+  private def namedParserImpl2[T](
+    naming: Expr[ColumnNaming], 
+    names: Expr[Seq[String]]
+  )(using
       Quotes,
       Type[T],
-      Type[Macro.ColumnNaming]
+      Type[ColumnNaming]
   ): Expr[RowParser[T]] =
     namedParserImpl4[T](names) { n => '{ $naming($n) } }
+
+  private def namedParserImpl3[T](names: Expr[Seq[String]])(using
+      Quotes,
+      Type[T],
+      Type[ColumnNaming]
+  ): Expr[RowParser[T]] = namedParserImpl4[T](names)(identity)
 
   private def namedParserImpl4[T](
       names: Expr[Seq[String]]
@@ -331,17 +342,17 @@ object Macro extends MacroOptions:
     offsetParserImpl[T]('{ 0 })
 
   private def sealedParserImpl1[T](using Quotes, Type[T]): Expr[RowParser[T]] = {
-    def discriminator = '{ anorm.Macro.DiscriminatorNaming.Default }
-    def discriminate  = '{ anorm.Macro.Discriminate.Identity }
+    def discriminator = '{ Macro.DiscriminatorNaming.Default }
+    def discriminate  = '{ Macro.Discriminate.Identity }
 
     sealedParserImpl(discriminator, discriminate)
   }
 
   private def sealedParserImpl2[T](naming: Expr[DiscriminatorNaming])(using Quotes, Type[T]): Expr[RowParser[T]] =
-    sealedParserImpl(naming, '{ anorm.Macro.Discriminate.Identity })
+    sealedParserImpl(naming, '{ Macro.Discriminate.Identity })
 
   private def sealedParserImpl3[T](discriminate: Expr[Discriminate])(using Quotes, Type[T]): Expr[RowParser[T]] =
-    sealedParserImpl('{ anorm.Macro.DiscriminatorNaming.Default }, discriminate)
+    sealedParserImpl('{ Macro.DiscriminatorNaming.Default }, discriminate)
 
   private def sealedParserImpl[T](naming: Expr[DiscriminatorNaming], discriminate: Expr[Discriminate])(using
       Quotes,
@@ -354,48 +365,138 @@ object Macro extends MacroOptions:
     '{ ??? }
   }
 
-  private def defaultParameters[T](using Quotes, Type[T]): Expr[ToParameterList[T]] = {
-    /* TODO
-import macros.ToParameterListImpl
-    val tpe    = c.weakTypeTag[T].tpe
-    val tpeSym = tpe.typeSymbol.asClass
+  // ---
 
-    @inline def abort(msg: String) = c.abort(c.enclosingPosition, msg)
+  private[anorm] given parameterProjectionFromExpr: FromExpr[ParameterProjection] = new FromExpr[ParameterProjection] {
+    def unapply(expr: Expr[ParameterProjection])(using q: Quotes): Option[ParameterProjection] = {
+      import q.reflect.*
 
-    if (tpeSym.isSealed && tpeSym.isAbstract) {
-      ToParameterListImpl.sealedTrait[T](c)
-    } else if (!tpeSym.isClass || !tpeSym.asClass.isCaseClass) {
-      abort(s"Either a sealed trait or a case class expected: $tpe")
-    } else {
-      @silent def p = c.universe.reify("_")
+      val strTpr = TypeRepr.of[String]
 
-      ToParameterListImpl.caseClass[T](c)(Seq.empty[c.Expr[Macro.ParameterProjection]], p)
+      @annotation.tailrec
+      def rec(term: Term): Option[ParameterProjection] = term match {
+        case Block(stats, e) =>
+          if stats.isEmpty then rec(e) else None
+
+        case Inlined(_, bindings, e) =>
+          if bindings.isEmpty then rec(e) else None
+
+        case Typed(e, _) =>
+          rec(e)
+
+        case Apply(meth, propNme :: paramNme :: Nil)
+            if meth.symbol.fullName.endsWith(f"ParameterProjection$$.apply") => {
+          val strFrom = FromExpr.StringFromExpr[String]
+
+          for {
+            propertyName <- strFrom.unapply(propNme.asExprOf[String])
+            parameterName <- {
+              if (paramNme.tpe <:< strTpr) {
+                strFrom.unapply(paramNme.asExprOf[String]).map(Option(_))
+              } else {
+                FromExpr.OptionFromExpr[String].unapply(paramNme.asExprOf[Option[String]])
+              }
+            }
+          } yield ParameterProjection(propertyName, parameterName)
+        }
+
+        case _ =>
+          None
+      }
+
+      rec(expr.asTerm)
     }
-     */
-    '{ ??? }
   }
 
-  private def parametersDefaultNames[T](separator: Expr[String])(using Quotes, Type[T]): Expr[ToParameterList[T]] =
-    '{ ??? } /* TODO: import macros.ToParameterListImpl; ToParameterListImpl.caseClass[T](
-      Seq.empty[c.Expr[Macro.ParameterProjection]], separator) */
+  private[anorm] given parameterProjectionToExpr: ToExpr[ParameterProjection] =
+    new ToExpr[ParameterProjection] {
+      def apply(p: ParameterProjection)(using q: Quotes): Expr[ParameterProjection] = {
+        import q.reflect.*
+
+        val propertyName  = Expr(p.propertyName)
+        val parameterName = Expr(p.parameterName)
+
+        '{ Macro.ParameterProjection($propertyName, $parameterName) }
+      }
+    }
+
+  private def parametersDefaultNames[T](separator: Expr[String])(using
+      q: Quotes,
+      tpe: Type[T],
+      proj: Type[ParameterProjection]
+  ): Expr[ToParameterList[T]] = {
+    import q.reflect.*
+
+    '{
+      withSelfToParameterList[T] { selfRef =>
+        ${
+          macros.ToParameterListImpl.caseClass[T](
+            forwardExpr = 'selfRef,
+            projection = Expr(Seq.empty[ParameterProjection]),
+            separator = separator
+          )
+        }
+      }
+    }
+  }
 
   private def configuredParameters[T](
-      projection: Expr[Seq[Macro.ParameterProjection]]
-  )(using Quotes, Type[T]): Expr[ToParameterList[T]] = {
-    /* TODO:
-    @silent def p = reify("_")
-import macros.ToParameterListImpl
+      projection: Expr[Seq[ParameterProjection]]
+  )(using q: Quotes, tpe: Type[T], proj: Type[ParameterProjection]): Expr[ToParameterList[T]] = {
+    import q.reflect.*
 
-    ToParameterListImpl.caseClass[T](c)(projection, p)
-     */
-    '{ ??? }
+    '{
+      withSelfToParameterList[T] { selfRef =>
+        ${ macros.ToParameterListImpl.caseClass[T]('selfRef, projection, '{ "_" }) }
+      }
+    }
   }
 
   private def parametersWithSeparator[T](
       separator: Expr[String],
-      projection: Expr[Seq[Macro.ParameterProjection]]
-  )(using Quotes, Type[T]): Expr[ToParameterList[T]] =
-    '{ ??? } // TODO: import macros.ToParameterListImpl; ToParameterListImpl.caseClass[T](c)(projection, separator)
+      projection: Expr[Seq[ParameterProjection]]
+  )(using q: Quotes, tpe: Type[T]): Expr[ToParameterList[T]] = {
+    import q.reflect.*
+
+    '{
+      withSelfToParameterList[T] { selfRef =>
+        ${ macros.ToParameterListImpl.caseClass[T]('selfRef, projection, separator) }
+      }
+    }
+  }
+
+  private def defaultParameters[T](using
+      q: Quotes,
+      tpe: Type[T],
+      proj: Type[ParameterProjection]
+  ): Expr[ToParameterList[T]] = {
+    import q.reflect.*
+
+    val repr   = TypeRepr.of[T](using tpe)
+    val tpeSym = repr.typeSymbol
+    val flags  = tpeSym.flags
+
+    if (flags.is(Flags.Sealed) || flags.is(Flags.Abstract)) {
+      macros.ToParameterListImpl.sealedTrait[T]
+    } else if (!tpeSym.isClassDef || !flags.is(Flags.Case)) {
+      report.errorAndAbort(s"Either a sealed trait or a case class expected: $tpe")
+
+    } else {
+      '{
+        withSelfToParameterList[T] { selfRef =>
+          ${
+            macros.ToParameterListImpl.caseClass[T](
+              forwardExpr = 'selfRef,
+              projection = Expr(Seq.empty[ParameterProjection]),
+              separator = '{ "_" }
+            )
+          }
+        }
+      }
+    }
+  }
+
+  // ---
 
   private def withColumn[T](
       f: Expr[Column[T]] => Expr[RowParser[T]]
@@ -414,13 +515,12 @@ import macros.ToParameterListImpl
     }
   }
 
-  inline private[anorm] def withSelfColumn[T](
-      f: Column[T] => Column[T]
-  ): Column[T] = new Column[T] { self =>
+  inline private[anorm] def withSelfToParameterList[T](
+      f: ToParameterList[T] => (T => List[NamedParameter])
+  ): ToParameterList[T] = new ToParameterList[T] { self =>
     lazy val underlying = f(self)
 
-    def apply(input: Any, meta: MetaDataItem): Either[SqlRequestError, T] =
-      underlying(input, meta)
+    def apply(input: T): List[NamedParameter] = underlying(input)
   }
 
   /** Only for internal purposes */

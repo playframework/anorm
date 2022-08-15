@@ -95,7 +95,10 @@ private[anorm] trait MacroOptions {
   case class ParameterProjection(propertyName: String, parameterName: Option[String] = None)
 
   object ParameterProjection {
-    def apply(propertyName: String, parameterName: String): ParameterProjection =
+    def apply(
+        propertyName: String,
+        parameterName: String
+    ): ParameterProjection =
       ParameterProjection(propertyName, Option(parameterName))
   }
 }

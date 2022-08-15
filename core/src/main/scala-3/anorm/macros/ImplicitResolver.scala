@@ -4,13 +4,13 @@ import scala.quoted.{ Expr, Quotes, Type }
 
 import anorm.Macro.Placeholder
 
-private[macros] trait ImplicitResolver[A] {
-  protected val quotes: Quotes
+private[macros] trait ImplicitResolver[A, Q <: Quotes] {
+  protected val quotes: Q
 
   import quotes.reflect.*
 
   // format: off
-  private given q: Quotes = quotes
+  private given q: Q = quotes
   // format: on
 
   protected val aTpeRepr: TypeRepr
@@ -34,14 +34,14 @@ private[macros] trait ImplicitResolver[A] {
       filter: TypeRepr => Boolean,
       replacement: TypeRepr,
       altered: Boolean
-    ): (TypeRepr, Boolean) = in match {
+  ): (TypeRepr, Boolean) = in match {
     case tpe :: ts =>
       tpe match {
         case t if filter(t) =>
           refactor(
             ts,
             base,
-            (replacement :: out),
+            replacement :: out,
             tail,
             filter,
             replacement,
@@ -63,7 +63,7 @@ private[macros] trait ImplicitResolver[A] {
           refactor(
             ts,
             base,
-            (t :: out),
+            t :: out,
             tail,
             filter,
             replacement,
@@ -79,7 +79,7 @@ private[macros] trait ImplicitResolver[A] {
           refactor(
             x,
             y,
-            (tpe :: more),
+            tpe :: more,
             ts,
             filter,
             replacement,
@@ -97,7 +97,7 @@ private[macros] trait ImplicitResolver[A] {
    */
   private def normalized(tpe: TypeRepr): (TypeRepr, Boolean) =
     tpe match {
-      case t if (t =:= aTpeRepr) => PlaceholderType -> true
+      case t if t =:= aTpeRepr => PlaceholderType -> true
 
       case AppliedType(t, args) if args.nonEmpty =>
         refactor(
@@ -115,7 +115,7 @@ private[macros] trait ImplicitResolver[A] {
 
   /* Restores reference to the type itself when Placeholder is found. */
   private def denormalized(ptype: TypeRepr): TypeRepr = ptype match {
-    case t if (t =:= PlaceholderType) =>
+    case t if t =:= PlaceholderType =>
       aTpeRepr
 
     case AppliedType(base, args) if args.nonEmpty =>
@@ -175,13 +175,10 @@ private[macros] trait ImplicitResolver[A] {
   private def createImplicit[M[_]](
       pending: Map[TypeRepr, Term],
       debug: String => Unit
-    )(tc: Type[M],
-      ptype: TypeRepr,
-      tx: TreeMap
-    ): Option[Implicit] = {
-    val pt = ptype.asType
+  )(tc: Type[M], ptype: TypeRepr, tx: TreeMap): Option[Implicit] = {
+    val pt              = ptype.asType
     val (ntpe, selfRef) = normalized(ptype)
-    val ptpe = ntpe
+    val ptpe            = ntpe
 
     // infers given
     val neededGivenType = TypeRepr.of[M](using tc).appliedTo(ptpe)
@@ -229,8 +226,7 @@ private[macros] trait ImplicitResolver[A] {
       forwardExpr: Expr[M[T]],
       pending: Map[TypeRepr, Term],
       debug: String => Unit
-    )(tc: Type[M]
-    ): TypeRepr => Option[Implicit] = {
+  )(tc: Type[M]): TypeRepr => Option[Implicit] = {
     val tx = new ImplicitTransformer[M[T]](forwardExpr)
 
     createImplicit(pending, debug)(tc, _: TypeRepr, tx)
@@ -242,10 +238,10 @@ private[macros] trait ImplicitResolver[A] {
 
   // To print the implicit types in the compiler messages
   protected final def prettyType(t: TypeRepr): String = t match {
-    case _ if (t <:< TypeRepr.of[EmptyTuple]) =>
+    case _ if t <:< TypeRepr.of[EmptyTuple] =>
       "EmptyTuple"
 
-    case AppliedType(ty, a :: b :: Nil) if (ty <:< TypeRepr.of[*:]) =>
+    case AppliedType(ty, a :: b :: Nil) if ty <:< TypeRepr.of[*:] =>
       s"${prettyType(a)} *: ${prettyType(b)}"
 
     case AppliedType(_, args) =>
@@ -269,11 +265,11 @@ private[macros] trait ImplicitResolver[A] {
 }
 
 private[macros] object ImplicitResolver {
-  def apply[T](q: Quotes)(using tpe: Type[T]): ImplicitResolver[T] =
-    new ImplicitResolver[T] {
+  def apply[T](q: Quotes)(using tpe: Type[T]): ImplicitResolver[T, q.type] =
+    new ImplicitResolver[T, q.type] {
       import q.reflect.*
 
-      val quotes: q.type = q
+      val quotes   = q
       val aTpeRepr = TypeRepr.of[T](using tpe)
     }
 }
