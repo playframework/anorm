@@ -2,41 +2,72 @@ package anorm.macros
 
 import scala.quoted.{ Expr, Quotes, Type }
 
-import anorm.{ Compat, ToParameterList, ToParameterValue, ToSql, ToStatement, NamedParameter }
-import anorm.Macro.{ debugEnabled, ParameterProjection }
+import anorm.{ Compat, Macro, ToParameterList, ToParameterValue, ToSql, ToStatement, NamedParameter }
+import Macro.{ debugEnabled, ParameterProjection }
 
 private[anorm] object ToParameterListImpl {
-  def sealedTrait[T](using Quotes, Type[T]): Expr[ToParameterList[T]] = {
-    /* TODO
-    val tpe                        = c.weakTypeTag[T].tpe
-    @inline def abort(msg: String) = c.abort(c.enclosingPosition, msg)
+  def sealedTrait[A](using q: Quotes, tpe: Type[A]): Expr[ToParameterList[A]] = {
 
-    val subclasses = Inspect.directKnownSubclasses(c)(tpe)
+    import q.reflect.*
 
-    if (subclasses.isEmpty) {
-      abort(s"cannot find any subclass: $tpe")
+    val repr = TypeRepr.of[A](using tpe)
+
+    val subclasses = Inspect.knownSubclasses(q)(repr) match {
+      case Some(classes) =>
+        classes
+
+      case None =>
+        report.errorAndAbort(s"cannot find any subclass: $tpe")
     }
 
     // ---
 
-    import c.universe._
+    type CaseType[U <: A] = U
 
-    val cases = subclasses.map { subcls =>
-      cq"v: ${subcls} => implicitly[_root_.anorm.ToParameterList[${subcls}]].apply(v)"
+    val cases = subclasses.zipWithIndex.map {
+      case (subcls, i) =>
+        subcls.asType match {
+          case '[CaseType[t]] =>
+            Expr.summon[ToParameterList[t]] match {
+              case Some(toParams) => {
+                val bind =
+                  Symbol.newBind(
+                    Symbol.spliceOwner,
+                    s"sub${i}",
+                    Flags.Case,
+                    subcls
+                  )
+
+                val matchedRef = Ref(bind).asExprOf[t]
+
+                CaseDef(
+                  Bind(bind, Typed(Wildcard(), Inferred(subcls))),
+                  guard = None,
+                  rhs = '{ $toParams($matchedRef) }.asTerm
+                )
+              }
+
+              case None =>
+                report.errorAndAbort(s"Missing ToParameterList[${subcls.show}]")
+            }
+
+          case _ =>
+            report.errorAndAbort(s"Invalid subclass ${subcls.show} for ${repr.show}")
+        }
     }
-    val arg = TermName(c.freshName("arg"))
-    val mat = Match(q"${arg}", cases)
 
-    val block = q"_root_.anorm.ToParameterList[${tpe}] { $arg: ${tpe} => $mat }"
+    inline def body(inline a: Expr[A]): Expr[List[NamedParameter]] =
+      Match(a.asTerm, cases).asExprOf[List[NamedParameter]]
+
+    val block = '{
+      ToParameterList[A] { (a: A) => ${ body('a) } }
+    }
 
     if (debugEnabled) {
-      c.echo(c.enclosingPosition, s"ToParameterList generated for $tpe: ${pretty(c)(block)}")
+      report.info(s"ToParameterList generated for ${repr.show}: ${block.show}")
     }
 
-    c.Expr[ToParameterList[T]](c.typecheck(block))
-     */
-
-    '{ ??? }
+    block
   }
 
   def caseClass[A](
@@ -61,6 +92,11 @@ private[anorm] object ToParameterListImpl {
 
     @inline def abort(msg: String) = report.errorAndAbort(msg)
 
+    val debug = {
+      if (debugEnabled) report.info(_: String)
+      else (_: String) => {}
+    }
+
     if (!tpeSym.isClassDef || !tpeSym.flags.is(Flags.Case)) {
       abort(s"Case class expected: $tpe")
     }
@@ -71,7 +107,7 @@ private[anorm] object ToParameterListImpl {
       abort("parsed data cannot be passed as constructor parameters")
     }
 
-    val resolv = ImplicitResolver[A](q).resolver(forwardExpr, Map.empty, report.info(_))(tsTpe)
+    val resolv = ImplicitResolver[A](q).resolver(forwardExpr, Map.empty, debug)(tsTpe)
 
     // ---
 
@@ -135,83 +171,82 @@ private[anorm] object ToParameterListImpl {
 
     val namedAppends = Map.newBuilder[String, (TypeRepr, Append[Any])]
 
-    properties.zipWithIndex.foreach {
-      case (sym, i) =>
-        if (!selectedProperties.contains(sym.name)) {
-          report.info(s"${sym.name} is filtered: ${selectedProperties}")
-        } else {
-          val pname = Expr(projectionMap.getOrElse(sym.name, sym.name))
+    properties.foreach { sym =>
+      if (!selectedProperties.contains(sym.name)) {
+        debug(s"${sym.name} is filtered: ${selectedProperties.mkString(", ")}")
+      } else {
+        val pname = Expr(projectionMap.getOrElse(sym.name, sym.name))
 
-          val tt: TypeRepr = sym.tree match {
-            case vd: ValDef => {
-              val vtpe = vd.tpt.tpe
+        val tt: TypeRepr = sym.tree match {
+          case vd: ValDef => {
+            val vtpe = vd.tpt.tpe
 
-              boundTypes.getOrElse(vtpe.typeSymbol, vtpe)
-            }
-
-            case _ =>
-              report.errorAndAbort(s"Value definition expected for ${aTpr.show} constructor parameter: $sym")
+            boundTypes.getOrElse(vtpe.typeSymbol, vtpe)
           }
 
-          tt.asType match {
-            case pt @ '[t] => {
-              val toSql = Expr.summon[ToSql[t]] match {
-                case Some(resolved) =>
-                  resolved
+          case _ =>
+            report.errorAndAbort(s"Value definition expected for ${aTpr.show} constructor parameter: $sym")
+        }
 
-                case _ =>
-                  '{ null: ToSql[t] }
+        tt.asType match {
+          case pt @ '[t] => {
+            val toSql = Expr.summon[ToSql[t]] match {
+              case Some(resolved) =>
+                resolved
+
+              case _ =>
+                '{ null: ToSql[t] }
+            }
+
+            resolv(tt) match {
+              case None if tt <:< aTpr => {
+                val append: Function2[Expr[A], Expr[Builder], Expr[Builder]] = { (v, buf) =>
+                  '{
+                    val prefix: String = $pname + $separator
+
+                    $buf ++= ${ forwardExpr }($v).map { p =>
+                      p.copy(name = prefix + p.name)
+                    }
+                  }
+                }
+
+                namedAppends += sym.name -> (tt -> append.asInstanceOf[Append[Any]])
               }
 
-              resolv(tt) match {
-                case None if tt <:< aTpr => {
-                  val append: Function2[Expr[A], Expr[Builder], Expr[Builder]] = { (v, buf) =>
-                    '{
-                      val prefix: String = $pname + $separator
+              case None =>
+                Expr.summon[ToStatement[t]] match {
+                  case None =>
+                    abort(s"cannot find either anorm.ToParameterList or anorm.ToStatement for ${sym.name}:${tt.show}")
 
-                      $buf ++= ${ forwardExpr }($v).map { p =>
-                        p.copy(name = prefix + p.name)
+                  case Some(toStmt) => { // use ToSql+ToStatement
+                    val append: Function2[Expr[t], Expr[Builder], Expr[Builder]] = { (v, buf) =>
+                      '{
+                        $buf += NamedParameter
+                          .namedWithString($pname -> $v)(ToParameterValue($toSql, $toStmt))
                       }
                     }
-                  }
 
-                  namedAppends += sym.name -> (tt -> append.asInstanceOf[Append[Any]])
+                    namedAppends += sym.name -> (tt -> append.asInstanceOf[Append[Any]])
+                  }
                 }
 
-                case None =>
-                  Expr.summon[ToStatement[t]] match {
-                    case None =>
-                      abort(s"cannot find either anorm.ToParameterList or anorm.ToStatement for ${sym.name}:${tt.show}")
+              case Some((toParams, _)) => { // use ToParameterList
+                val append: Function2[Expr[t], Expr[Builder], Expr[Builder]] = { (v, buf) =>
+                  '{
+                    val prefix: String = $pname + $separator
 
-                    case Some(toStmt) => { // use ToSql+ToStatement
-                      val append: Function2[Expr[t], Expr[Builder], Expr[Builder]] = { (v, buf) =>
-                        '{
-                          $buf += NamedParameter
-                            .namedWithString($pname -> $v)(ToParameterValue($toSql, $toStmt))
-                        }
-                      }
-
-                      namedAppends += sym.name -> (tt -> append.asInstanceOf[Append[Any]])
+                    $buf ++= ${ toParams.asExprOf[ToParameterList[t]] }($v).map { p =>
+                      p.copy(name = prefix + p.name)
                     }
                   }
-
-                case Some((toParams, _)) => { // use ToParameterList
-                  val append: Function2[Expr[t], Expr[Builder], Expr[Builder]] = { (v, buf) =>
-                    '{
-                      val prefix: String = $pname + $separator
-
-                      $buf ++= ${ toParams.asExprOf[ToParameterList[t]] }($v).map { p =>
-                        p.copy(name = prefix + p.name)
-                      }
-                    }
-                  }
-
-                  namedAppends += sym.name -> (tt -> append.asInstanceOf[Append[Any]])
                 }
+
+                namedAppends += sym.name -> (tt -> append.asInstanceOf[Append[Any]])
               }
             }
           }
         }
+      }
     }
 
     val appendParameters: Map[String, (TypeRepr, Append[Any])] =

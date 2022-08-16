@@ -91,7 +91,7 @@ object Macro extends MacroOptions with macros.ValueColumn with macros.ValueToSta
    *   Macro.parser[YourCaseClass]("foo", "loremIpsum")
    * }}}
    */
-  inline def parser[T](naming: ColumnNaming, names: String*): RowParser[T] = 
+  inline def parser[T](naming: ColumnNaming, names: String*): RowParser[T] =
     ${ namedParserImpl2[T]('naming, 'names) }
 
   /**
@@ -282,8 +282,8 @@ object Macro extends MacroOptions with macros.ValueColumn with macros.ValueToSta
     }
 
   private def namedParserImpl2[T](
-    naming: Expr[ColumnNaming], 
-    names: Expr[Seq[String]]
+      naming: Expr[ColumnNaming],
+      names: Expr[Seq[String]]
   )(using
       Quotes,
       Type[T],

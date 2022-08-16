@@ -21,9 +21,21 @@ private[anorm] object ToParameterListImpl {
 
     import c.universe._
 
+    val toParamLstTpe = c.weakTypeTag[ToParameterList[_]].tpe
+
     val cases = subclasses.map { subcls =>
-      cq"v: ${subcls} => implicitly[_root_.anorm.ToParameterList[${subcls}]].apply(v)"
+      val ptype = appliedType(toParamLstTpe, List(subcls))
+
+      c.inferImplicitValue(ptype) match {
+        case EmptyTree =>
+          c.abort(
+            c.enclosingPosition, s"Missing ToParameterList[${subcls}]")
+
+        case toParams         => 
+          cq"v: ${subcls} => $toParams(v)"
+      }
     }
+
     val arg = TermName(c.freshName("arg"))
     val mat = Match(q"${arg}", cases)
 
