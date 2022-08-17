@@ -57,7 +57,7 @@ private[anorm] object SealedRowParserImpl {
       val caseName = TermName(c.freshName("discriminated"))
       val key      = q"$discriminate(${subclass.typeSymbol.fullName})"
       val caseDecl = q"val $caseName = $key"
-      val subtype = {
+      val subtype = { // TODO: typeParams is not supported anyway
         if (subclass.typeSymbol.asClass.typeParams.isEmpty) subclass
         else subclass.erasure
       }

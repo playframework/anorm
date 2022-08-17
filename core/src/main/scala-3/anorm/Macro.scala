@@ -321,7 +321,8 @@ object Macro extends MacroOptions with macros.ValueColumn with macros.ValueToSta
           case Some(n) =>
             withColumn[T] { col =>
               val cn = naming(Expr(n))
-              '{ anorm.SqlParser.get[T]($cn)($col) }
+
+              '{ SqlParser.get[T]($cn)($col) }
             }
 
           case _ =>
@@ -358,7 +359,7 @@ object Macro extends MacroOptions with macros.ValueColumn with macros.ValueToSta
       Quotes,
       Type[T]
   ): Expr[RowParser[T]] =
-    '{ ??? } // TODO: anorm.macros.SealedRowParserImpl[T](c)(naming, discriminate)
+    macros.SealedRowParserImpl[T](naming, discriminate)
 
   private def parserImpl[T](genGet: (String, Int) => Expr[RowParser[T]])(using Quotes, Type[T]): Expr[RowParser[T]] = {
     // TODO: anorm.macros.RowParserImpl[T](c)(genGet)

@@ -6,7 +6,7 @@ import anorm.Macro.debugEnabled
 import anorm.ToStatement
 
 private[anorm] trait ValueToStatement {
-  def valueToStatementImpl[A <: AnyVal](using q: Quotes, tpe: Type[A]): Expr[ToStatement[A]] = {
+  protected def valueToStatementImpl[A <: AnyVal](using q: Quotes, tpe: Type[A]): Expr[ToStatement[A]] = {
 
     import q.reflect.*
 

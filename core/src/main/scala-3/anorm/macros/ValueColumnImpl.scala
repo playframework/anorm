@@ -6,7 +6,7 @@ import anorm.Column
 import anorm.Macro.debugEnabled
 
 private[anorm] trait ValueColumn {
-  def valueColumnImpl[A <: AnyVal](using q: Quotes, tpe: Type[A]): Expr[Column[A]] = {
+  protected def valueColumnImpl[A <: AnyVal](using q: Quotes, tpe: Type[A]): Expr[Column[A]] = {
     import q.reflect.*
 
     val aTpr = TypeRepr.of[A](using tpe)
