@@ -66,7 +66,10 @@ object Macro extends MacroOptions {
     def psz = params.size
 
     if (names.size < psz) {
-      c.abort(c.enclosingPosition, s"no column name for parameters: ${show(names)} < $params")
+      c.abort(
+        c.enclosingPosition,
+        s"no column name for parameters: ${names.map(n => show(n)).mkString(", ")} < ${params.map(_.name).mkString(", ")}"
+      )
 
     } else {
       parserImpl[T](c) { (t, _, i) =>

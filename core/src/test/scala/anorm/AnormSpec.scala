@@ -54,7 +54,7 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
       }
 
       "return 0 for missing optional numeric" in withQueryResult(null.asInstanceOf[Double]) { implicit c: Connection =>
-        SQL("SELECT * FROM test").as(scalar[Double].singleOpt).aka("single value") must beSome(0d)
+        SQL("SELECT * FROM test").as(scalar[Double].singleOpt).aka("single value") must beSome(0D)
 
       }
 

@@ -17,7 +17,7 @@ import resource.{ managed, ManagedResource, Resource }
  * {{{
  * import anorm._
  *
- * def foo(v: Any) = SQL("UPDATE t SET val = {o}").on('o -> anorm.Object(v))
+ * def foo(v: Any) = SQL("UPDATE t SET val = {o}").on("o" -> anorm.Object(v))
  * }}}
  */
 case class Object(value: Any)
@@ -277,7 +277,6 @@ object Sql { // TODO: Rename to SQL
   private def toSql(ts: List[StatementToken], buf: StringBuilder): StringBuilder = ts.foldLeft(buf) {
     case (sql, StringToken(t)) => sql ++= t
     case (sql, PercentToken)   => sql += '%'
-    // TODO: Remove; case (sql, _)              => sql
   }
 
   @SuppressWarnings(Array("IncorrectlyNamedExceptions"))

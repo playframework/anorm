@@ -31,18 +31,15 @@ object Common extends AutoPlugin {
             ("com.github.ghik" %% "silencer-plugin" % silencerVersion)
               .cross(CrossVersion.full)
           ),
-      ("com.github.ghik" %% "silencer-lib" % silencerVersion % Provided)
-        .cross(CrossVersion.full)
+          ("com.github.ghik" %% "silencer-lib" % silencerVersion % Provided)
+            .cross(CrossVersion.full)
         )
       } else Seq.empty
     },
     scalacOptions ++= Seq("-Xfatal-warnings"),
     scalacOptions ++= {
       if (scalaBinaryVersion.value != "3") {
-        Seq(
-          "-target:jvm-1.8",
-          "-Xlint",
-          "-g:vars")
+        Seq("-target:jvm-1.8", "-Xlint", "-g:vars")
       } else {
         Seq.empty
       }
@@ -65,9 +62,7 @@ object Common extends AutoPlugin {
           "-Ywarn-macros:after"
         )
       } else if (v == "2.11") {
-        Seq(
-          "-Xmax-classfile-name", "128",
-          "-Yopt:_", "-Ydead-code", "-Yclosure-elim", "-Yconst-opt")
+        Seq("-Xmax-classfile-name", "128", "-Yopt:_", "-Ydead-code", "-Yclosure-elim", "-Yconst-opt")
       } else {
         Seq(
           "-explaintypes",
@@ -108,13 +103,16 @@ object Common extends AutoPlugin {
 
   def scalaUnmanaged(ver: String, base: File): Seq[File] =
     CrossVersion.partialVersion(ver) match {
+      case Some((2, 11)) =>
+        Seq(base / "scala-2.12-", base / "scala-2.13-")
+
       case Some((2, 12)) =>
         Seq(base / "scala-2.12+", base / "scala-2.13-")
 
       case Some((3, _) | (2, 13)) =>
         Seq(base / "scala-2.12+", base / "scala-2.13+")
 
-      case Some((_, minor))                           =>
+      case Some((_, minor)) =>
         Seq(base / s"scala-2.${minor}-")
 
       case _ =>

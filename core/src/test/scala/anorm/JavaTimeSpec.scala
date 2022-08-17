@@ -1,8 +1,7 @@
 package anorm
 
 import java.sql.{ Connection, Timestamp }
-
-import java.time.{ Instant, LocalDate, LocalDateTime, ZonedDateTime, ZoneId }
+import java.time.{ Instant, LocalDate, LocalDateTime, ZoneId, ZonedDateTime }
 
 import acolyte.jdbc.AcolyteDSL._
 import acolyte.jdbc.Implicits._

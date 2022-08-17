@@ -13,10 +13,10 @@ import java.net.{ URI, URL }
 
 import java.sql.Timestamp
 
-import scala.reflect.ClassTag
-
 import scala.util.{ Failure, Success => TrySuccess, Try }
 import scala.util.control.NonFatal
+
+import scala.reflect.ClassTag
 
 import resource.managed
 
@@ -653,7 +653,7 @@ sealed trait JodaColumn {
    *
    * {{{
    * import org.joda.time.LocalDate
-   * import anorm.{ SQL, SqlParser }, SqlParser.scalar
+   * import anorm._, SqlParser.scalar
    *
    * def ld(implicit con: java.sql.Connection): LocalDate =
    *   SQL("SELECT last_mod FROM tbl").as(scalar[LocalDate].single)
@@ -738,7 +738,7 @@ sealed trait JodaColumn {
    * Parses column as joda Instant
    *
    * {{{
-   * import anorm.{ SQL, SqlParser }, SqlParser.scalar
+   * import anorm._, SqlParser.scalar
    * import org.joda.time.Instant
    *
    * def d(implicit con: java.sql.Connection): Instant =

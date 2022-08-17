@@ -28,10 +28,9 @@ private[anorm] object ToParameterListImpl {
 
       c.inferImplicitValue(ptype) match {
         case EmptyTree =>
-          c.abort(
-            c.enclosingPosition, s"Missing ToParameterList[${subcls}]")
+          c.abort(c.enclosingPosition, s"Missing ToParameterList[${subcls}]")
 
-        case toParams         => 
+        case toParams =>
           cq"v: ${subcls} => $toParams(v)"
       }
     }

@@ -14,6 +14,20 @@ sealed trait SqlResult[+A] { self =>
     case e @ Error(_) => e
   }
 
+  def collect[B](f: PartialFunction[A, B]): SqlResult[B] = self match {
+    case Success(a) =>
+      f.lift(a) match {
+        case Some(b) =>
+          Success(b)
+
+        case None =>
+          Error(SqlMappingError(s"Value ${a} is not matching"))
+      }
+
+    case Error(cause) =>
+      Error(cause)
+  }
+
   /**
    * Either applies function `e` if result is erroneous,
    * or function `f` with successful result if any.

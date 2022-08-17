@@ -51,7 +51,7 @@ object Macro extends MacroOptions with macros.ValueColumn with macros.ValueToSta
    * val p: RowParser[YourCaseClass] = Macro.namedParser[YourCaseClass]
    * }}}
    */
-  inline def namedParser[T](naming: ColumnNaming): RowParser[T] =
+  inline def namedParser[T](inline naming: ColumnNaming): RowParser[T] =
     ${ namedParserImpl1[T]('naming) }
 
   /**
@@ -70,7 +70,7 @@ object Macro extends MacroOptions with macros.ValueColumn with macros.ValueToSta
    *   Macro.parser[YourCaseClass]("foo", "bar")
    * }}}
    */
-  inline def parser[T](names: String*): RowParser[T] =
+  inline def parser[T](inline names: String*): RowParser[T] =
     ${ namedParserImpl3[T]('names) }
 
   /**
@@ -91,7 +91,7 @@ object Macro extends MacroOptions with macros.ValueColumn with macros.ValueToSta
    *   Macro.parser[YourCaseClass]("foo", "loremIpsum")
    * }}}
    */
-  inline def parser[T](naming: ColumnNaming, names: String*): RowParser[T] =
+  inline def parser[T](inline naming: ColumnNaming, inline names: String*): RowParser[T] =
     ${ namedParserImpl2[T]('naming, 'names) }
 
   /**
@@ -125,7 +125,7 @@ object Macro extends MacroOptions with macros.ValueColumn with macros.ValueToSta
    * val p: RowParser[YourCaseClass] = Macro.offsetParser[YourCaseClass](2)
    * }}}
    */
-  inline def offsetParser[T](offset: Int): RowParser[T] =
+  inline def offsetParser[T](inline offset: Int): RowParser[T] =
     ${ offsetParserImpl[T]('offset) }
 
   /**
@@ -142,7 +142,7 @@ object Macro extends MacroOptions with macros.ValueColumn with macros.ValueToSta
    * @param naming $discriminatorNamingParam
    * @tparam T $familyTParam
    */
-  inline def sealedParser[T](naming: DiscriminatorNaming): RowParser[T] =
+  inline def sealedParser[T](inline naming: DiscriminatorNaming): RowParser[T] =
     ${ sealedParserImpl2[T]('naming) }
 
   /**
@@ -151,7 +151,7 @@ object Macro extends MacroOptions with macros.ValueColumn with macros.ValueToSta
    * @param discriminate $discriminateParam
    * @tparam T $familyTParam
    */
-  inline def sealedParser[T](discriminate: Discriminate): RowParser[T] =
+  inline def sealedParser[T](inline discriminate: Discriminate): RowParser[T] =
     ${ sealedParserImpl3[T]('discriminate) }
 
   /**
@@ -161,7 +161,7 @@ object Macro extends MacroOptions with macros.ValueColumn with macros.ValueToSta
    * @param discriminate $discriminateParam
    * @tparam T $familyTParam
    */
-  inline def sealedParser[T](naming: DiscriminatorNaming, discriminate: Discriminate): RowParser[T] =
+  inline def sealedParser[T](inline naming: DiscriminatorNaming, discriminate: Discriminate): RowParser[T] =
     ${ sealedParserImpl[T]('naming, 'discriminate) }
 
   // ---
@@ -240,7 +240,7 @@ object Macro extends MacroOptions with macros.ValueColumn with macros.ValueToSta
    * @param projection $projectionParam
    * @tparam T $caseTParam
    */
-  inline def toParameters[T](inline separator: String, inline projection: ParameterProjection*): ToParameterList[T] = ${
+  inline def toParameters[T](inline separator: String, projection: ParameterProjection*): ToParameterList[T] = ${
     parametersWithSeparator[T]('separator, 'projection)
   }
 
@@ -265,21 +265,20 @@ object Macro extends MacroOptions with macros.ValueColumn with macros.ValueToSta
 
   // ---
 
-  private def namedParserImpl[T](using Quotes, Type[T]): Expr[RowParser[T]] =
-    withColumn[T] { col =>
-      parserImpl[T] { (n, _) =>
-        '{ anorm.SqlParser.get[T](${ Expr(n) })($col) }
-      }
+  private def namedParserImpl[A](using q: Quotes, tpe: Type[A]): Expr[RowParser[A]] = {
+    parserImpl[A](q) {
+      [T] => (_: Type[T]) ?=> (col: Expr[Column[T]], n: String, _: Int) => '{ SqlParser.get[T](${ Expr(n) })($col) }
     }
+  }
 
-  private def namedParserImpl1[T](
+  private def namedParserImpl1[A](
       naming: Expr[ColumnNaming]
-  )(using Quotes, Type[T], Type[ColumnNaming]): Expr[RowParser[T]] =
-    withColumn[T] { col =>
-      parserImpl[T] { (n, _) =>
-        '{ anorm.SqlParser.get[T]($naming(${ Expr(n) }))($col) }
-      }
+  )(using q: Quotes, tpe: Type[A], colNme: Type[ColumnNaming]): Expr[RowParser[A]] = {
+    parserImpl[A](q) {
+      [T] =>
+        (_: Type[T]) ?=> (col: Expr[Column[T]], n: String, _: Int) => '{ SqlParser.get[T]($naming(${ Expr(n) }))($col) }
     }
+  }
 
   private def namedParserImpl2[T](
       naming: Expr[ColumnNaming],
@@ -297,15 +296,16 @@ object Macro extends MacroOptions with macros.ValueColumn with macros.ValueToSta
       Type[ColumnNaming]
   ): Expr[RowParser[T]] = namedParserImpl4[T](names)(identity)
 
-  private def namedParserImpl4[T](
+  private def namedParserImpl4[A](
       names: Expr[Seq[String]]
-  )(naming: Expr[String] => Expr[String])(using q: Quotes, tpe: Type[T]): Expr[RowParser[T]] = {
+  )(naming: Expr[String] => Expr[String])(using q: Quotes, tpe: Type[A]): Expr[RowParser[A]] = {
+
     import q.reflect.*
 
-    val repr = TypeRepr.of[T](using tpe)
+    val repr = TypeRepr.of[A](using tpe)
     val ctor = repr.typeSymbol.primaryConstructor
 
-    val params = ctor.paramSymss.flatten
+    val params = ctor.paramSymss.map(_.filterNot(_.isType)).flatten
 
     @SuppressWarnings(Array("ListSize"))
     def psz = params.size
@@ -313,31 +313,34 @@ object Macro extends MacroOptions with macros.ValueColumn with macros.ValueToSta
     val ns = names.valueOrAbort
 
     if (ns.size < psz) {
-      report.errorAndAbort(s"no column name for parameters: ${ns.mkString(", ")} < $params")
+      report.errorAndAbort(s"no column name for parameters: ${ns.mkString(", ")} < ${params.mkString("[", ", ", "]")}")
 
     } else {
-      parserImpl[T] { (_, i) =>
-        ns.lift(i) match {
-          case Some(n) =>
-            withColumn[T] { col =>
-              val cn = naming(Expr(n))
+      parserImpl[A](q) {
+        [T] =>
+          (_: Type[T]) ?=>
+            (col: Expr[Column[T]], _: String, i: Int) =>
+              ns.lift(i) match {
+                case Some(n) => {
+                  val cn = naming(Expr(n))
 
-              '{ SqlParser.get[T]($cn)($col) }
+                  '{ SqlParser.get[T]($cn)($col) }
+                }
+
+                case _ =>
+                  report.errorAndAbort(s"missing column name for parameter $i")
             }
-
-          case _ =>
-            report.errorAndAbort(s"missing column name for parameter $i")
-        }
       }
     }
   }
 
-  private def offsetParserImpl[T](offset: Expr[Int])(using Quotes, Type[T]): Expr[RowParser[T]] =
-    withColumn[T] { col =>
-      parserImpl[T] { (_, i) =>
-        '{ anorm.SqlParser.get[T]($offset + ${ Expr(i + 1) })($col) }
-      }
+  private def offsetParserImpl[A](offset: Expr[Int])(using q: Quotes, tpe: Type[A]): Expr[RowParser[A]] = {
+    parserImpl[A](q) {
+      [T] =>
+        (_: Type[T]) ?=>
+          (col: Expr[Column[T]], _: String, i: Int) => '{ SqlParser.get[T]($offset + ${ Expr(i + 1) })($col) }
     }
+  }
 
   private def indexedParserImpl[T](using Quotes, Type[T]): Expr[RowParser[T]] =
     offsetParserImpl[T]('{ 0 })
@@ -361,9 +364,30 @@ object Macro extends MacroOptions with macros.ValueColumn with macros.ValueToSta
   ): Expr[RowParser[T]] =
     macros.SealedRowParserImpl[T](naming, discriminate)
 
-  private def parserImpl[T](genGet: (String, Int) => Expr[RowParser[T]])(using Quotes, Type[T]): Expr[RowParser[T]] = {
-    // TODO: anorm.macros.RowParserImpl[T](c)(genGet)
-    '{ ??? }
+  inline private def withParser[T](f: RowParser[T] => (Row => SqlResult[T])): RowParser[T] = new RowParser[T] { self =>
+    lazy val underlying = f(self)
+
+    def apply(row: Row): SqlResult[T] = underlying(row)
+  }
+
+  /**
+   * @tparam T the field type
+   */
+  private[anorm] type RowParserGenerator =
+    [T] => (fieldType: Type[T]) ?=> (column: Expr[Column[T]], fieldName: String, fieldIndex: Int) => Expr[RowParser[T]]
+
+  /**
+   * @tparam A the case class type
+   * @param genGet the function applied to each field of case class `A`
+   */
+  private def parserImpl[A](q: Quotes)(genGet: RowParserGenerator)(using Type[A]): Expr[RowParser[A]] = {
+    given quotes: Quotes = q
+
+    '{
+      withParser[A] { self =>
+        ${ macros.RowParserImpl[A](q, 'self)(genGet) }
+      }
+    }
   }
 
   // ---
@@ -516,7 +540,7 @@ object Macro extends MacroOptions with macros.ValueColumn with macros.ValueToSta
     }
   }
 
-  inline private[anorm] def withSelfToParameterList[T](
+  inline private def withSelfToParameterList[T](
       f: ToParameterList[T] => (T => List[NamedParameter])
   ): ToParameterList[T] = new ToParameterList[T] { self =>
     lazy val underlying = f(self)

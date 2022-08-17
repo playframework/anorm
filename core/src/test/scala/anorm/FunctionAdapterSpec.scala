@@ -50,7 +50,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
 
       val schema = rowList4(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D")
 
-      withQueryResult(schema.append("A", 2, 3L, 4.56d)) { implicit c: Connection =>
+      withQueryResult(schema.append("A", 2, 3L, 4.56D)) { implicit c: Connection =>
         SQL("SELECT * FROM test")
           .as((str("A") ~ int("B") ~ long("C") ~ get[Double]("D")).map(SqlParser.to(foo _)).single)
           .aka("function result") must_=== "Fn4"
@@ -69,7 +69,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
         classOf[Short]  -> "E"
       )
 
-      withQueryResult(schema.append("A", 2, 3L, 4.56d, 9.toShort)) { implicit c: Connection =>
+      withQueryResult(schema.append("A", 2, 3L, 4.56D, 9.toShort)) { implicit c: Connection =>
         SQL("SELECT * FROM test")
           .as((str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E")).map(SqlParser.to(foo _)).single)
           .aka("function result") must_=== "Fn5"
@@ -89,7 +89,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
         classOf[Byte]   -> "F"
       )
 
-      withQueryResult(schema.append("A", 2, 3L, 4.56d, 9.toShort, 10.toByte)) { implicit c: Connection =>
+      withQueryResult(schema.append("A", 2, 3L, 4.56D, 9.toShort, 10.toByte)) { implicit c: Connection =>
         SQL("SELECT * FROM test")
           .as(
             (str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F"))
@@ -114,7 +114,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
         classOf[Boolean] -> "G"
       )
 
-      withQueryResult(schema.append("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true)) { implicit c: Connection =>
+      withQueryResult(schema.append("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true)) { implicit c: Connection =>
         SQL("SELECT * FROM test")
           .as(
             (str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G"))
@@ -140,7 +140,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
         classOf[String]  -> "H"
       )
 
-      withQueryResult(schema.append("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true, "B")) { implicit c: Connection =>
+      withQueryResult(schema.append("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B")) { implicit c: Connection =>
         SQL("SELECT * FROM test")
           .as(
             (str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str(
@@ -167,7 +167,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
         classOf[Int]     -> "I"
       )
 
-      withQueryResult(schema.append("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true, "B", 3)) { implicit c: Connection =>
+      withQueryResult(schema.append("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3)) { implicit c: Connection =>
         SQL("SELECT * FROM test")
           .as(
             (str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str(
@@ -206,7 +206,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
         classOf[Long]    -> "J"
       )
 
-      withQueryResult(schema.append("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4L)) {
+      withQueryResult(schema.append("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L)) {
         implicit c: Connection =>
           SQL("SELECT * FROM test")
             .as(
@@ -248,7 +248,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
         classOf[Double]  -> "K"
       )
 
-      withQueryResult(schema.append("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67d)) {
+      withQueryResult(schema.append("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D)) {
         implicit c: Connection =>
           SQL("SELECT * FROM test")
             .as(
@@ -292,7 +292,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
         classOf[Short]   -> "L"
       )
 
-      withQueryResult(schema.append("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67d, 10.toShort)) {
+      withQueryResult(schema.append("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort)) {
         implicit c: Connection =>
           SQL("SELECT * FROM test")
             .as(
@@ -339,7 +339,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
       )
 
       withQueryResult(
-        schema.append("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67d, 10.toShort, 11.toByte)
+        schema.append("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte)
       ) { implicit c: Connection =>
         SQL("SELECT * FROM test")
           .as(
@@ -390,7 +390,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
       )
 
       withQueryResult(
-        schema.append("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67d, 10.toShort, 11.toByte, false)
+        schema.append("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte, false)
       ) { implicit c: Connection =>
         SQL("SELECT * FROM test")
           .as(
@@ -444,7 +444,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
 
       withQueryResult(
         schema
-          .append("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67d, 10.toShort, 11.toByte, false, "C")
+          .append("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte, false, "C")
       ) { implicit c: Connection =>
         SQL("SELECT * FROM test")
           .as(
@@ -503,14 +503,14 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
           "A",
           2,
           3L,
-          4.56d,
+          4.56D,
           9.toShort,
           10.toByte,
           true,
           "B",
           3,
           4L,
-          5.67d,
+          5.67D,
           10.toShort,
           11.toByte,
           false,
@@ -577,14 +577,14 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
           "A",
           2,
           3L,
-          4.56d,
+          4.56D,
           9.toShort,
           10.toByte,
           true,
           "B",
           3,
           4L,
-          5.67d,
+          5.67D,
           10.toShort,
           11.toByte,
           false,
@@ -654,21 +654,21 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
           "A",
           2,
           3L,
-          4.56d,
+          4.56D,
           9.toShort,
           10.toByte,
           true,
           "B",
           3,
           4L,
-          5.67d,
+          5.67D,
           10.toShort,
           11.toByte,
           false,
           "C",
           3,
           4L,
-          5.678d
+          5.678D
         )
       ) { implicit c: Connection =>
         SQL("SELECT * FROM test")
@@ -734,21 +734,21 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
           "A",
           2,
           3L,
-          4.56d,
+          4.56D,
           9.toShort,
           10.toByte,
           true,
           "B",
           3,
           4L,
-          5.67d,
+          5.67D,
           10.toShort,
           11.toByte,
           false,
           "C",
           3,
           4L,
-          5.678d,
+          5.678D,
           16.toShort
         )
       ) { implicit c: Connection =>
@@ -817,21 +817,21 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
           "A",
           2,
           3L,
-          4.56d,
+          4.56D,
           9.toShort,
           10.toByte,
           true,
           "B",
           3,
           4L,
-          5.67d,
+          5.67D,
           10.toShort,
           11.toByte,
           false,
           "C",
           3,
           4L,
-          5.678d,
+          5.678D,
           16.toShort,
           "D"
         )
@@ -903,21 +903,21 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
           "A",
           2,
           3L,
-          4.56d,
+          4.56D,
           9.toShort,
           10.toByte,
           true,
           "B",
           3,
           4L,
-          5.67d,
+          5.67D,
           10.toShort,
           11.toByte,
           false,
           "C",
           3,
           4L,
-          5.678d,
+          5.678D,
           16.toShort,
           "D",
           4
@@ -992,21 +992,21 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
           "A",
           2,
           3L,
-          4.56d,
+          4.56D,
           9.toShort,
           10.toByte,
           true,
           "B",
           3,
           4L,
-          5.67d,
+          5.67D,
           10.toShort,
           11.toByte,
           false,
           "C",
           3,
           4L,
-          5.678d,
+          5.678D,
           16.toShort,
           "D",
           4,

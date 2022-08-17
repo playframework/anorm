@@ -44,6 +44,7 @@ final class RowSpec extends org.specs2.mutable.Specification {
       val meta2    = MetaDataItem(ColumnName("table.id", Some("second_id")), false, "java.lang.Integer")
       val metaData = MetaData(List(meta1, meta2))
       val row      = ResultRow(metaData, List(1, 2))
+
       row.get("second_id") must beRight((2, meta2))
     }
 
@@ -53,6 +54,7 @@ final class RowSpec extends org.specs2.mutable.Specification {
       val meta2    = MetaDataItem(ColumnName("data.name", Some("CorrectAlias")), false, "java.lang.String")
       val metaData = MetaData(List(meta1, meta2))
       val row      = ResultRow(metaData, List("IncorrectString", "CorrectString"))
+
       row.get("CorrectAlias") must beRight(("CorrectString", meta2))
     }
   }

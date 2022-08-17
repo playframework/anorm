@@ -77,8 +77,7 @@ trait Row {
    * @param c Column mapping
    *
    * {{{
-   * import anorm.SQL
-   * import anorm.Column.columnToString // mapping column to string
+   * import anorm._, Column.columnToString // mapping column to string
    *
    * val res = SQL("SELECT * FROM Test").map { row =>
    *   // string columns 'code' and 'label'
@@ -96,8 +95,7 @@ trait Row {
    * @param c Column mapping
    *
    * {{{
-   * import anorm.SQL
-   * import anorm.Column.columnToString // mapping column to string
+   * import anorm._, Column.columnToString // mapping column to string
    *
    * val res = SQL("SELECT * FROM Test").map { row =>
    *   row(1) -> row(2) // string columns #1 and #2

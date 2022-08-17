@@ -28,8 +28,9 @@ final class EnumColumnSpec extends org.specs2.mutable.Specification {
     "not be parsed as Column from invalid String representation" >> {
       def spec(title: String, repr: String) =
         title in withQueryResult(RowLists.stringList :+ repr) { implicit con =>
-          SQL("SELECT v").as(scalar[Dummy].single) must throwA[Exception].like { case NonFatal(cause) =>
-            cause must_=== AnormException(TypeDoesNotMatch(s"Invalid value: $repr").message)
+          SQL("SELECT v").as(scalar[Dummy].single) must throwA[Exception].like {
+            case NonFatal(cause) =>
+              cause must_=== AnormException(TypeDoesNotMatch(s"Invalid value: $repr").message)
           }
         }
 
@@ -41,12 +42,15 @@ final class EnumColumnSpec extends org.specs2.mutable.Specification {
     "not be parsed as Column from non-String values" >> {
       def spec(tpe: String, rowList: RowList[_]) =
         tpe in withQueryResult(rowList) { implicit con =>
-          SQL("SELECT v").as(scalar[Dummy].single) must throwA[Exception].like { case NonFatal(cause) =>
-            cause must_=== AnormException(TypeDoesNotMatch(s"Column '.null' expected to be String; Found $tpe").message)
+          SQL("SELECT v").as(scalar[Dummy].single) must throwA[Exception].like {
+            case NonFatal(cause) =>
+              cause must_=== AnormException(
+                TypeDoesNotMatch(s"Column '.null' expected to be String; Found $tpe").message
+              )
           }
         }
 
-      spec("float", RowLists.floatList :+ 0.1f)
+      spec("float", RowLists.floatList :+ 0.1F)
       spec("int", RowLists.intList :+ 1)
     }
   }
@@ -79,7 +83,7 @@ final class EnumColumnSpec extends org.specs2.mutable.Specification {
           }
         }
 
-      spec("float", RowLists.floatList :+ 0.1f)
+      spec("float", RowLists.floatList :+ 0.1F)
       spec("int", RowLists.intList :+ 1)
     }
   }
@@ -121,7 +125,7 @@ final class EnumColumnSpec extends org.specs2.mutable.Specification {
           }
         }
 
-      spec("float", RowLists.floatList :+ 0.1f)
+      spec("float", RowLists.floatList :+ 0.1F)
       spec("int", RowLists.intList :+ 1)
     }
   }
@@ -163,7 +167,7 @@ final class EnumColumnSpec extends org.specs2.mutable.Specification {
           }
         }
 
-      spec("float", RowLists.floatList :+ 0.1f)
+      spec("float", RowLists.floatList :+ 0.1F)
       spec("int", RowLists.intList :+ 1)
     }
   }

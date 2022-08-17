@@ -7,21 +7,24 @@ package anorm
 private[anorm] case class TokenizedStatement(tokens: Seq[TokenGroup], names: Seq[String])
 
 private[anorm] object TokenizedStatement {
-  import scala.quoted.{Expr,FromExpr,Quotes,Type}
+  import scala.quoted.{ Expr, FromExpr, Quotes, Type }
 
   /** Returns empty tokenized statement. */
   lazy val empty = TokenizedStatement(Nil, Nil)
 
   /** String interpolation to tokenize statement. */
-  inline def stringInterpolation[T](inline parts: Seq[String], inline params: Seq[T & Show]): (TokenizedStatement, Map[String, T]) = ${tokenizeImpl[T]('parts, 'params)}
+  inline def stringInterpolation[T](
+      inline parts: Seq[String],
+      inline params: Seq[T & Show]
+  ): (TokenizedStatement, Map[String, T]) = ${ tokenizeImpl[T]('parts, 'params) }
 
   /** Tokenization macro */
   private def tokenizeImpl[T](
-    parts: Expr[Seq[String]],
-    params: Expr[Seq[T & Show]]
+      parts: Expr[Seq[String]],
+      params: Expr[Seq[T & Show]]
   )(using Quotes, Type[T]): Expr[(TokenizedStatement, Map[String, T])] = '{
-    val _parts = ${parts}
-    val _params = ${params}
+    val _parts  = ${ parts }
+    val _params = ${ params }
 
     tokenize(Iterator[String](), Nil, _parts, _params, Nil, Nil, Map.empty[String, T])
   }
@@ -51,12 +54,12 @@ private[anorm] object TokenizedStatement {
                       StringToken(str.dropRight(1)) :: gts
                     }
                   val ng = TokenGroup(
-                    (tks ::: StringToken(v.show) ::
-                      before),
+                    tks ::: StringToken(v.show) ::
+                      before,
                     pl
                   )
 
-                  tokenize(ti, tks.tail, parts, ps.tail, (ng :: groups), ns, m)
+                  tokenize(ti, tks.tail, parts, ps.tail, ng :: groups, ns, m)
 
                 case _ =>
                   val ng = TokenGroup(tks, None)
@@ -66,8 +69,8 @@ private[anorm] object TokenizedStatement {
                     tks.tail,
                     parts,
                     ps.tail,
-                    (ng :: prev.copy(placeholder = Some(n)) :: groups),
-                    (n +: ns),
+                    ng :: prev.copy(placeholder = Some(n)) :: groups,
+                    n +: ns,
                     m + (n -> v)
                   )
               }
@@ -89,8 +92,9 @@ private[anorm] object TokenizedStatement {
           val groups = (gs match {
             case TokenGroup(List(StringToken("")), None) :: tgs => tgs // trim end
             case _                                              => gs
-          }).collect { case TokenGroup(pr, pl) =>
-            TokenGroup(pr.reverse, pl)
+          }).collect {
+            case TokenGroup(pr, pl) =>
+              TokenGroup(pr.reverse, pl)
           }.reverse
 
           TokenizedStatement(groups, ns.reverse) -> m

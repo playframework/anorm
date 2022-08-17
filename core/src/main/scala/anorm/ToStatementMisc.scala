@@ -32,8 +32,11 @@ sealed trait ToStatementPriority0 {
    * For `null` value, `setNull` with `LONGVARBINARY` is called on statement.
    *
    * {{{
+   * // skip-doc-5f98a5e
+   * import anorm._
+   *
    * def foo(inputStream: java.io.InputStream) =
-   *   anorm.SQL("INSERT INTO Table(bin) VALUES {b}").on("b" -> inputStream)
+   *   SQL("INSERT INTO Table(bin) VALUES {b}").on("b" -> inputStream)
    * }}}
    */
   implicit def binaryStreamToStatement[S <: InputStream]: ToStatement[S] =
@@ -49,11 +52,14 @@ sealed trait ToStatementPriority0 {
    * For `null` value, `setNull` with `BLOB` is called on statement.
    *
    * {{{
+   * // skip-doc-5f98a5e
+   * import anorm._
+   *
    * def foo(byteArray: Array[Byte])(implicit con: java.sql.Connection) = {
    *   val blob = con.createBlob()
    *   blob.setBytes(1, byteArray)
    *
-   *   anorm.SQL("INSERT INTO Table(bin) VALUES {b}").on("b" -> blob)
+   *   SQL("INSERT INTO Table(bin) VALUES {b}").on("b" -> blob)
    * }
    * }}}
    */
@@ -70,8 +76,11 @@ sealed trait ToStatementPriority0 {
    * For `null` value, `setNull` with `VARCHAR` is called on statement.
    *
    * {{{
+   * // skip-doc-5f98a5e
+   * import anorm._
+   *
    * def foo(reader: java.io.Reader) =
-   *   anorm.SQL("INSERT INTO Table(chars) VALUES {c}").on("c" -> reader)
+   *   SQL("INSERT INTO Table(chars) VALUES {c}").on("c" -> reader)
    * }}}
    */
   implicit def characterStreamToStatement[R <: Reader]: ToStatement[R] =
@@ -86,7 +95,9 @@ sealed trait ToStatementPriority0 {
    * Sets boolean value on statement.
    *
    * {{{
-   * anorm.SQL("SELECT * FROM Test WHERE enabled = {b}").on("b" -> true)
+   * import anorm._
+   *
+   * SQL("SELECT * FROM Test WHERE enabled = {b}").on("b" -> true)
    * }}}
    */
   implicit object booleanToStatement extends ToStatement[Boolean] {
@@ -98,7 +109,9 @@ sealed trait ToStatementPriority0 {
    * For `null` value, `setNull` with `BOOLEAN` is called on statement.
    *
    * {{{
-   * anorm.SQL("SELECT * FROM Test WHERE enabled = {b}").
+   * import anorm._
+   *
+   * SQL("SELECT * FROM Test WHERE enabled = {b}").
    *   on("b" -> java.lang.Boolean.TRUE)
    * }}}
    */
@@ -112,7 +125,9 @@ sealed trait ToStatementPriority0 {
    * Sets byte value on statement.
    *
    * {{{
-   * anorm.SQL("SELECT * FROM Test WHERE flag = {b}").on("b" -> 1.toByte)
+   * import anorm._
+   *
+   * SQL("SELECT * FROM Test WHERE flag = {b}").on("b" -> 1.toByte)
    * }}}
    */
   implicit object byteToStatement extends ToStatement[Byte] {
@@ -124,7 +139,9 @@ sealed trait ToStatementPriority0 {
    * For `null` value, `setNull` with `TINYINT` is called on statement.
    *
    * {{{
-   * anorm.SQL("SELECT * FROM Test WHERE flag = {b}").
+   * import anorm._
+   *
+   * SQL("SELECT * FROM Test WHERE flag = {b}").
    *   on("b" -> new java.lang.Byte(1: Byte))
    * }}}
    */
@@ -138,7 +155,9 @@ sealed trait ToStatementPriority0 {
    * Sets double value on statement.
    *
    * {{{
-   * anorm.SQL("SELECT * FROM Test WHERE flag = {b}").on("b" -> 1D)
+   * import anorm._
+   *
+   * SQL("SELECT * FROM Test WHERE flag = {b}").on("b" -> 1D)
    * }}}
    */
   implicit object doubleToStatement extends ToStatement[Double] {
@@ -150,7 +169,9 @@ sealed trait ToStatementPriority0 {
    * For `null` value, `setNull` with `DOUBLE` is called on statement.
    *
    * {{{
-   * anorm.SQL("SELECT * FROM Test WHERE flag = {b}").
+   * import anorm._
+   *
+   * SQL("SELECT * FROM Test WHERE flag = {b}").
    *   on("b" -> new java.lang.Double(1D))
    * }}}
    */
@@ -164,7 +185,9 @@ sealed trait ToStatementPriority0 {
    * Sets float value on statement.
    *
    * {{{
-   * anorm.SQL("SELECT * FROM Test WHERE flag = {b}").on("b" -> 1F)
+   * import anorm._
+   *
+   * SQL("SELECT * FROM Test WHERE flag = {b}").on("b" -> 1F)
    * }}}
    */
   implicit object floatToStatement extends ToStatement[Float] {
@@ -176,7 +199,9 @@ sealed trait ToStatementPriority0 {
    * For `null` value, `setNull` with `FLOAT` is called on statement.
    *
    * {{{
-   * anorm.SQL("SELECT * FROM Test WHERE flag = {b}").
+   * import anorm._
+   *
+   * SQL("SELECT * FROM Test WHERE flag = {b}").
    *   on("b" -> new java.lang.Float(1F))
    * }}}
    */
@@ -190,7 +215,9 @@ sealed trait ToStatementPriority0 {
    * Sets long value on statement.
    *
    * {{{
-   * anorm.SQL("SELECT * FROM Test WHERE flag = {b}").on("b" -> 1L)
+   * import anorm._
+   *
+   * SQL("SELECT * FROM Test WHERE flag = {b}").on("b" -> 1L)
    * }}}
    */
   implicit object longToStatement extends ToStatement[Long] {
@@ -202,7 +229,9 @@ sealed trait ToStatementPriority0 {
    * For `null` value, `setNull` with `BIGINT` is called on statement.
    *
    * {{{
-   * anorm.SQL("SELECT * FROM Test WHERE flag = {b}").
+   * import anorm._
+   *
+   * SQL("SELECT * FROM Test WHERE flag = {b}").
    *   on("b" -> new java.lang.Long(1L))
    * }}}
    */
@@ -216,7 +245,9 @@ sealed trait ToStatementPriority0 {
    * Sets integer value on statement.
    *
    * {{{
-   * anorm.SQL("SELECT * FROM Test WHERE flag = {b}").on("b" -> 1)
+   * import anorm._
+   *
+   * SQL("SELECT * FROM Test WHERE flag = {b}").on("b" -> 1)
    * }}}
    */
   implicit object intToStatement extends ToStatement[Int] {
@@ -228,7 +259,9 @@ sealed trait ToStatementPriority0 {
    * For `null` value, `setNull` with `INTEGER` is called on statement.
    *
    * {{{
-   * anorm.SQL("SELECT * FROM Test WHERE flag = {b}").
+   * import anorm._
+   *
+   * SQL("SELECT * FROM Test WHERE flag = {b}").
    *   on("b" -> new java.lang.Integer(1))
    * }}}
    */
@@ -242,7 +275,9 @@ sealed trait ToStatementPriority0 {
    * Sets short value on statement.
    *
    * {{{
-   * anorm.SQL("SELECT * FROM Test WHERE flag = {b}").on("b" -> 1.toShort)
+   * import anorm._
+   *
+   * SQL("SELECT * FROM Test WHERE flag = {b}").on("b" -> 1.toShort)
    * }}}
    */
   implicit object shortToStatement extends ToStatement[Short] {
@@ -254,7 +289,9 @@ sealed trait ToStatementPriority0 {
    * For `null` value, `setNull` with `SMALLINT` is called on statement.
    *
    * {{{
-   * anorm.SQL("SELECT * FROM Test WHERE flag = {b}").
+   * import anorm._
+   *
+   * SQL("SELECT * FROM Test WHERE flag = {b}").
    *   on("b" -> new java.lang.Short(1.toShort))
    * }}}
    */
@@ -269,7 +306,9 @@ sealed trait ToStatementPriority0 {
    * For `null` character, `setNull` with `VARCHAR` is called on statement.
    *
    * {{{
-   * anorm.SQL("SELECT * FROM tbl WHERE flag = {c}").
+   * import anorm._
+   *
+   * SQL("SELECT * FROM tbl WHERE flag = {c}").
    *   on("c" -> new java.lang.Character('f'))
    * }}}
    */
@@ -284,7 +323,9 @@ sealed trait ToStatementPriority0 {
    * Sets character as parameter value.
    *
    * {{{
-   * anorm.SQL("SELECT * FROM tbl WHERE flag = {c}").on("c" -> 'f')
+   * import anorm._
+   *
+   * SQL("SELECT * FROM tbl WHERE flag = {c}").on("c" -> 'f')
    * }}}
    */
   implicit object charToStatement extends ToStatement[Char] {
@@ -297,7 +338,9 @@ sealed trait ToStatementPriority0 {
    * Value `null` is accepted.
    *
    * {{{
-   * anorm.SQL("SELECT * FROM tbl WHERE name = {n}").on("n" -> "str")
+   * import anorm._
+   *
+   * SQL("SELECT * FROM tbl WHERE name = {n}").on("n" -> "str")
    * }}}
    */
   implicit object stringToStatement extends ToStatement[String] {
@@ -308,7 +351,9 @@ sealed trait ToStatementPriority0 {
    * Sets null for None value.
    *
    * {{{
-   * anorm.SQL("SELECT * FROM Test WHERE category = {c}").on("c" -> None)
+   * import anorm._
+   *
+   * SQL("SELECT * FROM Test WHERE category = {c}").on("c" -> None)
    *
    * // Rather use:
    * anorm.SQL("SELECT * FROM Test WHERE category = {c}").
@@ -325,7 +370,9 @@ sealed trait ToStatementPriority0 {
    * Sets not empty optional A inferred as Some[A].
    *
    * {{{
-   * anorm.SQL("SELECT * FROM Test WHERE category = {c}").on("c" -> Some("cat"))
+   * import anorm._
+   *
+   * SQL("SELECT * FROM Test WHERE category = {c}").on("c" -> Some("cat"))
    * }}}
    */
   implicit def someToStatement[A](implicit c: ToStatement[A]): ToStatement[Some[A]] =
@@ -356,7 +403,9 @@ sealed trait ToStatementPriority0 {
    * For `null` value, `setNull` with `NUMERIC` is called on statement.
    *
    * {{{
-   * anorm.SQL("UPDATE tbl SET max = {m}").
+   * import anorm._
+   *
+   * SQL("UPDATE tbl SET max = {m}").
    *   on("m" -> new java.math.BigInteger("15"))
    * }}}
    */
@@ -372,7 +421,9 @@ sealed trait ToStatementPriority0 {
    * For `null` value, `setNull` with `NUMERIC` is called on statement.
    *
    * {{{
-   * anorm.SQL("UPDATE tbl SET max = {m}").on("m" -> BigInt(15))
+   * import anorm._
+   *
+   * SQL("UPDATE tbl SET max = {m}").on("m" -> BigInt(15))
    * }}}
    */
   implicit object scalaBigIntegerToStatement extends ToStatement[BigInt] {
@@ -387,7 +438,9 @@ sealed trait ToStatementPriority0 {
    * Value `null` is accepted.
    *
    * {{{
-   * anorm.SQL("UPDATE tbl SET max = {m}").
+   * import anorm._
+   *
+   * SQL("UPDATE tbl SET max = {m}").
    *   on("m" -> new java.math.BigDecimal(10.02F))
    * }}}
    */
@@ -401,7 +454,9 @@ sealed trait ToStatementPriority0 {
    * For `null` value, `setNull` with `DECIMAL` is called on statement.
    *
    * {{{
-   * anorm.SQL("UPDATE tbl SET max = {m}").on("m" -> BigDecimal(10.02F))
+   * import anorm._
+   *
+   * SQL("UPDATE tbl SET max = {m}").on("m" -> BigDecimal(10.02F))
    * }}}
    */
   implicit object scalaBigDecimalToStatement extends ToStatement[BigDecimal] {
@@ -416,8 +471,10 @@ sealed trait ToStatementPriority0 {
    * Value `null` is accepted.
    *
    * {{{
+   * import anorm._
+   *
    * def foo(date: java.util.Date) =
-   *   anorm.SQL("UPDATE tbl SET modified = {ts}").
+   *   SQL("UPDATE tbl SET modified = {ts}").
    *     on("ts" -> new java.sql.Timestamp(date.getTime))
    * }}}
    */
@@ -431,7 +488,9 @@ sealed trait ToStatementPriority0 {
    * For `null` value, `setNull` with `TIMESTAMP` is called on statement.
    *
    * {{{
-   * anorm.SQL("UPDATE tbl SET modified = {d}").on("d" -> new java.util.Date())
+   * import anorm._
+   *
+   * SQL("UPDATE tbl SET modified = {d}").on("d" -> new java.util.Date())
    * }}}
    */
   implicit object dateToStatement extends ToStatement[java.util.Date] {
@@ -447,12 +506,15 @@ sealed trait ToStatementPriority0 {
    * For `null` value, `setNull` with `TIMESTAMP` is called on statement.
    *
    * {{{
+   * // skip-doc-5f98a5e
+   * import anorm._
+   *
    * val wrapper = new {
    *   // Any value with a `.getTimestamp`
    *   val getTimestamp = new java.sql.Timestamp(123L)
    * }
    *
-   * anorm.SQL("UPDATE tbl SET modified = {ts}").on("ts" -> wrapper)
+   * SQL("UPDATE tbl SET modified = {ts}").on("ts" -> wrapper)
    * }}}
    */
   implicit def timestampWrapper1ToStatement[T <: TimestampWrapper1]: ToStatement[T] = new ToStatement[T] {
@@ -472,7 +534,9 @@ sealed trait ToStatementPriority0 {
    * For `null` value, `setNull` with `VARCHAR` is called on statement.
    *
    * {{{
-   * anorm.SQL("INSERT INTO lang_tbl(id, name) VALUE ({i}, {n})").
+   * import anorm._
+   *
+   * SQL("INSERT INTO lang_tbl(id, name) VALUE ({i}, {n})").
    *   on("i" -> java.util.UUID.randomUUID(), "n" -> "lang")
    * }}}
    */
@@ -488,7 +552,9 @@ sealed trait ToStatementPriority0 {
    * For `null` value, `setNull` with `VARCHAR` is called on statement.
    *
    * {{{
-   * anorm.SQL("INSERT INTO lang_tbl(id, name) VALUE ({i}, {n})").
+   * import anorm._
+   *
+   * SQL("INSERT INTO lang_tbl(id, name) VALUE ({i}, {n})").
    *   on("i" -> new java.net.URI("https://github.com/playframework/"),
    *      "n" -> "lang")
    * }}}
@@ -505,7 +571,9 @@ sealed trait ToStatementPriority0 {
    * For `null` value, `setNull` with `VARCHAR` is called on statement.
    *
    * {{{
-   * anorm.SQL("INSERT INTO lang_tbl(id, name) VALUE ({i}, {n})").
+   * import anorm._
+   *
+   * SQL("INSERT INTO lang_tbl(id, name) VALUE ({i}, {n})").
    *   on("i" -> new java.net.URL("https://github.com/playframework/"),
    *      "n" -> "lang")
    * }}}
@@ -522,7 +590,9 @@ sealed trait ToStatementPriority0 {
    * UNSAFE: It's set using `java.sql.PreparedStatement.setObject`.
    *
    * {{{
-   * anorm.SQL("EXEC indexed_at {d}").
+   * import anorm._
+   *
+   * SQL("EXEC indexed_at {d}").
    *   on("d" -> anorm.Object(new java.util.Date()))
    * }}}
    */
@@ -535,7 +605,9 @@ sealed trait ToStatementPriority0 {
    * Sets multi-value parameter from list on statement.
    *
    * {{{
-   * anorm.SQL("SELECT * FROM Test WHERE cat IN ({categories})").
+   * import anorm._
+   *
+   * SQL("SELECT * FROM Test WHERE cat IN ({categories})").
    *   on("categories" -> List(1, 3, 4))
    * }}}
    */
@@ -545,7 +617,9 @@ sealed trait ToStatementPriority0 {
    * Sets multi-value parameter from sequence on statement.
    *
    * {{{
-   * anorm.SQL("SELECT * FROM Test WHERE cat IN ({categories})").
+   * import anorm._
+   *
+   * SQL("SELECT * FROM Test WHERE cat IN ({categories})").
    *   on("categories" -> Seq("a", "b", "c"))
    * }}}
    */
@@ -555,7 +629,9 @@ sealed trait ToStatementPriority0 {
    * Sets multi-value parameter from set on statement.
    *
    * {{{
-   * anorm.SQL("SELECT * FROM Test WHERE cat IN ({categories})").
+   * import anorm._
+   *
+   * SQL("SELECT * FROM Test WHERE cat IN ({categories})").
    *   on("categories" -> Set(1, 3, 4))
    * }}}
    */
@@ -567,7 +643,9 @@ sealed trait ToStatementPriority0 {
    * {{{
    * import scala.collection.immutable.SortedSet
    *
-   * anorm.SQL("SELECT * FROM Test WHERE cat IN ({categories})").
+   * import anorm._
+   *
+   * SQL("SELECT * FROM Test WHERE cat IN ({categories})").
    *   on("categories" -> SortedSet("a", "b", "c"))
    * }}}
    */
@@ -584,7 +662,9 @@ sealed trait ToStatementPriority0 {
    * Sets multi-value parameter from vector on statement.
    *
    * {{{
-   * anorm.SQL("SELECT * FROM Test WHERE cat IN ({categories})").
+   * import anorm._
+   *
+   * SQL("SELECT * FROM Test WHERE cat IN ({categories})").
    *   on("categories" -> Vector("a", "b", "c"))
    * }}}
    */
@@ -596,9 +676,9 @@ sealed trait ToStatementPriority0 {
    * (using [[SeqParameter]]).
    *
    * {{{
-   * import anorm.SeqParameter
+   * import anorm._
    *
-   * anorm.SQL("SELECT * FROM Test t WHERE {categories}").
+   * SQL("SELECT * FROM Test t WHERE {categories}").
    *   on("categories" -> SeqParameter(
    *     seq = Seq("a", "b", "c"), sep = " OR ",
    *     pre = "EXISTS (SELECT NULL FROM j WHERE t.id=j.id AND name=",
@@ -625,7 +705,9 @@ sealed trait ToStatementPriority0 {
    * Sets an array parameter on statement (see `java.sql.Array`).
    *
    * {{{
-   * anorm.SQL("INSERT INTO Table(arr) VALUES {a}").
+   * import anorm._
+   *
+   * SQL("INSERT INTO Table(arr) VALUES {a}").
    *   on("a" -> Array("A", "2", "C"))
    * }}}
    */
@@ -789,8 +871,10 @@ sealed trait ToStatementPriority1 extends ToStatementPriority0 {
    * For `null` value, `setNull` with `LONGVARBINARY` is called on statement.
    *
    * {{{
+   * import anorm._
+   *
    * def foo(arrayOfBytes: Array[Byte]) =
-   *   anorm.SQL("INSERT INTO Table(bin) VALUES {b}").on("b" -> arrayOfBytes)
+   *   SQL("INSERT INTO Table(bin) VALUES {b}").on("b" -> arrayOfBytes)
    * }}}
    */
   implicit object byteArrayToStatement extends ToStatement[Array[Byte]] {

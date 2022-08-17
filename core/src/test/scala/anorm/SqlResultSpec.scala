@@ -21,7 +21,7 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
 
   private implicit val tag: ClassTag[Closeable] = Resources.closeableTag
 
-  "For-comprehension over result" should {
+  "For-comprehension/map over result" should {
     "fail when there is no data" in withQueryResult("scalar") { implicit c: Connection =>
       lazy val parser = for {
         a <- SqlParser.str("col1")
@@ -105,33 +105,47 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
     }
   }
 
+  "Successful result" in {
+    "be collected" in {
+      val suc = anorm.Success("foo")
+
+      (suc.collect {
+        case "foo" => 1
+      } must_=== anorm.Success(1)).and {
+        suc.collect {
+          case "bar" => 1
+        } must_=== anorm.Error(SqlMappingError("Value foo is not matching"))
+      }
+    }
+  }
+
   "Column" should {
-    "be found in result" in withQueryResult(rowList1(classOf[Float] -> "f") :+ 1.2f) { implicit c: Connection =>
-      SQL("SELECT f").as(SqlParser.matches("f", 1.2f).single) must beTrue
+    "be found in result" in withQueryResult(rowList1(classOf[Float] -> "f") :+ 1.2F) { implicit c: Connection =>
+      SQL("SELECT f").as(SqlParser.matches("f", 1.2F).single) must beTrue
     }
 
-    "not be found in result when value not matching" in withQueryResult(rowList1(classOf[Float] -> "f") :+ 1.2f) {
+    "not be found in result when value not matching" in withQueryResult(rowList1(classOf[Float] -> "f") :+ 1.2F) {
       implicit c: Connection =>
-        SQL("SELECT f").as(SqlParser.matches("f", 2.34f).single) must beFalse
+        SQL("SELECT f").as(SqlParser.matches("f", 2.34F).single) must beFalse
     }
 
-    "not be found in result when column missing" in withQueryResult(rowList1(classOf[Float] -> "f") :+ 1.2f) {
+    "not be found in result when column missing" in withQueryResult(rowList1(classOf[Float] -> "f") :+ 1.2F) {
       implicit c: Connection =>
-        SQL("SELECT f").as(SqlParser.matches("x", 1.2f).single) must beFalse
+        SQL("SELECT f").as(SqlParser.matches("x", 1.2F).single) must beFalse
     }
 
-    "be matching in result" in withQueryResult(rowList1(classOf[Float] -> "f") :+ 1.2f) { implicit c: Connection =>
-      SQL("SELECT f").as(SqlParser.matches("f", 1.2f).single) must beTrue
+    "be matching in result" in withQueryResult(rowList1(classOf[Float] -> "f") :+ 1.2F) { implicit c: Connection =>
+      SQL("SELECT f").as(SqlParser.matches("f", 1.2F).single) must beTrue
     }
 
-    "not be found in result when value not matching" in withQueryResult(rowList1(classOf[Float] -> "f") :+ 1.2f) {
+    "not be found in result when value not matching" in withQueryResult(rowList1(classOf[Float] -> "f") :+ 1.2F) {
       implicit c: Connection =>
-        SQL("SELECT f").as(SqlParser.matches("f", 2.34f).single) must beFalse
+        SQL("SELECT f").as(SqlParser.matches("f", 2.34F).single) must beFalse
     }
 
-    "not be found in result when column missing" in withQueryResult(rowList1(classOf[Float] -> "f") :+ 1.2f) {
+    "not be found in result when column missing" in withQueryResult(rowList1(classOf[Float] -> "f") :+ 1.2F) {
       implicit c: Connection =>
-        SQL("SELECT f").as(SqlParser.matches("x", 1.2f).single) must beFalse
+        SQL("SELECT f").as(SqlParser.matches("x", 1.2F).single) must beFalse
     }
 
     "be None when missing" in withQueryResult(rowList1(classOf[String] -> "foo") :+ "bar") { implicit c: Connection =>

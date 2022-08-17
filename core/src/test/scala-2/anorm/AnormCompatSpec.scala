@@ -1,9 +1,8 @@
 package anorm
 
-import acolyte.jdbc.Implicits._
-
-import acolyte.jdbc.RowLists
 import acolyte.jdbc.AcolyteDSL.withQueryResult
+import acolyte.jdbc.Implicits._
+import acolyte.jdbc.RowLists
 
 private[anorm] trait AnormCompatSpec { spec: AnormSpec =>
   "Query (scala2)" should {

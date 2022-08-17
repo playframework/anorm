@@ -18,12 +18,15 @@ sealed trait PGJson {
   // Could be moved to a separate module
 
   /** Allows to pass a `JsValue` as parameter to be stored as `PGobject`. */
-  implicit def jsValueToStatement[J <: JsValue] = ToStatement[J] { (s, i, js) =>
-    val pgObject = new PGobject()
-    pgObject.setType(JsValueParameterMetaData.sqlType)
-    pgObject.setValue(Json.stringify(js))
-    s.setObject(i, pgObject, JsValueParameterMetaData.jdbcType)
-  }
+  implicit def jsValueToStatement[J <: JsValue]: ToStatement[J] =
+    ToStatement[J] { (s, i, js) =>
+      val pgObject = new PGobject()
+
+      pgObject.setType(JsValueParameterMetaData.sqlType)
+      pgObject.setValue(Json.stringify(js))
+
+      s.setObject(i, pgObject, JsValueParameterMetaData.jdbcType)
+    }
 
   implicit object JsObjectParameterMetaData extends ParameterMetaData[JsObject] {
     val sqlType  = "JSONB"

@@ -35,10 +35,10 @@ final class TupleFlattenerSpec extends org.specs2.mutable.Specification {
     "be flatten from 4 columns to Tuple4" in {
       val schema = rowList4(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D")
 
-      withQueryResult(schema.append("A", 2, 3L, 4.56d)) { implicit c =>
+      withQueryResult(schema.append("A", 2, 3L, 4.56D)) { implicit c =>
         SQL("SELECT * FROM test")
           .as((str("A") ~ int("B") ~ long("C") ~ get[Double]("D")).map(SqlParser.flatten).single)
-          .aka("flatten columns") must_=== Tuple4("A", 2, 3L, 4.56d)
+          .aka("flatten columns") must_=== Tuple4("A", 2, 3L, 4.56D)
 
       }
     }
@@ -52,10 +52,10 @@ final class TupleFlattenerSpec extends org.specs2.mutable.Specification {
         classOf[Short]  -> "E"
       )
 
-      withQueryResult(schema.append("A", 2, 3L, 4.56d, 9.toShort)) { implicit c =>
+      withQueryResult(schema.append("A", 2, 3L, 4.56D, 9.toShort)) { implicit c =>
         SQL("SELECT * FROM test")
           .as((str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E")).map(SqlParser.flatten).single)
-          .aka("flatten columns") must_=== Tuple5("A", 2, 3L, 4.56d, 9.toShort)
+          .aka("flatten columns") must_=== Tuple5("A", 2, 3L, 4.56D, 9.toShort)
 
       }
     }
@@ -70,14 +70,14 @@ final class TupleFlattenerSpec extends org.specs2.mutable.Specification {
         classOf[Byte]   -> "F"
       )
 
-      withQueryResult(schema.append("A", 2, 3L, 4.56d, 9.toShort, 10.toByte)) { implicit c =>
+      withQueryResult(schema.append("A", 2, 3L, 4.56D, 9.toShort, 10.toByte)) { implicit c =>
         SQL("SELECT * FROM test")
           .as(
             (str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F"))
               .map(SqlParser.flatten)
               .single
           )
-          .aka("flatten columns") must_=== Tuple6("A", 2, 3L, 4.56d, 9.toShort, 10.toByte)
+          .aka("flatten columns") must_=== Tuple6("A", 2, 3L, 4.56D, 9.toShort, 10.toByte)
 
       }
     }
@@ -93,14 +93,14 @@ final class TupleFlattenerSpec extends org.specs2.mutable.Specification {
         classOf[Boolean] -> "G"
       )
 
-      withQueryResult(schema.append("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true)) { implicit c =>
+      withQueryResult(schema.append("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true)) { implicit c =>
         SQL("SELECT * FROM test")
           .as(
             (str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G"))
               .map(SqlParser.flatten)
               .single
           )
-          .aka("flatten columns") must_=== Tuple7("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true)
+          .aka("flatten columns") must_=== Tuple7("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true)
 
       }
     }
@@ -117,14 +117,14 @@ final class TupleFlattenerSpec extends org.specs2.mutable.Specification {
         classOf[String]  -> "H"
       )
 
-      withQueryResult(schema.append("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true, "B")) { implicit c =>
+      withQueryResult(schema.append("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B")) { implicit c =>
         SQL("SELECT * FROM test")
           .as(
             (str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str(
               "H"
             )).map(SqlParser.flatten).single
           )
-          .aka("flatten columns") must_=== Tuple8("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true, "B")
+          .aka("flatten columns") must_=== Tuple8("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B")
 
       }
     }
@@ -142,14 +142,14 @@ final class TupleFlattenerSpec extends org.specs2.mutable.Specification {
         classOf[Int]     -> "I"
       )
 
-      withQueryResult(schema.append("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true, "B", 3)) { implicit c =>
+      withQueryResult(schema.append("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3)) { implicit c =>
         SQL("SELECT * FROM test")
           .as(
             (str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str(
               "H"
             ) ~ int("I")).map(SqlParser.flatten).single
           )
-          .aka("flatten columns") must_=== Tuple9("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true, "B", 3)
+          .aka("flatten columns") must_=== Tuple9("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3)
 
       }
     }
@@ -168,14 +168,14 @@ final class TupleFlattenerSpec extends org.specs2.mutable.Specification {
         classOf[Long]    -> "J"
       )
 
-      withQueryResult(schema.append("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4L)) { implicit c =>
+      withQueryResult(schema.append("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L)) { implicit c =>
         SQL("SELECT * FROM test")
           .as(
             (str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str(
               "H"
             ) ~ int("I") ~ long("J")).map(SqlParser.flatten).single
           )
-          .aka("flatten columns") must_=== Tuple10("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4L)
+          .aka("flatten columns") must_=== Tuple10("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L)
 
       }
     }
@@ -195,14 +195,14 @@ final class TupleFlattenerSpec extends org.specs2.mutable.Specification {
         classOf[Double]  -> "K"
       )
 
-      withQueryResult(schema.append("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67d)) { implicit c =>
+      withQueryResult(schema.append("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D)) { implicit c =>
         SQL("SELECT * FROM test")
           .as(
             (str("A") ~ int("B") ~ long("C") ~ get[Double]("D") ~ get[Short]("E") ~ get[Byte]("F") ~ bool("G") ~ str(
               "H"
             ) ~ int("I") ~ long("J") ~ get[Double]("K")).map(SqlParser.flatten).single
           )
-          .aka("flatten columns") must_=== Tuple11("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67d)
+          .aka("flatten columns") must_=== Tuple11("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D)
 
       }
     }
@@ -223,7 +223,7 @@ final class TupleFlattenerSpec extends org.specs2.mutable.Specification {
         classOf[Short]   -> "L"
       )
 
-      withQueryResult(schema.append("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67d, 10.toShort)) {
+      withQueryResult(schema.append("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort)) {
         implicit c =>
           SQL("SELECT * FROM test")
             .as(
@@ -235,14 +235,14 @@ final class TupleFlattenerSpec extends org.specs2.mutable.Specification {
             "A",
             2,
             3L,
-            4.56d,
+            4.56D,
             9.toShort,
             10.toByte,
             true,
             "B",
             3,
             4L,
-            5.67d,
+            5.67D,
             10.toShort
           )
 
@@ -267,7 +267,7 @@ final class TupleFlattenerSpec extends org.specs2.mutable.Specification {
       )
 
       withQueryResult(
-        schema.append("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67d, 10.toShort, 11.toByte)
+        schema.append("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte)
       ) { implicit c =>
         SQL("SELECT * FROM test")
           .as(
@@ -281,14 +281,14 @@ final class TupleFlattenerSpec extends org.specs2.mutable.Specification {
           "A",
           2,
           3L,
-          4.56d,
+          4.56D,
           9.toShort,
           10.toByte,
           true,
           "B",
           3,
           4L,
-          5.67d,
+          5.67D,
           10.toShort,
           11.toByte
         )
@@ -315,7 +315,7 @@ final class TupleFlattenerSpec extends org.specs2.mutable.Specification {
       )
 
       withQueryResult(
-        schema.append("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67d, 10.toShort, 11.toByte, false)
+        schema.append("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte, false)
       ) { implicit c =>
         SQL("SELECT * FROM test")
           .as(
@@ -329,14 +329,14 @@ final class TupleFlattenerSpec extends org.specs2.mutable.Specification {
           "A",
           2,
           3L,
-          4.56d,
+          4.56D,
           9.toShort,
           10.toByte,
           true,
           "B",
           3,
           4L,
-          5.67d,
+          5.67D,
           10.toShort,
           11.toByte,
           false
@@ -366,7 +366,7 @@ final class TupleFlattenerSpec extends org.specs2.mutable.Specification {
 
       withQueryResult(
         schema
-          .append("A", 2, 3L, 4.56d, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67d, 10.toShort, 11.toByte, false, "C")
+          .append("A", 2, 3L, 4.56D, 9.toShort, 10.toByte, true, "B", 3, 4L, 5.67D, 10.toShort, 11.toByte, false, "C")
       ) { implicit c =>
         SQL("SELECT * FROM test")
           .as(
@@ -380,14 +380,14 @@ final class TupleFlattenerSpec extends org.specs2.mutable.Specification {
           "A",
           2,
           3L,
-          4.56d,
+          4.56D,
           9.toShort,
           10.toByte,
           true,
           "B",
           3,
           4L,
-          5.67d,
+          5.67D,
           10.toShort,
           11.toByte,
           false,
@@ -422,14 +422,14 @@ final class TupleFlattenerSpec extends org.specs2.mutable.Specification {
           "A",
           2,
           3L,
-          4.56d,
+          4.56D,
           9.toShort,
           10.toByte,
           true,
           "B",
           3,
           4L,
-          5.67d,
+          5.67D,
           10.toShort,
           11.toByte,
           false,
@@ -449,14 +449,14 @@ final class TupleFlattenerSpec extends org.specs2.mutable.Specification {
           "A",
           2,
           3L,
-          4.56d,
+          4.56D,
           9.toShort,
           10.toByte,
           true,
           "B",
           3,
           4L,
-          5.67d,
+          5.67D,
           10.toShort,
           11.toByte,
           false,
@@ -493,14 +493,14 @@ final class TupleFlattenerSpec extends org.specs2.mutable.Specification {
           "A",
           2,
           3L,
-          4.56d,
+          4.56D,
           9.toShort,
           10.toByte,
           true,
           "B",
           3,
           4L,
-          5.67d,
+          5.67D,
           10.toShort,
           11.toByte,
           false,
@@ -521,14 +521,14 @@ final class TupleFlattenerSpec extends org.specs2.mutable.Specification {
           "A",
           2,
           3L,
-          4.56d,
+          4.56D,
           9.toShort,
           10.toByte,
           true,
           "B",
           3,
           4L,
-          5.67d,
+          5.67D,
           10.toShort,
           11.toByte,
           false,
@@ -567,21 +567,21 @@ final class TupleFlattenerSpec extends org.specs2.mutable.Specification {
           "A",
           2,
           3L,
-          4.56d,
+          4.56D,
           9.toShort,
           10.toByte,
           true,
           "B",
           3,
           4L,
-          5.67d,
+          5.67D,
           10.toShort,
           11.toByte,
           false,
           "C",
           3,
           4L,
-          5.678d
+          5.678D
         )
       ) { implicit c =>
         SQL("SELECT * FROM test")
@@ -596,21 +596,21 @@ final class TupleFlattenerSpec extends org.specs2.mutable.Specification {
           "A",
           2,
           3L,
-          4.56d,
+          4.56D,
           9.toShort,
           10.toByte,
           true,
           "B",
           3,
           4L,
-          5.67d,
+          5.67D,
           10.toShort,
           11.toByte,
           false,
           "C",
           3,
           4L,
-          5.678d
+          5.678D
         )
 
       }
@@ -644,21 +644,21 @@ final class TupleFlattenerSpec extends org.specs2.mutable.Specification {
           "A",
           2,
           3L,
-          4.56d,
+          4.56D,
           9.toShort,
           10.toByte,
           true,
           "B",
           3,
           4L,
-          5.67d,
+          5.67D,
           10.toShort,
           11.toByte,
           false,
           "C",
           3,
           4L,
-          5.678d,
+          5.678D,
           16.toShort
         )
       ) { implicit c =>
@@ -674,21 +674,21 @@ final class TupleFlattenerSpec extends org.specs2.mutable.Specification {
           "A",
           2,
           3L,
-          4.56d,
+          4.56D,
           9.toShort,
           10.toByte,
           true,
           "B",
           3,
           4L,
-          5.67d,
+          5.67D,
           10.toShort,
           11.toByte,
           false,
           "C",
           3,
           4L,
-          5.678d,
+          5.678D,
           16.toShort
         )
 
@@ -724,21 +724,21 @@ final class TupleFlattenerSpec extends org.specs2.mutable.Specification {
           "A",
           2,
           3L,
-          4.56d,
+          4.56D,
           9.toShort,
           10.toByte,
           true,
           "B",
           3,
           4L,
-          5.67d,
+          5.67D,
           10.toShort,
           11.toByte,
           false,
           "C",
           3,
           4L,
-          5.678d,
+          5.678D,
           16.toShort,
           "D"
         )
@@ -755,21 +755,21 @@ final class TupleFlattenerSpec extends org.specs2.mutable.Specification {
           "A",
           2,
           3L,
-          4.56d,
+          4.56D,
           9.toShort,
           10.toByte,
           true,
           "B",
           3,
           4L,
-          5.67d,
+          5.67D,
           10.toShort,
           11.toByte,
           false,
           "C",
           3,
           4L,
-          5.678d,
+          5.678D,
           16.toShort,
           "D"
         )
@@ -807,21 +807,21 @@ final class TupleFlattenerSpec extends org.specs2.mutable.Specification {
           "A",
           2,
           3L,
-          4.56d,
+          4.56D,
           9.toShort,
           10.toByte,
           true,
           "B",
           3,
           4L,
-          5.67d,
+          5.67D,
           10.toShort,
           11.toByte,
           false,
           "C",
           3,
           4L,
-          5.678d,
+          5.678D,
           16.toShort,
           "D",
           4
@@ -839,21 +839,21 @@ final class TupleFlattenerSpec extends org.specs2.mutable.Specification {
           "A",
           2,
           3L,
-          4.56d,
+          4.56D,
           9.toShort,
           10.toByte,
           true,
           "B",
           3,
           4L,
-          5.67d,
+          5.67D,
           10.toShort,
           11.toByte,
           false,
           "C",
           3,
           4L,
-          5.678d,
+          5.678D,
           16.toShort,
           "D",
           4
@@ -893,21 +893,21 @@ final class TupleFlattenerSpec extends org.specs2.mutable.Specification {
           "A",
           2,
           3L,
-          4.56d,
+          4.56D,
           9.toShort,
           10.toByte,
           true,
           "B",
           3,
           4L,
-          5.67d,
+          5.67D,
           10.toShort,
           11.toByte,
           false,
           "C",
           3,
           4L,
-          5.678d,
+          5.678D,
           16.toShort,
           "D",
           4,
@@ -928,21 +928,21 @@ final class TupleFlattenerSpec extends org.specs2.mutable.Specification {
           "A",
           2,
           3L,
-          4.56d,
+          4.56D,
           9.toShort,
           10.toByte,
           true,
           "B",
           3,
           4L,
-          5.67d,
+          5.67D,
           10.toShort,
           11.toByte,
           false,
           "C",
           3,
           4L,
-          5.678d,
+          5.678D,
           16.toShort,
           "D",
           4,

@@ -2,8 +2,8 @@ import play.api.libs.json.{ JsObject, JsValue }
 
 import anorm.ParameterMetaData
 
-class ParameterMetaDataSpec extends org.specs2.mutable.Specification {
-  "Parameter metadata" title
+final class ParameterMetaDataSpec extends org.specs2.mutable.Specification {
+  "Parameter metadata".title
 
   import anorm.postgresql._
 

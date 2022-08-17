@@ -4,8 +4,8 @@
 
 import java.util.StringTokenizer
 
-import java.sql.{ PreparedStatement, ResultSet, SQLException }
 import java.lang.reflect.InvocationTargetException
+import java.sql.{ PreparedStatement, ResultSet, SQLException }
 
 import scala.reflect.ClassTag
 

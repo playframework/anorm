@@ -92,16 +92,7 @@ case class SimpleSql[T](
     stmt
   }
 
-  /**
-   * Prepares query with given row parser.
-   *
-   * {{{
-   * import anorm.{ SQL, SqlParser }
-   *
-   * val res = SQL("SELECT 1").using(SqlParser.scalar[Int])
-   * // See: SQL("SELECT 1").as(SqlParser.scalar[Int].single)
-   * }}}
-   */
+  /** Prepares query with given row parser. */
   @deprecated(message = "Use [[as]]", since = "2.5.1")
   def using[U](p: RowParser[U]): SimpleSql[U] = copy(sql, params, p)
 

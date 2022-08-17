@@ -92,46 +92,44 @@ private[anorm] object ToParameterListImpl {
 
     @inline def abort(msg: String) = report.errorAndAbort(msg)
 
-    val debug = {
-      if (debugEnabled) report.info(_: String)
-      else (_: String) => {}
-    }
-
     if (!tpeSym.isClassDef || !tpeSym.flags.is(Flags.Case)) {
       abort(s"Case class expected: $tpe")
     }
 
     val ctor = tpeSym.primaryConstructor
 
-    if (ctor.paramSymss.isEmpty) {
-      abort("parsed data cannot be passed as constructor parameters")
-    }
-
-    val resolv = ImplicitResolver[A](q).resolver(forwardExpr, Map.empty, debug)(tsTpe)
-
-    // ---
-
     val (boundTypes, properties) = ctor.paramSymss match {
-      case targs :: params :: Nil if targs.forall(_.isType) => {
+      case targs :: params :: tail if targs.forall(_.isType) => {
+        if (tail.nonEmpty) {
+          report.info(
+            s"${aTpr.show} constructor has multiple list of parameters. As for unapply, only for the first one will be considered"
+          )
+        }
+
         val boundTps = targs.zip(aTArgs).toMap
 
         boundTps -> params
       }
 
-      case params :: Nil =>
+      case params :: Nil if !params.exists(_.isType) =>
         Map.empty[Symbol, TypeRepr] -> params
-
-      case params :: _ => {
-        report.info(
-          s"${aTpr.show} constructor has multiple list of parameters. As for unapply, only for the first one will be considered"
-        )
-
-        Map.empty[Symbol, TypeRepr] -> params
-      }
 
       case _ =>
         report.errorAndAbort(s"${aTpr.show} constructor has no parameter")
     }
+
+    if (properties.isEmpty) {
+      abort("parsed data cannot be passed as constructor parameters")
+    }
+
+    // ---
+
+    val debug = {
+      if (debugEnabled) report.info(_: String)
+      else (_: String) => {}
+    }
+
+    val resolv = ImplicitResolver[A](q).resolver(forwardExpr, Map.empty, debug)(tsTpe)
 
     val compiledProjection: Seq[ParameterProjection] = {
       import _root_.anorm.Macro.parameterProjectionFromExpr

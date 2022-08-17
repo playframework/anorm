@@ -7,8 +7,8 @@ import anorm.{ Error, RowParser, SqlMappingError, SqlParser }
 
 private[anorm] object SealedRowParserImpl {
   def apply[A](
-    naming: Expr[DiscriminatorNaming], 
-    discriminate: Expr[Discriminate]
+      naming: Expr[DiscriminatorNaming],
+      discriminate: Expr[Discriminate]
   )(using q: Quotes, tpe: Type[A]): Expr[RowParser[A]] = {
     import q.reflect.*
 
@@ -48,26 +48,26 @@ private[anorm] object SealedRowParserImpl {
     }
 
     if (missing.nonEmpty) {
-      def details = missing.map { subcls =>
+      def details = missing
+        .map { subcls =>
           s"- cannot find anorm.RowParser[${subcls.show}] in the implicit scope"
         }
         .mkString(",\r\n")
 
-      report.errorAndAbort(
-        s"fails to generate sealed parser: ${repr.show};\r\n$details")
+      report.errorAndAbort(s"fails to generate sealed parser: ${repr.show};\r\n$details")
     }
 
     // ---
 
-    val cases: List[(String, CaseDef)] = subParsers.result().map { 
+    val cases: List[(String, CaseDef)] = subParsers.result().map {
       case (subcls, subParser) =>
         val tpeSym = subcls.typeSymbol
         val tpeName = {
-          if (tpeSym.flags is Flags.Module) tpeSym.fullName.stripSuffix(f"$$")
+          if (tpeSym.flags.is(Flags.Module)) tpeSym.fullName.stripSuffix(f"$$")
           else tpeSym.fullName
         }
 
-        val key = '{ $discriminate(${Expr(tpeName)}) }
+        val key = '{ $discriminate(${ Expr(tpeName) }) }
 
         val bind =
           Symbol.newBind(
@@ -82,7 +82,8 @@ private[anorm] object SealedRowParserImpl {
         tpeSym.fullName -> CaseDef(
           Bind(bind, Wildcard()),
           guard = Some('{ $ref == $key }.asTerm),
-          rhs = subParser.asTerm)
+          rhs = subParser.asTerm
+        )
     }
 
     def fallbackCase: CaseDef = {
@@ -100,8 +101,8 @@ private[anorm] object SealedRowParserImpl {
         Bind(fallbackBind, Wildcard()),
         guard = None,
         rhs = '{
-          val msg = "unexpected row type '%s'; expected: %s".
-            format($fallbackVal, ${Expr(cases.map(_._1))}.mkString(", "))
+          val msg =
+            "unexpected row type '%s'; expected: %s".format($fallbackVal, ${ Expr(cases.map(_._1)) }.mkString(", "))
 
           RowParser.failed[A](Error(SqlMappingError(msg)))
         }.asTerm
@@ -115,7 +116,7 @@ private[anorm] object SealedRowParserImpl {
       ).asExprOf[RowParser[A]]
 
     val parser: Expr[RowParser[A]] = '{
-      val discriminatorCol = $naming(${Expr(repr.typeSymbol.fullName)})
+      val discriminatorCol = $naming(${ Expr(repr.typeSymbol.fullName) })
 
       SqlParser.str(discriminatorCol).flatMap { (discriminatorVal: String) =>
         ${ body('discriminatorVal) }
