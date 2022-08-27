@@ -85,20 +85,21 @@ object ToSql {
     traversableToSql[A, Vector[A]]
 
   /** Returns fragment for each value, with custom formatting. */
-  implicit def seqParamToSql[A](implicit conv: ToSql[A] = ToSql.missing[A]) =
+  implicit def seqParamToSql[A](implicit conv: ToSql[A] = ToSql.missing[A]): ToSql[SeqParameter[A]] =
     ToSql[SeqParameter[A]] { p =>
       val before = p.before.getOrElse("")
       val after  = p.after.getOrElse("")
       val c: A => (String, Int) =
         if (conv == null) _ => "?" -> 1 else conv.fragment
 
-      val sql = p.values.foldLeft(new StringBuilder() -> 0) { case ((sb, i), v) =>
-        val frag = c(v)
-        val st =
-          if (i > 0) sb ++= p.separator ++= before ++= frag._1
-          else sb ++= before ++= frag._1
+      val sql = p.values.foldLeft(new StringBuilder() -> 0) {
+        case ((sb, i), v) =>
+          val frag = c(v)
+          val st =
+            if (i > 0) sb ++= p.separator ++= before ++= frag._1
+            else sb ++= before ++= frag._1
 
-        (st ++= after, i + frag._2)
+          (st ++= after, i + frag._2)
       }
 
       sql._1.toString -> sql._2
@@ -108,11 +109,12 @@ object ToSql {
     val c: A => (String, Int) =
       if (conv == null) _ => "?" -> 1 else conv.fragment
 
-    val sql = values.foldLeft(new StringBuilder() -> 0) { case ((sb, i), v) =>
-      val frag = c(v)
-      val st   = if (i > 0) sb ++= ", " ++= frag._1 else sb ++= frag._1
+    val sql = values.foldLeft(new StringBuilder() -> 0) {
+      case ((sb, i), v) =>
+        val frag = c(v)
+        val st   = if (i > 0) sb ++= ", " ++= frag._1 else sb ++= frag._1
 
-      (st, i + frag._2)
+        (st, i + frag._2)
     }
 
     sql._1.toString -> sql._2

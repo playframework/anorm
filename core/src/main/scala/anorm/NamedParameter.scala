@@ -42,25 +42,15 @@ object NamedParameter {
 
   /**
    * $namedWithSymbol
-   *
-   * {{{
-   * import anorm.{ NamedParameter, ParameterValue }
-   *
-   * def foo(pv: ParameterValue): NamedParameter = 'name -> pv
-   * }}}
    */
+  @deprecated(message = "Symbol is deprecated", since = "2.7.0")
   implicit def namedWithSymbol(t: (Symbol, ParameterValue)): NamedParameter =
     NamedParameter(t._1.name, t._2)
 
   /**
    * $namedWithSymbol
-   *
-   * {{{
-   * import anorm.NamedParameter
-   *
-   * val p: NamedParameter = 'name -> 1L
-   * }}}
    */
+  @deprecated(message = "Symbol is deprecated", since = "2.7.0")
   implicit def namedWithSymbol[V](t: (Symbol, V))(implicit c: ToParameterValue[V]): NamedParameter =
     NamedParameter(t._1.name, c(t._2))
 

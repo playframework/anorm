@@ -28,8 +28,9 @@ final class ValueEnumColumnSpec extends org.specs2.mutable.Specification {
 
     "not be parsed as Column from invalid Short representation" in {
       withQueryResult(RowLists.shortList :+ 0.toShort) { implicit con =>
-        SQL("SELECT v").as(scalar[Drink].single) must throwA[Exception].like { case NonFatal(cause) =>
-          cause mustEqual AnormException(TypeDoesNotMatch(s"Invalid value: 0").message)
+        SQL("SELECT v").as(scalar[Drink].single) must throwA[Exception].like {
+          case NonFatal(cause) =>
+            cause mustEqual AnormException(TypeDoesNotMatch(s"Invalid value: 0").message)
         }
       }
     }
@@ -40,7 +41,7 @@ final class ValueEnumColumnSpec extends org.specs2.mutable.Specification {
           SQL("SELECT v").as(scalar[Drink].single) must throwA[AnormException]
         }
 
-      spec("float", RowLists.floatList :+ 0.12f)
+      spec("float", RowLists.floatList :+ 0.12F)
       spec("String", RowLists.stringList :+ "foo")
     }
   }

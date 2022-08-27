@@ -3,8 +3,8 @@ package anorm
 import acolyte.jdbc.Implicits._
 import acolyte.jdbc.RowLists.rowList1
 
-class CursorSpec extends org.specs2.mutable.Specification {
-  "Cursor" title
+final class CursorSpec extends org.specs2.mutable.Specification {
+  "Cursor".title
 
   "Cursor" should {
     "not be returned when there is no result" in {
@@ -12,14 +12,14 @@ class CursorSpec extends org.specs2.mutable.Specification {
     }
 
     "be returned for one row" in {
-      Cursor(stringList :+ "A" resultSet, ColumnAliaser.empty).aka("cursor") must beSome.which { cur =>
+      Cursor((stringList :+ "A").resultSet, ColumnAliaser.empty).aka("cursor") must beSome.which { cur =>
         (cur.row[String]("str").aka("row") must_=== "A").and(cur.next.aka("after first") must beNone)
       }
     }
 
     "be return for three rows" in {
-      Cursor(stringList :+ "red" :+ "green" :+ "blue" resultSet, ColumnAliaser.empty).aka("cursor") must beSome.which {
-        first =>
+      Cursor((stringList :+ "red" :+ "green" :+ "blue").resultSet, ColumnAliaser.empty).aka("cursor") must beSome
+        .which { first =>
           (first
             .row[String]("str")
             .aka("row #1") must_=== "red").and(first.next.aka("after first") must beSome.which { snd =>
@@ -28,14 +28,15 @@ class CursorSpec extends org.specs2.mutable.Specification {
                 (third.row[String]("str").aka("row #1") must_=== "blue").and(third.next.aka("after third") must beNone)
             })
           })
-      }
+        }
     }
 
     "match pattern" in {
-      Cursor(stringList :+ "Foo" :+ "Bar" resultSet, ColumnAliaser.empty).aka("cursor") must beSome[Cursor].like {
+      Cursor((stringList :+ "Foo" :+ "Bar").resultSet, ColumnAliaser.empty).aka("cursor") must beSome[Cursor].like {
         case Cursor(row1, b) =>
-          (row1[String](1) must_=== "Foo").and(b must beSome[Cursor].like { case Cursor(row2, None) =>
-            row2[String](1) must_=== "Bar"
+          (row1[String](1) must_=== "Foo").and(b must beSome[Cursor].like {
+            case Cursor(row2, None) =>
+              row2[String](1) must_=== "Bar"
           })
       }
     }

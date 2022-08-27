@@ -150,7 +150,7 @@ private[anorm] object MetaData {
 
       }
 
-      val cn = ColumnName(tableName + "." + meta.getColumnName(i), alias = Option(meta.getColumnLabel(i)))
+      val cn = ColumnName(qualified = tableName + "." + meta.getColumnName(i), alias = Option(meta.getColumnLabel(i)))
 
       val colName = as(i -> cn).fold(cn)(a => cn.copy(alias = Some(a)))
 

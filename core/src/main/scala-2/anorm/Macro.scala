@@ -18,116 +18,17 @@ import com.github.ghik.silencer.silent
  * @define projectionParam The optional projection for the properties as parameters; If none, using the all the class properties.
  * @define valueClassTParam the type of the value class
  */
-object Macro {
+object Macro extends MacroOptions {
   import scala.language.experimental.macros
   import scala.reflect.macros.whitebox
 
-  /** Only for internal purposes */
-  final class Placeholder {}
-
-  /** Only for internal purposes */
-  object Placeholder {
-    implicit object Parser extends RowParser[Placeholder] {
-      val success = Success(new Placeholder())
-
-      def apply(row: Row) = success
-    }
-  }
-
-  /**
-   * Naming strategy, to map each class property to the corresponding column.
-   */
-  trait ColumnNaming extends (String => String) {
-
-    /**
-     * Returns the column name for the class property.
-     *
-     * @param property the name of the case class property
-     */
-    def apply(property: String): String
-  }
-
-  /** Naming companion */
-  object ColumnNaming {
-
-    /** Keep the original property name. */
-    object Identity extends ColumnNaming {
-      def apply(property: String) = property
-    }
-
-    /**
-     * For each class property, use the snake case equivalent
-     * to name its column (e.g. fooBar -> foo_bar).
-     */
-    object SnakeCase extends ColumnNaming {
-      private val re = "[A-Z]+".r
-
-      def apply(property: String): String =
-        re.replaceAllIn(property, { m => s"_${m.matched.toLowerCase}" })
-    }
-
-    /** Naming using a custom transformation function. */
-    def apply(transformation: String => String): ColumnNaming =
-      new ColumnNaming {
-        def apply(property: String): String = transformation(property)
-      }
-  }
-
-  trait Discriminate extends (String => String) {
-
-    /**
-     * Returns the value representing the specified type,
-     * to be used as a discriminator within a sealed family.
-     *
-     * @param tname the name of type (class or object) to be discriminated
-     */
-    def apply(tname: String): String
-  }
-
-  object Discriminate {
-    sealed class Function(f: String => String) extends Discriminate {
-      def apply(tname: String) = f(tname)
-    }
-
-    /** Uses the type name as-is as value for the discriminator */
-    object Identity extends Function(identity[String])
-
-    /** Returns a `Discriminate` function from any `String => String`. */
-    def apply(discriminate: String => String): Discriminate =
-      new Function(discriminate)
-  }
-
-  trait DiscriminatorNaming extends (String => String) {
-
-    /**
-     * Returns the name for the discriminator column.
-     * @param familyType the name of the famility type (sealed trait)
-     */
-    def apply(familyType: String): String
-  }
-
-  object DiscriminatorNaming {
-    sealed class Function(f: String => String) extends DiscriminatorNaming {
-      def apply(familyType: String) = f(familyType)
-    }
-
-    /** Always use "classname" as name for the discriminator column. */
-    object Default extends Function(_ => "classname")
-
-    /** Returns a naming according from any `String => String`. */
-    def apply(naming: String => String): DiscriminatorNaming =
-      new Function(naming)
-  }
-
-  // ---
-
-  def namedParserImpl[T: c.WeakTypeTag](c: whitebox.Context): c.Expr[T] = {
+  def namedParserImpl[T: c.WeakTypeTag](c: whitebox.Context): c.Expr[RowParser[T]] = {
     import c.universe._
 
     parserImpl[T](c) { (t, n, _) => q"anorm.SqlParser.get[$t]($n)" }
   }
 
-  def namedParserImpl1[T: c.WeakTypeTag](c: whitebox.Context)(naming: c.Expr[ColumnNaming]): c.Expr[T] = {
+  def namedParserImpl1[T: c.WeakTypeTag](c: whitebox.Context)(naming: c.Expr[ColumnNaming]): c.Expr[RowParser[T]] = {
     import c.universe._
 
     parserImpl[T](c) { (t, n, _) => q"anorm.SqlParser.get[$t]($naming($n))" }
@@ -135,10 +36,10 @@ object Macro {
 
   @deprecated("Use [[namedParserImpl2]]", "2.5.2")
   @SuppressWarnings(Array("MethodNames" /*deprecated*/ ))
-  def namedParserImpl_[T: c.WeakTypeTag](c: whitebox.Context)(names: c.Expr[String]*): c.Expr[T] =
+  def namedParserImpl_[T: c.WeakTypeTag](c: whitebox.Context)(names: c.Expr[String]*): c.Expr[RowParser[T]] =
     namedParserImpl2[T](c)(names: _*)
 
-  def namedParserImpl2[T: c.WeakTypeTag](c: whitebox.Context)(names: c.Expr[String]*): c.Expr[T] = {
+  def namedParserImpl2[T: c.WeakTypeTag](c: whitebox.Context)(names: c.Expr[String]*): c.Expr[RowParser[T]] = {
     import c.universe._
 
     namedParserImpl4[T](c)(names) { n => q"$n" }
@@ -146,7 +47,7 @@ object Macro {
 
   def namedParserImpl3[T: c.WeakTypeTag](
       c: whitebox.Context
-  )(naming: c.Expr[ColumnNaming], names: c.Expr[String]*): c.Expr[T] = {
+  )(naming: c.Expr[ColumnNaming], names: c.Expr[String]*): c.Expr[RowParser[T]] = {
     import c.universe._
 
     namedParserImpl4[T](c)(names) { n => q"$naming($n)" }
@@ -154,7 +55,7 @@ object Macro {
 
   private def namedParserImpl4[T: c.WeakTypeTag](
       c: whitebox.Context
-  )(names: Seq[c.Expr[String]])(naming: c.Expr[String] => c.universe.Tree): c.Expr[T] = {
+  )(names: Seq[c.Expr[String]])(naming: c.Expr[String] => c.universe.Tree): c.Expr[RowParser[T]] = {
     import c.universe._
 
     val tpe    = c.weakTypeTag[T].tpe
@@ -165,7 +66,10 @@ object Macro {
     def psz = params.size
 
     if (names.size < psz) {
-      c.abort(c.enclosingPosition, s"no column name for parameters: ${show(names)} < $params")
+      c.abort(
+        c.enclosingPosition,
+        s"no column name for parameters: ${names.map(n => show(n)).mkString(", ")} < ${params.map(_.name).mkString(", ")}"
+      )
 
     } else {
       parserImpl[T](c) { (t, _, i) =>
@@ -181,7 +85,7 @@ object Macro {
     }
   }
 
-  def offsetParserImpl[T: c.WeakTypeTag](c: whitebox.Context)(offset: c.Expr[Int]): c.Expr[T] = {
+  def offsetParserImpl[T: c.WeakTypeTag](c: whitebox.Context)(offset: c.Expr[Int]): c.Expr[RowParser[T]] = {
     import c.universe._
 
     parserImpl[T](c) { (t, _, i) =>
@@ -189,7 +93,7 @@ object Macro {
     }
   }
 
-  def indexedParserImpl[T: c.WeakTypeTag](c: whitebox.Context): c.Expr[T] = {
+  def indexedParserImpl[T: c.WeakTypeTag](c: whitebox.Context): c.Expr[RowParser[T]] = {
     import c.universe._
 
     @silent def p = reify(0)
@@ -221,7 +125,7 @@ object Macro {
 
   private def parserImpl[T: c.WeakTypeTag](c: whitebox.Context)(
       genGet: (c.universe.Type, String, Int) => c.universe.Tree
-  ): c.Expr[T] = anorm.macros.RowParserImpl[T](c)(genGet)
+  ): c.Expr[RowParser[T]] = anorm.macros.RowParserImpl[T](c)(genGet)
 
   /**
    * Returns a row parser generated for a case class `T`,
@@ -501,16 +405,16 @@ object Macro {
 
   // ---
 
-  /**
-   * @param propertyName the name of the class property
-   * @param parameterName the name of for the parameter,
-   * if different from the property one, otherwise `None`
-   */
-  case class ParameterProjection(propertyName: String, parameterName: Option[String] = None)
+  /** Only for internal purposes */
+  final class Placeholder {}
 
-  object ParameterProjection {
-    def apply(propertyName: String, parameterName: String): ParameterProjection =
-      ParameterProjection(propertyName, Option(parameterName))
+  /** Only for internal purposes */
+  object Placeholder {
+    implicit object Parser extends RowParser[Placeholder] {
+      val success = Success(new Placeholder())
+
+      def apply(row: Row) = success
+    }
   }
 
   private[anorm] lazy val debugEnabled =

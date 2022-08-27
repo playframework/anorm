@@ -3,8 +3,8 @@ package anorm
 import acolyte.jdbc.Implicits._
 import acolyte.jdbc.RowLists.rowList3
 
-class MetaDataSpec extends org.specs2.mutable.Specification {
-  "Meta-data" title
+final class MetaDataSpec extends org.specs2.mutable.Specification {
+  "Meta-data".title
 
   "Meta-data" should {
     "support column aliases" in {
@@ -23,7 +23,8 @@ class MetaDataSpec extends org.specs2.mutable.Specification {
 
     "be parsed from resultset" >> {
       import scala.language.existentials
-      @inline def rs = (fooBarTable :+ (1L, "lorem", 3)).getRowList.resultSet()
+
+      @inline def rs = fooBarTable.append(1L, "lorem", 3).getRowList.resultSet()
 
       val item1 = MetaDataItem(ColumnName(".id", Some("id")), false, "long")
 

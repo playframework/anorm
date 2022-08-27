@@ -57,12 +57,8 @@ private[anorm] object SealedRowParserImpl {
       val caseName = TermName(c.freshName("discriminated"))
       val key      = q"$discriminate(${subclass.typeSymbol.fullName})"
       val caseDecl = q"val $caseName = $key"
-      val subtype = {
-        if (subclass.typeSymbol.asClass.typeParams.isEmpty) subclass
-        else subclass.erasure
-      }
 
-      (key, caseDecl, cq"`$caseName` => implicitly[anorm.RowParser[$subtype]]")
+      (key, caseDecl, cq"`$caseName` => implicitly[anorm.RowParser[$subclass]]")
     }
 
     lazy val supported = q"List(..${cases.map(_._1)})"

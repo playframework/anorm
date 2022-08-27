@@ -7,7 +7,9 @@ import java.sql.{ Connection, PreparedStatement, ResultSet }
 
 import scala.util.{ Failure, Try }
 
-import resource.{ managed, ManagedResource }
+import scala.reflect.ClassTag
+
+import resource.{ managed, ManagedResource, Resource }
 
 /**
  * Untyped value wrapper.
@@ -15,7 +17,7 @@ import resource.{ managed, ManagedResource }
  * {{{
  * import anorm._
  *
- * def foo(v: Any) = SQL("UPDATE t SET val = {o}").on('o -> anorm.Object(v))
+ * def foo(v: Any) = SQL("UPDATE t SET val = {o}").on("o" -> anorm.Object(v))
  * }}}
  */
 case class Object(value: Any)
@@ -53,6 +55,11 @@ object SeqParameter {
 }
 
 private[anorm] trait Sql extends WithResult {
+  private implicit val statementCls: ClassTag[PreparedStatement] =
+    statementClassTag
+
+  private implicit val resultSetCls: ClassTag[ResultSet] = resultSetClassTag
+
   private[anorm] def unsafeStatement(connection: Connection, getGeneratedKeys: Boolean = false): PreparedStatement
 
   private[anorm] def unsafeStatement(
@@ -65,7 +72,8 @@ private[anorm] trait Sql extends WithResult {
       connection: Connection,
       getGeneratedKeys: Boolean = false
   ): ManagedResource[PreparedStatement] = {
-    implicit val res = StatementResource
+    implicit val res: Resource[PreparedStatement] = StatementResource
+
     managed(unsafeStatement(connection, getGeneratedKeys))
   }
 
@@ -74,7 +82,8 @@ private[anorm] trait Sql extends WithResult {
       generatedColumn: String,
       generatedColumns: Seq[String]
   ): ManagedResource[PreparedStatement] = {
-    implicit val res = StatementResource
+    implicit val res: Resource[PreparedStatement] = StatementResource
+
     managed(unsafeStatement(connection, generatedColumn, generatedColumns))
   }
 
@@ -83,7 +92,8 @@ private[anorm] trait Sql extends WithResult {
    */
   protected def resultSet(connection: Connection): ManagedResource[ResultSet] =
     preparedStatement(connection).flatMap { stmt =>
-      implicit val res = ResultSetResource
+      implicit val res: Resource[ResultSet] = ResultSetResource
+
       managed(stmt.executeQuery())
     }
 
@@ -197,15 +207,20 @@ private[anorm] trait Sql extends WithResult {
       prep: Connection => ManagedResource[PreparedStatement],
       generatedKeysParser: ResultSetParser[A],
       as: ColumnAliaser
-  )(implicit connection: Connection): Try[A] = Sql.asTry(
-    generatedKeysParser,
-    prep(connection).flatMap { stmt =>
-      stmt.executeUpdate()
-      managed(stmt.getGeneratedKeys)
-    },
-    resultSetOnFirstRow,
-    as
-  )
+  )(implicit connection: Connection): Try[A] = {
+    @com.github.ghik.silencer.silent
+    implicit def cls: ClassTag[ResultSet] = resultSetClassTag
+
+    Sql.asTry(
+      generatedKeysParser,
+      prep(connection).flatMap { stmt =>
+        stmt.executeUpdate()
+        managed(stmt.getGeneratedKeys)
+      },
+      resultSetOnFirstRow,
+      as
+    )
+  }
 
   /**
    * Executes this SQL query, and returns its result.
@@ -262,7 +277,6 @@ object Sql { // TODO: Rename to SQL
   private def toSql(ts: List[StatementToken], buf: StringBuilder): StringBuilder = ts.foldLeft(buf) {
     case (sql, StringToken(t)) => sql ++= t
     case (sql, PercentToken)   => sql += '%'
-    case (sql, _)              => sql
   }
 
   @SuppressWarnings(Array("IncorrectlyNamedExceptions"))

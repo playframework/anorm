@@ -65,8 +65,9 @@ sealed trait TupleFlattenerPriority4 extends TupleFlattenerPriority3 {
    * @param c5 Column #5
    */
   implicit def flattenerTo5[T1, T2, T3, T4, T5]: TupleFlattener[(T1 ~ T2 ~ T3 ~ T4 ~ T5) => (T1, T2, T3, T4, T5)] =
-    TupleFlattener[(T1 ~ T2 ~ T3 ~ T4 ~ T5) => (T1, T2, T3, T4, T5)] { case (c1 ~ c2 ~ c3 ~ c4 ~ c5) =>
-      (c1, c2, c3, c4, c5)
+    TupleFlattener[(T1 ~ T2 ~ T3 ~ T4 ~ T5) => (T1, T2, T3, T4, T5)] {
+      case (c1 ~ c2 ~ c3 ~ c4 ~ c5) =>
+        (c1, c2, c3, c4, c5)
     }
 }
 
@@ -86,8 +87,9 @@ sealed trait TupleFlattenerPriority5 extends TupleFlattenerPriority4 {
    */
   implicit def flattenerTo6[T1, T2, T3, T4, T5, T6]
       : TupleFlattener[(T1 ~ T2 ~ T3 ~ T4 ~ T5 ~ T6) => (T1, T2, T3, T4, T5, T6)] =
-    TupleFlattener[(T1 ~ T2 ~ T3 ~ T4 ~ T5 ~ T6) => (T1, T2, T3, T4, T5, T6)] { case (c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6) =>
-      (c1, c2, c3, c4, c5, c6)
+    TupleFlattener[(T1 ~ T2 ~ T3 ~ T4 ~ T5 ~ T6) => (T1, T2, T3, T4, T5, T6)] {
+      case (c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6) =>
+        (c1, c2, c3, c4, c5, c6)
     }
 }
 
@@ -241,8 +243,9 @@ sealed trait TupleFlattenerPriority11 extends TupleFlattenerPriority10 {
     (
         T1 ~ T2 ~ T3 ~ T4 ~ T5 ~ T6 ~ T7 ~ T8 ~ T9 ~ T10 ~ T11 ~ T12
     ) => (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12)
-  ] { case (c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 ~ c9 ~ c10 ~ c11 ~ c12) =>
-    (c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12)
+  ] {
+    case (c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 ~ c9 ~ c10 ~ c11 ~ c12) =>
+      (c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12)
   }
 }
 
@@ -276,8 +279,9 @@ sealed trait TupleFlattenerPriority12 extends TupleFlattenerPriority11 {
     (
         T1 ~ T2 ~ T3 ~ T4 ~ T5 ~ T6 ~ T7 ~ T8 ~ T9 ~ T10 ~ T11 ~ T12 ~ T13
     ) => (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13)
-  ] { case (c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 ~ c9 ~ c10 ~ c11 ~ c12 ~ c13) =>
-    (c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13)
+  ] {
+    case (c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 ~ c9 ~ c10 ~ c11 ~ c12 ~ c13) =>
+      (c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13)
   }
 }
 
@@ -312,8 +316,9 @@ sealed trait TupleFlattenerPriority13 extends TupleFlattenerPriority12 {
     (
         T1 ~ T2 ~ T3 ~ T4 ~ T5 ~ T6 ~ T7 ~ T8 ~ T9 ~ T10 ~ T11 ~ T12 ~ T13 ~ T14
     ) => (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14)
-  ] { case (c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 ~ c9 ~ c10 ~ c11 ~ c12 ~ c13 ~ c14) =>
-    (c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14)
+  ] {
+    case (c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 ~ c9 ~ c10 ~ c11 ~ c12 ~ c13 ~ c14) =>
+      (c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14)
   }
 }
 
@@ -349,8 +354,9 @@ sealed trait TupleFlattenerPriority14 extends TupleFlattenerPriority13 {
     (
         T1 ~ T2 ~ T3 ~ T4 ~ T5 ~ T6 ~ T7 ~ T8 ~ T9 ~ T10 ~ T11 ~ T12 ~ T13 ~ T14 ~ T15
     ) => (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15)
-  ] { case (c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 ~ c9 ~ c10 ~ c11 ~ c12 ~ c13 ~ c14 ~ c15) =>
-    (c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15)
+  ] {
+    case (c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 ~ c9 ~ c10 ~ c11 ~ c12 ~ c13 ~ c14 ~ c15) =>
+      (c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15)
   }
 }
 
@@ -387,8 +393,9 @@ sealed trait TupleFlattenerPriority15 extends TupleFlattenerPriority14 {
     (
         T1 ~ T2 ~ T3 ~ T4 ~ T5 ~ T6 ~ T7 ~ T8 ~ T9 ~ T10 ~ T11 ~ T12 ~ T13 ~ T14 ~ T15 ~ T16
     ) => (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16)
-  ] { case (c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 ~ c9 ~ c10 ~ c11 ~ c12 ~ c13 ~ c14 ~ c15 ~ c16) =>
-    (c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16)
+  ] {
+    case (c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 ~ c9 ~ c10 ~ c11 ~ c12 ~ c13 ~ c14 ~ c15 ~ c16) =>
+      (c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16)
   }
 }
 
@@ -427,8 +434,9 @@ sealed trait TupleFlattenerPriority16 extends TupleFlattenerPriority15 {
     (
         T1 ~ T2 ~ T3 ~ T4 ~ T5 ~ T6 ~ T7 ~ T8 ~ T9 ~ T10 ~ T11 ~ T12 ~ T13 ~ T14 ~ T15 ~ T16 ~ T17
     ) => (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17)
-  ] { case (c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 ~ c9 ~ c10 ~ c11 ~ c12 ~ c13 ~ c14 ~ c15 ~ c16 ~ c17) =>
-    (c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17)
+  ] {
+    case (c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 ~ c9 ~ c10 ~ c11 ~ c12 ~ c13 ~ c14 ~ c15 ~ c16 ~ c17) =>
+      (c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17)
   }
 }
 
@@ -468,8 +476,9 @@ sealed trait TupleFlattenerPriority17 extends TupleFlattenerPriority16 {
     (
         T1 ~ T2 ~ T3 ~ T4 ~ T5 ~ T6 ~ T7 ~ T8 ~ T9 ~ T10 ~ T11 ~ T12 ~ T13 ~ T14 ~ T15 ~ T16 ~ T17 ~ T18
     ) => (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18)
-  ] { case (c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 ~ c9 ~ c10 ~ c11 ~ c12 ~ c13 ~ c14 ~ c15 ~ c16 ~ c17 ~ c18) =>
-    (c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18)
+  ] {
+    case (c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 ~ c9 ~ c10 ~ c11 ~ c12 ~ c13 ~ c14 ~ c15 ~ c16 ~ c17 ~ c18) =>
+      (c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18)
   }
 }
 
@@ -510,8 +519,9 @@ sealed trait TupleFlattenerPriority18 extends TupleFlattenerPriority17 {
     (
         T1 ~ T2 ~ T3 ~ T4 ~ T5 ~ T6 ~ T7 ~ T8 ~ T9 ~ T10 ~ T11 ~ T12 ~ T13 ~ T14 ~ T15 ~ T16 ~ T17 ~ T18 ~ T19
     ) => (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19)
-  ] { case (c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 ~ c9 ~ c10 ~ c11 ~ c12 ~ c13 ~ c14 ~ c15 ~ c16 ~ c17 ~ c18 ~ c19) =>
-    (c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19)
+  ] {
+    case (c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 ~ c9 ~ c10 ~ c11 ~ c12 ~ c13 ~ c14 ~ c15 ~ c16 ~ c17 ~ c18 ~ c19) =>
+      (c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19)
   }
 }
 

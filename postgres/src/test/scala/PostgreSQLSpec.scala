@@ -19,8 +19,8 @@ import org.postgresql.util.PGobject
 import postgresql._
 import AcolyteDSL.{ handleStatement, withQueryResult }
 
-class PostgreSQLSpec extends org.specs2.mutable.Specification {
-  "PostgreSQL support" title
+final class PostgreSQLSpec extends org.specs2.mutable.Specification {
+  "PostgreSQL support".title
 
   import acolyte.jdbc.Implicits._
 
@@ -38,39 +38,40 @@ class PostgreSQLSpec extends org.specs2.mutable.Specification {
         }
 
         def con = AcolyteDSL.connection(handleStatement.withUpdateHandler {
-          case UpdateExecution(ExpectedStmt, P(`id`) :: DefinedParameter(JsVal, JsDef) :: Nil) => {
-
+          case UpdateExecution(ExpectedStmt, P(`id`) :: DefinedParameter(JsVal, JsDef) :: Nil) =>
             1 // update count
-          }
+
+          case ex =>
+            sys.error(s"Unexpected execution: $ex")
         })
 
         f(con)
       }
 
       "when is an object" in {
-        withPgo("foo", """{"bar":1}""") { implicit con =>
+        withPgo("foo", """{"bar":1}""") { implicit con: Connection =>
           SQL"""INSERT INTO test(id, json) VALUES (${"foo"}, ${Json.obj("bar" -> 1)})""".executeUpdate() must_=== 1
         }
       }
 
       "when is a string" in {
-        withPgo("foo", "\"bar\"") { implicit con =>
+        withPgo("foo", "\"bar\"") { implicit con: Connection =>
           SQL"""INSERT INTO test(id, json) VALUES (${"foo"}, ${Json.toJson("bar")})""".executeUpdate() must_=== 1
         }
       }
 
       "when is a number" in {
-        withPgo("foo", "3") { implicit con =>
+        withPgo("foo", "3") { implicit con: Connection =>
           SQL"""INSERT INTO test(id, json) VALUES (${"foo"}, ${Json.toJson(3L)})""".executeUpdate() must_=== 1
         }
       }
 
       "using JSON writer" >> {
-        "for pure value" in withPgo("foo", "2") { implicit con =>
+        "for pure value" in withPgo("foo", "2") { implicit con: Connection =>
           SQL"""INSERT INTO test(id, json) VALUES (${"foo"}, ${asJson[TestEnum](Lorem)})""".executeUpdate() must_=== 1
         }
 
-        "for some optional value" in withPgo("foo", "2") { implicit con =>
+        "for some optional value" in withPgo("foo", "2") { implicit con: Connection =>
           SQL"""INSERT INTO test(id, json) VALUES (${"foo"}, ${asNullableJson[TestEnum](Some(Lorem))})"""
             .executeUpdate() must_=== 1
         }
@@ -78,11 +79,13 @@ class PostgreSQLSpec extends org.specs2.mutable.Specification {
         "for missing optional value" in {
           val id = "foo"
 
-          implicit def con =
+          implicit def con: Connection =
             AcolyteDSL.connection(handleStatement.withUpdateHandler {
-              case UpdateExecution(ExpectedStmt, P(`id`) :: DefinedParameter(null, JsDef) :: Nil) => {
+              case UpdateExecution(ExpectedStmt, P(`id`) :: DefinedParameter(null, JsDef) :: Nil) =>
                 1 // update count
-              }
+
+              case ex =>
+                sys.error(s"Unexpected execution: $ex")
             })
 
           SQL"""INSERT INTO test(id, json) VALUES (${id}, ${asNullableJson[TestEnum](Option.empty[TestEnum])})"""
@@ -101,15 +104,15 @@ class PostgreSQLSpec extends org.specs2.mutable.Specification {
       }
       val jsVal = Json.obj("bar" -> 1)
 
-      "successfully" in withQueryResult(table :+ jsonb) { implicit con =>
+      "successfully" in withQueryResult(table :+ jsonb) { implicit con: Connection =>
         SQL"SELECT json FROM test".as(SqlParser.scalar[JsValue].single) must_=== jsVal
       }
 
-      "successfully as JsObject" in withQueryResult(table :+ jsonb) { implicit con =>
+      "successfully as JsObject" in withQueryResult(table :+ jsonb) { implicit con: Connection =>
         SQL"SELECT json FROM test".as(SqlParser.scalar[JsObject].single) must_=== jsVal
       }
 
-      "successfully using a Reads" in withQueryResult(table :+ jsonb) { implicit con =>
+      "successfully using a Reads" in withQueryResult(table :+ jsonb) { implicit con: Connection =>
         SQL"SELECT json FROM test".as(SqlParser.scalar(fromJson[TestEnum]).single) must_=== Bar
       }
     }
@@ -117,7 +120,7 @@ class PostgreSQLSpec extends org.specs2.mutable.Specification {
 
   "UUID" should {
     "be passed as PostgreSQL UUID" in {
-      implicit val con = AcolyteDSL.connection(handleStatement.withUpdateHandler {
+      implicit val con: Connection = AcolyteDSL.connection(handleStatement.withUpdateHandler {
         case UpdateExecution(
               "INSERT INTO test_seq VALUES(?::UUID)",
               DefinedParameter(uuid: String, ParameterMetaData.Str) :: Nil

@@ -38,10 +38,11 @@ trait Row {
    * @see #as
    */
   lazy val asMap: Map[String, Any] =
-    Compat.toMap(Compat.lazyZip(data, metaData.ms)) { case (v, m) =>
-      val k = m.column.qualified
+    Compat.toMap(Compat.lazyZip(data, metaData.ms)) {
+      case (v, m) =>
+        val k = m.column.qualified
 
-      if (m.nullable) k -> Option(v) else k -> v
+        if (m.nullable) k -> Option(v) else k -> v
     }
 
   /**
@@ -76,8 +77,7 @@ trait Row {
    * @param c Column mapping
    *
    * {{{
-   * import anorm.SQL
-   * import anorm.Column.columnToString // mapping column to string
+   * import anorm._, Column.columnToString // mapping column to string
    *
    * val res = SQL("SELECT * FROM Test").map { row =>
    *   // string columns 'code' and 'label'
@@ -95,8 +95,7 @@ trait Row {
    * @param c Column mapping
    *
    * {{{
-   * import anorm.SQL
-   * import anorm.Column.columnToString // mapping column to string
+   * import anorm._, Column.columnToString // mapping column to string
    *
    * val res = SQL("SELECT * FROM Test").map { row =>
    *   row(1) -> row(2) // string columns #1 and #2
@@ -114,8 +113,9 @@ trait Row {
 
   // Data per column name
   private lazy val columnsDictionary: Map[String, Any] =
-    Compat.toMap(Compat.lazyZip(metaData.ms, data)) { case (m, v) =>
-      m.column.qualified.toUpperCase -> v
+    Compat.toMap(Compat.lazyZip(metaData.ms, data)) {
+      case (m, v) =>
+        m.column.qualified.toUpperCase -> v
     }
 
   // Data per column alias

@@ -4,7 +4,10 @@
 
 import java.util.StringTokenizer
 
-import java.sql.SQLException
+import java.lang.reflect.InvocationTargetException
+import java.sql.{ PreparedStatement, ResultSet, SQLException }
+
+import scala.reflect.ClassTag
 
 /**
  * Anorm API
@@ -17,8 +20,7 @@ import java.sql.SQLException
  * SQL("Select 1")
  * }}}
  */
-package object anorm {
-  import scala.language.implicitConversions
+package object anorm extends PackageCompat {
 
   /** Structural type for timestamp wrapper. */
   type TimestampWrapper1 = { def getTimestamp: java.sql.Timestamp }
@@ -30,7 +32,18 @@ package object anorm {
     def unapply(that: Any): Option[java.sql.Timestamp] = try {
       Some(that.asInstanceOf[TimestampWrapper1].getTimestamp)
     } catch {
-      case _: NoSuchMethodException => None
+      case _: NoSuchMethodException =>
+        None
+
+      case ie: InvocationTargetException => {
+        val cause = ie.getCause
+
+        if (cause != null) {
+          throw cause
+        }
+
+        throw ie
+      }
     }
   }
 
@@ -46,6 +59,16 @@ package object anorm {
     } catch {
       case _: NoSuchMethodException => None
       case _: SQLException          => None
+
+      case ie: InvocationTargetException => {
+        val cause = ie.getCause
+
+        if (cause != null) {
+          throw cause
+        }
+
+        throw ie
+      }
     }
   }
 
@@ -61,12 +84,18 @@ package object anorm {
     } catch {
       case _: NoSuchMethodException => None
       case _: SQLException          => None
+
+      case ie: InvocationTargetException => {
+        val cause = ie.getCause
+
+        if (cause != null) {
+          throw cause
+        }
+
+        throw ie
+      }
     }
   }
-
-  // TODO: Review implicit usage there
-  // (add explicit functions on SqlQuery?)
-  implicit def sqlToSimple(sql: SqlQuery): SimpleSql[Row] = sql.asSimple
 
   /**
    * Creates an SQL query with given statement.
@@ -179,8 +208,9 @@ package object anorm {
           val groups = (gs match {
             case TokenGroup(List(StringToken("")), None) :: tgs => tgs // trim end
             case _                                              => gs
-          }).collect { case TokenGroup(pr, pl) =>
-            TokenGroup(pr.reverse, pl)
+          }).collect {
+            case TokenGroup(pr, pl) =>
+              TokenGroup(pr.reverse, pl)
           }.reverse
 
           TokenizedStatement(groups, ns.reverse) -> m
@@ -188,21 +218,25 @@ package object anorm {
   }
 
   // Optimized resource typeclass not using reflection
-  object StatementResource extends resource.Resource[java.sql.PreparedStatement] {
-
-    def close(stmt: java.sql.PreparedStatement) = stmt.close()
+  object StatementResource extends resource.Resource[PreparedStatement] {
+    def close(stmt: PreparedStatement) = stmt.close()
 
     @deprecated("Deprecated by Scala-ARM upgrade", "2.5.4")
     def fatalExceptions = Seq[Class[_]](classOf[Exception])
   }
+
+  private[anorm] lazy val statementClassTag =
+    implicitly[ClassTag[PreparedStatement]]
 
   // Optimized resource typeclass not using reflection
-  object ResultSetResource extends resource.Resource[java.sql.ResultSet] {
-    def close(rs: java.sql.ResultSet) = rs.close()
+  object ResultSetResource extends resource.Resource[ResultSet] {
+    def close(rs: ResultSet) = rs.close()
 
     @deprecated("Deprecated by Scala-ARM upgrade", "2.5.4")
     def fatalExceptions = Seq[Class[_]](classOf[Exception])
   }
+
+  private[anorm] lazy val resultSetClassTag = implicitly[ClassTag[ResultSet]]
 
   /** Activable features */
   object features {

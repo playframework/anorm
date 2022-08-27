@@ -9,7 +9,7 @@ import anorm.macros.Inspect.pretty
 private[anorm] object RowParserImpl {
   def apply[T: c.WeakTypeTag](
       c: whitebox.Context
-  )(genGet: (c.universe.Type, String, Int) => c.universe.Tree): c.Expr[T] = {
+  )(genGet: (c.universe.Type, String, Int) => c.universe.Tree): c.Expr[RowParser[T]] = {
     val tpe                        = c.weakTypeTag[T].tpe
     @inline def abort(msg: String) = c.abort(c.enclosingPosition, msg)
 
@@ -141,6 +141,6 @@ private[anorm] object RowParserImpl {
       c.echo(c.enclosingPosition, s"row parser generated for $tpe: ${pretty(c)(parser)}")
     }
 
-    c.Expr(c.typecheck(parser))
+    c.Expr[RowParser[T]](c.typecheck(parser))
   }
 }

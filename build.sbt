@@ -4,25 +4,24 @@ import Common._
 import com.typesafe.tools.mima.core._
 import com.typesafe.tools.mima.plugin.MimaKeys.{ mimaBinaryIssueFilters, mimaPreviousArtifacts }
 
-/* TODO
 // Scalafix
 inThisBuild(
   List(
-    //scalaVersion := "2.13.3",
+    // scalaVersion := "2.13.3",
     semanticdbEnabled := true,
     semanticdbVersion := scalafixSemanticdb.revision,
-    scalafixDependencies ++= Seq(
-      "com.github.liancheng" %% "organize-imports" % "0.5.0")
+    scalafixDependencies ++= Seq("com.github.liancheng" %% "organize-imports" % "0.5.0")
   )
 )
- */
 
 val specs2Test = Seq(
   "specs2-core",
-  "specs2-junit"
-).map("org.specs2" %% _ % "4.10.6" % Test)
+  "specs2-junit",
+  "specs2-matcher-extra"
+).map("org.specs2" %% _ % "4.10.6" % Test cross (CrossVersion.for3Use2_13))
+  .map(_.exclude("org.scala-lang.modules", "*"))
 
-lazy val acolyteVersion = "1.1.4"
+lazy val acolyteVersion = "1.2.1"
 lazy val acolyte        = "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test
 
 ThisBuild / resolvers ++= Seq("Tatami Snapshots".at("https://raw.github.com/cchantep/tatami/master/snapshots"))
@@ -33,22 +32,26 @@ lazy val `anorm-tokenizer` = project
   .in(file("tokenizer"))
   .settings(
     mimaPreviousArtifacts := {
-      if (scalaBinaryVersion.value == "2.13") {
+      if (scalaBinaryVersion.value == "3") {
         Set.empty
       } else {
         mimaPreviousArtifacts.value
       }
     },
-    libraryDependencies ++= Seq(
-      "org.scala-lang" % "scala-reflect" % scalaVersion.value
-    )
+    libraryDependencies += {
+      if (scalaBinaryVersion.value == "3") {
+        "org.scala-lang" %% "scala3-compiler" % scalaVersion.value % Provided
+      } else {
+        "org.scala-lang" % "scala-reflect" % scalaVersion.value
+      }
+    }
   )
 
 // ---
 
 val armShading = Seq(
-  libraryDependencies += "com.jsuereth" %% "scala-arm" % "2.1-SNAPSHOT",
-  assembly / test                       := {},
+  libraryDependencies += ("com.jsuereth" %% "scala-arm" % "2.1-SNAPSHOT").cross(CrossVersion.for3Use2_13),
+  assembly / test := {},
   assembly / assemblyOption ~= {
     _.withIncludeScala(false) // java libraries shouldn't include scala
   },
@@ -96,6 +99,23 @@ lazy val parserCombinatorsVer = Def.setting[String] {
   }
 }
 
+lazy val coreMimaFilter: ProblemFilter = {
+  case MissingClassProblem(old) =>
+    !old.fullName.startsWith("resource.") &&
+    old.fullName.indexOf("Macro") == -1 &&
+    !old.fullName.startsWith("anorm.macros.")
+
+  case _ => true
+}
+
+lazy val xmlVer = Def.setting[String] {
+  if (scalaBinaryVersion.value == "2.11") {
+    "1.3.0"
+  } else {
+    "2.1.0"
+  }
+}
+
 lazy val `anorm-core` = project
   .in(file("core"))
   .settings(
@@ -104,11 +124,27 @@ lazy val `anorm-core` = project
       (Compile / sourceGenerators) += Def.task {
         Seq(GFA((Compile / sourceManaged).value / "anorm"))
       }.taskValue,
-      scalacOptions ++= Seq(
-        "-Xlog-free-terms",
-        "-P:silencer:globalFilters=missing\\ in\\ object\\ ToSql\\ is\\ deprecated;possibilities\\ in\\ class\\ ColumnNotFound\\ is\\ deprecated;DeprecatedSqlParser\\ in\\ package\\ anorm\\ is\\ deprecated;constructor\\ deprecatedName\\ in\\ class\\ deprecatedName\\ is\\ deprecated"
-      ),
-      (Test / scalacOptions) ++= {
+      scaladocExtractorSkipToken := {
+        if (scalaBinaryVersion.value == "3") {
+          "// skip-doc-5f98a5e"
+        } else {
+          scaladocExtractorSkipToken.value
+        }
+      },
+      scalacOptions ++= {
+        if (scalaBinaryVersion.value == "3") {
+          Seq.empty
+          Seq(
+            "-Wconf:cat=deprecation&msg=.*(reflectiveSelectableFromLangReflectiveCalls|DeprecatedSqlParser|missing .*ToSql).*:s"
+          )
+        } else {
+          Seq(
+            "-Xlog-free-terms",
+            "-P:silencer:globalFilters=missing\\ in\\ object\\ ToSql\\ is\\ deprecated;possibilities\\ in\\ class\\ ColumnNotFound\\ is\\ deprecated;DeprecatedSqlParser\\ in\\ package\\ anorm\\ is\\ deprecated;constructor\\ deprecatedName\\ in\\ class\\ deprecatedName\\ is\\ deprecated"
+          )
+        }
+      },
+      Test / scalacOptions ++= {
         if (scalaBinaryVersion.value == "2.13") {
           Seq("-Ypatmat-exhaust-depth", "off", "-P:silencer:globalFilters=multiarg\\ infix\\ syntax")
         } else {
@@ -116,7 +152,7 @@ lazy val `anorm-core` = project
         }
       },
       mimaPreviousArtifacts := {
-        if (scalaBinaryVersion.value == "2.13") {
+        if (scalaBinaryVersion.value == "3") {
           Set.empty
         } else {
           mimaPreviousArtifacts.value
@@ -149,29 +185,25 @@ lazy val `anorm-core` = project
         ProblemFilters.exclude[DirectMissingMethodProblem]( // deprecated 2.3.8
           "anorm.SqlQuery.statement"
         ),
+        incoRet("anorm.ParameterValue.apply"),
         // private:
-        ProblemFilters.exclude[MissingClassProblem]( // macro
-          "anorm.Macro$ImplicitResolver$2$ImplicitTransformer$"
-        ),
-        ProblemFilters.exclude[MissingClassProblem]( // macro
-          "anorm.Macro$ImplicitResolver$2$Implicit$"
-        ),
-        ProblemFilters.exclude[MissingClassProblem]( // macro
-          "anorm.Macro$ImplicitResolver$2$Implicit"
-        ),
         ProblemFilters.exclude[DirectMissingMethodProblem]( // private
           "anorm.Sql.asTry"
         ),
-        ProblemFilters.exclude[ReversedMissingMethodProblem]("anorm.JavaTimeToStatement.localDateToStatement")
+        ProblemFilters.exclude[ReversedMissingMethodProblem]("anorm.JavaTimeToStatement.localDateToStatement"),
+        coreMimaFilter,
+        // was deprecated
+        ProblemFilters.exclude[IncompatibleMethTypeProblem]("anorm.ColumnNotFound.copy"),
+        ProblemFilters.exclude[IncompatibleResultTypeProblem]("anorm.ColumnNotFound.copy$default$2")
       ),
       libraryDependencies ++= Seq(
         "joda-time"               % "joda-time"                % "2.11.1",
         "org.joda"                % "joda-convert"             % "2.2.2",
         "org.scala-lang.modules" %% "scala-parser-combinators" % parserCombinatorsVer.value,
-        "com.h2database"          % "h2"                       % "2.1.214" % Test,
-        acolyte,
-        "com.chuusai" %% "shapeless" % "2.3.9" % Test
-      ) ++ specs2Test
+        "org.scala-lang.modules" %% "scala-xml"                % xmlVer.value % Test,
+        "com.h2database"          % "h2"                       % "2.1.214"    % Test,
+        acolyte
+      ) ++ specs2Test,
     ) ++ armShading
   )
   .dependsOn(`anorm-tokenizer`)
@@ -179,19 +211,30 @@ lazy val `anorm-core` = project
 lazy val `anorm-iteratee` = (project in file("iteratee"))
   .settings(
     sourceDirectory := {
-      if (scalaBinaryVersion.value == "2.13") new java.io.File("/no/sources")
+      val v = scalaBinaryVersion.value
+
+      if (v == "3" || v == "2.13") new java.io.File("/no/sources")
       else sourceDirectory.value
     },
     mimaPreviousArtifacts := {
-      if (scalaBinaryVersion.value == "2.13") Set.empty[ModuleID]
-      else Set(organization.value %% name.value % "2.6.0")
+      val v = scalaBinaryVersion.value
+
+      if (v == "3" || v == "2.13") Set.empty[ModuleID]
+      else Set(organization.value %% name.value % "2.6.10")
     },
-    publish / skip := { scalaBinaryVersion.value == "2.13" },
+    publish / skip := {
+      val v = scalaBinaryVersion.value
+
+      v == "3" || v == "2.13"
+    },
     libraryDependencies ++= {
-      if (scalaBinaryVersion.value == "2.13") Seq.empty[ModuleID]
+      val v = scalaBinaryVersion.value
+
+      if (v == "3" || v == "2.13") Seq.empty[ModuleID]
       else
         Seq(
-          "com.typesafe.play" %% "play-iteratees" % "2.6.1",
+          "com.typesafe.play"      %% "play-iteratees" % "2.6.1",
+          "org.scala-lang.modules" %% "scala-xml"      % xmlVer.value % Test,
           acolyte
         ) ++ specs2Test
     }
@@ -202,7 +245,10 @@ lazy val `anorm-iteratee` = (project in file("iteratee"))
 
 lazy val akkaVer = Def.setting[String] {
   sys.env.get("AKKA_VERSION").getOrElse {
-    if (scalaBinaryVersion.value == "2.11") "2.4.20"
+    val v = scalaBinaryVersion.value
+
+    if (v == "2.11") "2.4.20"
+    else if (v == "3") "2.6.19"
     else "2.5.32"
   }
 }
@@ -214,14 +260,31 @@ val akkaContribVer = Def.setting[String] {
 
 lazy val `anorm-akka` = (project in file("akka"))
   .settings(
-    mimaPreviousArtifacts := Set.empty,
-    libraryDependencies ++= Seq("akka-testkit", "akka-stream").map { m =>
-      "com.typesafe.akka" %% m % akkaVer.value % Provided
+    mimaPreviousArtifacts := {
+      if (scalaBinaryVersion.value == "3") {
+        Set.empty
+      } else {
+        mimaPreviousArtifacts.value
+      }
     },
-    libraryDependencies ++= (acolyte +: specs2Test) ++ Seq(
-      "com.typesafe.akka" %% "akka-stream-contrib" % akkaContribVer.value % Test
+    libraryDependencies ++= Seq("akka-testkit", "akka-stream").map { m =>
+      ("com.typesafe.akka" %% m % akkaVer.value % Provided).exclude("org.scala-lang.modules", "*")
+    },
+    libraryDependencies ++= Seq(
+      acolyte,
+      "org.scala-lang.modules" %% "scala-xml" % xmlVer.value % Test
+    ) ++ specs2Test ++ Seq(
+      ("com.typesafe.akka" %% "akka-stream-contrib" % akkaContribVer.value % Test)
+        .cross(CrossVersion.for3Use2_13)
+        .exclude("com.typesafe.akka", "*")
     ),
-    scalacOptions += "-P:silencer:globalFilters=deprecated",
+    scalacOptions ++= {
+      if (scalaBinaryVersion.value == "3") {
+        Seq("-Wconf:cat=deprecation&msg=.*(onDownstreamFinish|ActorMaterializer).*:s")
+      } else {
+        Seq("-P:silencer:globalFilters=deprecated")
+      }
+    },
     Test / unmanagedSourceDirectories ++= {
       CrossVersion.partialVersion(scalaVersion.value) match {
         case Some((2, n)) if n < 13 =>
@@ -240,7 +303,7 @@ lazy val `anorm-akka` = (project in file("akka"))
 lazy val pgVer = sys.env.get("POSTGRES_VERSION").getOrElse("42.5.0")
 
 val playVer = Def.setting[String] {
-  if (scalaVersion.value.startsWith("2.13")) "2.7.3"
+  if (scalaBinaryVersion.value == "2.13") "2.7.3"
   else "2.6.14"
 }
 
@@ -248,14 +311,18 @@ lazy val `anorm-postgres` = (project in file("postgres"))
   .settings(
     mimaPreviousArtifacts := Set.empty,
     libraryDependencies ++= {
+      val v = scalaBinaryVersion.value
+
       val playJsonVer = {
-        if (scalaBinaryVersion.value == "2.13") "2.9.2"
+        if (v == "2.13") "2.9.2"
+        else if (v == "3") "2.10.0-RC6"
         else "2.6.7"
       }
 
       Seq(
-        "org.postgresql"     % "postgresql" % pgVer,
-        "com.typesafe.play" %% "play-json"  % playJsonVer
+        "org.postgresql"          % "postgresql" % pgVer,
+        "com.typesafe.play"      %% "play-json"  % playJsonVer,
+        "org.scala-lang.modules" %% "scala-xml"  % xmlVer.value % Test
       ) ++ specs2Test :+ acolyte
     }
   )
@@ -263,8 +330,23 @@ lazy val `anorm-postgres` = (project in file("postgres"))
 
 lazy val `anorm-enumeratum` = (project in file("enumeratum"))
   .settings(
+    sourceDirectory := {
+      if (scalaBinaryVersion.value == "3") new java.io.File("/no/sources")
+      else sourceDirectory.value
+    },
+    publish / skip        := { scalaBinaryVersion.value == "3" },
     mimaPreviousArtifacts := Set.empty,
-    libraryDependencies ++= Seq("com.beachape" %% "enumeratum" % "1.7.0", acolyte) ++ specs2Test
+    libraryDependencies ++= {
+      if (scalaBinaryVersion.value != "3") {
+        Seq(
+          "org.scala-lang.modules" %% "scala-xml"  % xmlVer.value % Test,
+          "com.beachape"           %% "enumeratum" % "1.7.0",
+          acolyte
+        ) ++ specs2Test
+      } else {
+        Seq.empty
+      }
+    }
   )
   .dependsOn(`anorm-core`)
 
@@ -294,14 +376,13 @@ lazy val docs = project
   )
   .dependsOn(`anorm-core`)
 
-Scapegoat.settings
-
 ThisBuild / playBuildRepoName := "anorm"
 
 addCommandAlias(
   "validateCode",
   List(
+    "scalafixAll -check",
     "scalafmtSbtCheck",
-    "scalafmtCheckAll",
+    "+scalafmtCheckAll"
   ).mkString(";")
 )

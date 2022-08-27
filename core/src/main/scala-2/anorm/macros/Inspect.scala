@@ -70,8 +70,9 @@ private[anorm] object Inspect {
       if (apply.paramLists.isEmpty) {
         Map.empty
       } else {
-        Compat.toMap(Compat.lazyZip(apply.typeParams, tpeArgs)) { case (sym, ty) =>
-          sym.fullName -> ty
+        Compat.toMap(Compat.lazyZip(apply.typeParams, tpeArgs)) {
+          case (sym, ty) =>
+            sym.fullName -> ty
         }
       }
     }

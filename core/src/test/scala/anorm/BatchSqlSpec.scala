@@ -1,7 +1,8 @@
 package anorm
 
-class BatchSqlSpec extends org.specs2.mutable.Specification with H2Database {
-  "Batch SQL" title
+final class BatchSqlSpec extends org.specs2.mutable.Specification with H2Database {
+
+  "Batch SQL".title
 
   "Creation" should {
     "fail with parameter maps not having same names" in {
@@ -71,9 +72,12 @@ class BatchSqlSpec extends org.specs2.mutable.Specification with H2Database {
     "be successful with first parameter map" in {
       val b1 = BatchSql("SELECT * FROM tbl WHERE a = {a}, b = {b}", Seq[NamedParameter]("a" -> 0, "b" -> 1), Nil)
 
-      implicit val toParams = ToParameterList[(Int, Int)] { case (a, b) =>
-        List[NamedParameter](NamedParameter.namedWithString("a" -> a), NamedParameter.namedWithString("b" -> b))
-      }
+      implicit val toParams: ToParameterList[(Int, Int)] =
+        ToParameterList[(Int, Int)] {
+          case (a, b) =>
+            List[NamedParameter](NamedParameter.namedWithString("a" -> a), NamedParameter.namedWithString("b" -> b))
+        }
+
       lazy val b2 = b1.bind(2 -> 3)
 
       lazy val expectedMaps = Seq(

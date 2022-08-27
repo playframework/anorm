@@ -7,6 +7,7 @@ import acolyte.jdbc.{ DefinedParameter => DParam, ParameterMetaData => ParamMeta
 import acolyte.jdbc.AcolyteDSL.{ connection, handleStatement, withQueryResult }
 import acolyte.jdbc.Implicits._
 
+import org.specs2.matcher.TypecheckMatchers._
 import org.specs2.specification.core.Fragments
 
 import com.github.ghik.silencer.silent
@@ -15,7 +16,9 @@ import Macro.ColumnNaming
 import SqlParser.scalar
 
 final class MacroSpec extends org.specs2.mutable.Specification {
-  "Macro" title
+  "Macro".title
+
+  import TestUtils.typecheck
 
   val barRow1 = RowLists.rowList1(classOf[Int] -> "v")
 
@@ -48,47 +51,61 @@ final class MacroSpec extends org.specs2.mutable.Specification {
   }
 
   "Generated named parser" should {
-    // No Column[Bar] so compilation error is expected
-    shapeless.test.illTyped("anorm.Macro.namedParser[Foo[Bar]]")
-
-    // Not enough column names for class parameters
-    shapeless.test.illTyped("""anorm.Macro.parser[Foo[Int]]("Foo", "Bar")""")
+    "not be resolved" in {
+      // No Column[Bar] so compilation error is expected
+      (typecheck("anorm.Macro.namedParser[Foo[Bar]]") must failWith(
+        ".*cannot find.* .*Column.* nor .*RowParser.* for .*loremIpsum.*Bar.*"
+      )).and {
+        // Not enough column names for class parameters
+        typecheck("""anorm.Macro.parser[Foo[Int]]("Foo", "Bar")""") must failWith(
+          ".*no column name for parameters.* .*Foo.* .*Bar.*"
+        )
+      }
+    }
 
     "be successful for Bar" in withQueryResult(barRow1 :+ 1 :+ 3) { implicit c =>
       val parser1 = Macro.namedParser[Bar]
       val parser2 = Macro.parser[Bar]("v")
 
-      (SQL"TEST".as(parser1.*) must_=== List(Bar(1), Bar(3))).and(SQL"TEST".as(parser2.*) must_=== List(Bar(1), Bar(3)))
+      (SQL"TEST".as(parser1.*) must_=== List(Bar(1), Bar(3))).and {
+        SQL"TEST".as(parser2.*) must_=== List(Bar(1), Bar(3))
+      }
     }
 
     "be successful for Foo[Int]" >> {
       def spec(parser1: RowParser[Foo[Int]], parser2: RowParser[Foo[Int]])(implicit c: Connection) = {
         val expected = List(
-          Foo(1.2f, "str1")(1, Some(2L))(Some(true)),
-          Foo(2.3f, "str2")(4, None)(None),
-          Foo(3.4f, "str3")(5, Some(3L))(None),
-          Foo(5.6f, "str4")(6, None)(Some(false))
+          Foo(1.2F, "str1")(1, Some(2L))(Some(true)),
+          Foo(2.3F, "str2")(4, None)(None),
+          Foo(3.4F, "str3")(5, Some(3L))(None),
+          Foo(5.6F, "str4")(6, None)(Some(false))
         )
 
-        (SQL"TEST".as(parser1.*) must_=== expected).and(SQL("TEST").as(parser2.*) must_=== expected)
+        (SQL"TEST".as(parser1.*) must_=== expected).and {
+          SQL("TEST").as(parser2.*) must_=== expected
+        }
       }
 
       "using the default column naming" in withQueryResult(
-        fooRow1 :+ (1.2f, "str1", 1, 2L, true) :+ (2.3f, "str2", 4,
-        nullLong, nullBoolean) :+ (3.4f, "str3",
-        5, 3L, nullBoolean) :+ (5.6f, "str4", 6,
-        nullLong, false)
+        fooRow1
+          .append(1.2F, "str1", 1, 2L, true)
+          .append(2.3F, "str2", 4, nullLong, nullBoolean)
+          .append(3.4F, "str3", 5, 3L, nullBoolean)
+          .append(5.6F, "str4", 6, nullLong, false)
       ) { implicit con =>
 
-        spec(Macro.namedParser[Foo[Int]], Macro.parser[Foo[Int]]("r", "bar", "loremIpsum", "opt", "x"))
-
+        spec(
+          parser1 = Macro.namedParser[Foo[Int]],
+          parser2 = Macro.parser[Foo[Int]]("r", "bar", "loremIpsum", "opt", "x")
+        )
       }
 
       "using the snake case naming" in withQueryResult(
-        fooRow2 :+ (1.2f, "str1", 1, 2L, true) :+ (2.3f, "str2", 4,
-        nullLong, nullBoolean) :+ (3.4f, "str3",
-        5, 3L, nullBoolean) :+ (5.6f, "str4", 6,
-        nullLong, false)
+        fooRow2
+          .append(1.2F, "str1", 1, 2L, true)
+          .append(2.3F, "str2", 4, nullLong, nullBoolean)
+          .append(3.4F, "str3", 5, 3L, nullBoolean)
+          .append(5.6F, "str4", 6, nullLong, false)
       ) { implicit con =>
 
         spec(
@@ -112,71 +129,84 @@ final class MacroSpec extends org.specs2.mutable.Specification {
         classOf[Int]     -> "v"
       )
 
-      withQueryResult(row :+ (1.2f, "str1", 1, 2L, true, 6)) { implicit c =>
-        SQL"TEST".as(fooBar.singleOpt) must beSome(Foo(1.2f, "str1")(Bar(6), Some(2))(Some(true)))
+      withQueryResult(row.append(1.2F, "str1", 1, 2L, true, 6)) { implicit c =>
+        SQL"TEST".as(fooBar.singleOpt) must beSome(Foo(1.2F, "str1")(Bar(6), Some(2))(Some(true)))
       }
     }
 
     "support self reference" in {
-      val _ = Macro.namedParser[Self] // check compile is ok
+      // check compile is ok
+      typecheck("Macro.namedParser[Self]") must not(beNull)
 
-      ok // TODO: Supports aliasing to make it really usable (see #124)
+      // TODO: Supports aliasing to make it really usable (see #124)
     }
   }
 
   "Generated indexed parser" should {
-    // No Column[Bar] so compilation error is expected
-    shapeless.test.illTyped("anorm.Macro.indexedParser[Foo[Bar]]")
+    "not be resolved" in {
+      // No Column[Bar] so compilation error is expected
+      typecheck("anorm.Macro.indexedParser[Foo[Bar]]") must failWith(
+        ".*cannot find .*Column.* nor .*RowParser.* .*loremIpsum.*Bar.*"
+      )
+    }
 
     "be successful for Bar" in withQueryResult(RowLists.intList :+ 1 :+ 3) { implicit c =>
       SQL"TEST".as(Macro.indexedParser[Bar].*) must_=== List(Bar(1), Bar(3))
     }
 
     "be successful for Foo[Int]" in withQueryResult(
-      fooRow1 :+ (1.2f, "str1", 1, 2L, true) :+ (2.3f, "str2", 4,
-      nullLong,
-      nullBoolean) :+ (3.4f, "str3", 5, 3L,
-      nullBoolean) :+ (5.6f, "str4", 6,
-      nullLong, false)
+      fooRow1
+        .append(1.2F, "str1", 1, 2L, true)
+        .append(2.3F, "str2", 4, nullLong, nullBoolean)
+        .append(3.4F, "str3", 5, 3L, nullBoolean)
+        .append(5.6F, "str4", 6, nullLong, false)
     ) { implicit con =>
       val parser: RowParser[Foo[Int]] = Macro.indexedParser[Foo[Int]]
 
       SQL"TEST".as(parser.*) must_=== List(
-        Foo(1.2f, "str1")(1, Some(2L))(Some(true)),
-        Foo(2.3f, "str2")(4, None)(None),
-        Foo(3.4f, "str3")(5, Some(3L))(None),
-        Foo(5.6f, "str4")(6, None)(Some(false))
+        Foo(1.2F, "str1")(1, Some(2L))(Some(true)),
+        Foo(2.3F, "str2")(4, None)(None),
+        Foo(3.4F, "str3")(5, Some(3L))(None),
+        Foo(5.6F, "str4")(6, None)(Some(false))
       )
     }
   }
 
   "Generated indexed parser (with an offset)" should {
-    // No Column[Bar] so compilation error is expected
-    shapeless.test.illTyped("anorm.Macro.offsetParser[Foo[Bar]]")
+    "not be resolved" in {
+      // No Column[Bar] so compilation error is expected
+      typecheck("Macro.offsetParser[Foo[Bar]](1)") must failWith(
+        ".*cannot find .*Column.* nor .*RowParser.* for loremIpsum.*Bar.* .*Foo.*"
+      )
+    }
 
     "be successful for Bar" in withQueryResult(RowLists.intList :+ 1 :+ 3) { implicit c =>
       SQL"TEST".as(Macro.offsetParser[Bar](0).*) must_=== List(Bar(1), Bar(3))
     }
 
     "be successful for Foo[Int]" in withQueryResult(
-      fooRow1 :+ (1.2f, "str1", 1, 2L, true) :+ (2.3f, "str2", 4,
-      nullLong,
-      nullBoolean) :+ (3.4f, "str3", 5, 3L,
-      nullBoolean) :+ (5.6f, "str4", 6,
-      nullLong, false)
+      fooRow1
+        .append(1.2F, "str1", 1, 2L, true)
+        .append(2.3F, "str2", 4, nullLong, nullBoolean)
+        .append(3.4F, "str3", 5, 3L, nullBoolean)
+        .append(5.6F, "str4", 6, nullLong, false)
     ) { implicit con =>
       val parser: RowParser[Foo[Int]] = Macro.offsetParser[Foo[Int]](0)
 
       SQL"TEST".as(parser.*) must_=== List(
-        Foo(1.2f, "str1")(1, Some(2L))(Some(true)),
-        Foo(2.3f, "str2")(4, None)(None),
-        Foo(3.4f, "str3")(5, Some(3L))(None),
-        Foo(5.6f, "str4")(6, None)(Some(false))
+        Foo(1.2F, "str1")(1, Some(2L))(Some(true)),
+        Foo(2.3F, "str2")(4, None)(None),
+        Foo(3.4F, "str3")(5, Some(3L))(None),
+        Foo(5.6F, "str4")(6, None)(Some(false))
       )
     }
 
     "be successful for Goo[T] with offset = 2" in withQueryResult(
-      fooRow1 :+ (1.2f, "str1", 1, 2L, true) :+ (2.3f, "str2", 4, nullLong, nullBoolean) :+ (3.4f, "str3", 5, 3L, nullBoolean) :+ (5.6f, "str4", 6, nullLong, false)
+      fooRow1
+        .append(1.2F, "str1", 1, 2L, true)
+        .append(2.3F, "str2", 4, nullLong, nullBoolean)
+        .append(3.4F, "str3", 5, 3L, nullBoolean)
+        .append(5.6F, "str4", 6, nullLong, false)
     ) { implicit con =>
       val parser: RowParser[Goo[Int]] = Macro.offsetParser[Goo[Int]](2)
 
@@ -216,25 +246,29 @@ final class MacroSpec extends org.specs2.mutable.Specification {
   }
 
   "Sealed parser" should {
-    // No subclass
-    shapeless.test.illTyped("anorm.Macro.sealedParser[NoSubclass]")
-
-    // Cannot find the RowParser instances for the subclasses,
-    // from the implicit scope
-    shapeless.test.illTyped("Macro.sealedParser[Family]")
-
-    // No subclass
-    shapeless.test.illTyped("Macro.sealedParser[EmptyFamily]")
+    "not be resolved" in {
+      (typecheck("Macro.sealedParser[NoSubclass]") must failWith(".*cannot find any subclass.* .*NoSubclass.*"))
+        .and {
+          // Cannot find the RowParser instances for the subclasses,
+          // from the implicit scope
+          typecheck("Macro.sealedParser[Family]") must failWith(".*sealed.* .*Bar.* .*CaseObj.*")
+        }
+        .and {
+          // No subclass
+          typecheck("Macro.sealedParser[EmptyFamily]") must failWith(".*cannot find any subclass.* .*EmptyFamily.*")
+        }
+    }
 
     "be successful for the Family trait" >> {
       "with the default discrimination" in {
         val barRow2 = RowLists.rowList2(classOf[String] -> "classname", classOf[Int] -> "v")
 
-        withQueryResult(barRow2 :+ ("anorm.MacroSpec.Bar", 1) :+ ("anorm.MacroSpec.CaseObj", -1)) { implicit c =>
+        withQueryResult(barRow2.append("anorm.MacroSpec.Bar", 1).append("anorm.MacroSpec.CaseObj", -1)) { implicit c =>
           implicit val caseObjParser =
             RowParser[CaseObj.type] { _ => Success(CaseObj) }
 
-          implicit val barParser = Macro.namedParser[Bar]
+          implicit val barParser: RowParser[Bar] =
+            SqlParser.int("v").map { Bar(_) }
 
           // cannot handle object anorm.MacroSpec.NotCase: no case accessor
           @silent def familyParser = Macro.sealedParser[Family]
@@ -246,11 +280,12 @@ final class MacroSpec extends org.specs2.mutable.Specification {
       "with a customized discrimination" in {
         val barRow2 = RowLists.rowList2(classOf[String] -> "foo", classOf[Int] -> "v")
 
-        withQueryResult(barRow2 :+ ("Bar", 1) :+ ("CaseObj", -1)) { implicit c =>
+        withQueryResult(barRow2.append("Bar", 1).append("CaseObj", -1)) { implicit c =>
           implicit val caseObjParser =
             RowParser[CaseObj.type] { _ => Success(CaseObj) }
 
-          implicit val barParser = Macro.namedParser[Bar]
+          implicit val barParser: RowParser[Bar] =
+            SqlParser.int("v").map { Bar(_) }
 
           // cannot handle object anorm.MacroSpec.NotCase: no case accessor
           @silent def familyParser =
@@ -266,8 +301,11 @@ final class MacroSpec extends org.specs2.mutable.Specification {
     import Macro.{ ParameterProjection => proj }
     import NamedParameter.{ namedWithString => named }
 
-    // No ToParameterList[Bar] so compilation error is expected
-    shapeless.test.illTyped("anorm.Macro.toParameters[Goo[Bar]]")
+    "not be resolved" in {
+      typecheck("Macro.toParameters[Goo[Bar]]") must failWith(
+        ".*cannot find either .*ToParameterList.* or .*ToStatement.* for .*Bar.*"
+      )
+    }
 
     "be successful for Bar" >> {
       val fixture = Bar(1)
@@ -277,10 +315,11 @@ final class MacroSpec extends org.specs2.mutable.Specification {
           Macro.toParameters[Bar]()               -> List(named("v" -> 1)),
           Macro.toParameters[Bar](proj("v", "w")) -> List(named("w" -> 1))
         ).zipWithIndex
-      ) { case ((encoder, params), index) =>
-        s"using encoder #${index}" in {
-          encoder(fixture) must_=== params
-        }
+      ) {
+        case ((encoder, params), index) =>
+          s"using encoder #${index}" in {
+            encoder(fixture) must_=== params
+          }
       }
     }
 
@@ -296,10 +335,11 @@ final class MacroSpec extends org.specs2.mutable.Specification {
           ),
           Macro.toParameters[Goo[Int]](proj("loremIpsum", "value")) -> List(named("value" -> 1))
         ).zipWithIndex
-      ) { case ((encoder, params), index) =>
-        s"using encoder #${index}" in {
-          encoder(fixture) must_=== params
-        }
+      ) {
+        case ((encoder, params), index) =>
+          s"using encoder #${index}" in {
+            encoder(fixture) must_=== params
+          }
       }
     }
 
@@ -314,10 +354,11 @@ final class MacroSpec extends org.specs2.mutable.Specification {
 
       Fragments.foreach(
         Seq[(Family, List[NamedParameter])](Bar(1) -> List(named("v" -> 1)), CaseObj -> List.empty[NamedParameter])
-      ) { case (i, params) =>
-        s"for $i" in {
-          ToParameterList.from(i) must_=== params
-        }
+      ) {
+        case (i, params) =>
+          s"for $i" in {
+            ToParameterList.from(i) must_=== params
+          }
       }
     }
 
@@ -339,36 +380,41 @@ final class MacroSpec extends org.specs2.mutable.Specification {
             named("x"            -> Some(false))
           )
         ).zipWithIndex
-      ) { case ((encoder, params), index) =>
-        s"using encoder #${index}" in {
-          encoder(fixture) must_=== params
-        }
+      ) {
+        case ((encoder, params), index) =>
+          s"using encoder #${index}" in {
+            encoder(fixture) must_=== params
+          }
       }
     }
   }
 
   "Generated column" should {
-    shapeless.test.illTyped("anorm.Macro.valueColumn[Bar]") // case class
-
-    shapeless.test.illTyped("anorm.Macro.valueColumn[InvalidValueClass]")
+    "not be resolved" in {
+      (typecheck("Macro.valueColumn[Bar]") must failWith(".*AnyVal.*")).and {
+        typecheck("Macro.valueColumn[InvalidValueClass]") must failWith(".*MacroSpec.*")
+      }
+    }
 
     "be generated for a supported ValueClass" in {
       implicit val generated: Column[ValidValueClass] =
         Macro.valueColumn[ValidValueClass]
 
-      withQueryResult(RowLists.doubleList :+ 1.2d) { implicit con =>
-        SQL("SELECT d").as(scalar[ValidValueClass].single).aka("parsed column") must_=== new ValidValueClass(1.2d)
+      withQueryResult(RowLists.doubleList :+ 1.2D) { implicit con =>
+        SQL("SELECT d").as(scalar[ValidValueClass].single).aka("parsed column") must_=== new ValidValueClass(1.2D)
       }
     }
   }
 
   "ToStatement" should {
-    shapeless.test.illTyped("anorm.Macro.valueToStatement[Bar]") // case class
+    "not be resolved" in {
+      typecheck("Macro.valueToStatement[Bar]") must failWith(".*AnyVal.*")
+    }
 
-    val SqlDouble3s = ParamMeta.Double(23.456d)
+    val SqlDouble3s = ParamMeta.Double(23.456D)
 
     def withConnection[A](f: java.sql.Connection => A): A = f(connection(handleStatement.withUpdateHandler {
-      case UpdateExecution("set-double ?", DParam(23.456d, SqlDouble3s) :: Nil) => 1 /* case ok */
+      case UpdateExecution("set-double ?", DParam(23.456D, SqlDouble3s) :: Nil) => 1 /* case ok */
 
       case x => sys.error(s"Unexpected: $x")
     }))
@@ -378,7 +424,7 @@ final class MacroSpec extends org.specs2.mutable.Specification {
         Macro.valueToStatement[ValidValueClass]
 
       withConnection { implicit c =>
-        SQL("set-double {p}").on("p" -> new ValidValueClass(23.456d)).execute() must beFalse
+        SQL("set-double {p}").on("p" -> new ValidValueClass(23.456D)).execute() must beFalse
       }
     }
   }

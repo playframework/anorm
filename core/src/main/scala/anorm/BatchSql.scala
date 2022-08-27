@@ -2,7 +2,7 @@ package anorm
 
 import java.sql.{ Connection, PreparedStatement }
 
-import resource.managed
+import resource.{ managed, Resource }
 
 private[anorm] object BatchSqlErrors {
   val HeterogeneousParameterMaps = "if each map hasn't same parameter names"
@@ -85,7 +85,11 @@ sealed trait BatchSql {
     fill(connection, null, getGeneratedKeys, params)
 
   def execute()(implicit connection: Connection): Array[Int] = {
-    implicit val res = StatementResource
+    implicit val res: Resource[PreparedStatement] = StatementResource
+
+    implicit val cls: scala.reflect.ClassTag[PreparedStatement] =
+      statementClassTag
+
     managed(getFilledStatement(connection)).acquireAndGet(_.executeBatch())
   }
 
@@ -252,4 +256,5 @@ object BatchSql {
 
   private[anorm] case class Copy(sql: SqlQuery, names: Set[String], params: Seq[Map[String, ParameterValue]])
       extends BatchSql
+
 }

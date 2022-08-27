@@ -5,8 +5,8 @@ import acolyte.jdbc.AcolyteDSL.{ connection, handleQuery, withQueryResult }
 import acolyte.jdbc.Implicits._
 import acolyte.jdbc.RowLists.stringList
 
-class StatementParserSpec extends org.specs2.mutable.Specification {
-  "SQL statement parser" title
+final class StatementParserSpec extends org.specs2.mutable.Specification {
+  "SQL statement parser".title
 
   "Statement" should {
     "be parsed with 'name' and 'cat' parameters and support multiple lines" in {
@@ -142,35 +142,38 @@ class StatementParserSpec extends org.specs2.mutable.Specification {
         0,
         new StringBuilder(),
         List.empty[(Int, ParameterValue)]
-      ) must beSuccessfulTry.like { case prepared1 =>
-        (prepared1._2.aka("parameters #1") must_=== List[(Int, ParameterValue)](0 -> List("a", "b"), 2 -> 3))
-          .and {
-            Sql.query(
-              stmt2.tokens,
-              stmt2.names.toList,
-              Map[String, ParameterValue]("cs_1" -> "a", "cs_2" -> "b", "id" -> 3),
-              0,
-              new StringBuilder(),
-              List.empty[(Int, ParameterValue)]
-            ) must beSuccessfulTry.like { case prepared2 =>
-              (prepared1._1.aka("sql") must_=== prepared2._1).and(
-                prepared2._2.aka("parameters #2") must_=== (List[(Int, ParameterValue)](0 -> "a", 1 -> "b", 2 -> 3))
-              )
+      ) must beSuccessfulTry.like {
+        case prepared1 =>
+          (prepared1._2.aka("parameters #1") must_=== List[(Int, ParameterValue)](0 -> List("a", "b"), 2 -> 3))
+            .and {
+              Sql.query(
+                stmt2.tokens,
+                stmt2.names.toList,
+                Map[String, ParameterValue]("cs_1" -> "a", "cs_2" -> "b", "id" -> 3),
+                0,
+                new StringBuilder(),
+                List.empty[(Int, ParameterValue)]
+              ) must beSuccessfulTry.like {
+                case prepared2 =>
+                  (prepared1._1.aka("sql") must_=== prepared2._1).and(
+                    prepared2._2.aka("parameters #2") must_=== (List[(Int, ParameterValue)](0 -> "a", 1 -> "b", 2 -> 3))
+                  )
+              }
             }
-          }
-          .and {
-            Sql.query(
-              stmt3.tokens,
-              stmt3.names.toList,
-              Map[String, ParameterValue]("cs" -> List("a", "b"), "id" -> 3),
-              0,
-              new StringBuilder(),
-              List.empty[(Int, ParameterValue)]
-            ) must beSuccessfulTry.like { case prepared3 =>
-              (prepared3._1.aka("sql") must_=== prepared1._1)
-                .and(prepared3._2.aka("parameters #3") must_=== prepared1._2)
+            .and {
+              Sql.query(
+                stmt3.tokens,
+                stmt3.names.toList,
+                Map[String, ParameterValue]("cs" -> List("a", "b"), "id" -> 3),
+                0,
+                new StringBuilder(),
+                List.empty[(Int, ParameterValue)]
+              ) must beSuccessfulTry.like {
+                case prepared3 =>
+                  (prepared3._1.aka("sql") must_=== prepared1._1)
+                    .and(prepared3._2.aka("parameters #3") must_=== prepared1._2)
+              }
             }
-          }
       }
     }
 
@@ -199,8 +202,9 @@ class StatementParserSpec extends org.specs2.mutable.Specification {
         0,
         new StringBuilder(),
         List.empty[(Int, ParameterValue)]
-      ) must beFailedTry.like { case err: Sql.MissingParameter =>
-        err.getMessage must startWith("""Missing parameter value for 'id' after: "SELECT""")
+      ) must beFailedTry.like {
+        case err: Sql.MissingParameter =>
+          err.getMessage must startWith("""Missing parameter value for 'id' after: "SELECT""")
       }
     }
 
@@ -212,10 +216,11 @@ class StatementParserSpec extends org.specs2.mutable.Specification {
         0,
         new StringBuilder(),
         List.empty[(Int, ParameterValue)]
-      ) must beSuccessfulTry.like { case (sql, (0, pv) :: Nil) =>
-        (sql must_=== "SELECT * FROM name LIKE '%strange' AND id = ?").and(
-          pv must_=== ParameterValue.toParameterValue("foo")
-        )
+      ) must beSuccessfulTry.like {
+        case (sql, (0, pv) :: Nil) =>
+          (sql must_=== "SELECT * FROM name LIKE '%strange' AND id = ?").and(
+            pv must_=== ParameterValue.from("foo")
+          )
       }
     }
   }
@@ -252,7 +257,7 @@ class StatementParserSpec extends org.specs2.mutable.Specification {
       val cmd    = "SELECT"
       val clause = "FROM"
       val table  = "Test"
-      implicit val con = connection(handleQuery {
+      implicit val con: java.sql.Connection = connection(handleQuery {
         case QueryExecution(
               "SELECT * FROM Test WHERE id = ? AND code IN (?, ?)",
               DParam("id1", ParamMeta.Str) :: DParam(2, ParamMeta.Int) ::

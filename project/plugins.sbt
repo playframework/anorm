@@ -7,8 +7,6 @@ addSbtPlugin("com.typesafe.play" % "interplay" % sys.props.get("interplay.versio
 
 addSbtPlugin("com.typesafe" % "sbt-mima-plugin" % "1.1.0")
 
-addSbtPlugin("com.sksamuel.scapegoat" %% "sbt-scapegoat" % "1.1.1")
-
 addSbtPlugin("com.github.sbt" % "sbt-unidoc" % "0.5.0")
 
 addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "1.2.0")

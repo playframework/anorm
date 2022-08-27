@@ -89,8 +89,9 @@ object SqlStatementParser extends JavaTokenParsers {
   }
 
   private val variable: Parser[TokenGroup] =
-    "{" ~> (ident ~ (("." ~> ident) ?)) <~ "}" ^^ { case i1 ~ i2 =>
-      TokenGroup(Nil, Some(i1 + i2.fold("")("." + _)))
+    "{" ~> (ident ~ (("." ~> ident) ?)) <~ "}" ^^ {
+      case i1 ~ i2 =>
+        TokenGroup(Nil, Some(i1 + i2.fold("")("." + _)))
     }
 
   private val reserved: Parser[PercentToken.type] =

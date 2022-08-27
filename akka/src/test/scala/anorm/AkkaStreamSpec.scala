@@ -7,21 +7,26 @@ import scala.collection.immutable.Seq
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
+import akka.actor.ActorSystem
+
+import akka.stream.Materializer
 import akka.stream.scaladsl.{ Keep, Sink, Source }
 
-import acolyte.jdbc.QueryResult
 import acolyte.jdbc.AcolyteDSL.withQueryResult
 import acolyte.jdbc.Implicits._
+import acolyte.jdbc.QueryResult
 import acolyte.jdbc.RowLists.stringList
 
 import org.specs2.concurrent.ExecutionEnv
 
 final class AkkaStreamSpec(implicit ee: ExecutionEnv) extends org.specs2.mutable.Specification {
 
-  "Akka Stream" title
+  "Akka Stream".title
 
-  implicit lazy val system  = akka.actor.ActorSystem("knox-core-tests")
-  implicit def materializer = akka.stream.ActorMaterializer.create(system)
+  implicit lazy val system: ActorSystem = ActorSystem("anorm-tests")
+
+  implicit def materializer: Materializer =
+    akka.stream.ActorMaterializer.create(system)
 
   // Akka-Contrib issue with Akka-Stream > 2.5.4
   // import akka.stream.contrib.TestKit.assertAllStagesStopped
@@ -66,8 +71,9 @@ final class AkkaStreamSpec(implicit ee: ExecutionEnv) extends org.specs2.mutable
 
       "on success" in assertAllStagesStopped {
         withQueryResult(stringList :+ "A" :+ "B" :+ "C") { implicit con =>
-          runAsync(Sink.seq[String]) must beLike[ResultSet] { case rs =>
-            (rs.isClosed must beTrue).and(rs.getStatement.isClosed must beTrue).and(con.isClosed must beFalse)
+          runAsync(Sink.seq[String]) must beLike[ResultSet] {
+            case rs =>
+              (rs.isClosed must beTrue).and(rs.getStatement.isClosed must beTrue).and(con.isClosed must beFalse)
           }.await(0, 5.seconds)
         }
       }

@@ -66,7 +66,7 @@ object ParameterValue {
 
   @throws[IllegalArgumentException]("if value `v` is null whereas `toStmt` is marked with [[anorm.NotNullGuard]]")
   @SuppressWarnings(Array("NullParameter"))
-  @inline def apply[A](v: A, s: ToSql[A], toStmt: ToStatement[A]) =
+  @inline def apply[A](v: A, s: ToSql[A], toStmt: ToStatement[A]): ParameterValue =
     (v, toStmt) match {
       case (null, _: NotNullGuard) => throw new IllegalArgumentException()
       case _                       => new DefaultParameterValue(v, s, toStmt)
