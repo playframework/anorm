@@ -197,7 +197,7 @@ lazy val `anorm-core` = project
         ProblemFilters.exclude[IncompatibleResultTypeProblem]("anorm.ColumnNotFound.copy$default$2")
       ),
       libraryDependencies ++= Seq(
-        "joda-time"               % "joda-time"                % "2.11.0",
+        "joda-time"               % "joda-time"                % "2.11.1",
         "org.joda"                % "joda-convert"             % "2.2.2",
         "org.scala-lang.modules" %% "scala-parser-combinators" % parserCombinatorsVer.value,
         "org.scala-lang.modules" %% "scala-xml"                % xmlVer.value % Test,
@@ -300,7 +300,7 @@ lazy val `anorm-akka` = (project in file("akka"))
 
 // ---
 
-lazy val pgVer = sys.env.get("POSTGRES_VERSION").getOrElse("42.4.2")
+lazy val pgVer = sys.env.get("POSTGRES_VERSION").getOrElse("42.5.0")
 
 val playVer = Def.setting[String] {
   if (scalaBinaryVersion.value == "2.13") "2.7.3"
