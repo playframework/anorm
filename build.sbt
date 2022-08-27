@@ -165,7 +165,7 @@ lazy val `anorm-core` = project
         ProblemFilters.exclude[ReversedMissingMethodProblem]("anorm.JavaTimeToStatement.localDateToStatement")
       ),
       libraryDependencies ++= Seq(
-        "joda-time"               % "joda-time"                % "2.11.0",
+        "joda-time"               % "joda-time"                % "2.11.1",
         "org.joda"                % "joda-convert"             % "2.2.2",
         "org.scala-lang.modules" %% "scala-parser-combinators" % parserCombinatorsVer.value,
         "com.h2database"          % "h2"                       % "2.1.214" % Test,
