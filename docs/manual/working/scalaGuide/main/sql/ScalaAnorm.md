@@ -48,7 +48,7 @@ You will need to add Anorm and JDBC plugin to your dependencies :
 ```scala
 libraryDependencies ++= Seq(
   jdbc,
-  "org.playframework.anorm" %% "anorm" % "2.5.1"
+  "org.playframework.anorm" %% "anorm" % "2.7.0"
 )
 ```
 
@@ -79,7 +79,7 @@ val id: Option[Long] =
 When a key generated is on insertion is not a single `Long`, `executeInsert` can be passed a `ResultSetParser` to return the correct key.
 
 ```scala
-import anorm.SqlParser.str
+import anorm._
 
 val id: List[String] = 
   SQL("insert into City(name, country) values ({name}, {country})")
@@ -118,7 +118,7 @@ You can also use string interpolation to pass parameters (see details thereafter
 In case several columns are found with same name in query result, for example columns named `code` in both `Country` and `CountryLanguage` tables, there can be ambiguity. By default a mapping like following one will use the last column:
 
 ```scala
-import anorm.{ SQL, SqlParser }
+import anorm._
 
 val code: String = SQL(
   """
@@ -132,7 +132,7 @@ val code: String = SQL(
 If `Country.Code` is 'First' and `CountryLanguage` is 'Second', then in previous example `code` value will be 'Second'. Ambiguity can be resolved using qualified column name, with table name:
 
 ```scala
-import anorm.{ SQL, SqlParser }
+import anorm._
 
 val code: String = SQL(
   """
@@ -147,7 +147,7 @@ val code: String = SQL(
 When a column is aliased, typically using SQL `AS`, its value can also be resolved. Following example parses column with `country_lang` alias.
 
 ```scala
-import anorm.{ SQL, SqlParser }
+import anorm._
 
 val lang: String = SQL(
   """
@@ -161,7 +161,8 @@ val lang: String = SQL(
 The columns can also be specified by position, rather than name:
 
 ```scala
-import anorm.SqlParser.{ str, float }
+import anorm._
+
 // Parsing column by name or position
 val parser = 
   str("name") ~ float(3) /* third column as float */ map {
@@ -175,7 +176,7 @@ val product: (String, Float) = SQL("SELECT * FROM prod WHERE id = {id}").
 If the columns are not strictly defined (e.g. with types that can vary), the `SqlParser.folder` can be used to fold each row in a custom way.
 
 ```scala
-import anorm.{ RowParser, SqlParser }
+import anorm._
 
 val parser: RowParser[Map[String, Any]] = 
   SqlParser.folder(Map.empty[String, Any]) { (map, value, meta) => 
@@ -272,13 +273,14 @@ An Anorm parameter can be multi-value, like a sequence of string.
 In such case, values will be prepared to be passed appropriately in JDBC.
 
 ```scala
+import anorm._
+
 // With default formatting (", " as separator)
 SQL("SELECT * FROM Test WHERE cat IN ({categories})").
   on("categories" -> Seq("a", "b", "c")
 // -> SELECT * FROM Test WHERE cat IN ('a', 'b', 'c')
 
 // With custom formatting
-import anorm.SeqParameter
 SQL("SELECT * FROM Test t WHERE {categories}").
   on("categories" -> SeqParameter(
     values = Seq("a", "b", "c"), separator = " OR ", 
@@ -320,8 +322,7 @@ SQL"UPDATE Test SET langs = $arr".execute()
 A column can also be multi-value if its type is JDBC array (`java.sql.Array`), then it can be mapped to either array or list (`Array[T]` or `List[T]`), provided type of element (`T`) is also supported in column mapping.
 
 ```scala
-import anorm.SQL
-import anorm.SqlParser.{ scalar, * }
+import anorm._, SqlParser.{ scalar, * }
 
 // array and element parser
 import anorm.Column.{ columnToArray, stringToArray }
@@ -337,7 +338,7 @@ val res: List[Array[String]] =
 When you need to execute a same update several times with different arguments, a batch query can be used (e.g. to execute a batch of insertions).
 
 ```scala
-import anorm.BatchSql
+import anorm._
 
 val batch = BatchSql(
   "INSERT INTO books(title, author) VALUES({title}, {author})", 
@@ -357,7 +358,8 @@ It's possible to define custom or database specific conversion for parameters.
 
 ```scala
 import java.sql.PreparedStatement
-import anorm.{ ParameterMetaData, ToStatement }
+
+import anorm._
 
 // Custom conversion to statement for type T
 implicit def customToStatement: ToStatement[T] = new ToStatement[T] {
@@ -430,7 +432,7 @@ Anorm provides several ways to handle and parse the row retrieved by the databas
 The macro `namedParser[T]` can be used to create a `RowParser[T]` at compile-time, for any case class `T`.
 
 ```scala
-import anorm.{ Macro, RowParser }
+import anorm._
 
 case class Info(name: String, year: Option[Int])
 
@@ -447,7 +449,7 @@ val result: List[Info] = SQL"SELECT * FROM list".as(parser.*)
 The similar macros `indexedParser[T]` and `offsetParser[T]` are available to get column values by positions instead of names.
 
 ```scala
-import anorm.{ Macro, RowParser }
+import anorm._
 
 case class Info(name: String, year: Option[Int])
 
@@ -474,7 +476,7 @@ val result2: List[Info] = SQL"SELECT * FROM list".as(parser2.*)
 To indicate custom names for the columns to be parsed, the macro `parser[T](names)` can be used.
 
 ```scala
-import anorm.{ Macro, RowParser }
+import anorm._
 
 case class Info(name: String, year: Option[Int])
 
@@ -491,7 +493,7 @@ val result: List[Info] = SQL"SELECT * FROM list".as(parser.*)
 It's also possible to configure the named parsers using a naming strategy for the corresponding columns.
 
 ```scala
-import anorm.{ Macro, RowParser }, Macro.ColumnNaming
+import anorm._
 
 case class Info(name: String, lastModified: Long)
 
@@ -651,7 +653,7 @@ val result: List[(String, Int)] =
 A `RowParser` can be combined with any function to applied it with extracted columns.
 
 ```scala
-import anorm.SqlParser.{ int, str, to }
+import anorm._, SqlParser.{ int, str, to }
 
 def display(name: String, population: Int): String = 
   s"The population in $name is of $population."
@@ -666,7 +668,7 @@ If list should not be empty, `parser.+` can be used instead of `parser.*`.
 Anorm is providing parser combinators other than the most common `~` one: `~>`, `<~`.
 
 ```scala
-import anorm.{ SQL, SqlParser }, SqlParser.{ int, str }
+import anorm._, SqlParser.{ int, str }
 
 // Combinator ~>
 val String = SQL("SELECT * FROM test").as((int("id") ~> str("val")).single)
@@ -844,6 +846,7 @@ The following example transforms each row to the correct Scala type:
 
 ```scala
 import java.sql.Connection
+
 import anorm._
 
 trait Country
@@ -868,14 +871,14 @@ def countries(implicit con: Connection): List[Country] =
 A row parser can be defined as for-comprehension, working with SQL result type. It can be useful when working with lot of column, possibly to work around case class limit.
 
 ```scala
-import anorm.SqlParser.{ str, int }
+import anorm._, SqlParser.{ str, int }
 
 val parser = for {
   a <- str("colA")
   b <- int("colB")
 } yield (a -> b)
 
-val parsed: (String, Int) = SELECT("SELECT * FROM Test").as(parser.single)
+val parsed: (String, Int) = SQL("SELECT * FROM Test").as(parser.single)
 ```
 
 ### Streaming results
@@ -904,7 +907,7 @@ val books: Either[List[Throwable], List[String]] =
 It's possible to use a custom streaming:
 
 ```scala
-import anorm.{ Cursor, Row }
+import anorm._
 
 @annotation.tailrec
 def go(c: Option[Cursor], l: List[String]): List[String] = c match {
@@ -925,6 +928,8 @@ The parsing API can be used with streaming, using `RowParser` on each cursor `.r
 
 ```scala
 import scala.util.{ Try, Success => TrySuccess, Failure }
+
+import anorm._
 
 // bookParser: anorm.RowParser[Book]
 
@@ -1020,6 +1025,8 @@ libraryDependencies ++= Seq(
 
 > For a Play application, as `play-iteratees` is provided there is no need to add this dependency.
 
+> Since Scala 2.13, `play-iteratees` is no longer available.
+
 Then the parsed results from Anorm can be turned into [`Enumerator`](https://www.playframework.com/documentation/latest/api/scala/index.html#play.api.libs.iteratee.Enumerator).
 
 ```scala
@@ -1039,7 +1046,7 @@ Moreover data, query execution involves context information like SQL warnings th
 Way to get context information along with query data is to use `executeQuery()`:
 
 ```scala
-import anorm.SqlQueryResult
+import anorm._
 
 val res: SqlQueryResult = SQL("EXEC stored_proc {code}").
   on("code" -> code).executeQuery()
@@ -1288,6 +1295,8 @@ The type of a parameter should be visible, to be properly set on SQL statement.
 Using value as `Any`, explicitly or due to erasure, leads to compilation error `No implicit view available from Any => anorm.ParameterValue`.
 
 ```scala
+import anorm._
+
 // Wrong #1
 val p: Any = "strAsAny"
 SQL("SELECT * FROM test WHERE id={id}").
