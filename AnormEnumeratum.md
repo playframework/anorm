@@ -12,6 +12,8 @@ libraryDependencies ++= Seq(
 )
 ```
 
+> As Enumeratum itself is not yet compatible, this module is not available for Scala 3.
+
 ## Usage
 
 Using this module, enums can be parsed from database columns and passed as parameters.
