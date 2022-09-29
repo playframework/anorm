@@ -40,7 +40,14 @@ object Common extends AutoPlugin {
     scalacOptions ++= Seq("-Xfatal-warnings"),
     scalacOptions ++= {
       if (scalaBinaryVersion.value != "3") {
-        Seq("-release", "11", "-Xlint", "-g:vars")
+        Seq("-Xlint", "-g:vars")
+      } else {
+        Seq.empty
+      }
+    },
+    scalacOptions ++= {
+      if (scalaBinaryVersion.value != "2.11") {
+        Seq("-release", "11")
       } else {
         Seq.empty
       }
