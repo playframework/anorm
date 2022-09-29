@@ -1,8 +1,8 @@
 import sbt.Keys._
 import sbt._
 import sbt.plugins.JvmPlugin
-
 import com.typesafe.tools.mima.plugin.MimaKeys.mimaPreviousArtifacts
+import xerial.sbt.Sonatype.autoImport._
 
 object Common extends AutoPlugin {
   import com.typesafe.tools.mima.core._
@@ -13,9 +13,10 @@ object Common extends AutoPlugin {
   val previousVersion = "2.6.0"
 
   override def projectSettings = Seq(
-    organization       := "org.playframework.anorm",
-    scalaVersion       := "2.12.16",
-    crossScalaVersions := Seq("2.11.12", scalaVersion.value, "2.13.8"),
+    organization        := "org.playframework.anorm",
+    sonatypeProfileName := "org.playframework",
+    scalaVersion        := "2.12.16",
+    crossScalaVersions  := Seq("2.11.12", scalaVersion.value, "2.13.8"),
     (Compile / unmanagedSourceDirectories) ++= {
       val sv = scalaVersion.value
 
