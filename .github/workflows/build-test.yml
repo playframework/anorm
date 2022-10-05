@@ -15,19 +15,19 @@ concurrency:
 jobs:
   check-code-style:
     name: Code Style
-    uses: playframework/.github/.github/workflows/cmd.yml@v2
+    uses: playframework/.github/.github/workflows/cmd.yml@v3
     with:
       cmd: sbt validateCode
 
   check-binary-compatibility:
     name: Binary Compatibility
-    uses: playframework/.github/.github/workflows/binary-check.yml@v2
+    uses: playframework/.github/.github/workflows/binary-check.yml@v3
 
   check-docs:
     name: Docs
-    uses: playframework/.github/.github/workflows/cmd.yml@v2
+    uses: playframework/.github/.github/workflows/cmd.yml@v3
     with:
-      java: 11, 8
+      java: 17, 11
       scala: 2.11.x, 2.12.x, 2.13.x # TODO: 3.x (other play modules not ok)
       cmd: sbt ++$MATRIX_SCALA docs/test
 
@@ -37,9 +37,9 @@ jobs:
       - "check-code-style"
       - "check-binary-compatibility"
       - "check-docs"
-    uses: playframework/.github/.github/workflows/cmd.yml@v2
+    uses: playframework/.github/.github/workflows/cmd.yml@v3
     with:
-      java: 11, 8
+      java: 17, 11
       scala: 2.11.x, 2.12.x, 2.13.x, 3.x
       cmd: sbt ++$MATRIX_SCALA publishLocal test
 
@@ -48,4 +48,4 @@ jobs:
     if: github.event_name == 'pull_request'
     needs: # Should be last
       - "tests"
-    uses: playframework/.github/.github/workflows/rtm.yml@v2
+    uses: playframework/.github/.github/workflows/rtm.yml@v3

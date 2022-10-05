@@ -371,7 +371,8 @@ lazy val docs = project
     libraryDependencies ++= Seq(
       "com.typesafe.play" %% "play-jdbc"   % playVer.value % Test,
       "com.typesafe.play" %% "play-specs2" % playVer.value % Test,
-      "com.h2database"     % "h2"          % "1.4.199"
+      "com.google.inject" % "guice" % "5.1.0" % Test, // TODO: Remove when depending on play-jdbc/-specs2 2.8.x+
+      "com.h2database"    % "h2"    % "1.4.199"
     )
   )
   .dependsOn(`anorm-core`)
