@@ -89,10 +89,6 @@ git add AnormPostgres.md
 cp "$SRCDIR/AnormEnumeratum.md" .
 git add AnormEnumeratum.md
 
-# Contributing page
-cp anorm/CONTRIBUTING.md .
-git add CONTRIBUTING.md
-
 # Highlights
 rm -f Highlights.md
 
