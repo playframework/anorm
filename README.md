@@ -48,8 +48,6 @@ To test the documentation code samples, run:
 
     sbt docs/test
 
-## Support
+## Releasing a new version
 
-The Anorm library is *[Community Driven][]*.
-
-[Community Driven]: https://developer.lightbend.com/docs/lightbend-platform/introduction/getting-help/support-terminology.html#community-driven
+See https://github.com/playframework/.github/blob/main/RELEASING.md
