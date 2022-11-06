@@ -5,7 +5,7 @@ resolvers ++= DefaultOptions.resolvers(snapshot = true) ++ Seq(
 
 addSbtPlugin("com.typesafe.play" % "interplay" % sys.props.get("interplay.version").getOrElse("3.0.7"))
 
-addSbtPlugin("com.typesafe" % "sbt-mima-plugin" % "1.1.0")
+addSbtPlugin("com.typesafe" % "sbt-mima-plugin" % "1.1.1")
 
 addSbtPlugin("com.github.sbt" % "sbt-unidoc" % "0.5.0")
 
