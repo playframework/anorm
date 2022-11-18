@@ -885,7 +885,7 @@ val parsed: (String, Int) = SQL("SELECT * FROM Test").as(parser.single)
 
 Query results can be processed row per row, not having all loaded in memory.
 
-**NOTE**: Setting `autoCommit=false` (at the `Connection`) and `fetchSize=N` (at the sql query) is necessary avoid loading all data into memory.
+**NOTE**: Setting `autoCommit=false` (on the `Connection`) and `fetchSize=N` (on the SQL query) is necessary avoid loading all data into memory.
 
 In the following example we will count the number of country rows.
 
