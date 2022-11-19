@@ -885,11 +885,13 @@ val parsed: (String, Int) = SQL("SELECT * FROM Test").as(parser.single)
 
 Query results can be processed row per row, not having all loaded in memory.
 
+**NOTE**: Setting `autoCommit=false` (on the `Connection`) and `fetchSize=N` (on the SQL query) is necessary avoid loading all data into memory.
+
 In the following example we will count the number of country rows.
 
 ```scala
 val countryCount: Either[List[Throwable], Long] = 
-  SQL"Select count(*) as c from Country".fold(0L) { (c, _) => c + 1 }
+  SQL"Select count(*) as c from Country".withFetchSize(Some(1000)).fold(0L) { (c, _) => c + 1 }
 ```
 
 > In previous example, either it's the successful `Long` result (right), or the list of errors (left).
@@ -898,7 +900,7 @@ Result can also be partially processed:
 
 ```scala
 val books: Either[List[Throwable], List[String]] = 
-  SQL("Select name from Books").foldWhile(List[String]()) { (list, row) => 
+  SQL("Select name from Books".withFetchSize(Some(1000))).foldWhile(List[String]()) { (list, row) => 
     if (list.size == 100) (list -> false) // stop with `list`
     else (list := row[String]("name")) -> true // continue with one more name
   }
@@ -921,7 +923,7 @@ def go(c: Option[Cursor], l: List[String]): List[String] = c match {
 }
 
 val books: Either[List[Throwable], List[String]] = 
-  SQL("Select name from Books").withResult(go(_, List.empty[String]))
+  SQL("Select name from Books".withFetchSize(Some(1000))).withResult(go(_, List.empty[String]))
 ```
 
 The parsing API can be used with streaming, using `RowParser` on each cursor `.row`. The previous example can be updated with row parser.
@@ -951,7 +953,7 @@ def go(c: Option[Cursor], l: List[Book]): Try[List[Book]] = c match {
 }
 
 val books: Either[List[Throwable], Try[List[Book]]] = 
-  SQL("Select name from Books").withResult(go(_, List.empty[Book]))
+  SQL("Select name from Books".withFetchSize(Some(1000))).withResult(go(_, List.empty[Book]))
 
 books match {
   case Left(streamingErrors) => ???
@@ -986,7 +988,7 @@ import akka.stream.scaladsl.{ Sink, Source }
 
 import anorm._
 
-def resultSource(implicit m: Materializer, con: Connection): Source[String, Future[Int]] = AkkaStream.source(SQL"SELECT * FROM Test", SqlParser.scalar[String], ColumnAliaser.empty)
+def resultSource(implicit m: Materializer, con: Connection): Source[String, Future[Int]] = AkkaStream.source(SQL"SELECT * FROM Test".withFetchSize(Some(1000)), SqlParser.scalar[String], ColumnAliaser.empty)
 
 def countStrings()(implicit m: Materializer, con: Connection): Future[Int] =
   resultSource.runWith(
@@ -1007,7 +1009,7 @@ import akka.stream.scaladsl.{ Sink, Source }
 import anorm._
 
 def source(implicit m: Materializer, connection: Connection): Source[String, Future[Int]]#ReprMat[String, Unit] = 
-  AkkaStream.source(SQL"SELECT * FROM Test", SqlParser.scalar[String], ColumnAliaser.empty)
+  AkkaStream.source(SQL"SELECT * FROM Test".withFetchSize(Some(1000)), SqlParser.scalar[String], ColumnAliaser.empty)
     .mapMaterializedValue(_.onComplete { _ =>
       connection.close()
     })
