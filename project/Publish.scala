@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) from 2022 The Play Framework Contributors <https://github.com/playframework>, 2011-2021 Lightbend Inc. <https://www.lightbend.com>
+ */
+
 import scala.xml.{ Elem => XmlElem, Node => XmlNode }
 
 import sbt.Keys._
@@ -19,7 +23,7 @@ object Publish {
     licenses := {
       Seq(
         "Apache 2.0" ->
-          url("http://www.apache.org/licenses/LICENSE-2.0")
+          url("https://www.apache.org/licenses/LICENSE-2.0")
       )
     },
     homepage := Some(url(siteUrl))

@@ -1,11 +1,18 @@
+/*
+ * Copyright (C) from 2022 The Play Framework Contributors <https://github.com/playframework>, 2011-2021 Lightbend Inc. <https://www.lightbend.com>
+ */
+
 import sbt.Keys._
 import sbt._
 import sbt.plugins.JvmPlugin
 import com.typesafe.tools.mima.plugin.MimaKeys.mimaPreviousArtifacts
+import de.heikoseeberger.sbtheader.HeaderPlugin.autoImport.HeaderPattern.commentBetween
+import de.heikoseeberger.sbtheader.{ CommentStyle, FileType, HeaderPlugin, LineCommentCreator }
 import xerial.sbt.Sonatype.autoImport._
 
 object Common extends AutoPlugin {
   import com.typesafe.tools.mima.core._
+  import HeaderPlugin.autoImport._
 
   override def trigger  = allRequirements
   override def requires = JvmPlugin
@@ -90,7 +97,18 @@ object Common extends AutoPlugin {
     Test / scalacOptions ~= (_.filterNot(_ == "-Werror")),
     scalacOptions ~= (_.filterNot(_ == "-Xfatal-warnings")),
     Test / fork           := true,
-    mimaPreviousArtifacts := Set(organization.value %% moduleName.value % previousVersion)
+    mimaPreviousArtifacts := Set(organization.value %% moduleName.value % previousVersion),
+    headerLicense := Some(
+      HeaderLicense.Custom(
+        "Copyright (C) from 2022 The Play Framework Contributors <https://github.com/playframework>, 2011-2021 Lightbend Inc. <https://www.lightbend.com>"
+      )
+    ),
+    headerMappings ++= Map(
+      FileType("sbt")        -> HeaderCommentStyle.cppStyleLineComment,
+      FileType("properties") -> HeaderCommentStyle.hashLineComment,
+      FileType("xml")        -> HeaderCommentStyle.xmlStyleBlockComment,
+      FileType("md") -> CommentStyle(new LineCommentCreator("<!---", "-->"), commentBetween("<!---", "*", "-->"))
+    ),
   ) ++ Publish.settings
 
   @inline def missMeth(n: String) =
