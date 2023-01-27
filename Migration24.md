@@ -1,3 +1,5 @@
+<!--- Copyright (C) from 2022 The Play Framework Contributors <https://github.com/playframework>, 2011-2021 Lightbend Inc. <https://www.lightbend.com> -->
+
 # Anorm 2.4 Migration Guide
 
 This is a guide for migrating from Anorm 2.3 to Anorm 2.4. If you need to migrate from an earlier version of Anorm then you must first follow the [Play 2.3 Migration Guide](https://www.playframework.com/documentation/2.3.x/Migration23).

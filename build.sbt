@@ -1,3 +1,5 @@
+// Copyright (C) from 2022 The Play Framework Contributors <https://github.com/playframework>, 2011-2021 Lightbend Inc. <https://www.lightbend.com>
+
 import AnormGeneration.{ generateFunctionAdapter => GFA }
 import Common._
 
@@ -355,7 +357,15 @@ lazy val `anorm-enumeratum` = (project in file("enumeratum"))
 lazy val `anorm-parent` = (project in file("."))
   .enablePlugins(ScalaUnidocPlugin)
   .aggregate(`anorm-tokenizer`, `anorm-core`, `anorm-iteratee`, `anorm-akka`, `anorm-postgres`, `anorm-enumeratum`)
-  .settings(mimaPreviousArtifacts := Set.empty)
+  .settings(
+    mimaPreviousArtifacts := Set.empty,
+    (Compile / headerSources) ++=
+      ((baseDirectory.value ** ("*.properties" || "*.md" || "*.sbt"))
+        --- (baseDirectory.value ** "target" ** "*")
+        --- (baseDirectory.value / ".github" ** "*")
+        --- (baseDirectory.value / "docs" ** "*")).get ++
+        (baseDirectory.value / "project" ** "*.scala" --- (baseDirectory.value ** "target" ** "*")).get
+  )
 
 lazy val docs = project
   .in(file("docs"))
@@ -372,7 +382,10 @@ lazy val docs = project
       "com.typesafe.play" %% "play-jdbc"   % playVer.value % Test,
       "com.typesafe.play" %% "play-specs2" % playVer.value % Test,
       "com.h2database"     % "h2"          % "1.4.199"
-    )
+    ),
+    (Compile / headerSources) ++=
+      ((baseDirectory.value ** ("*.md" || "*.scala" || "*.xml"))
+        --- (baseDirectory.value ** "target" ** "*")).get
   )
   .dependsOn(`anorm-core`)
 
@@ -383,6 +396,9 @@ addCommandAlias(
   List(
     "scalafixAll -check",
     "scalafmtSbtCheck",
-    "+scalafmtCheckAll"
+    "+scalafmtCheckAll",
+    "+headerCheckAll",
+    "docs/headerCheckAll",
+    "docs/scalafmtCheckAll"
   ).mkString(";")
 )
