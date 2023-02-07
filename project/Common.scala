@@ -106,7 +106,7 @@ object Common extends AutoPlugin {
     headerMappings ++= Map(
       FileType("sbt")        -> HeaderCommentStyle.cppStyleLineComment,
       FileType("properties") -> HeaderCommentStyle.hashLineComment,
-      FileType("xml")        -> HeaderCommentStyle.xmlStyleBlockComment,
+      FileType.xml           -> HeaderCommentStyle.xmlStyleBlockComment,
       FileType("md") -> CommentStyle(new LineCommentCreator("<!---", "-->"), commentBetween("<!---", "*", "-->"))
     ),
   ) ++ Publish.settings
