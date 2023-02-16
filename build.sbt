@@ -302,7 +302,7 @@ lazy val `anorm-akka` = (project in file("akka"))
 
 // ---
 
-lazy val pgVer = sys.env.get("POSTGRES_VERSION").getOrElse("42.5.3")
+lazy val pgVer = sys.env.get("POSTGRES_VERSION").getOrElse("42.5.4")
 
 val playVer = Def.setting[String] {
   if (scalaBinaryVersion.value == "2.13") "2.7.3"
