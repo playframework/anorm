@@ -16,11 +16,15 @@ inThisBuild(
   )
 )
 
-val specs2Test = Seq(
+def specs2Test(scalaBinaryVersion: String) = Seq(
   "specs2-core",
   "specs2-junit",
   "specs2-matcher-extra"
-).map("org.specs2" %% _ % "4.19.2" % Test)
+).map("org.specs2" %% _ % (if (scalaBinaryVersion == "2.11") {
+                             "4.10.6"
+                           } else {
+                             "4.19.2"
+                           }) % Test)
   .map(_.exclude("org.scala-lang.modules", "*"))
 
 lazy val acolyteVersion = "1.2.5"
@@ -205,7 +209,7 @@ lazy val `anorm-core` = project
         "org.scala-lang.modules" %% "scala-xml"                % xmlVer.value % Test,
         "com.h2database"          % "h2"                       % "2.1.214"    % Test,
         acolyte
-      ) ++ specs2Test,
+      ) ++ specs2Test(scalaBinaryVersion.value),
     ) ++ armShading
   )
   .dependsOn(`anorm-tokenizer`)
@@ -238,7 +242,7 @@ lazy val `anorm-iteratee` = (project in file("iteratee"))
           "com.typesafe.play"      %% "play-iteratees" % "2.6.1",
           "org.scala-lang.modules" %% "scala-xml"      % xmlVer.value % Test,
           acolyte
-        ) ++ specs2Test
+        ) ++ specs2Test(scalaBinaryVersion.value)
     }
   )
   .dependsOn(`anorm-core`)
@@ -275,7 +279,7 @@ lazy val `anorm-akka` = (project in file("akka"))
     libraryDependencies ++= Seq(
       acolyte,
       "org.scala-lang.modules" %% "scala-xml" % xmlVer.value % Test
-    ) ++ specs2Test ++ Seq(
+    ) ++ specs2Test(scalaBinaryVersion.value) ++ Seq(
       ("com.typesafe.akka" %% "akka-stream-contrib" % akkaContribVer.value % Test)
         .cross(CrossVersion.for3Use2_13)
         .exclude("com.typesafe.akka", "*")
@@ -325,7 +329,7 @@ lazy val `anorm-postgres` = (project in file("postgres"))
         "org.postgresql"          % "postgresql" % pgVer,
         "com.typesafe.play"      %% "play-json"  % playJsonVer,
         "org.scala-lang.modules" %% "scala-xml"  % xmlVer.value % Test
-      ) ++ specs2Test :+ acolyte
+      ) ++ specs2Test(scalaBinaryVersion.value) :+ acolyte
     }
   )
   .dependsOn(`anorm-core`)
@@ -344,7 +348,7 @@ lazy val `anorm-enumeratum` = (project in file("enumeratum"))
           "org.scala-lang.modules" %% "scala-xml"  % xmlVer.value % Test,
           "com.beachape"           %% "enumeratum" % "1.7.2",
           acolyte
-        ) ++ specs2Test
+        ) ++ specs2Test(scalaBinaryVersion.value)
       } else {
         Seq.empty
       }
