@@ -11,7 +11,7 @@ import play.api.test._
 import play.api.test.Helpers._
 
 class ScalaAnorm extends org.specs2.mutable.Specification {
-  "Code samples" title
+  "Code samples".title
 
   def createApp(additionalConfiguration: Map[String, _]): Application = {
     new GuiceApplicationBuilder().configure(additionalConfiguration).build()
