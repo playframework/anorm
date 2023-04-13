@@ -19,15 +19,17 @@ class ScalaAnorm extends org.specs2.mutable.Specification {
 
   "Anorm" should {
     "be usable in play" in new WithApplication(createApp(additionalConfiguration = inMemoryDatabase())) {
-      val database = app.injector.instanceOf[Database]
-      // #playdb
-      import anorm._
+      override def running() = {
+        val database = app.injector.instanceOf[Database]
+        // #playdb
+        import anorm._
 
-      database.withConnection { implicit c =>
-        val _: Boolean = SQL("Select 1").execute()
+        database.withConnection { implicit c =>
+          val _: Boolean = SQL("Select 1").execute()
+        }
+        // #playdb
+        ok
       }
-      // #playdb
-      ok
     }
   }
 }
