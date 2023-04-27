@@ -56,6 +56,33 @@ final class AkkaStreamSpec(implicit ee: ExecutionEnv) extends org.specs2.mutable
       }
     }
 
+    "fail materialized value on finished downstream" in assertAllStagesStopped {
+      val list = stringList :+ "A" :+ "B" :+ "C"
+
+      withQueryResult(list.withCycling(true)) { implicit con =>
+        val killSwitch = akka.stream.KillSwitches.shared("cycling-switch")
+
+        AkkaStream
+          .source(SQL"SELECT * FROM Test", SqlParser.scalar[String])
+
+        val p = scala.concurrent.Promise[Int]()
+
+        val res = AkkaStream
+          .source(SQL"SELECT * FROM Test", SqlParser.scalar[String])
+          .mapMaterializedValue(p.completeWith)
+          .via(killSwitch.flow)
+          .runWith(Sink.ignore)
+          .flatMap(_ => p.future)
+
+        Thread.sleep(2000)
+        killSwitch.shutdown()
+
+        res must throwA[java.util.concurrent.ExecutionException].like {
+          case e => e.getCause must beAnInstanceOf[InterruptedException]
+        }.await
+      }
+    }
+
     "manage resources" >> {
       def run[T](sink: Sink[String, T])(implicit c: Connection) = {
         val graph = source(SQL"SELECT * FROM Test", SqlParser.scalar[String])
