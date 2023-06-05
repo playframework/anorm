@@ -97,7 +97,7 @@ lazy val parserCombinatorsVer = Def.setting[String] {
   if (scalaBinaryVersion.value.startsWith("2")) {
     "1.1.2"
   } else {
-    "2.1.1"
+    "2.3.0"
   }
 }
 
