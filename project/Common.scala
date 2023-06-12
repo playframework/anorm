@@ -32,7 +32,7 @@ object Common extends AutoPlugin {
     (Test / unmanagedSourceDirectories) ++= scalaUnmanaged(scalaVersion.value, (Test / sourceDirectory).value),
     ThisBuild / libraryDependencies ++= {
       if (scalaBinaryVersion.value != "3") {
-        val silencerVersion = "1.7.13"
+        val silencerVersion = "1.17.13"
 
         Seq(
           compilerPlugin(
