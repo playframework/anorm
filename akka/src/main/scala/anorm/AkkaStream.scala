@@ -180,6 +180,7 @@ object AkkaStream {
         }
 
         override def onDownstreamFinish() = {
+          result.tryFailure(new InterruptedException("Downstream finished"))
           release()
           super.onDownstreamFinish()
         }
