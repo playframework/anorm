@@ -22,8 +22,8 @@ object Common extends AutoPlugin {
   override def projectSettings = Seq(
     organization        := "org.playframework.anorm",
     sonatypeProfileName := "org.playframework",
-    scalaVersion        := "2.12.17",
-    crossScalaVersions  := Seq("2.11.12", scalaVersion.value, "2.13.10", "3.1.3"),
+    scalaVersion        := "2.12.18",
+    crossScalaVersions  := Seq("2.11.12", scalaVersion.value, "2.13.11", "3.3.0"),
     (Compile / unmanagedSourceDirectories) ++= {
       val sv = scalaVersion.value
 
@@ -32,7 +32,7 @@ object Common extends AutoPlugin {
     (Test / unmanagedSourceDirectories) ++= scalaUnmanaged(scalaVersion.value, (Test / sourceDirectory).value),
     ThisBuild / libraryDependencies ++= {
       if (scalaBinaryVersion.value != "3") {
-        val silencerVersion = "1.7.12"
+        val silencerVersion = "1.7.13"
 
         Seq(
           compilerPlugin(

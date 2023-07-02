@@ -97,7 +97,7 @@ lazy val parserCombinatorsVer = Def.setting[String] {
   if (scalaBinaryVersion.value.startsWith("2")) {
     "1.1.2"
   } else {
-    "2.1.1"
+    "2.3.0"
   }
 }
 
@@ -199,7 +199,7 @@ lazy val `anorm-core` = project
         ProblemFilters.exclude[IncompatibleResultTypeProblem]("anorm.ColumnNotFound.copy$default$2")
       ),
       libraryDependencies ++= Seq(
-        "joda-time"               % "joda-time"                % "2.12.2",
+        "joda-time"               % "joda-time"                % "2.12.5",
         "org.joda"                % "joda-convert"             % "2.2.3",
         "org.scala-lang.modules" %% "scala-parser-combinators" % parserCombinatorsVer.value,
         "org.scala-lang.modules" %% "scala-xml"                % xmlVer.value % Test,
