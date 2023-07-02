@@ -23,8 +23,8 @@ val specs2Test = Seq(
 ).map("org.specs2" %% _ % "4.10.6" % Test cross (CrossVersion.for3Use2_13))
   .map(_.exclude("org.scala-lang.modules", "*"))
 
-lazy val acolyteVersion = "1.2.7-58199735-SNAPSHOT"
-lazy val acolyte        = ("org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test).changing()
+lazy val acolyteVersion = "1.2.8"
+lazy val acolyte        = "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test
 
 ThisBuild / resolvers ++= Seq("Tatami Snapshots".at("https://raw.github.com/cchantep/tatami/master/snapshots"))
 
