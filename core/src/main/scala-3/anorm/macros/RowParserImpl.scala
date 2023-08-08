@@ -287,24 +287,20 @@ private[anorm] object RowParserImpl {
                 // (whose type has type arguments), false warning is raised
                 // about exhaustivity.
 
-                if (hasGenericProperty) {
-                  List(
-                    ctorCase,
-                    CaseDef(
-                      Wildcard(),
-                      guard = None,
-                      rhs = '{
-                        anorm.Error(
-                          anorm.SqlMappingError(
-                            "Unexpected parsed value: " + ${ parsed }
-                          )
+                List(
+                  ctorCase,
+                  CaseDef(
+                    Wildcard(),
+                    guard = None,
+                    rhs = '{
+                      anorm.Error(
+                        anorm.SqlMappingError(
+                          "Unexpected parsed value: " + ${ parsed }
                         )
-                      }.asTerm
-                    )
+                      )
+                    }.asTerm
                   )
-                } else {
-                  List(ctorCase)
-                }
+                )
               }
 
               inline def flatMapParsed[U: Type](inline parsed: Expr[U]): Expr[SqlResult[A]] =
