@@ -261,10 +261,7 @@ lazy val akkaVer = Def.setting[String] {
   }
 }
 
-val akkaContribVer = Def.setting[String] {
-  if (akkaVer.value.startsWith("2.5")) "0.11+4-91b2f9fa"
-  else "0.10"
-}
+lazy val pekkoVer = Def.setting[String]("1.0.1")
 
 lazy val `anorm-akka` = (project in file("akka"))
   .settings(
@@ -280,12 +277,9 @@ lazy val `anorm-akka` = (project in file("akka"))
     },
     libraryDependencies ++= Seq(
       acolyte,
-      "org.scala-lang.modules" %% "scala-xml" % xmlVer.value % Test
-    ) ++ specs2Test ++ Seq(
-      ("com.typesafe.akka" %% "akka-stream-contrib" % akkaContribVer.value % Test)
-        .cross(CrossVersion.for3Use2_13)
-        .exclude("com.typesafe.akka", "*")
-    ),
+      "org.scala-lang.modules" %% "scala-xml"           % xmlVer.value  % Test,
+      "com.typesafe.akka"      %% "akka-stream-testkit" % akkaVer.value % Test
+    ) ++ specs2Test,
     scalacOptions ++= {
       if (scalaBinaryVersion.value == "3") {
         Seq("-Wconf:cat=deprecation&msg=.*(onDownstreamFinish|ActorMaterializer).*:s")
@@ -303,6 +297,38 @@ lazy val `anorm-akka` = (project in file("akka"))
 
       }
     }
+  )
+  .dependsOn(`anorm-core`)
+
+lazy val `anorm-pekko` = (project in file("pekko"))
+  .settings(
+    mimaPreviousArtifacts := Set.empty,
+    libraryDependencies ++= Seq("pekko-testkit", "pekko-stream").map { m =>
+      ("org.apache.pekko" %% m % pekkoVer.value % Provided).exclude("org.scala-lang.modules", "*")
+    },
+    libraryDependencies ++= Seq(
+      acolyte,
+      "org.scala-lang.modules" %% "scala-xml"            % xmlVer.value   % Test,
+      "org.apache.pekko"       %% "pekko-stream-testkit" % pekkoVer.value % Test
+    ) ++ specs2Test,
+    scalacOptions ++= {
+      if (scalaBinaryVersion.value == "3") {
+        Seq("-Wconf:cat=deprecation&msg=.*(onDownstreamFinish|ActorMaterializer).*:s")
+      } else {
+        Seq("-P:silencer:globalFilters=deprecated")
+      }
+    },
+    Test / unmanagedSourceDirectories ++= {
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, n)) if n < 13 =>
+          Seq((Test / sourceDirectory).value / "scala-2.13-")
+
+        case _ =>
+          Seq((Test / sourceDirectory).value / "scala-2.13+")
+
+      }
+    },
+    crossScalaVersions -= "2.11.12"
   )
   .dependsOn(`anorm-core`)
 
@@ -362,7 +388,15 @@ lazy val `anorm-enumeratum` = (project in file("enumeratum"))
 
 lazy val `anorm-parent` = (project in file("."))
   .enablePlugins(ScalaUnidocPlugin)
-  .aggregate(`anorm-tokenizer`, `anorm-core`, `anorm-iteratee`, `anorm-akka`, `anorm-postgres`, `anorm-enumeratum`)
+  .aggregate(
+    `anorm-tokenizer`,
+    `anorm-core`,
+    `anorm-iteratee`,
+    `anorm-akka`,
+    `anorm-pekko`,
+    `anorm-postgres`,
+    `anorm-enumeratum`
+  )
   .settings(
     mimaPreviousArtifacts := Set.empty,
     (Compile / headerSources) ++=
