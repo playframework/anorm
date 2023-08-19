@@ -11,8 +11,7 @@ inThisBuild(
   List(
     // scalaVersion := "2.13.3",
     semanticdbEnabled := true,
-    semanticdbVersion := scalafixSemanticdb.revision,
-    scalafixDependencies ++= Seq("com.github.liancheng" %% "organize-imports" % "0.5.0")
+    semanticdbVersion := scalafixSemanticdb.revision
   )
 )
 
@@ -161,6 +160,13 @@ lazy val `anorm-core` = project
         }
       },
       mimaBinaryIssueFilters ++= Seq(
+        ProblemFilters.exclude[MissingClassProblem](f"anorm.package$$ResultSetResource$$"),
+        ProblemFilters.exclude[MissingClassProblem](f"anorm.package$$StatementResource$$"),
+        ProblemFilters.exclude[MissingClassProblem](f"anorm.package$$StringWrapper2$$"),
+        ProblemFilters.exclude[MissingClassProblem](f"anorm.package$$TimestampWrapper1$$"),
+        ProblemFilters.exclude[MissingClassProblem](f"anorm.package$$TimestampWrapper2$$"),
+        ProblemFilters.exclude[MissingClassProblem](f"anorm.package$$features$$"),
+        // ---
         ProblemFilters.exclude[IncompatibleSignatureProblem]("anorm.SqlStatementParser.elem"),
         ProblemFilters.exclude[IncompatibleSignatureProblem]("anorm.SqlStatementParser.accept"),
         // ---

@@ -8,7 +8,7 @@ import acolyte.jdbc.AcolyteDSL.withQueryResult
 import acolyte.jdbc.Implicits._
 import acolyte.jdbc.RowLists
 
-private[anorm] trait AnormCompatSpec { spec: AnormSpec =>
+trait AnormCompatSpec { spec: tests.AnormSpec =>
   "Query (scala2)" should {
     "be executed as simple SQL" in withQueryResult(RowLists.booleanList :+ true) { implicit con =>
       val sql = SQL("SELECT 1")

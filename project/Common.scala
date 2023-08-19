@@ -92,7 +92,7 @@ object Common extends AutoPlugin {
     },
     Test / scalacOptions ++= {
       if (scalaBinaryVersion.value != "3") Seq("-Yrangepos")
-      else Seq.empty
+      else Seq("-language:implicitConversions")
     },
     Test / scalacOptions ~= (_.filterNot(_ == "-Werror")),
     scalacOptions ~= (_.filterNot(_ == "-Xfatal-warnings")),

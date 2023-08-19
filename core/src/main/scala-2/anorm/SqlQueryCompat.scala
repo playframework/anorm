@@ -4,4 +4,4 @@
 
 package anorm
 
-trait AnormCompatSpec { _self: tests.AnormSpec => }
+private[anorm] trait SqlQueryCompat {}
