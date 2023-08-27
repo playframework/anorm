@@ -328,7 +328,7 @@ lazy val `anorm-pekko` = (project in file("pekko"))
 
       }
     },
-    crossScalaVersions -= "2.11.12",
+    crossScalaVersions --= Seq("2.11.12", "2.12.18"),
     mimaFailOnNoPrevious := false
   )
   .dependsOn(`anorm-core`)
