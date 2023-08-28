@@ -2,7 +2,7 @@
  * Copyright (C) from 2022 The Play Framework Contributors <https://github.com/playframework>, 2011-2021 Lightbend Inc. <https://www.lightbend.com>
  */
 
-package anorm
+package tests // Test as unprivililedged/outside caller
 
 import java.sql.Connection
 
@@ -10,12 +10,16 @@ import acolyte.jdbc.{ ExecutedParameter, QueryResult, RowLists, UpdateExecution 
 import acolyte.jdbc.AcolyteDSL.{ connection, handleQuery, handleStatement, updateResult, withQueryResult }
 import acolyte.jdbc.Implicits._
 
-import org.specs2.mutable.Specification
+import anorm._
 
 import RowLists.{ stringList, longList, rowList1, rowList2, rowList3 }
 import SqlParser.scalar
 
-final class AnormSpec extends Specification with H2Database with AnormTest {
+final class AnormSpec
+    extends org.specs2.mutable.Specification
+    with anorm.H2Database
+    with AnormTest
+    with anorm.AnormCompatSpec {
   "Anorm".title
 
   lazy val fooBarTable = rowList3(classOf[Long] -> "id", classOf[String] -> "foo", classOf[Int] -> "bar")
@@ -48,9 +52,9 @@ final class AnormSpec extends Specification with H2Database with AnormTest {
 
     "handle scalar result" >> {
       "return single value" in withQueryResult(20) { implicit c: Connection =>
-        (SQL("SELECT * FROM test").as(scalar[Int].single).aka("single value #1") must_=== 20)
-          .and(SQL("SELECT * FROM test").as(scalar[Int].single) must_=== 20)
-
+        (SQL("SELECT * FROM test").as(scalar[Int].single).aka("single value #1") must_=== 20).and {
+          SQL("SELECT * FROM test").as(scalar[Int].single) must_=== 20
+        }
       }
 
       "return None for missing optional value" in withQueryResult(null.asInstanceOf[String]) { implicit c: Connection =>

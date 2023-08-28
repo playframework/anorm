@@ -2,6 +2,8 @@
  * Copyright (C) from 2022 The Play Framework Contributors <https://github.com/playframework>, 2011-2021 Lightbend Inc. <https://www.lightbend.com>
  */
 
+package anorm
+
 import java.util.StringTokenizer
 
 import java.lang.reflect.InvocationTargetException
@@ -9,18 +11,7 @@ import java.sql.{ PreparedStatement, ResultSet, SQLException }
 
 import scala.reflect.ClassTag
 
-/**
- * Anorm API
- *
- * Use the SQL method to start an SQL query
- *
- * {{{
- * import anorm._
- *
- * SQL("Select 1")
- * }}}
- */
-package object anorm extends PackageCompat {
+private[anorm] trait TopLevelDefinitions extends PackageCompat {
 
   /** Structural type for timestamp wrapper. */
   type TimestampWrapper1 = { def getTimestamp: java.sql.Timestamp }
@@ -108,41 +99,8 @@ package object anorm extends PackageCompat {
   @SuppressWarnings(Array("MethodNames", "TryGet" /* TODO: Make it safer */ ))
   def SQL(stmt: String): SqlQuery = SqlStatementParser.parse(stmt).map(ts => SqlQuery.prepare(ts, ts.names)).get
 
-  /**
-   * Creates an SQL query using String Interpolation feature.
-   * It is a 1-step alternative for SQL("...").on(...) functions.
-   *
-   * {{{
-   * import java.util.Date
-   * import java.sql.Connection
-   *
-   * import anorm._
-   *
-   * case class Computer(
-   *   name: String,
-   *   introduced: Date,
-   *   discontinued: Date,
-   *   companyId: String)
-   *
-   * def foo(computer: Computer, id: String)(implicit con: Connection) =
-   *   SQL"""
-   *     UPDATE computer SET name = \\${computer.name},
-   *     introduced = \\${computer.introduced},
-   *     discontinued = \\${computer.discontinued},
-   *     company_id = \\${computer.companyId}
-   *     WHERE id = \\$id
-   *   """.executeUpdate()
-   * }}}
-   */
-  implicit class SqlStringInterpolation(val sc: StringContext) extends AnyVal {
-    def SQL(args: ParameterValue*) = {
-      val (ts, ps) = TokenizedStatement.stringInterpolation(sc.parts, args)
-      SimpleSql(SqlQuery.prepare(ts, ts.names), ps, RowParser(Success(_)))
-    }
-  }
-
   @annotation.tailrec
-  private[anorm] def tokenize(
+  private[anorm] final def tokenize(
       ti: Iterator[Any],
       tks: List[StatementToken],
       parts: Seq[String],
@@ -150,71 +108,74 @@ package object anorm extends PackageCompat {
       gs: Seq[TokenGroup],
       ns: Seq[String],
       m: Map[String, ParameterValue]
-  ): (TokenizedStatement, Map[String, ParameterValue]) = if (ti.hasNext) ti.next() match {
-    case "%" => tokenize(ti, PercentToken :: tks, parts, ps, gs, ns, m)
-    case s: String =>
-      tokenize(ti, StringToken(s) :: tks, parts, ps, gs, ns, m)
-    case _ => /* should not occur */ tokenize(ti, tks, parts, ps, gs, ns, m)
-  }
-  else {
-    if (tks.nonEmpty) {
-      gs match {
-        case prev :: groups =>
-          ps.headOption match {
-            case Some(v) =>
-              prev match {
-                case TokenGroup(StringToken(str) :: gts, pl) if str.endsWith("#") /* escaped part */ =>
-                  val before =
-                    if (str == "#") gts.reverse
-                    else {
-                      StringToken(str.dropRight(1)) :: gts.reverse
-                    }
-                  val ng = TokenGroup(
-                    tks ::: StringToken(v.show) ::
-                      before,
-                    pl
-                  )
+  ): (TokenizedStatement, Map[String, ParameterValue]) = {
+    if (ti.hasNext) ti.next() match {
+      case "%" => tokenize(ti, PercentToken :: tks, parts, ps, gs, ns, m)
+      case s: String =>
+        tokenize(ti, StringToken(s) :: tks, parts, ps, gs, ns, m)
+      case _ => /* should not occur */ tokenize(ti, tks, parts, ps, gs, ns, m)
+    }
+    else {
+      if (tks.nonEmpty) {
+        gs match {
+          case prev :: groups =>
+            ps.headOption match {
+              case Some(v) =>
+                prev match {
+                  case TokenGroup(StringToken(str) :: gts, pl) if str.endsWith("#") /* escaped part */ =>
+                    val before =
+                      if (str == "#") gts.reverse
+                      else {
+                        StringToken(str.dropRight(1)) :: gts.reverse
+                      }
+                    val ng = TokenGroup(
+                      tks ::: StringToken(v.show) ::
+                        before,
+                      pl
+                    )
 
-                  tokenize(ti, tks.tail, parts, ps.tail, ng :: groups, ns, m)
+                    tokenize(ti, tks.tail, parts, ps.tail, ng :: groups, ns, m)
 
-                case _ =>
-                  val ng = TokenGroup(tks, None)
-                  val n  = '_'.toString + ns.size
-                  tokenize(
-                    ti,
-                    tks.tail,
-                    parts,
-                    ps.tail,
-                    ng :: prev.copy(placeholder = Some(n)) :: groups,
-                    n +: ns,
-                    m + (n -> v)
-                  )
-              }
-            case _ =>
-              sys.error(s"No parameter value for placeholder: ${gs.size}")
-          }
-        case _ => tokenize(ti, tks.tail, parts, ps, List(TokenGroup(tks, None)), ns, m)
+                  case _ =>
+                    val ng = TokenGroup(tks, None)
+                    val n  = '_'.toString + ns.size
+                    tokenize(
+                      ti,
+                      tks.tail,
+                      parts,
+                      ps.tail,
+                      ng :: prev.copy(placeholder = Some(n)) :: groups,
+                      n +: ns,
+                      m + (n -> v)
+                    )
+                }
+              case _ =>
+                sys.error(s"No parameter value for placeholder: ${gs.size}")
+            }
+          case _ => tokenize(ti, tks.tail, parts, ps, List(TokenGroup(tks, None)), ns, m)
+        }
+      } else {
+        parts.headOption match {
+          case Some(part) =>
+            val it = Compat.javaEnumIterator[java.lang.Object](new StringTokenizer(part, "%", true))
+
+            if (!it.hasNext /* empty */ ) {
+              tokenize(it, List(StringToken("")), parts.tail, ps, gs, ns, m)
+            } else tokenize(it, tks, parts.tail, ps, gs, ns, m)
+
+          case _ =>
+            val groups = (gs match {
+              case TokenGroup(List(StringToken("")), None) :: tgs => tgs // trim end
+              case _                                              => gs
+            }).collect {
+              case TokenGroup(pr, pl) =>
+                TokenGroup(pr.reverse, pl)
+            }.reverse
+
+            TokenizedStatement(groups, ns.reverse) -> m
+        }
       }
-    } else
-      parts.headOption match {
-        case Some(part) =>
-          val it = Compat.javaEnumIterator[java.lang.Object](new StringTokenizer(part, "%", true))
-
-          if (!it.hasNext /* empty */ ) {
-            tokenize(it, List(StringToken("")), parts.tail, ps, gs, ns, m)
-          } else tokenize(it, tks, parts.tail, ps, gs, ns, m)
-
-        case _ =>
-          val groups = (gs match {
-            case TokenGroup(List(StringToken("")), None) :: tgs => tgs // trim end
-            case _                                              => gs
-          }).collect {
-            case TokenGroup(pr, pl) =>
-              TokenGroup(pr.reverse, pl)
-          }.reverse
-
-          TokenizedStatement(groups, ns.reverse) -> m
-      }
+    }
   }
 
   // Optimized resource typeclass not using reflection

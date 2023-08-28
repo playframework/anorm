@@ -5,7 +5,7 @@
 package anorm
 
 /** Initial SQL query, without parameter values. */
-sealed trait SqlQuery {
+sealed trait SqlQuery extends SqlQueryCompat {
   private[anorm] def stmt: TokenizedStatement
 
   /** Names of parameters in initial order */
