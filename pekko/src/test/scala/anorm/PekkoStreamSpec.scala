@@ -11,11 +11,6 @@ import scala.collection.immutable.Seq
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-import akka.actor.ActorSystem
-
-import akka.stream.Materializer
-import akka.stream.scaladsl.{ Keep, Sink, Source }
-
 import acolyte.jdbc.AcolyteDSL.withQueryResult
 import acolyte.jdbc.Implicits._
 import acolyte.jdbc.QueryResult
@@ -23,21 +18,24 @@ import acolyte.jdbc.RowLists.stringList
 
 import org.specs2.concurrent.ExecutionEnv
 
-final class AkkaStreamSpec(implicit ee: ExecutionEnv) extends org.specs2.mutable.Specification {
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.stream.Materializer
+import org.apache.pekko.stream.scaladsl.{ Keep, Sink, Source }
+import org.apache.pekko.stream.testkit.scaladsl.StreamTestKit.assertAllStagesStopped
 
-  "Akka Stream".title
+final class PekkoStreamSpec(implicit ee: ExecutionEnv) extends org.specs2.mutable.Specification {
+
+  "Pekko Stream".title
 
   implicit lazy val system: ActorSystem = ActorSystem("anorm-tests")
 
   implicit def materializer: Materializer =
-    akka.stream.ActorMaterializer.create(system)
+    org.apache.pekko.stream.ActorMaterializer.create(system)
 
-  import StreamTestKit.assertAllStagesStopped
-
-  "Akka Stream" should {
+  "Pekko Stream" should {
     "expose the query result as source" in assertAllStagesStopped {
       withQueryResult(stringList :+ "A" :+ "B" :+ "C") { implicit con =>
-        AkkaStream
+        PekkoStream
           .source(SQL"SELECT * FROM Test", SqlParser.scalar[String])
           .runWith(Sink.seq[String]) must beTypedEqualTo(
           Seq("A", "B", "C")
@@ -47,7 +45,7 @@ final class AkkaStreamSpec(implicit ee: ExecutionEnv) extends org.specs2.mutable
 
     "be done if the stream run through" in {
       withQueryResult(stringList :+ "A" :+ "B" :+ "C") { implicit con =>
-        AkkaStream
+        PekkoStream
           .source(SQL"SELECT * FROM Test", SqlParser.scalar[String])
           .toMat(Sink.ignore)(Keep.left)
           .run() must beTypedEqualTo(3).await(0, 3.seconds)
@@ -58,14 +56,14 @@ final class AkkaStreamSpec(implicit ee: ExecutionEnv) extends org.specs2.mutable
       val list = stringList :+ "A" :+ "B" :+ "C"
 
       withQueryResult(list.withCycling(true)) { implicit con =>
-        val killSwitch = akka.stream.KillSwitches.shared("cycling-switch")
+        val killSwitch = org.apache.pekko.stream.KillSwitches.shared("cycling-switch")
 
-        AkkaStream
+        PekkoStream
           .source(SQL"SELECT * FROM Test", SqlParser.scalar[String])
 
         val p = scala.concurrent.Promise[Int]()
 
-        val res = AkkaStream
+        val res = PekkoStream
           .source(SQL"SELECT * FROM Test", SqlParser.scalar[String])
           .mapMaterializedValue(p.completeWith)
           .via(killSwitch.flow)
@@ -127,7 +125,7 @@ final class AkkaStreamSpec(implicit ee: ExecutionEnv) extends org.specs2.mutable
             def unsafeStatement(
                 connection: Connection,
                 generatedColumn: String,
-                generatedColumns: AkkaCompat.Seq[String]
+                generatedColumns: PekkoCompat.Seq[String]
             ): PreparedStatement = ???
 
             def unsafeStatement(connection: Connection, getGeneratedKeys: Boolean): PreparedStatement =
@@ -156,5 +154,5 @@ final class AkkaStreamSpec(implicit ee: ExecutionEnv) extends org.specs2.mutable
   }
 
   def source[T](sql: Sql, parser: RowParser[T])(implicit connection: Connection) =
-    new AkkaStream.ResultSource[T](connection, sql, ColumnAliaser.empty, parser)
+    new PekkoStream.ResultSource[T](connection, sql, ColumnAliaser.empty, parser)
 }
