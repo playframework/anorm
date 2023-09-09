@@ -15,7 +15,6 @@ import akka.actor.ActorSystem
 
 import akka.stream.Materializer
 import akka.stream.scaladsl.{ Keep, Sink, Source }
-import akka.stream.testkit.scaladsl.StreamTestKit.assertAllStagesStopped
 
 import acolyte.jdbc.AcolyteDSL.withQueryResult
 import acolyte.jdbc.Implicits._
@@ -32,6 +31,8 @@ final class AkkaStreamSpec(implicit ee: ExecutionEnv) extends org.specs2.mutable
 
   implicit def materializer: Materializer =
     akka.stream.ActorMaterializer.create(system)
+
+  import StreamTestKit.assertAllStagesStopped
 
   "Akka Stream" should {
     "expose the query result as source" in assertAllStagesStopped {
