@@ -6,8 +6,6 @@ package anorm
 
 import scala.util.Failure
 
-import scala.collection.immutable.Seq
-
 /** Anorm runtime exception */
 final case class AnormException(message: String) extends Exception with scala.util.control.NoStackTrace {
   override def getMessage() = message

@@ -10,8 +10,6 @@ import anorm.{ Compat, ToParameterList, ToSql, ToStatement }
 import anorm.Macro.{ debugEnabled, ParameterProjection }
 import anorm.macros.Inspect.pretty
 
-import scala.collection.immutable.Seq
-
 private[anorm] object ToParameterListImpl {
   def sealedTrait[T: c.WeakTypeTag](c: whitebox.Context): c.Expr[ToParameterList[T]] = {
     val tpe                        = c.weakTypeTag[T].tpe

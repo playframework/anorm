@@ -13,8 +13,6 @@ import java.net.{ URI, URL }
 import java.lang.{ Boolean => JBool, Byte => JByte, Double => JDouble, Float => JFloat, Long => JLong, Short => JShort }
 import java.sql.{ PreparedStatement, Timestamp }
 
-import scala.collection.immutable.Seq
-
 private[anorm] trait ToStatementBase[A] { self =>
 
   /**
