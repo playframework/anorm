@@ -27,7 +27,7 @@ jobs:
     name: Docs
     uses: playframework/.github/.github/workflows/cmd.yml@v4
     with:
-      java: 11
+      java: 11, 8
       scala: 2.11.x, 2.12.x, 2.13.x, 3.x
       cmd: sbt ++$MATRIX_SCALA docs/test
 
