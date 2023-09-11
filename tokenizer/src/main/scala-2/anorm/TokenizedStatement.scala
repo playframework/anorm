@@ -4,8 +4,6 @@
 
 package anorm
 
-import scala.collection.immutable.Seq
-
 /**
  * @param tokens the token groups
  * @param names the binding names of parsed placeholders

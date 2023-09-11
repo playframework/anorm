@@ -12,8 +12,6 @@ import scala.reflect.ClassTag
 
 import resource.{ managed, ManagedResource, Resource }
 
-import scala.collection.immutable.Seq
-
 /**
  * Untyped value wrapper.
  *

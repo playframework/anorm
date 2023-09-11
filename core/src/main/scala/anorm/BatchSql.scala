@@ -8,8 +8,6 @@ import java.sql.{ Connection, PreparedStatement }
 
 import resource.{ managed, Resource }
 
-import scala.collection.immutable.Seq
-
 private[anorm] object BatchSqlErrors {
   val HeterogeneousParameterMaps = "if each map hasn't same parameter names"
   val ParameterNamesNotMatchingPlaceholders =

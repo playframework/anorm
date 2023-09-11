@@ -6,8 +6,6 @@ package anorm
 
 import com.github.ghik.silencer.silent
 
-import scala.collection.immutable.Seq
-
 /**
  * @define caseTParam the type of case class
  * @define namingParam the column naming, to resolve the column name for each case class property

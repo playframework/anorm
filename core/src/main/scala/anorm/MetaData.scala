@@ -4,8 +4,6 @@
 
 package anorm
 
-import scala.collection.immutable.Seq
-
 /**
  * @param qualified the qualified column name
  * @param alias the column alias

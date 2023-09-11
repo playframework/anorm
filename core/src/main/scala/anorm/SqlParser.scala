@@ -4,8 +4,6 @@
 
 package anorm
 
-import scala.collection.immutable.Seq
-
 object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
   import java.io.InputStream
   import java.util.Date
