@@ -39,6 +39,15 @@ lazy val `anorm-tokenizer` = project
         mimaPreviousArtifacts.value
       }
     },
+    scalacOptions ++= {
+      if (scalaBinaryVersion.value == "3") {
+        Seq.empty
+      } else {
+        Seq(
+          "-P:silencer:globalFilters=type Seq in package scala has changed semantics in version 2.13.0",
+        )
+      },
+    },
     libraryDependencies += {
       if (scalaBinaryVersion.value == "3") {
         "org.scala-lang" %% "scala3-compiler" % scalaVersion.value % Provided
@@ -141,7 +150,7 @@ lazy val `anorm-core` = project
         } else {
           Seq(
             "-Xlog-free-terms",
-            "-P:silencer:globalFilters=missing\\ in\\ object\\ ToSql\\ is\\ deprecated;possibilities\\ in\\ class\\ ColumnNotFound\\ is\\ deprecated;DeprecatedSqlParser\\ in\\ package\\ anorm\\ is\\ deprecated;constructor\\ deprecatedName\\ in\\ class\\ deprecatedName\\ is\\ deprecated;.*method ~> in class Parser has changed semantics.*;.*method <~ in class Parser has changed semantics.*;.*method ~ in class Parser has changed semantics.*;.*package object inheritance is deprecated.*",
+            "-P:silencer:globalFilters=missing\\ in\\ object\\ ToSql\\ is\\ deprecated;possibilities\\ in\\ class\\ ColumnNotFound\\ is\\ deprecated;DeprecatedSqlParser\\ in\\ package\\ anorm\\ is\\ deprecated;constructor\\ deprecatedName\\ in\\ class\\ deprecatedName\\ is\\ deprecated;.*method ~> in class Parser has changed semantics.*;.*method <~ in class Parser has changed semantics.*;.*method ~ in class Parser has changed semantics.*;.*package object inheritance is deprecated.*;type Seq in package scala has changed semantics in version 2.13.0",
           )
         }
       },
