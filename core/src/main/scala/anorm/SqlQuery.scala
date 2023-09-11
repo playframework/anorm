@@ -4,6 +4,8 @@
 
 package anorm
 
+import scala.collection.immutable.Seq
+
 /** Initial SQL query, without parameter values. */
 sealed trait SqlQuery extends SqlQueryCompat {
   private[anorm] def stmt: TokenizedStatement

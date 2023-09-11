@@ -11,6 +11,8 @@ import java.sql.{ PreparedStatement, ResultSet, SQLException }
 
 import scala.reflect.ClassTag
 
+import scala.collection.immutable.Seq
+
 private[anorm] trait TopLevelDefinitions extends PackageCompat {
 
   /** Structural type for timestamp wrapper. */

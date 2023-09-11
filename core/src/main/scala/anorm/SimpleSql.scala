@@ -6,6 +6,8 @@ package anorm
 
 import java.sql.{ Connection, PreparedStatement }
 
+import scala.collection.immutable.Seq
+
 /** Simple/plain SQL. */
 case class SimpleSql[T](
     sql: SqlQuery,
