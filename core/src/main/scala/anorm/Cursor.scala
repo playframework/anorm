@@ -40,9 +40,9 @@ object Cursor {
    */
   private[anorm] def onFirstRow(rs: ResultSet, aliaser: ColumnAliaser): Option[Cursor] = try {
     Some(new Cursor {
-      val meta               = MetaData.parse(rs, aliaser)
-      val columns: List[Int] = List.range(1, meta.columnCount + 1)
-      val row                = ResultRow(meta, columns.map(rs.getObject(_)))
+      val meta                        = MetaData.parse(rs, aliaser)
+      val columns: List[Int]          = List.range(1, meta.columnCount + 1)
+      val row: anorm.Cursor.ResultRow = ResultRow(meta, columns.map(rs.getObject(_)))
 
       def next = apply(rs, meta, columns)
     })
@@ -52,9 +52,9 @@ object Cursor {
 
   /** Returns a cursor with already parsed metadata. */
   private def withMeta(rs: ResultSet, _meta: MetaData): Cursor = new Cursor {
-    val meta               = _meta
-    val columns: List[Int] = List.range(1, meta.columnCount + 1)
-    val row                = ResultRow(meta, columns.map(rs.getObject(_)))
+    val meta                        = _meta
+    val columns: List[Int]          = List.range(1, meta.columnCount + 1)
+    val row: anorm.Cursor.ResultRow = ResultRow(meta, columns.map(rs.getObject(_)))
 
     lazy val next = apply(rs, meta, columns)
   }
@@ -63,8 +63,8 @@ object Cursor {
   private def apply(rs: ResultSet, meta: MetaData, columns: List[Int]): Option[Cursor] = if (!rs.next) None
   else
     Some(new Cursor {
-      val row  = ResultRow(meta, columns.map(rs.getObject(_)))
-      def next = if (!rs.next) None else Some(withMeta(rs, meta))
+      val row: anorm.Cursor.ResultRow = ResultRow(meta, columns.map(rs.getObject(_)))
+      def next                        = if (!rs.next) None else Some(withMeta(rs, meta))
     })
 
   /** Result row to be parsed. */

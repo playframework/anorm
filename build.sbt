@@ -141,7 +141,7 @@ lazy val `anorm-core` = project
         } else {
           Seq(
             "-Xlog-free-terms",
-            "-P:silencer:globalFilters=missing\\ in\\ object\\ ToSql\\ is\\ deprecated;possibilities\\ in\\ class\\ ColumnNotFound\\ is\\ deprecated;DeprecatedSqlParser\\ in\\ package\\ anorm\\ is\\ deprecated;constructor\\ deprecatedName\\ in\\ class\\ deprecatedName\\ is\\ deprecated"
+            "-P:silencer:globalFilters=missing\\ in\\ object\\ ToSql\\ is\\ deprecated;possibilities\\ in\\ class\\ ColumnNotFound\\ is\\ deprecated;DeprecatedSqlParser\\ in\\ package\\ anorm\\ is\\ deprecated;constructor\\ deprecatedName\\ in\\ class\\ deprecatedName\\ is\\ deprecated;.*method ~> in class Parser has changed semantics.*;.*method <~ in class Parser has changed semantics.*;.*method ~ in class Parser has changed semantics.*;.*package object inheritance is deprecated.*",
           )
         }
       },
@@ -386,6 +386,15 @@ val playVer = Def.setting[String] {
 lazy val `anorm-postgres` = (project in file("postgres"))
   .settings(
     mimaPreviousArtifacts := Set.empty,
+    scalacOptions ++= {
+      if (scalaBinaryVersion.value == "3") {
+        Seq.empty
+      } else {
+        Seq(
+          "-P:silencer:globalFilters=.*package object inheritance is deprecated.*",
+        )
+      }
+    },
     libraryDependencies ++= {
       val v = scalaBinaryVersion.value
 

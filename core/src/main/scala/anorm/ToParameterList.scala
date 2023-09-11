@@ -4,6 +4,8 @@
 
 package anorm
 
+import scala.collection.immutable.Seq
+
 /** Convert to a list of [[NamedParameter]] */
 @annotation.implicitNotFound("No converter to SQL parameters for the type ${A}: `anorm.ToParameterList[${A}]` required")
 trait ToParameterList[A] extends (A => List[NamedParameter]) {

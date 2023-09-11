@@ -5,6 +5,7 @@
 package anorm
 
 import scala.util.{ Success => TrySuccess, Try }
+import scala.collection.immutable.Seq
 
 trait Row {
   private[anorm] def metaData: MetaData

@@ -6,6 +6,8 @@ package anorm
 
 import com.github.ghik.silencer.silent
 
+import scala.collection.immutable.Seq
+
 /**
  * @define caseTParam the type of case class
  * @define namingParam the column naming, to resolve the column name for each case class property
@@ -417,7 +419,7 @@ object Macro extends MacroOptions {
     implicit object Parser extends RowParser[Placeholder] {
       val success = Success(new Placeholder())
 
-      def apply(row: Row) = success
+      def apply(row: Row): anorm.Success[anorm.Macro.Placeholder] = success
     }
   }
 
