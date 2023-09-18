@@ -120,9 +120,9 @@ lazy val coreMimaFilter: ProblemFilter = {
 
 lazy val xmlVer = Def.setting[String] {
   if (scalaBinaryVersion.value == "2.11") {
-    "1.3.0"
+    "1.3.1"
   } else {
-    "2.1.0"
+    "2.2.0"
   }
 }
 
@@ -409,7 +409,7 @@ lazy val `anorm-postgres` = (project in file("postgres"))
 
       val playJsonVer = {
         if (v == "2.13") "2.9.2"
-        else if (v == "3") "2.10.0-RC6"
+        else if (v == "3") "2.10.1"
         else "2.6.7"
       }
 
