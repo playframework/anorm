@@ -218,7 +218,7 @@ lazy val `anorm-core` = project
         "org.joda"                % "joda-convert"             % "2.2.3",
         "org.scala-lang.modules" %% "scala-parser-combinators" % parserCombinatorsVer.value,
         "org.scala-lang.modules" %% "scala-xml"                % xmlVer.value % Test,
-        "com.h2database"          % "h2"                       % "2.2.222"    % Test,
+        "com.h2database"          % "h2"                       % "2.2.224"    % Test,
         acolyte
       ) ++ specs2Test,
     ) ++ armShading
