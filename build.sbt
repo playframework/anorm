@@ -489,8 +489,6 @@ lazy val docs = project
   )
   .dependsOn(`anorm-core`)
 
-ThisBuild / playBuildRepoName := "anorm"
-
 addCommandAlias(
   "validateCode",
   List(
