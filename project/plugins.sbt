@@ -5,8 +5,6 @@ resolvers ++= DefaultOptions.resolvers(snapshot = true) ++ Seq(
   "Tatami Releases".at("https://raw.github.com/cchantep/tatami/master/releases")
 )
 
-addSbtPlugin("com.typesafe.play" % "interplay" % sys.props.get("interplay.version").getOrElse("3.1.7"))
-
 addSbtPlugin("com.typesafe" % "sbt-mima-plugin" % "1.1.3")
 
 addSbtPlugin("com.github.sbt" % "sbt-unidoc" % "0.5.0")
