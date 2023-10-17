@@ -59,7 +59,7 @@ object MacroParsers {
         case "scalaguide.sql.MacroParsers.Lorem" =>
           implicitly[RowParser[Lorem.type]]
 
-        case (d) =>
+        case d =>
           RowParser.failed[Family](
             Error(
               SqlMappingError(
