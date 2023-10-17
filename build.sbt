@@ -61,7 +61,7 @@ lazy val `anorm-tokenizer` = project
 
 val armShading = Seq(
   libraryDependencies += ("com.jsuereth" %% "scala-arm" % "2.1-SNAPSHOT").cross(CrossVersion.for3Use2_13),
-  assembly / test := {},
+  assembly / test                        := {},
   assembly / assemblyOption ~= {
     _.withIncludeScala(false) // java libraries shouldn't include scala
   },
