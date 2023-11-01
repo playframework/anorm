@@ -17,7 +17,7 @@ object Common extends AutoPlugin {
   override def trigger  = allRequirements
   override def requires = JvmPlugin
 
-  val previousVersion = "2.6.10"
+  val previousVersion: Option[String] = Some("2.6.10")
 
   override def projectSettings = Seq(
     organization        := "org.playframework.anorm",
@@ -97,7 +97,7 @@ object Common extends AutoPlugin {
     Test / scalacOptions ~= (_.filterNot(_ == "-Werror")),
     scalacOptions ~= (_.filterNot(_ == "-Xfatal-warnings")),
     Test / fork           := true,
-    mimaPreviousArtifacts := Set(organization.value %% moduleName.value % previousVersion),
+    mimaPreviousArtifacts := previousVersion.map(organization.value %% moduleName.value % _).toSet,
     headerLicense := Some(
       HeaderLicense.Custom(
         "Copyright (C) from 2022 The Play Framework Contributors <https://github.com/playframework>, 2011-2021 Lightbend Inc. <https://www.lightbend.com>"
