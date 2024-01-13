@@ -385,7 +385,7 @@ lazy val `anorm-pekko` = (project in file("pekko"))
 
 // ---
 
-lazy val pgVer = sys.env.get("POSTGRES_VERSION").getOrElse("42.6.0")
+lazy val pgVer = sys.env.get("POSTGRES_VERSION").getOrElse("42.7.1")
 
 val playVer = Def.setting[String] {
   if (scalaBinaryVersion.value == "2.13") "2.7.3"
