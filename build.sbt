@@ -22,6 +22,15 @@ val specs2Test = Seq(
 ).map("org.specs2" %% _ % "4.10.6" % Test cross (CrossVersion.for3Use2_13))
   .map(_.exclude("org.scala-lang.modules", "*"))
 
+val common = Seq(
+  scalacOptions ++= Seq("-deprecation", "-feature", "-unchecked", "-encoding", "utf8") ++
+    (CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((2, 13)) => Seq("-Xsource:3", "-Xmigration")
+      case _             => Seq.empty
+    }),
+  javacOptions ++= Seq("-encoding", "UTF-8", "-Xlint:-options"),
+)
+
 lazy val acolyteVersion = "1.2.9"
 lazy val acolyte        = "org.eu.acolyte" %% "jdbc-scala" % acolyteVersion % Test
 
@@ -31,6 +40,7 @@ ThisBuild / mimaFailOnNoPrevious := false
 
 lazy val `anorm-tokenizer` = project
   .in(file("tokenizer"))
+  .settings(common)
   .settings(
     mimaPreviousArtifacts := {
       if (scalaBinaryVersion.value == "3") {
@@ -128,6 +138,7 @@ lazy val xmlVer = Def.setting[String] {
 
 lazy val `anorm-core` = project
   .in(file("core"))
+  .settings(common)
   .settings(
     Seq(
       name := "anorm",
@@ -226,6 +237,7 @@ lazy val `anorm-core` = project
   .dependsOn(`anorm-tokenizer`)
 
 lazy val `anorm-iteratee` = (project in file("iteratee"))
+  .settings(common)
   .settings(
     sourceDirectory := {
       val v = scalaBinaryVersion.value
@@ -271,6 +283,7 @@ lazy val akkaVer = Def.setting[String] {
 }
 
 lazy val `anorm-akka` = (project in file("akka"))
+  .settings(common)
   .settings(
     mimaPreviousArtifacts := {
       if (scalaBinaryVersion.value == "3") {
@@ -326,6 +339,7 @@ lazy val pekkoEnabled = Def.setting[Boolean] {
 }
 
 lazy val `anorm-pekko` = (project in file("pekko"))
+  .settings(common)
   .settings(
     mimaPreviousArtifacts := Set.empty,
     sourceDirectory := {
@@ -393,6 +407,7 @@ val playVer = Def.setting[String] {
 }
 
 lazy val `anorm-postgres` = (project in file("postgres"))
+  .settings(common)
   .settings(
     mimaPreviousArtifacts := Set.empty,
     scalacOptions ++= {
@@ -423,6 +438,7 @@ lazy val `anorm-postgres` = (project in file("postgres"))
   .dependsOn(`anorm-core`)
 
 lazy val `anorm-enumeratum` = (project in file("enumeratum"))
+  .settings(common)
   .settings(
     sourceDirectory := {
       if (scalaBinaryVersion.value == "3") new java.io.File("/no/sources")
@@ -457,6 +473,7 @@ lazy val `anorm-parent` = (project in file("."))
     `anorm-postgres`,
     `anorm-enumeratum`
   )
+  .settings(common)
   .settings(
     mimaPreviousArtifacts := Set.empty,
     (Compile / headerSources) ++=
@@ -471,6 +488,7 @@ lazy val docs = project
   .in(file("docs"))
   .enablePlugins(Playdoc)
   .configs(Docs)
+  .settings(common)
   .settings(
     name := "anorm-docs",
     (Test / unmanagedSourceDirectories) ++= {
