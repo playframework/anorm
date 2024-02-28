@@ -330,7 +330,7 @@ lazy val `anorm-akka` = (project in file("akka"))
   )
   .dependsOn(`anorm-core`)
 
-lazy val pekkoVer = Def.setting[String]("1.0.1")
+lazy val pekkoVer = Def.setting[String]("1.0.2")
 
 lazy val pekkoEnabled = Def.setting[Boolean] {
   val v = scalaBinaryVersion.value
