@@ -23,7 +23,7 @@ object Common extends AutoPlugin {
     organization        := "org.playframework.anorm",
     sonatypeProfileName := "org.playframework",
     scalaVersion        := "2.12.19",
-    crossScalaVersions  := Seq("2.11.12", scalaVersion.value, "2.13.12", "3.3.1"),
+    crossScalaVersions  := Seq("2.11.12", scalaVersion.value, "2.13.13", "3.3.1"),
     (Compile / unmanagedSourceDirectories) ++= {
       val sv = scalaVersion.value
 
