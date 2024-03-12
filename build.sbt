@@ -423,8 +423,7 @@ lazy val `anorm-postgres` = (project in file("postgres"))
       val v = scalaBinaryVersion.value
 
       val playJsonVer = {
-        if (v == "2.13") "2.9.2"
-        else if (v == "3") "2.10.1"
+        if (v == "2.13" || v == "3") "2.10.4"
         else "2.6.7"
       }
 
