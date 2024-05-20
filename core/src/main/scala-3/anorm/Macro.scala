@@ -244,7 +244,7 @@ object Macro extends MacroOptions with macros.ValueColumn with macros.ValueToSta
    * @param projection $projectionParam
    * @tparam T $caseTParam
    */
-  inline def toParameters[T](inline separator: String, projection: ParameterProjection*): ToParameterList[T] = ${
+  inline def toParameters[T](inline separator: String, inline projection: ParameterProjection*): ToParameterList[T] = ${
     parametersWithSeparator[T]('separator, 'projection)
   }
 
@@ -484,7 +484,7 @@ object Macro extends MacroOptions with macros.ValueColumn with macros.ValueToSta
   private def parametersWithSeparator[T](
       separator: Expr[String],
       projection: Expr[Seq[ParameterProjection]]
-  )(using q: Quotes, tpe: Type[T]): Expr[ToParameterList[T]] = {
+  )(using q: Quotes, tpe: Type[T], proj: Type[ParameterProjection]): Expr[ToParameterList[T]] = {
     import q.reflect.*
 
     '{
