@@ -28,7 +28,7 @@ jobs:
     uses: playframework/.github/.github/workflows/cmd.yml@v4
     with:
       java: 8
-      scala: 2.11.x, 2.12.x, 2.13.x
+      scala: 2.11.x, 2.12.x
       cmd: sbt ++$MATRIX_SCALA docs/test
 
   check-docs-11:
@@ -39,15 +39,27 @@ jobs:
       scala: 2.11.x, 2.12.x, 2.13.x, 3.x
       cmd: sbt ++$MATRIX_SCALA docs/test
 
-  tests:
+  tests-8:
     name: Tests
     needs:
       - "check-code-style"
       - "check-binary-compatibility"
-      - "check-docs"
+      - "check-docs-8"
     uses: playframework/.github/.github/workflows/cmd.yml@v4
     with:
-      java: 11, 8
+      java: 8
+      scala: 2.11.x, 2.12.x
+      cmd: sbt ++$MATRIX_SCALA publishLocal test
+
+  tests-11:
+    name: Tests
+    needs:
+      - "check-code-style"
+      - "check-binary-compatibility"
+      - "check-docs-11"
+    uses: playframework/.github/.github/workflows/cmd.yml@v4
+    with:
+      java: 11
       scala: 2.11.x, 2.12.x, 2.13.x, 3.x
       cmd: sbt ++$MATRIX_SCALA publishLocal test
 
@@ -55,5 +67,6 @@ jobs:
     name: Finish
     if: github.event_name == 'pull_request'
     needs: # Should be last
-      - "tests"
+      - "tests-8"
+      - "tests-11"
     uses: playframework/.github/.github/workflows/rtm.yml@v4
