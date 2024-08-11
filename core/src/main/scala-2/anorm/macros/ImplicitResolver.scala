@@ -61,8 +61,8 @@ object ImplicitResolver {
           replacement: Type,
           altered: Boolean
       ): (Type, Boolean) = in match {
-        case tpe :: ts =>
-          boundTypes.getOrElse(tpe.typeSymbol.fullName, tpe) match {
+        case itpe :: ts =>
+          boundTypes.getOrElse(itpe.typeSymbol.fullName, itpe) match {
             case t if filter(t) =>
               refactor(ts, base, replacement :: out, tail, filter, replacement, true)
 
@@ -73,13 +73,13 @@ object ImplicitResolver {
           }
 
         case _ => {
-          val tpe = appliedType(base, out.reverse)
+          val itpe = appliedType(base, out.reverse)
 
           tail match {
             case (x, y, more) :: ts =>
-              refactor(x, y, tpe :: more, ts, filter, replacement, altered)
+              refactor(x, y, itpe :: more, ts, filter, replacement, altered)
 
-            case _ => tpe -> altered
+            case _ => itpe -> altered
           }
         }
       }

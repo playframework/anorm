@@ -209,9 +209,6 @@ private[anorm] trait Sql extends WithResult {
       generatedKeysParser: ResultSetParser[A],
       as: ColumnAliaser
   )(implicit connection: Connection): Try[A] = {
-    @com.github.ghik.silencer.silent
-    implicit def cls: ClassTag[ResultSet] = resultSetClassTag
-
     Sql.asTry(
       generatedKeysParser,
       prep(connection).flatMap { stmt =>

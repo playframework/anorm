@@ -13,12 +13,16 @@ import play.api.test.Helpers._
 class ScalaAnorm extends org.specs2.mutable.Specification {
   "Code samples".title
 
-  def createApp(additionalConfiguration: Map[String, _]): Application = {
+  def createApp(additionalConfiguration: Map[String, _]): Application =
     new GuiceApplicationBuilder().configure(additionalConfiguration).build()
-  }
 
   "Anorm" should {
-    "be usable in play" in new WithApplication(createApp(additionalConfiguration = inMemoryDatabase())) {
+    trait Scala211Compat {
+      def running(): Unit = ()
+    }
+
+    "be usable in play" in new WithApplication(createApp(additionalConfiguration = inMemoryDatabase()))
+      with Scala211Compat {
       override def running() = {
         val database = app.injector.instanceOf[Database]
         // #playdb
@@ -28,8 +32,9 @@ class ScalaAnorm extends org.specs2.mutable.Specification {
           val _: Boolean = SQL("Select 1").execute()
         }
         // #playdb
-        ok
       }
+
+      ok
     }
   }
 }
