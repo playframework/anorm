@@ -32,7 +32,8 @@ package object anorm extends anorm.TopLevelDefinitions {
    */
   implicit class SqlStringInterpolation(val sc: StringContext) extends AnyVal {
     def SQL(args: ParameterValue*) = {
-      val (ts, ps) = TokenizedStatement.stringInterpolation(sc.parts, args)
+      val (ts, ps) = TokenizedStatement.stringInterpolation(sc.parts.toSeq, args)
+
       SimpleSql(SqlQuery.prepare(ts, ts.names), ps, RowParser(Success(_)))
     }
   }

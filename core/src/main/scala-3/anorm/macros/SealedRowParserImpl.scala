@@ -6,8 +6,8 @@ package anorm.macros
 
 import scala.quoted.{ Expr, Quotes, Type }
 
-import anorm.Macro.{ debugEnabled, Discriminate, DiscriminatorNaming }
 import anorm.{ Error, RowParser, SqlMappingError, SqlParser }
+import anorm.Macro.{ debugEnabled, Discriminate, DiscriminatorNaming }
 
 private[anorm] object SealedRowParserImpl {
   def apply[A](

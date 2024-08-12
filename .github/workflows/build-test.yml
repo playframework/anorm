@@ -23,12 +23,20 @@ jobs:
     name: Binary Compatibility
     uses: playframework/.github/.github/workflows/binary-check.yml@v4
 
-  check-docs:
+  check-docs-8:
+    name: Docs Java 8
+    uses: playframework/.github/.github/workflows/cmd.yml@v4
+    with:
+      java: 8
+      scala: 2.11.x, 2.12.x, 2.13.x
+      cmd: sbt ++$MATRIX_SCALA docs/test
+
+  check-docs-11:
     name: Docs
     uses: playframework/.github/.github/workflows/cmd.yml@v4
     with:
-      java: 11, 8
-      scala: 2.11.x, 2.12.x, 2.13.x # TODO: 3.x (other play modules not ok)
+      java: 11
+      scala: 2.11.x, 2.12.x, 2.13.x, 3.x
       cmd: sbt ++$MATRIX_SCALA docs/test
 
   tests:
