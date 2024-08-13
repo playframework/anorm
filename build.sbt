@@ -230,14 +230,24 @@ lazy val `anorm-core` = project
         ProblemFilters.exclude[IncompatibleMethTypeProblem]("anorm.ColumnNotFound.copy"),
         ProblemFilters.exclude[IncompatibleResultTypeProblem]("anorm.ColumnNotFound.copy$default$2")
       ),
-      libraryDependencies ++= Seq(
-        "joda-time"               % "joda-time"                % "2.12.7",
-        "org.joda"                % "joda-convert"             % "2.2.3",
-        "org.scala-lang.modules" %% "scala-parser-combinators" % parserCombinatorsVer.value,
-        "org.scala-lang.modules" %% "scala-xml"                % xmlVer.value % Test,
-        "com.h2database"          % "h2"                       % "2.2.224"    % Test,
-        acolyte
-      ) ++ specs2Test,
+      libraryDependencies ++= {
+        val h2Ver = sys.props.get("java.version") match {
+          case Some(v) if v.startsWith("1.8") =>
+            "2.2.224"
+
+          case _ =>
+            "2.3.230"
+        }
+
+        Seq(
+          "joda-time"               % "joda-time"                % "2.12.7",
+          "org.joda"                % "joda-convert"             % "2.2.3",
+          "org.scala-lang.modules" %% "scala-parser-combinators" % parserCombinatorsVer.value,
+          "org.scala-lang.modules" %% "scala-xml"                % xmlVer.value % Test,
+          "com.h2database"          % "h2"                       % h2Ver        % Test,
+          acolyte
+        ) ++ specs2Test
+      },
     ) ++ armShading ++ licensing
   )
   .dependsOn(`anorm-tokenizer`)
