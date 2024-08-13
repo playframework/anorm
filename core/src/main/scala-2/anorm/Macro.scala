@@ -98,9 +98,7 @@ object Macro extends MacroOptions {
   }
 
   def indexedParserImpl[T: c.WeakTypeTag](c: whitebox.Context): c.Expr[RowParser[T]] = {
-    import c.universe._
-
-    @silent def p = reify(0)
+    @silent def p = c.universe.reify(0)
 
     offsetParserImpl[T](c)(p)
   }

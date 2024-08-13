@@ -6,8 +6,8 @@ package anorm.macros
 
 import scala.quoted.{ Expr, Quotes, Type }
 
-import anorm.{ Column, Row, RowParser, SqlResult, ~ }
-import anorm.Macro.{ RowParserGenerator, debugEnabled }
+import anorm.{ ~, Column, Row, RowParser, SqlResult }
+import anorm.Macro.{ debugEnabled, RowParserGenerator }
 
 private[anorm] object RowParserImpl {
   def apply[A](

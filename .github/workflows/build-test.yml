@@ -15,20 +15,28 @@ concurrency:
 jobs:
   check-code-style:
     name: Code Style
-    uses: playframework/.github/.github/workflows/cmd.yml@v3
+    uses: playframework/.github/.github/workflows/cmd.yml@v4
     with:
       cmd: sbt validateCode
 
   check-binary-compatibility:
     name: Binary Compatibility
-    uses: playframework/.github/.github/workflows/binary-check.yml@v3
+    uses: playframework/.github/.github/workflows/binary-check.yml@v4
 
-  check-docs:
-    name: Docs
-    uses: playframework/.github/.github/workflows/cmd.yml@v3
+  check-docs-8:
+    name: Docs Java 8
+    uses: playframework/.github/.github/workflows/cmd.yml@v4
     with:
-      java: 11, 8
-      scala: 2.11.x, 2.12.x, 2.13.x # TODO: 3.x (other play modules not ok)
+      java: 8
+      scala: 2.11.x, 2.12.x, 2.13.x
+      cmd: sbt ++$MATRIX_SCALA docs/test
+
+  check-docs-11:
+    name: Docs
+    uses: playframework/.github/.github/workflows/cmd.yml@v4
+    with:
+      java: 11
+      scala: 2.11.x, 2.12.x, 2.13.x, 3.x
       cmd: sbt ++$MATRIX_SCALA docs/test
 
   tests:
@@ -37,7 +45,7 @@ jobs:
       - "check-code-style"
       - "check-binary-compatibility"
       - "check-docs"
-    uses: playframework/.github/.github/workflows/cmd.yml@v3
+    uses: playframework/.github/.github/workflows/cmd.yml@v4
     with:
       java: 11, 8
       scala: 2.11.x, 2.12.x, 2.13.x, 3.x
@@ -48,4 +56,4 @@ jobs:
     if: github.event_name == 'pull_request'
     needs: # Should be last
       - "tests"
-    uses: playframework/.github/.github/workflows/rtm.yml@v3
+    uses: playframework/.github/.github/workflows/rtm.yml@v4

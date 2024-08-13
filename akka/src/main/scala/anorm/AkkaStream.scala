@@ -11,7 +11,7 @@ import scala.util.control.NonFatal
 import scala.concurrent.{ Future, Promise }
 
 import akka.stream.Materializer
-import akka.stream.scaladsl.{ Source }
+import akka.stream.scaladsl.Source
 
 /**
  * Anorm companion for the [[http://doc.akka.io/docs/akka/2.4.4/scala/stream/]].
@@ -70,7 +70,7 @@ object AkkaStream {
   def source[T](sql: => Sql, parser: RowParser[T])(implicit
       @deprecated("No longer required (will be removed)", "2.5.4") m: Materializer,
       con: Connection
-  ): Source[T, Future[Int]] = source[T](sql, parser, ColumnAliaser.empty)
+  ): Source[T, Future[Int]] = Source.fromGraph(new ResultSource[T](con, sql, ColumnAliaser.empty, parser))
 
   /**
    * Returns the result rows from the `sql` query as an enumerator.
@@ -84,9 +84,9 @@ object AkkaStream {
    * @param connection $connectionParam
    */
   def source(sql: => Sql, as: ColumnAliaser)(implicit
-      m: Materializer,
-      connnection: Connection
-  ): Source[Row, Future[Int]] = source(sql, RowParser.successful, as)
+      @deprecated("No longer required (will be removed)", "2.7.1") m: Materializer,
+      @deprecatedName(Symbol("connnection")) con: Connection
+  ): Source[Row, Future[Int]] = Source.fromGraph(new ResultSource[Row](con, sql, as, RowParser.successful))
 
   /**
    * Returns the result rows from the `sql` query as an enumerator.

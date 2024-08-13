@@ -6,13 +6,11 @@ import sbt.Keys._
 import sbt._
 import sbt.plugins.JvmPlugin
 import com.typesafe.tools.mima.plugin.MimaKeys.mimaPreviousArtifacts
-import de.heikoseeberger.sbtheader.HeaderPlugin.autoImport.HeaderPattern.commentBetween
-import de.heikoseeberger.sbtheader.{ CommentStyle, FileType, HeaderPlugin, LineCommentCreator }
+
 import xerial.sbt.Sonatype.autoImport._
 
 object Common extends AutoPlugin {
   import com.typesafe.tools.mima.core._
-  import HeaderPlugin.autoImport._
 
   override def trigger  = allRequirements
   override def requires = JvmPlugin
@@ -23,16 +21,16 @@ object Common extends AutoPlugin {
     organization        := "org.playframework.anorm",
     sonatypeProfileName := "org.playframework",
     scalaVersion        := "2.12.19",
-    crossScalaVersions  := Seq("2.11.12", scalaVersion.value, "2.13.13", "3.3.1"),
-    (Compile / unmanagedSourceDirectories) ++= {
+    crossScalaVersions  := Seq("2.11.12", scalaVersion.value, "2.13.14", "3.4.2"),
+    Compile / unmanagedSourceDirectories ++= {
       val sv = scalaVersion.value
 
       scalaUnmanaged(sv, (Compile / sourceDirectory).value)
     },
-    (Test / unmanagedSourceDirectories) ++= scalaUnmanaged(scalaVersion.value, (Test / sourceDirectory).value),
+    Test / unmanagedSourceDirectories ++= scalaUnmanaged(scalaVersion.value, (Test / sourceDirectory).value),
     ThisBuild / libraryDependencies ++= {
       if (scalaBinaryVersion.value != "3") {
-        val silencerVersion = "1.7.16"
+        val silencerVersion = "1.7.17"
 
         Seq(
           compilerPlugin(
@@ -46,17 +44,28 @@ object Common extends AutoPlugin {
     },
     scalacOptions ++= Seq("-Xfatal-warnings"),
     scalacOptions ++= {
-      if (scalaBinaryVersion.value != "3") {
-        Seq("-target:jvm-1.8", "-Xlint", "-g:vars")
+      val v = scalaBinaryVersion.value
+
+      if (v == "2.13") {
+        Seq("-release", "8") :+ "-Xlint"
+      } else if (v == "3") {
+        Seq("-release", "8")
       } else {
-        Seq.empty
+        Seq("-target:jvm-1.8", "-g:vars") :+ "-Xlint"
       }
     },
     scalacOptions ++= {
       val v = scalaBinaryVersion.value
 
       if (v == "3") {
-        Seq("-explaintypes", "-Werror")
+        Seq(
+          "-explaintypes",
+          "-Werror",
+          "-Wconf:msg=.*with\\ as\\ a\\ type\\ operator.*:s",
+          "-Wconf:msg=.*deprecated.*uninitialized.*:s",
+          "-Wconf:msg=.*vararg\\ splices.*:s",
+          "-Wconf:cat=deprecation&msg=.*(reflectiveSelectableFromLangReflectiveCalls|DeprecatedSqlParser|missing .*ToSql|deprecatedName).*:s"
+        )
       } else if (v == "2.12") {
         Seq(
           "-Xmax-classfile-name",
@@ -72,6 +81,7 @@ object Common extends AutoPlugin {
       } else if (v == "2.11") {
         Seq("-Xmax-classfile-name", "128", "-Yopt:_", "-Ydead-code", "-Yclosure-elim", "-Yconst-opt")
       } else {
+        // 2.13
         Seq(
           "-explaintypes",
           "-Werror",
@@ -80,7 +90,9 @@ object Common extends AutoPlugin {
           "-Wdead-code",
           "-Wvalue-discard",
           "-Wextra-implicit",
-          "-Wmacros:after"
+          "-Wmacros:after",
+          "-Wconf:msg=.*type\\ Seq\\ in\\ package\\ scala\\ has\\ changed\\ semantics.*:s",
+          "-Wconf:cat=deprecation&msg=.*(reflectiveSelectableFromLangReflectiveCalls|DeprecatedSqlParser|missing .*ToSql|deprecatedName).*:s"
         )
       }
     },
@@ -97,18 +109,7 @@ object Common extends AutoPlugin {
     Test / scalacOptions ~= (_.filterNot(_ == "-Werror")),
     scalacOptions ~= (_.filterNot(_ == "-Xfatal-warnings")),
     Test / fork           := true,
-    mimaPreviousArtifacts := previousVersion.map(organization.value %% moduleName.value % _).toSet,
-    headerLicense := Some(
-      HeaderLicense.Custom(
-        "Copyright (C) from 2022 The Play Framework Contributors <https://github.com/playframework>, 2011-2021 Lightbend Inc. <https://www.lightbend.com>"
-      )
-    ),
-    headerMappings ++= Map(
-      FileType("sbt")        -> HeaderCommentStyle.cppStyleLineComment,
-      FileType("properties") -> HeaderCommentStyle.hashLineComment,
-      FileType.xml           -> HeaderCommentStyle.xmlStyleBlockComment,
-      FileType("md") -> CommentStyle(new LineCommentCreator("<!---", "-->"), commentBetween("<!---", "*", "-->"))
-    ),
+    mimaPreviousArtifacts := previousVersion.map(organization.value %% moduleName.value % _).toSet
   ) ++ Publish.settings
 
   @inline def missMeth(n: String) =

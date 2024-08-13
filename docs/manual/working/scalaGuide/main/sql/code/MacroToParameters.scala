@@ -5,6 +5,7 @@
 package scalaGuide.sql.anorm
 
 object MacroToParameters1 {
+  import anorm._
   // #caseClassToParameters1
   import anorm.{ Macro, SQL, ToParameterList }
   import anorm.NamedParameter

@@ -144,7 +144,7 @@ private[macros] trait ImplicitResolver[A, Q <: Quotes] {
    * @param forwardExpr the `Expr` that forward to the materialized instance itself
    */
   private class ImplicitTransformer[T](forwardExpr: Expr[T]) extends TreeMap {
-    private val denorm = denormalized _
+    private val denorm = denormalized
 
     @SuppressWarnings(Array("AsInstanceOf"))
     override def transformTree(tree: Tree)(owner: Symbol): Tree = tree match {
