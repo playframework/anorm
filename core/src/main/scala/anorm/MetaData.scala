@@ -100,7 +100,7 @@ object ColumnAliaser {
    * }}}
    */
   def perPositions(positions: Set[Int])(as: ((Int, ColumnName)) => String): ColumnAliaser = new Default({
-    case c @ (pos, _) if positions contains pos => as(c)
+    case c @ (pos, _) if positions.contains(pos) => as(c)
   })
 
   /**
