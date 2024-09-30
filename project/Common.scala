@@ -20,8 +20,8 @@ object Common extends AutoPlugin {
   override def projectSettings = Seq(
     organization        := "org.playframework.anorm",
     sonatypeProfileName := "org.playframework",
-    scalaVersion        := "2.12.19",
-    crossScalaVersions  := Seq("2.11.12", scalaVersion.value, "2.13.14", "3.4.3"),
+    scalaVersion        := "2.12.20",
+    crossScalaVersions  := Seq("2.11.12", scalaVersion.value, "2.13.15", "3.4.3"),
     Compile / unmanagedSourceDirectories ++= {
       val sv = scalaVersion.value
 
