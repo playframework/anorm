@@ -241,7 +241,7 @@ lazy val `anorm-core` = project
 
         Seq(
           "joda-time"               % "joda-time"                % "2.13.0",
-          "org.joda"                % "joda-convert"             % "2.2.3",
+          "org.joda"                % "joda-convert"             % "2.2.4",
           "org.scala-lang.modules" %% "scala-parser-combinators" % parserCombinatorsVer.value,
           "org.scala-lang.modules" %% "scala-xml"                % xmlVer.value % Test,
           "com.h2database"          % "h2"                       % h2Ver        % Test,
@@ -352,7 +352,7 @@ lazy val `anorm-akka` = (project in file("akka"))
   )
   .dependsOn(`anorm-core`)
 
-lazy val pekkoVer = Def.setting[String]("1.1.1")
+lazy val pekkoVer = Def.setting[String]("1.1.2")
 
 lazy val pekkoEnabled = Def.setting[Boolean] {
   val v = scalaBinaryVersion.value
