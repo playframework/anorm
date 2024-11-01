@@ -368,11 +368,15 @@ object Macro extends MacroOptions with macros.ValueColumn with macros.ValueToSta
   ): Expr[RowParser[T]] =
     macros.SealedRowParserImpl[T](naming, discriminate)
 
-  inline private def withParser[T](f: RowParser[T] => (Row => SqlResult[T])): RowParser[T] = new RowParser[T] { self =>
+  final class SelfRowParser[T](
+      f: RowParser[T] => (Row => SqlResult[T])
+  ) extends RowParser[T] { self =>
     lazy val underlying = f(self)
 
     def apply(row: Row): SqlResult[T] = underlying(row)
   }
+
+  inline private def withParser[T](f: RowParser[T] => (Row => SqlResult[T])): RowParser[T] = new SelfRowParser[T](f)
 
   /**
    * @tparam T the field type
@@ -544,13 +548,17 @@ object Macro extends MacroOptions with macros.ValueColumn with macros.ValueToSta
     }
   }
 
-  inline private def withSelfToParameterList[T](
+  final class SelfToParameterList[T](
       f: ToParameterList[T] => (T => List[NamedParameter])
-  ): ToParameterList[T] = new ToParameterList[T] { self =>
+  ) extends ToParameterList[T] { self =>
     lazy val underlying = f(self)
 
     def apply(input: T): List[NamedParameter] = underlying(input)
   }
+
+  inline private def withSelfToParameterList[T](
+      f: ToParameterList[T] => (T => List[NamedParameter])
+  ): ToParameterList[T] = new SelfToParameterList[T](f)
 
   /** Only for internal purposes */
   final class Placeholder {}
