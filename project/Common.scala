@@ -2,13 +2,14 @@ import sbt.Keys._
 import sbt._
 import sbt.plugins.JvmPlugin
 import com.typesafe.tools.mima.plugin.MimaKeys.mimaPreviousArtifacts
+import xerial.sbt.Sonatype
 import xerial.sbt.Sonatype.autoImport._
 
 object Common extends AutoPlugin {
   import com.typesafe.tools.mima.core._
 
   override def trigger  = allRequirements
-  override def requires = JvmPlugin
+  override def requires = JvmPlugin && Sonatype
 
   val previousVersion = "2.6.10"
 
