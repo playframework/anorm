@@ -26,7 +26,17 @@ object Publish {
           url("https://www.apache.org/licenses/LICENSE-2.0")
       )
     },
-    homepage := Some(url(siteUrl))
+    homepage := Some(url(siteUrl)),
+    organizationName := "The Play Framework Project",
+    organizationHomepage := Some(url("https://playframework.com/")),
+    developers := List(
+      Developer(
+        id = "playframework",
+        name = "The Play Framework Contributors",
+        email = "contact@playframework.com",
+        url = url("https://github.com/playframework")
+      )
+    )
   )
 
   // ---
