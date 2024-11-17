@@ -26,8 +26,8 @@ object Publish {
           url("https://www.apache.org/licenses/LICENSE-2.0")
       )
     },
-    homepage := Some(url(siteUrl)),
-    organizationName := "The Play Framework Project",
+    homepage             := Some(url(siteUrl)),
+    organizationName     := "The Play Framework Project",
     organizationHomepage := Some(url("https://playframework.com/")),
     developers := List(
       Developer(
