@@ -16,7 +16,7 @@ import anorm._
 
 class IterateeSpec(implicit ee: ExecutionEnv) extends org.specs2.mutable.Specification {
 
-  "Play Iteratee" title
+  "Play Iteratee".title
 
   "Iteratees" should {
     "broadcast the streaming result" in {

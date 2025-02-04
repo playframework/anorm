@@ -11,7 +11,7 @@ import acolyte.jdbc.Implicits._
 import anorm._
 
 final class ValueEnumToStatementSpec extends org.specs2.mutable.Specification {
-  "ValueEnum parameters" title
+  "ValueEnum parameters".title
 
   "Sensitive ValueEnum" should {
     "successfully passed as parameter" >> {

@@ -146,7 +146,7 @@ object AnormGeneration {
   def generateFunctionAdapter(dir: File): File = {
     val out = dir / "FunctionAdapter.scala"
 
-    if (out exists) out
+    if (out.exists) out
     else {
       IO.writer[File](out, "", IO.defaultCharset, false) { w ⇒
         w.append("""package anorm

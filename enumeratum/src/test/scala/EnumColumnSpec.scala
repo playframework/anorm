@@ -15,7 +15,7 @@ import anorm.{ AnormException, SQL, SqlParser, TypeDoesNotMatch }
 import SqlParser.scalar
 
 final class EnumColumnSpec extends org.specs2.mutable.Specification {
-  "Enum column" title
+  "Enum column".title
 
   "Sensitive enum" should {
     "be successfully parsed as Column" >> {
