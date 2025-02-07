@@ -31,7 +31,7 @@ final class AnormSpec
       val ex: Boolean = SQL"""insert into test1(id, foo, bar) 
         values (${10L}, ${"Hello"}, ${20})""".execute()
 
-      (ex.aka("update executed") must beFalse) /*not query*/.and {
+      (ex.aka("update executed") must beFalse) /*not query*/ .and {
         SQL("select * from test1 where id = {id}")
           .on(Symbol("id") -> 10L)
           .as(RowParser { row =>

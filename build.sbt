@@ -240,7 +240,7 @@ lazy val `anorm-core` = project
         }
 
         Seq(
-          "joda-time"               % "joda-time"                % "2.13.0",
+          "joda-time"               % "joda-time"                % "2.13.1",
           "org.joda"                % "joda-convert"             % "2.2.4",
           "org.scala-lang.modules" %% "scala-parser-combinators" % parserCombinatorsVer.value,
           "org.scala-lang.modules" %% "scala-xml"                % xmlVer.value % Test,
@@ -352,7 +352,7 @@ lazy val `anorm-akka` = (project in file("akka"))
   )
   .dependsOn(`anorm-core`)
 
-lazy val pekkoVer = Def.setting[String]("1.1.2")
+lazy val pekkoVer = Def.setting[String]("1.1.3")
 
 lazy val pekkoEnabled = Def.setting[Boolean] {
   val v = scalaBinaryVersion.value
@@ -424,7 +424,7 @@ lazy val `anorm-pekko` = (project in file("pekko"))
 
 // ---
 
-lazy val pgVer = sys.env.get("POSTGRES_VERSION").getOrElse("42.7.4")
+lazy val pgVer = sys.env.get("POSTGRES_VERSION").getOrElse("42.7.5")
 
 val playVer = Def.setting[String] {
   if (scalaBinaryVersion.value == "2.13" || scalaBinaryVersion.value == "3") "2.9.2"

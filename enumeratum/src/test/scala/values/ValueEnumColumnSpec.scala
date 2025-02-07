@@ -15,7 +15,7 @@ import anorm.{ AnormException, SQL, SqlParser, TypeDoesNotMatch }
 import SqlParser.scalar
 
 final class ValueEnumColumnSpec extends org.specs2.mutable.Specification {
-  "ValueEnum column" title
+  "ValueEnum column".title
 
   "ValueEnum" should {
     "be successfully parsed as Column" >> {

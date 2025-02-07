@@ -22,7 +22,7 @@ object Common extends AutoPlugin {
     organization        := "org.playframework.anorm",
     sonatypeProfileName := "org.playframework",
     scalaVersion        := "2.12.20",
-    crossScalaVersions  := Seq("2.11.12", scalaVersion.value, "2.13.15", "3.3.4"),
+    crossScalaVersions  := Seq("2.11.12", scalaVersion.value, "2.13.16", "3.3.5"),
     Compile / unmanagedSourceDirectories ++= {
       val sv = scalaVersion.value
 
@@ -146,7 +146,7 @@ object AnormGeneration {
   def generateFunctionAdapter(dir: File): File = {
     val out = dir / "FunctionAdapter.scala"
 
-    if (out exists) out
+    if (out.exists) out
     else {
       IO.writer[File](out, "", IO.defaultCharset, false) { w ⇒
         w.append("""package anorm
