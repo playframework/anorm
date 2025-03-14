@@ -112,10 +112,9 @@ val armShading = Seq(
 )
 
 lazy val parserCombinatorsVer = Def.setting[String] {
-  if (scalaBinaryVersion.value.startsWith("2")) {
-    "1.1.2"
-  } else {
-    "2.3.0"
+  CrossVersion.partialVersion(scalaVersion.value) match {
+    case Some((2, n)) if n < 13 => "1.1.2"
+    case _                      => "2.4.0"
   }
 }
 
