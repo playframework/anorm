@@ -453,7 +453,7 @@ lazy val `anorm-postgres` = (project in file("postgres"))
 
         Seq(
           "org.postgresql"          % "postgresql" % pgVer,
-          "com.typesafe.play"      %% "play-json"  % playJsonVer,
+          "org.playframework"      %% "play-json"  % playJsonVer,
           "org.scala-lang.modules" %% "scala-xml"  % xmlVer.value % Test
         ) ++ specs2Test :+ acolyte
       }
