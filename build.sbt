@@ -131,7 +131,7 @@ lazy val xmlVer = Def.setting[String] {
   if (scalaBinaryVersion.value == "2.11") {
     "1.3.1"
   } else {
-    "2.2.0"
+    "2.4.0"
   }
 }
 
