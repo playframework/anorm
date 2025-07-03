@@ -16,9 +16,9 @@ object Common extends AutoPlugin {
   val previousVersion: Option[String] = Some("2.6.10")
 
   override def projectSettings = Seq(
-    organization        := "org.playframework.anorm",
-    scalaVersion        := "2.12.20",
-    crossScalaVersions  := Seq("2.11.12", scalaVersion.value, "2.13.16", "3.3.6"),
+    organization       := "org.playframework.anorm",
+    scalaVersion       := "2.12.20",
+    crossScalaVersions := Seq("2.11.12", scalaVersion.value, "2.13.16", "3.3.6"),
     Compile / unmanagedSourceDirectories ++= {
       val sv = scalaVersion.value
 
