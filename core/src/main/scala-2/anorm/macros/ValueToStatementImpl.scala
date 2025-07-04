@@ -23,7 +23,7 @@ private[anorm] object ValueToStatement {
       case List(term: TermSymbol) :: Nil => {
         val tsTpe = c.weakTypeTag[ToStatement[_]].tpe
 
-        val forwardName = TermName(c.freshName("forward"))
+        val forwardName                                                       = TermName(c.freshName("forward"))
         val resolveImplicit: (Name, Type, Type) => Implicit[Type, Name, Tree] =
           ImplicitResolver(c)(tpe, Map.empty, forwardName)
 

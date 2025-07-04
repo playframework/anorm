@@ -91,15 +91,15 @@ object ToSql {
   /** Returns fragment for each value, with custom formatting. */
   implicit def seqParamToSql[A](implicit conv: ToSql[A] = ToSql.missing[A]): ToSql[SeqParameter[A]] =
     ToSql[SeqParameter[A]] { p =>
-      val before = p.before.getOrElse("")
-      val after  = p.after.getOrElse("")
+      val before                = p.before.getOrElse("")
+      val after                 = p.after.getOrElse("")
       val c: A => (String, Int) =
         if (conv == null) _ => "?" -> 1 else conv.fragment
 
       val sql = p.values.foldLeft(new StringBuilder() -> 0) {
         case ((sb, i), v) =>
           val frag = c(v)
-          val st =
+          val st   =
             if (i > 0) sb ++= p.separator ++= before ++= frag._1
             else sb ++= before ++= frag._1
 

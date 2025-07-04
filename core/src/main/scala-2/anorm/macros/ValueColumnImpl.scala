@@ -24,7 +24,7 @@ private[anorm] object ValueColumnImpl {
       case List(term: TermSymbol) :: Nil => {
         val colTpe = c.weakTypeTag[Column[_]].tpe
 
-        val forwardName = TermName(c.freshName("forward"))
+        val forwardName                                                       = TermName(c.freshName("forward"))
         val resolveImplicit: (Name, Type, Type) => Implicit[Type, Name, Tree] =
           ImplicitResolver(c)(tpe, Map.empty, forwardName)
 

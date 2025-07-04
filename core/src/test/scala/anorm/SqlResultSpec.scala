@@ -218,7 +218,7 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
       var closed              = false
       val probe               = resource.managed(new java.io.Closeable { def close() = closed = true })
 
-      var i = 0
+      var i        = 0
       lazy val agg =
         res.copy(resultSet = res.resultSet.and(probe).map(_._1)).fold(List.empty[Int], ColumnAliaser.empty) { (l, _) =>
           i = i + 1; l :+ i
@@ -242,7 +242,7 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
           var closed = false
           val probe  = resource.managed(new java.io.Closeable { def close() = closed = true })
 
-          var i = 0
+          var i        = 0
           lazy val agg =
             res.copy(resultSet = res.resultSet.and(probe).map(_._1)).fold(List.empty[Int], ColumnAliaser.empty) {
               (l, _) =>
@@ -288,7 +288,7 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
       var closed              = false
       val probe               = resource.managed(new java.io.Closeable { def close() = closed = true })
 
-      var i = 0
+      var i        = 0
       lazy val agg =
         res.copy(resultSet = res.resultSet.and(probe).map(_._1)).foldWhile(List.empty[Int], ColumnAliaser.empty) {
           (l, _) =>
@@ -310,7 +310,7 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
       var closed              = false
       val probe               = resource.managed(new java.io.Closeable { def close() = closed = true })
 
-      var i = 0
+      var i        = 0
       lazy val agg =
         res.copy(resultSet = res.resultSet.and(probe).map(_._1)).foldWhile(List.empty[Int], ColumnAliaser.empty) {
           (l, _) =>
@@ -334,7 +334,7 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
         var closed              = false
         val probe               = resource.managed(new java.io.Closeable { def close() = closed = true })
 
-        var i = 0
+        var i        = 0
         lazy val agg =
           res.copy(resultSet = res.resultSet.and(probe).map(_._1)).foldWhile(List.empty[Int], ColumnAliaser.empty) {
             (l, _) =>

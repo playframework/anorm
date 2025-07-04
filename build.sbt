@@ -81,7 +81,7 @@ val armShading = Seq(
       case _                => "anorm.jar"
     }
   },
-  assembly / assemblyShadeRules := Seq.empty,
+  assembly / assemblyShadeRules     := Seq.empty,
   (assembly / assemblyExcludedJars) := (assembly / fullClasspath).value.filter {
     !_.data.getName.startsWith("scala-arm")
   },
@@ -363,12 +363,12 @@ lazy val `anorm-pekko` = (project in file("pekko"))
   .settings(
     Seq(
       mimaPreviousArtifacts := Set.empty,
-      sourceDirectory := {
+      sourceDirectory       := {
         if (!pekkoEnabled.value) new java.io.File("/no/sources")
         else sourceDirectory.value
       },
       publishArtifact := pekkoEnabled.value,
-      publish := Def.taskDyn {
+      publish         := Def.taskDyn {
         val ver = scalaBinaryVersion.value
         val go  = publish.value
 

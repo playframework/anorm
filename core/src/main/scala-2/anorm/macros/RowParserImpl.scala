@@ -123,7 +123,7 @@ private[anorm] object RowParserImpl {
 
     val caseDef = cq"$m => { $body }"
     val patMat  = q"$x.map[$tpe] { _ match { case $caseDef } }"
-    val parser =
+    val parser  =
       if (!hasSelfRef) patMat
       else {
         val generated = TypeName(c.freshName("Generated"))

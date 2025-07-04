@@ -86,7 +86,7 @@ private[anorm] object RowParserImpl {
         columnSymss: List[List[Symbol]]
     )
 
-    val pkg = Symbol.requiredPackage("anorm")
+    val pkg         = Symbol.requiredPackage("anorm")
     val TildeSelect = (for {
       ts <- pkg.declaredType("~").headOption.map(_.companionModule)
       un <- ts.declaredMethod("unapply").headOption
@@ -262,7 +262,7 @@ private[anorm] object RowParserImpl {
               None
 
             case Some(GenerationState(parsing, _, matchPattern, revColss)) => {
-              val targs = boundTypes.values.toList
+              val targs    = boundTypes.values.toList
               val colArgss = revColss.reverse.map {
                 _.reverse.map(Ref(_: Symbol))
               }
