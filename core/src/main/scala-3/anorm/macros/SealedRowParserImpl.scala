@@ -65,7 +65,7 @@ private[anorm] object SealedRowParserImpl {
 
     val cases: List[(String, CaseDef)] = subParsers.result().map {
       case (subcls, subParser) =>
-        val tpeSym = subcls.typeSymbol
+        val tpeSym  = subcls.typeSymbol
         val tpeName = {
           if (tpeSym.flags.is(Flags.Module)) tpeSym.fullName.stripSuffix(f"$$")
           else tpeSym.fullName

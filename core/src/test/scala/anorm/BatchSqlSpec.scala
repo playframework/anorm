@@ -61,7 +61,7 @@ final class BatchSqlSpec extends org.specs2.mutable.Specification with H2Databas
     "be successful" in {
       val b1 = BatchSql("SELECT * FROM tbl WHERE a = {a}, b = {b}", Seq[NamedParameter]("a" -> 0, "b" -> 1), Nil)
 
-      lazy val b2 = b1.addBatchParams(2, 3)
+      lazy val b2           = b1.addBatchParams(2, 3)
       lazy val expectedMaps = Seq(
         Map[String, ParameterValue]("a" -> 0, "b" -> 1),
         Map.empty[String, ParameterValue],

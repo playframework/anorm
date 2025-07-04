@@ -37,7 +37,7 @@ object SqlStatementParser extends JavaTokenParsers {
 
   private val instr: Parser[TokenizedStatement] = {
     @inline def normalize(t: StatementToken): Option[TokenGroup] = t match {
-      case StringToken("") => Option.empty[TokenGroup]
+      case StringToken("")                => Option.empty[TokenGroup]
       case StringToken(s) if s.trim == "" =>
         Some(TokenGroup(List(StringToken(" ")), None))
 

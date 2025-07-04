@@ -37,7 +37,7 @@ object ImplicitResolver {
 
         // infers implicit
         val neededImplicitType = appliedType(typeclass, ptpe)
-        val neededImplicit = if (!selfRef) {
+        val neededImplicit     = if (!selfRef) {
           c.inferImplicitValue(neededImplicitType)
         } else
           c.untypecheck(

@@ -270,17 +270,16 @@ object Macro extends MacroOptions with macros.ValueColumn with macros.ValueToSta
   // ---
 
   private def namedParserImpl[A](using q: Quotes, tpe: Type[A]): Expr[RowParser[A]] = {
-    parserImpl[A](q) {
-      [T] => (_: Type[T]) ?=> (col: Expr[Column[T]], n: String, _: Int) => '{ SqlParser.get[T](${ Expr(n) })($col) }
+    parserImpl[A](q) { [T] => (_: Type[T]) ?=> (col: Expr[Column[T]], n: String, _: Int) =>
+      '{ SqlParser.get[T](${ Expr(n) })($col) }
     }
   }
 
   private def namedParserImpl1[A](
       naming: Expr[ColumnNaming]
   )(using q: Quotes, tpe: Type[A], colNme: Type[ColumnNaming]): Expr[RowParser[A]] = {
-    parserImpl[A](q) {
-      [T] =>
-        (_: Type[T]) ?=> (col: Expr[Column[T]], n: String, _: Int) => '{ SqlParser.get[T]($naming(${ Expr(n) }))($col) }
+    parserImpl[A](q) { [T] => (_: Type[T]) ?=> (col: Expr[Column[T]], n: String, _: Int) =>
+      '{ SqlParser.get[T]($naming(${ Expr(n) }))($col) }
     }
   }
 
@@ -320,29 +319,24 @@ object Macro extends MacroOptions with macros.ValueColumn with macros.ValueToSta
       report.errorAndAbort(s"no column name for parameters: ${ns.mkString(", ")} < ${params.mkString("[", ", ", "]")}")
 
     } else {
-      parserImpl[A](q) {
-        [T] =>
-          (_: Type[T]) ?=>
-            (col: Expr[Column[T]], _: String, i: Int) =>
-              ns.lift(i) match {
-                case Some(n) => {
-                  val cn = naming(Expr(n))
+      parserImpl[A](q) { [T] => (_: Type[T]) ?=> (col: Expr[Column[T]], _: String, i: Int) =>
+        ns.lift(i) match {
+          case Some(n) => {
+            val cn = naming(Expr(n))
 
-                  '{ SqlParser.get[T]($cn)($col) }
-                }
+            '{ SqlParser.get[T]($cn)($col) }
+          }
 
-                case _ =>
-                  report.errorAndAbort(s"missing column name for parameter $i")
-            }
+          case _ =>
+            report.errorAndAbort(s"missing column name for parameter $i")
+        }
       }
     }
   }
 
   private def offsetParserImpl[A](offset: Expr[Int])(using q: Quotes, tpe: Type[A]): Expr[RowParser[A]] = {
-    parserImpl[A](q) {
-      [T] =>
-        (_: Type[T]) ?=>
-          (col: Expr[Column[T]], _: String, i: Int) => '{ SqlParser.get[T]($offset + ${ Expr(i + 1) })($col) }
+    parserImpl[A](q) { [T] => (_: Type[T]) ?=> (col: Expr[Column[T]], _: String, i: Int) =>
+      '{ SqlParser.get[T]($offset + ${ Expr(i + 1) })($col) }
     }
   }
 
@@ -422,7 +416,7 @@ object Macro extends MacroOptions with macros.ValueColumn with macros.ValueToSta
           val strFrom = FromExpr.StringFromExpr[String]
 
           for {
-            propertyName <- strFrom.unapply(propNme.asExprOf[String])
+            propertyName  <- strFrom.unapply(propNme.asExprOf[String])
             parameterName <- {
               if (paramNme.tpe <:< strTpr) {
                 strFrom.unapply(paramNme.asExprOf[String]).map(Option(_))

@@ -49,7 +49,7 @@ object MacroParsers {
 
   // First, RowParser instances for all the subtypes must be provided,
   // either by macros or by custom parsers
-  implicit val barParser: RowParser[Bar] = Macro.namedParser[Bar]
+  implicit val barParser: RowParser[Bar]          = Macro.namedParser[Bar]
   implicit val loremParser: RowParser[Lorem.type] = RowParser[Lorem.type] { _ /*anyRowDiscriminatedAsLorem*/ =>
     Success(Lorem)
   }

@@ -45,7 +45,7 @@ sealed trait ToStatementPriority0 {
    */
   implicit def binaryStreamToStatement[S <: InputStream]: ToStatement[S] =
     new ToStatement[S] {
-      val jdbcType = implicitly[ParameterMetaData[InputStream]].jdbcType
+      val jdbcType                                  = implicitly[ParameterMetaData[InputStream]].jdbcType
       def set(s: PreparedStatement, i: Int, bin: S) =
         if (bin == (null: InputStream)) s.setNull(i, jdbcType)
         else s.setBinaryStream(i, bin)
@@ -69,7 +69,7 @@ sealed trait ToStatementPriority0 {
    */
   implicit def blobToStatement[B <: java.sql.Blob]: ToStatement[B] =
     new ToStatement[B] {
-      val jdbcType = implicitly[ParameterMetaData[java.sql.Blob]].jdbcType
+      val jdbcType                                   = implicitly[ParameterMetaData[java.sql.Blob]].jdbcType
       def set(s: PreparedStatement, i: Int, blob: B) =
         if (blob == (null: java.sql.Blob)) s.setNull(i, jdbcType)
         else s.setBlob(i, blob)
@@ -89,7 +89,7 @@ sealed trait ToStatementPriority0 {
    */
   implicit def characterStreamToStatement[R <: Reader]: ToStatement[R] =
     new ToStatement[R] {
-      val jdbcType = implicitly[ParameterMetaData[Reader]].jdbcType
+      val jdbcType                                    = implicitly[ParameterMetaData[Reader]].jdbcType
       def set(s: PreparedStatement, i: Int, chars: R) =
         if (chars == (null: Reader)) s.setNull(i, jdbcType)
         else s.setCharacterStream(i, chars)
@@ -120,7 +120,7 @@ sealed trait ToStatementPriority0 {
    * }}}
    */
   implicit object javaBooleanToStatement extends ToStatement[JBool] {
-    val jdbcType = implicitly[ParameterMetaData[JBool]].jdbcType
+    val jdbcType                                          = implicitly[ParameterMetaData[JBool]].jdbcType
     def set(s: PreparedStatement, i: Int, b: JBool): Unit =
       if (b != (null: JBool)) s.setBoolean(i, b) else s.setNull(i, jdbcType)
   }
@@ -150,7 +150,7 @@ sealed trait ToStatementPriority0 {
    * }}}
    */
   implicit object javaByteToStatement extends ToStatement[JByte] {
-    val jdbcType = implicitly[ParameterMetaData[JByte]].jdbcType
+    val jdbcType                                          = implicitly[ParameterMetaData[JByte]].jdbcType
     def set(s: PreparedStatement, i: Int, b: JByte): Unit =
       if (b != (null: JByte)) s.setByte(i, b) else s.setNull(i, jdbcType)
   }
@@ -180,7 +180,7 @@ sealed trait ToStatementPriority0 {
    * }}}
    */
   implicit object javaDoubleToStatement extends ToStatement[JDouble] {
-    val jdbcType = implicitly[ParameterMetaData[JDouble]].jdbcType
+    val jdbcType                                            = implicitly[ParameterMetaData[JDouble]].jdbcType
     def set(s: PreparedStatement, i: Int, d: JDouble): Unit =
       if (d != (null: JDouble)) s.setDouble(i, d) else s.setNull(i, jdbcType)
   }
@@ -210,7 +210,7 @@ sealed trait ToStatementPriority0 {
    * }}}
    */
   implicit object javaFloatToStatement extends ToStatement[JFloat] {
-    val jdbcType = implicitly[ParameterMetaData[JFloat]].jdbcType
+    val jdbcType                                           = implicitly[ParameterMetaData[JFloat]].jdbcType
     def set(s: PreparedStatement, i: Int, f: JFloat): Unit =
       if (f != (null: JFloat)) s.setFloat(i, f) else s.setNull(i, jdbcType)
   }
@@ -240,7 +240,7 @@ sealed trait ToStatementPriority0 {
    * }}}
    */
   implicit object javaLongToStatement extends ToStatement[JLong] {
-    val jdbcType = implicitly[ParameterMetaData[JLong]].jdbcType
+    val jdbcType                                          = implicitly[ParameterMetaData[JLong]].jdbcType
     def set(s: PreparedStatement, i: Int, l: JLong): Unit =
       if (l != (null: JLong)) s.setLong(i, l) else s.setNull(i, jdbcType)
   }
@@ -270,7 +270,7 @@ sealed trait ToStatementPriority0 {
    * }}}
    */
   implicit object integerToStatement extends ToStatement[Integer] {
-    val jdbcType = implicitly[ParameterMetaData[Integer]].jdbcType
+    val jdbcType                                            = implicitly[ParameterMetaData[Integer]].jdbcType
     def set(s: PreparedStatement, i: Int, v: Integer): Unit =
       if (v != (null: Integer)) s.setInt(i, v) else s.setNull(i, jdbcType)
   }
@@ -300,7 +300,7 @@ sealed trait ToStatementPriority0 {
    * }}}
    */
   implicit object javaShortToStatement extends ToStatement[JShort] {
-    val jdbcType = implicitly[ParameterMetaData[JShort]].jdbcType
+    val jdbcType                                           = implicitly[ParameterMetaData[JShort]].jdbcType
     def set(s: PreparedStatement, i: Int, v: JShort): Unit =
       if (v != (null: JShort)) s.setShort(i, v) else s.setNull(i, jdbcType)
   }
@@ -317,7 +317,7 @@ sealed trait ToStatementPriority0 {
    * }}}
    */
   implicit object characterToStatement extends ToStatement[Character] {
-    val jdbcType = implicitly[ParameterMetaData[Character]].jdbcType
+    val jdbcType                                         = implicitly[ParameterMetaData[Character]].jdbcType
     def set(s: PreparedStatement, i: Int, ch: Character) =
       if (ch != (null: Character)) s.setString(i, ch.toString)
       else s.setNull(i, jdbcType)
@@ -414,7 +414,7 @@ sealed trait ToStatementPriority0 {
    * }}}
    */
   implicit object javaBigIntegerToStatement extends ToStatement[BigInteger] {
-    val jdbcType = implicitly[ParameterMetaData[BigInteger]].jdbcType
+    val jdbcType                                                   = implicitly[ParameterMetaData[BigInteger]].jdbcType
     def set(s: PreparedStatement, index: Int, v: BigInteger): Unit =
       if (v != (null: BigInteger)) s.setBigDecimal(index, new JBigDec(v))
       else s.setNull(index, jdbcType)
@@ -431,7 +431,7 @@ sealed trait ToStatementPriority0 {
    * }}}
    */
   implicit object scalaBigIntegerToStatement extends ToStatement[BigInt] {
-    val jdbcType = implicitly[ParameterMetaData[BigInt]].jdbcType
+    val jdbcType                                               = implicitly[ParameterMetaData[BigInt]].jdbcType
     def set(s: PreparedStatement, index: Int, v: BigInt): Unit =
       if (v != (null: BigInt)) s.setBigDecimal(index, new JBigDec(v.bigInteger))
       else s.setNull(index, jdbcType)
@@ -464,7 +464,7 @@ sealed trait ToStatementPriority0 {
    * }}}
    */
   implicit object scalaBigDecimalToStatement extends ToStatement[BigDecimal] {
-    val jdbcType = implicitly[ParameterMetaData[BigDecimal]].jdbcType
+    val jdbcType                                                   = implicitly[ParameterMetaData[BigDecimal]].jdbcType
     def set(s: PreparedStatement, index: Int, v: BigDecimal): Unit =
       if (v != (null: BigDecimal)) s.setBigDecimal(index, v.bigDecimal)
       else s.setNull(index, jdbcType)
@@ -545,7 +545,7 @@ sealed trait ToStatementPriority0 {
    * }}}
    */
   implicit object uuidToStatement extends ToStatement[JUUID] {
-    val jdbcType = implicitly[ParameterMetaData[JUUID]].jdbcType
+    val jdbcType                                               = implicitly[ParameterMetaData[JUUID]].jdbcType
     def set(s: PreparedStatement, index: Int, id: JUUID): Unit =
       if (id != (null: JUUID)) s.setString(index, id.toString)
       else s.setNull(index, jdbcType)
@@ -564,7 +564,7 @@ sealed trait ToStatementPriority0 {
    * }}}
    */
   implicit object uriToStatement extends ToStatement[URI] {
-    val jdbcType = implicitly[ParameterMetaData[URI]].jdbcType
+    val jdbcType                                              = implicitly[ParameterMetaData[URI]].jdbcType
     def set(s: PreparedStatement, index: Int, uri: URI): Unit =
       if (uri != (null: URI)) s.setString(index, uri.toString)
       else s.setNull(index, jdbcType)
@@ -583,7 +583,7 @@ sealed trait ToStatementPriority0 {
    * }}}
    */
   implicit object urlToStatement extends ToStatement[URL] {
-    val jdbcType = implicitly[ParameterMetaData[URL]].jdbcType
+    val jdbcType                                              = implicitly[ParameterMetaData[URL]].jdbcType
     def set(s: PreparedStatement, index: Int, url: URL): Unit =
       if (url != (null: URL)) s.setString(index, url.toString)
       else s.setNull(index, jdbcType)

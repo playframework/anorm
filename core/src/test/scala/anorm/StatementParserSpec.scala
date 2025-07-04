@@ -231,7 +231,7 @@ final class StatementParserSpec extends org.specs2.mutable.Specification {
 
   "String interpolation" should {
     "be successfully prepared" in {
-      val hell = "sinki"
+      val hell  = "sinki"
       val query = SQL"""
          SELECT * FROM (SELECT 'Hello' AS COL1, 'World' AS COL2) AS MY_TABLE WHERE COL1 LIKE $hell + '{foo} %'
       """
@@ -258,9 +258,9 @@ final class StatementParserSpec extends org.specs2.mutable.Specification {
     }
 
     "handle values as '#' escaped part in statement or SQL parameters" in {
-      val cmd    = "SELECT"
-      val clause = "FROM"
-      val table  = "Test"
+      val cmd                               = "SELECT"
+      val clause                            = "FROM"
+      val table                             = "Test"
       implicit val con: java.sql.Connection = connection(handleQuery {
         case QueryExecution(
               "SELECT * FROM Test WHERE id = ? AND code IN (?, ?)",

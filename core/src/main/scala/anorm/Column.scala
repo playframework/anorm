@@ -169,7 +169,7 @@ object Column extends JodaColumn with JavaTimeColumn {
         case string: String      => Right(string.getBytes)
         case blob: java.sql.Blob => streamBytes(blob.getBinaryStream)
         case StringWrapper2(s)   => string(s)(_.getBytes)
-        case _ =>
+        case _                   =>
           Left(TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to bytes array for column $qualified"))
       }
     }
@@ -229,7 +229,7 @@ object Column extends JodaColumn with JavaTimeColumn {
         case stream: InputStream => Right(stream)
         case string: String      => Right(new ByteArrayInputStream(string.getBytes))
         case blob: java.sql.Blob => Right(blob.getBinaryStream)
-        case _ =>
+        case _                   =>
           Left(TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to input stream for column $qualified"))
       }
     }
@@ -333,7 +333,7 @@ object Column extends JodaColumn with JavaTimeColumn {
       case int: Int       => Right(BigInteger.valueOf(int.toLong))
       case s: Short       => Right(BigInteger.valueOf(s.toLong))
       case b: Byte        => Right(BigInteger.valueOf(b.toLong))
-      case _ =>
+      case _              =>
         Left(TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to BigInteger for column $qualified"))
     }
   }
@@ -371,11 +371,11 @@ object Column extends JodaColumn with JavaTimeColumn {
   implicit val columnToUUID: Column[UUID] = nonNull { (value, meta) =>
     val MetaDataItem(qualified, _, _) = meta
     value match {
-      case d: UUID => Right(d)
+      case d: UUID   => Right(d)
       case s: String =>
         Try { UUID.fromString(s) } match {
           case TrySuccess(v) => Right(v)
-          case Failure(ex) =>
+          case Failure(ex)   =>
             Left(
               TypeDoesNotMatch(
                 s"Cannot convert $value: ${className(value)} to UUID for column $qualified: ${ex.getMessage}"
@@ -414,7 +414,7 @@ object Column extends JodaColumn with JavaTimeColumn {
       case i: Int         => Right(JBigDec.valueOf(i.toLong))
       case s: Short       => Right(JBigDec.valueOf(s.toLong))
       case b: Byte        => Right(JBigDec.valueOf(b.toLong))
-      case _ =>
+      case _              =>
         Left(TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to BigDecimal for column $qualified"))
     }
   }
@@ -669,7 +669,7 @@ sealed trait JodaColumn {
         case time: Long            => Right(new LocalDate(time))
         case TimestampWrapper1(ts) => Ts(ts)(t => new LocalDate(t.getTime))
         case TimestampWrapper2(ts) => Ts(ts)(t => new LocalDate(t.getTime))
-        case _ =>
+        case _                     =>
           Left(TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to Joda LocalDate for column $qualified"))
       }
     }
@@ -696,7 +696,7 @@ sealed trait JodaColumn {
         case time: Long            => Right(new LocalDateTime(time))
         case TimestampWrapper1(ts) => Ts(ts)(t => new LocalDateTime(t.getTime))
         case TimestampWrapper2(ts) => Ts(ts)(t => new LocalDateTime(t.getTime))
-        case _ =>
+        case _                     =>
           Left(
             TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to Joda LocalDateTime for column $qualified")
           )
@@ -720,8 +720,8 @@ sealed trait JodaColumn {
 
       @SuppressWarnings(Array("AsInstanceOf"))
       def unsafe = value match {
-        case date: Date => Right(new DateTime(date.getTime))
-        case time: Long => Right(new DateTime(time))
+        case date: Date            => Right(new DateTime(date.getTime))
+        case time: Long            => Right(new DateTime(time))
         case TimestampWrapper1(ts) =>
           Option(ts).fold(Right(null.asInstanceOf[DateTime]))(t => Right(new DateTime(t.getTime)))
 
@@ -788,7 +788,7 @@ sealed trait JavaTimeColumn {
     value match {
       case date: LocalDateTime    => Right(epoch(date.toInstant(ZoneOffset.UTC)))
       case ts: java.sql.Timestamp => Ts(ts)(t => epoch(t.toInstant))
-      case date: java.util.Date =>
+      case date: java.util.Date   =>
         Right(epoch(Instant.ofEpochMilli(date.getTime)))
 
       case time: Long =>
@@ -796,7 +796,7 @@ sealed trait JavaTimeColumn {
 
       case TimestampWrapper1(ts) => Ts(ts)(t => epoch(t.toInstant))
       case TimestampWrapper2(ts) => Ts(ts)(t => epoch(t.toInstant))
-      case _ =>
+      case _                     =>
         Left(TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to $description for column $qualified"))
     }
   }
@@ -811,7 +811,7 @@ sealed trait JavaTimeColumn {
       case time: Long            => Right(epoch(time))
       case TimestampWrapper1(ts) => Ts(ts)(t => epoch(t.getTime))
       case TimestampWrapper2(ts) => Ts(ts)(t => epoch(t.getTime))
-      case _ =>
+      case _                     =>
         Left(TypeDoesNotMatch(s"Cannot convert $value: ${className(value)} to $description for column $qualified"))
     }
   }

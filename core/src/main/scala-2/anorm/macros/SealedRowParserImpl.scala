@@ -19,7 +19,7 @@ private[anorm] object SealedRowParserImpl {
     val tpe = c.weakTypeTag[T].tpe
 
     @inline def abort(msg: String) = c.abort(c.enclosingPosition, msg)
-    val sub = directKnownSubclasses(c)(tpe).filter { subclass =>
+    val sub                        = directKnownSubclasses(c)(tpe).filter { subclass =>
       if (subclass.typeSymbol.asClass.typeParams.nonEmpty) {
         c.warning(c.enclosingPosition, s"class with type parameters is not supported as family member: $subclass")
 
@@ -31,7 +31,7 @@ private[anorm] object SealedRowParserImpl {
       abort(s"cannot find any subclass: $tpe")
     }
 
-    val parserTpe = c.weakTypeTag[RowParser[_]].tpe
+    val parserTpe           = c.weakTypeTag[RowParser[_]].tpe
     val missing: List[Type] = sub.flatMap { subclass =>
       val ptype = appliedType(parserTpe, List(subclass))
 
@@ -66,7 +66,7 @@ private[anorm] object SealedRowParserImpl {
     }
 
     lazy val supported = q"List(..${cases.map(_._1)})"
-    def mappingError =
+    def mappingError   =
       q"""anorm.RowParser.failed[$tpe](anorm.Error(anorm.SqlMappingError("unexpected row type '%s'; expected: %s".format(d, $supported))))"""
 
     val discriminatorTerm = TermName(c.freshName("discriminator"))

@@ -9,7 +9,7 @@ import java.sql.{ Connection, PreparedStatement }
 import resource.{ managed, Resource }
 
 private[anorm] object BatchSqlErrors {
-  val HeterogeneousParameterMaps = "if each map hasn't same parameter names"
+  val HeterogeneousParameterMaps            = "if each map hasn't same parameter names"
   val ParameterNamesNotMatchingPlaceholders =
     "if parameter names don't match query placeholders"
   val UnexpectedParameterName = "if `args` contains unexpected parameter name"

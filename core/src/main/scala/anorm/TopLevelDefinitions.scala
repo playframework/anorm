@@ -110,7 +110,7 @@ private[anorm] trait TopLevelDefinitions extends PackageCompat {
       m: Map[String, ParameterValue]
   ): (TokenizedStatement, Map[String, ParameterValue]) = {
     if (ti.hasNext) ti.next() match {
-      case "%" => tokenize(ti, PercentToken :: tks, parts, ps, gs, ns, m)
+      case "%"       => tokenize(ti, PercentToken :: tks, parts, ps, gs, ns, m)
       case s: String =>
         tokenize(ti, StringToken(s) :: tks, parts, ps, gs, ns, m)
       case _ => /* should not occur */ tokenize(ti, tks, parts, ps, gs, ns, m)

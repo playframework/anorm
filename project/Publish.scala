@@ -15,7 +15,7 @@ object Publish {
     pomIncludeRepository   := { _ => false },
     autoAPIMappings        := true,
     apiURL                 := Some(url(s"$siteUrl/unidoc/anorm/")),
-    pomPostProcess := transformPomDependencies { dep: XmlElem =>
+    pomPostProcess         := transformPomDependencies { dep: XmlElem =>
       if ((dep \ "groupId").text == "com.sksamuel.scapegoat") {
         Option.empty[XmlElem] // discard
       } else Some(dep)
@@ -29,7 +29,7 @@ object Publish {
     homepage             := Some(url(siteUrl)),
     organizationName     := "The Play Framework Project",
     organizationHomepage := Some(url("https://playframework.com/")),
-    developers := List(
+    developers           := List(
       Developer(
         id = "playframework",
         name = "The Play Framework Contributors",
