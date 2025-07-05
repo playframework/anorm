@@ -3,7 +3,7 @@
 ThisBuild / dynverVTagPrefix := false
 
 (ThisBuild / version) := {
-  val Stable = """([0-9]+)\.([0-9]+)\.([0-9]+)""".r
+  val Stable = """([0-9]+)\.([0-9]+)\.([0-9]+)(-(?:M|RC)[0-9]+)?""".r
 
   (ThisBuild / dynverGitDescribeOutput).value match {
     case Some(descr) => {
@@ -11,8 +11,8 @@ ThisBuild / dynverVTagPrefix := false
         (ThisBuild / previousStableVersion).value match {
           case Some(previousVer) => {
             val current = (for {
-              Seq(maj, min, patch) <- Stable.unapplySeq(previousVer)
-              nextPatch            <- scala.util.Try(patch.toInt).map(_ + 1).toOption
+              Seq(maj, min, patch, milestone) <- Stable.unapplySeq(previousVer)
+              nextPatch                       <- scala.util.Try(patch.toInt).map(_ + 1).toOption
             } yield {
               val suffix = descr.commitSuffix.sha
               s"${maj}.${min}.${nextPatch}-${suffix}-SNAPSHOT"
