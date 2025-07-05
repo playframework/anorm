@@ -22,7 +22,7 @@ val specs2Test = Seq(
 ).map("org.specs2" %% _ % "4.10.6" % Test cross (CrossVersion.for3Use2_13))
   .map(_.exclude("org.scala-lang.modules", "*"))
 
-lazy val acolyte = "org.eu.acolyte" %% "jdbc-scala" % "1.2.9" % Test
+lazy val acolyte = "org.eu.acolyte" %% "jdbc-scala" % "1.2.10" % Test
 
 // Licensing
 import de.heikoseeberger.sbtheader.HeaderPlugin.autoImport.HeaderPattern.commentBetween
