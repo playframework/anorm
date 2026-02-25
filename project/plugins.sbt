@@ -4,7 +4,7 @@ resolvers ++= DefaultOptions.resolvers(snapshot = true) ++ Seq(
   "Tatami Releases".at("https://raw.github.com/cchantep/tatami/master/releases")
 )
 
-addSbtPlugin("com.typesafe" % "sbt-mima-plugin" % "1.1.4")
+addSbtPlugin("com.typesafe" % "sbt-mima-plugin" % "1.1.5")
 
 addSbtPlugin("com.github.sbt" % "sbt-unidoc" % "0.6.1")
 
@@ -16,6 +16,6 @@ addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.14.5")
 
 addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.5.5")
 
-addSbtPlugin("com.github.sbt" % "sbt-ci-release" % "1.11.1")
+addSbtPlugin("com.github.sbt" % "sbt-ci-release" % "1.11.2")
 
 addSbtPlugin("com.github.sbt" % "sbt-header" % "5.11.0")
