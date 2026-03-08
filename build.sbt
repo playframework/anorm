@@ -233,7 +233,7 @@ lazy val `anorm-core` = project
         }
 
         Seq(
-          "joda-time"               % "joda-time"                % "2.14.0",
+          "joda-time"               % "joda-time"                % "2.14.1",
           "org.joda"                % "joda-convert"             % "3.0.1",
           "org.scala-lang.modules" %% "scala-parser-combinators" % parserCombinatorsVer.value,
           "org.scala-lang.modules" %% "scala-xml"                % xmlVer % Test,
