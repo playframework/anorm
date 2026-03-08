@@ -408,11 +408,6 @@ lazy val `anorm-pekko` = (project in file("pekko"))
 
 lazy val pgVer = sys.env.get("POSTGRES_VERSION").getOrElse("42.7.7")
 
-val playVer = Def.setting[String] {
-  if (scalaBinaryVersion.value == "2.13" || scalaBinaryVersion.value == "3") "2.9.2"
-  else "2.6.14"
-}
-
 lazy val `anorm-postgres` = (project in file("postgres"))
   .settings(
     Seq(
@@ -498,10 +493,21 @@ lazy val docs = project
 
         (manualDir / "javaGuide" ** "code").get ++ (manualDir / "scalaGuide" ** "code").get
       },
+      libraryDependencies ++= {
+        if (scalaBinaryVersion.value == "2.12") {
+          Seq(
+            "com.typesafe.play" %% "play-jdbc"   % "2.8.22" % Test,
+            "com.typesafe.play" %% "play-specs2" % "2.8.22" % Test
+          )
+        } else {
+          Seq(
+            "org.playframework" %% "play-jdbc"   % "3.0.10" % Test,
+            "org.playframework" %% "play-specs2" % "3.0.10" % Test
+          )
+        }
+      },
       libraryDependencies ++= Seq(
-        "com.typesafe.play" %% "play-jdbc"   % playVer.value % Test,
-        "com.typesafe.play" %% "play-specs2" % playVer.value % Test,
-        "com.h2database"     % "h2"          % "1.4.199"
+        "com.h2database" % "h2" % "1.4.199"
       ),
       (Compile / headerSources) ++=
         ((baseDirectory.value ** ("*.md" || "*.scala" || "*.xml"))
