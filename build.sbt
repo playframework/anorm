@@ -19,7 +19,7 @@ val specs2Test = Seq(
   "specs2-core",
   "specs2-junit",
   "specs2-matcher-extra"
-).map("org.specs2" %% _ % "4.10.6" % Test cross (CrossVersion.for3Use2_13))
+).map("org.specs2" %% _ % "4.23.0" % Test cross (CrossVersion.for3Use2_13))
   .map(_.exclude("org.scala-lang.modules", "*"))
 
 lazy val acolyte = "org.eu.acolyte" %% "jdbc-scala" % "1.2.9" % Test
