@@ -427,16 +427,9 @@ lazy val `anorm-postgres` = (project in file("postgres"))
         }
       },
       libraryDependencies ++= {
-        val v = scalaBinaryVersion.value
-
-        val playJsonVer = {
-          if (v == "2.13" || v == "3") "2.10.7"
-          else "2.6.7"
-        }
-
         Seq(
           "org.postgresql"          % "postgresql" % pgVer,
-          "com.typesafe.play"      %% "play-json"  % playJsonVer,
+          "org.playframework"      %% "play-json"  % "3.0.6",
           "org.scala-lang.modules" %% "scala-xml"  % xmlVer % Test
         ) ++ specs2Test :+ acolyte
       }
