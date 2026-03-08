@@ -127,13 +127,7 @@ lazy val coreMimaFilter: ProblemFilter = {
   case _ => true
 }
 
-lazy val xmlVer = Def.setting[String] {
-  if (scalaBinaryVersion.value == "2.11") {
-    "1.3.1"
-  } else {
-    "2.4.0"
-  }
-}
+lazy val xmlVer = "2.4.0"
 
 lazy val `anorm-core` = project
   .in(file("core"))
@@ -242,8 +236,8 @@ lazy val `anorm-core` = project
           "joda-time"               % "joda-time"                % "2.14.0",
           "org.joda"                % "joda-convert"             % "3.0.1",
           "org.scala-lang.modules" %% "scala-parser-combinators" % parserCombinatorsVer.value,
-          "org.scala-lang.modules" %% "scala-xml"                % xmlVer.value % Test,
-          "com.h2database"          % "h2"                       % h2Ver        % Test,
+          "org.scala-lang.modules" %% "scala-xml"                % xmlVer % Test,
+          "com.h2database"          % "h2"                       % h2Ver  % Test,
           acolyte
         ) ++ specs2Test
       },
@@ -278,7 +272,7 @@ lazy val `anorm-iteratee` = (project in file("iteratee"))
         else
           Seq(
             "com.typesafe.play"      %% "play-iteratees" % "2.6.1",
-            "org.scala-lang.modules" %% "scala-xml"      % xmlVer.value % Test,
+            "org.scala-lang.modules" %% "scala-xml"      % xmlVer % Test,
             acolyte
           ) ++ specs2Test
       }
@@ -292,8 +286,7 @@ lazy val akkaVer = Def.setting[String] {
   sys.env.get("AKKA_VERSION").getOrElse {
     val v = scalaBinaryVersion.value
 
-    if (v == "2.11") "2.4.20"
-    else if (v == "3") "2.6.19"
+    if (v == "3") "2.6.19"
     else "2.5.32"
   }
 }
@@ -313,7 +306,7 @@ lazy val `anorm-akka` = (project in file("akka"))
       },
       libraryDependencies ++= Seq(
         acolyte,
-        "org.scala-lang.modules" %% "scala-xml"           % xmlVer.value  % Test,
+        "org.scala-lang.modules" %% "scala-xml"           % xmlVer        % Test,
         ("com.typesafe.akka"     %% "akka-stream-testkit" % akkaVer.value % Test).exclude("org.scala-lang.modules", "*")
       ) ++ specs2Test,
       scalacOptions ++= {
@@ -336,16 +329,6 @@ lazy val `anorm-akka` = (project in file("akka"))
             (Test / sourceDirectory).value / "scala-2.13+"
 
         }
-      },
-      Test / unmanagedSourceDirectories += {
-        CrossVersion.partialVersion(scalaVersion.value) match {
-          case Some((2, 11)) =>
-            (Test / sourceDirectory).value / "scala-2.12-"
-
-          case _ =>
-            (Test / sourceDirectory).value / "scala-2.12+"
-
-        }
       }
     ) ++ licensing
   )
@@ -356,7 +339,7 @@ lazy val pekkoVer = Def.setting[String]("1.1.4")
 lazy val pekkoEnabled = Def.setting[Boolean] {
   val v = scalaBinaryVersion.value
 
-  v != "2.11" && v != "2.12"
+  v != "2.12"
 }
 
 lazy val `anorm-pekko` = (project in file("pekko"))
@@ -391,7 +374,7 @@ lazy val `anorm-pekko` = (project in file("pekko"))
         if (pekkoEnabled.value) {
           Seq(
             acolyte,
-            "org.scala-lang.modules" %% "scala-xml"            % xmlVer.value   % Test,
+            "org.scala-lang.modules" %% "scala-xml"            % xmlVer         % Test,
             "org.apache.pekko"       %% "pekko-stream-testkit" % pekkoVer.value % Test
           ) ++ specs2Test
         } else {
@@ -454,7 +437,7 @@ lazy val `anorm-postgres` = (project in file("postgres"))
         Seq(
           "org.postgresql"          % "postgresql" % pgVer,
           "com.typesafe.play"      %% "play-json"  % playJsonVer,
-          "org.scala-lang.modules" %% "scala-xml"  % xmlVer.value % Test
+          "org.scala-lang.modules" %% "scala-xml"  % xmlVer % Test
         ) ++ specs2Test :+ acolyte
       }
     ) ++ licensing
@@ -473,7 +456,7 @@ lazy val `anorm-enumeratum` = (project in file("enumeratum"))
       libraryDependencies ++= {
         if (scalaBinaryVersion.value != "3") {
           Seq(
-            "org.scala-lang.modules" %% "scala-xml"  % xmlVer.value % Test,
+            "org.scala-lang.modules" %% "scala-xml"  % xmlVer % Test,
             "com.beachape"           %% "enumeratum" % "1.7.2",
             acolyte
           ) ++ specs2Test

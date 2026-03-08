@@ -18,7 +18,7 @@ object Common extends AutoPlugin {
   override def projectSettings = Seq(
     organization       := "org.playframework.anorm",
     scalaVersion       := "2.12.20",
-    crossScalaVersions := Seq("2.11.12", scalaVersion.value, "2.13.18", "3.3.7"),
+    crossScalaVersions := Seq(scalaVersion.value, "2.13.18", "3.3.7"),
     Compile / unmanagedSourceDirectories ++= {
       val sv = scalaVersion.value
 
@@ -75,8 +75,6 @@ object Common extends AutoPlugin {
           "-Ywarn-unused-import",
           "-Ywarn-macros:after"
         )
-      } else if (v == "2.11") {
-        Seq("-Xmax-classfile-name", "128", "-Yopt:_", "-Ydead-code", "-Yclosure-elim", "-Yconst-opt")
       } else {
         // 2.13
         Seq(
@@ -120,17 +118,11 @@ object Common extends AutoPlugin {
 
   def scalaUnmanaged(ver: String, base: File): Seq[File] =
     CrossVersion.partialVersion(ver) match {
-      case Some((2, 11)) =>
-        Seq(base / "scala-2.12-", base / "scala-2.13-")
-
       case Some((2, 12)) =>
-        Seq(base / "scala-2.12+", base / "scala-2.13-")
+        Seq(base / "scala-2.13-")
 
       case Some((3, _) | (2, 13)) =>
-        Seq(base / "scala-2.12+", base / "scala-2.13+")
-
-      case Some((_, minor)) =>
-        Seq(base / s"scala-2.${minor}-")
+        Seq(base / "scala-2.13+")
 
       case _ =>
         sys.error(s"Unexpected version: $ver")
