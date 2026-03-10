@@ -445,7 +445,7 @@ lazy val `anorm-enumeratum` = (project in file("enumeratum"))
         if (scalaBinaryVersion.value != "3") {
           Seq(
             "org.scala-lang.modules" %% "scala-xml"  % xmlVer % Test,
-            "com.beachape"           %% "enumeratum" % "1.7.2",
+            "com.beachape"           %% "enumeratum" % "1.7.6",
             acolyte
           ) ++ specs2Test
         } else {
