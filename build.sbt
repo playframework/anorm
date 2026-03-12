@@ -99,7 +99,7 @@ val armShading = Seq(
     }
   },
   pomPostProcess := {
-    val excludeGroups = Seq("com.github.ghik", "com.jsuereth", "com.sksamuel.scapegoat")
+    val excludeGroups = Seq("com.jsuereth", "com.sksamuel.scapegoat")
 
     XmlUtil.transformPomDependencies { d =>
       (d \ "groupId").headOption.collect {
@@ -159,14 +159,13 @@ lazy val `anorm-core` = project
           )
         } else {
           Seq(
-            "-Xlog-free-terms",
-            "-P:silencer:globalFilters=missing\\ in\\ object\\ ToSql\\ is\\ deprecated;possibilities\\ in\\ class\\ ColumnNotFound\\ is\\ deprecated;DeprecatedSqlParser\\ in\\ package\\ anorm\\ is\\ deprecated;constructor\\ deprecatedName\\ in\\ class\\ deprecatedName\\ is\\ deprecated;.*method ~> in class Parser has changed semantics.*;.*method <~ in class Parser has changed semantics.*;.*method ~ in class Parser has changed semantics.*;.*package object inheritance is deprecated.*;type Seq in package scala has changed semantics in version 2.13.0",
+            "-Xlog-free-terms"
           )
         }
       },
       Test / scalacOptions ++= {
         if (scalaBinaryVersion.value == "2.13") {
-          Seq("-Ypatmat-exhaust-depth", "off", "-P:silencer:globalFilters=multiarg\\ infix\\ syntax")
+          Seq("-Ypatmat-exhaust-depth", "off")
         } else {
           Seq.empty
         }
@@ -314,8 +313,6 @@ lazy val `anorm-akka` = (project in file("akka"))
 
         if (v == "3" || v == "2.13") {
           Seq("-Wconf:msg=.*(onDownstreamFinish|ActorMaterializer).*:s")
-        } else if (v != "2.13") {
-          Seq("-P:silencer:globalFilters=deprecated")
         } else {
           Seq.empty
         }
@@ -387,7 +384,7 @@ lazy val `anorm-pekko` = (project in file("pekko"))
         if (v == "3" || v == "2.13") {
           Seq("-Wconf:cat=deprecation&msg=.*(onDownstreamFinish|ActorMaterializer).*:s")
         } else {
-          Seq("-P:silencer:globalFilters=deprecated")
+          Seq.empty
         }
       },
       Test / unmanagedSourceDirectories ++= {
@@ -413,12 +410,10 @@ lazy val `anorm-postgres` = (project in file("postgres"))
     Seq(
       mimaPreviousArtifacts := Set.empty,
       scalacOptions ++= {
-        if (scalaBinaryVersion.value == "3") {
-          Seq.empty
+        if (scalaBinaryVersion.value == "2.13") {
+          Seq("-Wconf:cat=deprecation&msg=.*package object inheritance is deprecated.*:s")
         } else {
-          Seq(
-            "-P:silencer:globalFilters=.*package object inheritance is deprecated.*",
-          )
+          Seq.empty
         }
       },
       libraryDependencies ++= {

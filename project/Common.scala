@@ -25,20 +25,6 @@ object Common extends AutoPlugin {
       scalaUnmanaged(sv, (Compile / sourceDirectory).value)
     },
     Test / unmanagedSourceDirectories ++= scalaUnmanaged(scalaVersion.value, (Test / sourceDirectory).value),
-    ThisBuild / libraryDependencies ++= {
-      if (scalaBinaryVersion.value != "3") {
-        val silencerVersion = "1.7.19"
-
-        Seq(
-          compilerPlugin(
-            ("com.github.ghik" %% "silencer-plugin" % silencerVersion)
-              .cross(CrossVersion.full)
-          ),
-          ("com.github.ghik" %% "silencer-lib" % silencerVersion % Provided)
-            .cross(CrossVersion.full)
-        )
-      } else Seq.empty
-    },
     scalacOptions ++= Seq("-Xfatal-warnings"),
     scalacOptions ++= {
       val v = scalaBinaryVersion.value
