@@ -6,11 +6,11 @@ package anorm
 
 import java.sql.Connection
 
+import scala.annotation.nowarn
+
 import acolyte.jdbc.AcolyteDSL.withQueryResult
 import acolyte.jdbc.Implicits._
 import acolyte.jdbc.RowLists._
-
-import scala.annotation.nowarn
 
 import SqlParser.{ bool, str, int, long, get }
 

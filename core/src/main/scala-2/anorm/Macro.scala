@@ -106,8 +106,8 @@ object Macro extends MacroOptions {
   def sealedParserImpl1[T: c.WeakTypeTag](c: whitebox.Context): c.Expr[RowParser[T]] = {
     import c.universe.reify
 
-    @nowarn def discriminator = reify(DiscriminatorNaming.Default)
-    @nowarn def discriminate  = reify(Discriminate.Identity)
+    def discriminator = reify(DiscriminatorNaming.Default)
+    def discriminate  = reify(Discriminate.Identity)
 
     sealedParserImpl(c)(discriminator, discriminate)
   }

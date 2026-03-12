@@ -7,14 +7,14 @@ package anorm
 import java.lang.{ Boolean => JBool, Long => JLong }
 import java.sql.Connection
 
+import scala.annotation.nowarn
+
 import acolyte.jdbc.{ DefinedParameter => DParam, ParameterMetaData => ParamMeta, RowLists, UpdateExecution }
 import acolyte.jdbc.AcolyteDSL.{ connection, handleStatement, withQueryResult }
 import acolyte.jdbc.Implicits._
 
 import org.specs2.matcher.TypecheckMatchers._
 import org.specs2.specification.core.Fragments
-
-import scala.annotation.nowarn
 
 import Macro.ColumnNaming
 import SqlParser.scalar
