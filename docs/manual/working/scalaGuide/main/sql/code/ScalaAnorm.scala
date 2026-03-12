@@ -16,26 +16,27 @@ class ScalaAnorm extends org.specs2.mutable.Specification {
   def createApp(additionalConfiguration: Map[String, _]): Application =
     new GuiceApplicationBuilder().configure(additionalConfiguration).build()
 
-  "Anorm" should {
+  "Anorm".should {
     trait Scala211Compat {
       def running(): Unit = ()
     }
 
-    "be usable in play" in new WithApplication(createApp(additionalConfiguration = inMemoryDatabase()))
-      with Scala211Compat {
-      override def running() = {
-        val database = app.injector.instanceOf[Database]
-        // #playdb
-        import anorm._
+    "be usable in play".in(
+      new WithApplication(createApp(additionalConfiguration = inMemoryDatabase())) with Scala211Compat {
+        override def running() = {
+          val database = app.injector.instanceOf[Database]
+          // #playdb
+          import anorm._
 
-        database.withConnection { implicit c =>
-          val _: Boolean = SQL("Select 1").execute()
+          database.withConnection { implicit c =>
+            val _: Boolean = SQL("Select 1").execute()
+          }
+          // #playdb
         }
-        // #playdb
-      }
 
-      ok
-    }
+        ok
+      }
+    )
   }
 }
 

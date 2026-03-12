@@ -21,7 +21,7 @@ sealed trait TupleFlattenerPriority1 {
    * @param c2 Column #2
    */
   implicit def flattenerTo2[T1, T2]: TupleFlattener[(T1 ~ T2) => (T1, T2)] = TupleFlattener[(T1 ~ T2) => (T1, T2)] {
-    case (c1 ~ c2) => (c1, c2)
+    case c1 ~ c2 => (c1, c2)
   }
 }
 
@@ -37,7 +37,7 @@ sealed trait TupleFlattenerPriority2 extends TupleFlattenerPriority1 {
    * @param c3 Column #3
    */
   implicit def flattenerTo3[T1, T2, T3]: TupleFlattener[(T1 ~ T2 ~ T3) => (T1, T2, T3)] =
-    TupleFlattener[(T1 ~ T2 ~ T3) => (T1, T2, T3)] { case (c1 ~ c2 ~ c3) => (c1, c2, c3) }
+    TupleFlattener[(T1 ~ T2 ~ T3) => (T1, T2, T3)] { case c1 ~ c2 ~ c3 => (c1, c2, c3) }
 }
 
 /**
@@ -52,7 +52,7 @@ sealed trait TupleFlattenerPriority3 extends TupleFlattenerPriority2 {
    * @param c4 Column #4
    */
   implicit def flattenerTo4[T1, T2, T3, T4]: TupleFlattener[(T1 ~ T2 ~ T3 ~ T4) => (T1, T2, T3, T4)] =
-    TupleFlattener[(T1 ~ T2 ~ T3 ~ T4) => (T1, T2, T3, T4)] { case (c1 ~ c2 ~ c3 ~ c4) => (c1, c2, c3, c4) }
+    TupleFlattener[(T1 ~ T2 ~ T3 ~ T4) => (T1, T2, T3, T4)] { case c1 ~ c2 ~ c3 ~ c4 => (c1, c2, c3, c4) }
 }
 
 /**
@@ -70,7 +70,7 @@ sealed trait TupleFlattenerPriority4 extends TupleFlattenerPriority3 {
    */
   implicit def flattenerTo5[T1, T2, T3, T4, T5]: TupleFlattener[(T1 ~ T2 ~ T3 ~ T4 ~ T5) => (T1, T2, T3, T4, T5)] =
     TupleFlattener[(T1 ~ T2 ~ T3 ~ T4 ~ T5) => (T1, T2, T3, T4, T5)] {
-      case (c1 ~ c2 ~ c3 ~ c4 ~ c5) =>
+      case c1 ~ c2 ~ c3 ~ c4 ~ c5 =>
         (c1, c2, c3, c4, c5)
     }
 }
@@ -92,7 +92,7 @@ sealed trait TupleFlattenerPriority5 extends TupleFlattenerPriority4 {
   implicit def flattenerTo6[T1, T2, T3, T4, T5, T6]
       : TupleFlattener[(T1 ~ T2 ~ T3 ~ T4 ~ T5 ~ T6) => (T1, T2, T3, T4, T5, T6)] =
     TupleFlattener[(T1 ~ T2 ~ T3 ~ T4 ~ T5 ~ T6) => (T1, T2, T3, T4, T5, T6)] {
-      case (c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6) =>
+      case c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 =>
         (c1, c2, c3, c4, c5, c6)
     }
 }
@@ -115,7 +115,7 @@ sealed trait TupleFlattenerPriority6 extends TupleFlattenerPriority5 {
   implicit def flattenerTo7[T1, T2, T3, T4, T5, T6, T7]
       : TupleFlattener[(T1 ~ T2 ~ T3 ~ T4 ~ T5 ~ T6 ~ T7) => (T1, T2, T3, T4, T5, T6, T7)] =
     TupleFlattener[(T1 ~ T2 ~ T3 ~ T4 ~ T5 ~ T6 ~ T7) => (T1, T2, T3, T4, T5, T6, T7)] {
-      case (c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7) => (c1, c2, c3, c4, c5, c6, c7)
+      case c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 => (c1, c2, c3, c4, c5, c6, c7)
     }
 }
 
@@ -138,7 +138,7 @@ sealed trait TupleFlattenerPriority7 extends TupleFlattenerPriority6 {
   implicit def flattenerTo8[T1, T2, T3, T4, T5, T6, T7, T8]
       : TupleFlattener[(T1 ~ T2 ~ T3 ~ T4 ~ T5 ~ T6 ~ T7 ~ T8) => (T1, T2, T3, T4, T5, T6, T7, T8)] =
     TupleFlattener[(T1 ~ T2 ~ T3 ~ T4 ~ T5 ~ T6 ~ T7 ~ T8) => (T1, T2, T3, T4, T5, T6, T7, T8)] {
-      case (c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8) => (c1, c2, c3, c4, c5, c6, c7, c8)
+      case c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 => (c1, c2, c3, c4, c5, c6, c7, c8)
     }
 }
 
@@ -162,7 +162,7 @@ sealed trait TupleFlattenerPriority8 extends TupleFlattenerPriority7 {
   implicit def flattenerTo9[T1, T2, T3, T4, T5, T6, T7, T8, T9]
       : TupleFlattener[(T1 ~ T2 ~ T3 ~ T4 ~ T5 ~ T6 ~ T7 ~ T8 ~ T9) => (T1, T2, T3, T4, T5, T6, T7, T8, T9)] =
     TupleFlattener[(T1 ~ T2 ~ T3 ~ T4 ~ T5 ~ T6 ~ T7 ~ T8 ~ T9) => (T1, T2, T3, T4, T5, T6, T7, T8, T9)] {
-      case (c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 ~ c9) => (c1, c2, c3, c4, c5, c6, c7, c8, c9)
+      case c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 ~ c9 => (c1, c2, c3, c4, c5, c6, c7, c8, c9)
     }
 }
 
@@ -187,7 +187,7 @@ sealed trait TupleFlattenerPriority9 extends TupleFlattenerPriority8 {
   implicit def flattenerTo10[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]: TupleFlattener[
     (T1 ~ T2 ~ T3 ~ T4 ~ T5 ~ T6 ~ T7 ~ T8 ~ T9 ~ T10) => (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10)
   ] = TupleFlattener[(T1 ~ T2 ~ T3 ~ T4 ~ T5 ~ T6 ~ T7 ~ T8 ~ T9 ~ T10) => (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10)] {
-    case (c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 ~ c9 ~ c10) => (c1, c2, c3, c4, c5, c6, c7, c8, c9, c10)
+    case c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 ~ c9 ~ c10 => (c1, c2, c3, c4, c5, c6, c7, c8, c9, c10)
   }
 }
 
@@ -215,7 +215,7 @@ sealed trait TupleFlattenerPriority10 extends TupleFlattenerPriority9 {
     (T1 ~ T2 ~ T3 ~ T4 ~ T5 ~ T6 ~ T7 ~ T8 ~ T9 ~ T10 ~ T11) => (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11)
   ] = TupleFlattener[
     (T1 ~ T2 ~ T3 ~ T4 ~ T5 ~ T6 ~ T7 ~ T8 ~ T9 ~ T10 ~ T11) => (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11)
-  ] { case (c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 ~ c9 ~ c10 ~ c11) => (c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11) }
+  ] { case c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 ~ c9 ~ c10 ~ c11 => (c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11) }
 }
 
 /**
@@ -248,7 +248,7 @@ sealed trait TupleFlattenerPriority11 extends TupleFlattenerPriority10 {
         T1 ~ T2 ~ T3 ~ T4 ~ T5 ~ T6 ~ T7 ~ T8 ~ T9 ~ T10 ~ T11 ~ T12
     ) => (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12)
   ] {
-    case (c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 ~ c9 ~ c10 ~ c11 ~ c12) =>
+    case c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 ~ c9 ~ c10 ~ c11 ~ c12 =>
       (c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12)
   }
 }
@@ -284,7 +284,7 @@ sealed trait TupleFlattenerPriority12 extends TupleFlattenerPriority11 {
         T1 ~ T2 ~ T3 ~ T4 ~ T5 ~ T6 ~ T7 ~ T8 ~ T9 ~ T10 ~ T11 ~ T12 ~ T13
     ) => (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13)
   ] {
-    case (c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 ~ c9 ~ c10 ~ c11 ~ c12 ~ c13) =>
+    case c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 ~ c9 ~ c10 ~ c11 ~ c12 ~ c13 =>
       (c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13)
   }
 }
@@ -321,7 +321,7 @@ sealed trait TupleFlattenerPriority13 extends TupleFlattenerPriority12 {
         T1 ~ T2 ~ T3 ~ T4 ~ T5 ~ T6 ~ T7 ~ T8 ~ T9 ~ T10 ~ T11 ~ T12 ~ T13 ~ T14
     ) => (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14)
   ] {
-    case (c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 ~ c9 ~ c10 ~ c11 ~ c12 ~ c13 ~ c14) =>
+    case c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 ~ c9 ~ c10 ~ c11 ~ c12 ~ c13 ~ c14 =>
       (c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14)
   }
 }
@@ -359,7 +359,7 @@ sealed trait TupleFlattenerPriority14 extends TupleFlattenerPriority13 {
         T1 ~ T2 ~ T3 ~ T4 ~ T5 ~ T6 ~ T7 ~ T8 ~ T9 ~ T10 ~ T11 ~ T12 ~ T13 ~ T14 ~ T15
     ) => (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15)
   ] {
-    case (c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 ~ c9 ~ c10 ~ c11 ~ c12 ~ c13 ~ c14 ~ c15) =>
+    case c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 ~ c9 ~ c10 ~ c11 ~ c12 ~ c13 ~ c14 ~ c15 =>
       (c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15)
   }
 }
@@ -398,7 +398,7 @@ sealed trait TupleFlattenerPriority15 extends TupleFlattenerPriority14 {
         T1 ~ T2 ~ T3 ~ T4 ~ T5 ~ T6 ~ T7 ~ T8 ~ T9 ~ T10 ~ T11 ~ T12 ~ T13 ~ T14 ~ T15 ~ T16
     ) => (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16)
   ] {
-    case (c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 ~ c9 ~ c10 ~ c11 ~ c12 ~ c13 ~ c14 ~ c15 ~ c16) =>
+    case c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 ~ c9 ~ c10 ~ c11 ~ c12 ~ c13 ~ c14 ~ c15 ~ c16 =>
       (c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16)
   }
 }
@@ -439,7 +439,7 @@ sealed trait TupleFlattenerPriority16 extends TupleFlattenerPriority15 {
         T1 ~ T2 ~ T3 ~ T4 ~ T5 ~ T6 ~ T7 ~ T8 ~ T9 ~ T10 ~ T11 ~ T12 ~ T13 ~ T14 ~ T15 ~ T16 ~ T17
     ) => (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17)
   ] {
-    case (c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 ~ c9 ~ c10 ~ c11 ~ c12 ~ c13 ~ c14 ~ c15 ~ c16 ~ c17) =>
+    case c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 ~ c9 ~ c10 ~ c11 ~ c12 ~ c13 ~ c14 ~ c15 ~ c16 ~ c17 =>
       (c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17)
   }
 }
@@ -481,7 +481,7 @@ sealed trait TupleFlattenerPriority17 extends TupleFlattenerPriority16 {
         T1 ~ T2 ~ T3 ~ T4 ~ T5 ~ T6 ~ T7 ~ T8 ~ T9 ~ T10 ~ T11 ~ T12 ~ T13 ~ T14 ~ T15 ~ T16 ~ T17 ~ T18
     ) => (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18)
   ] {
-    case (c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 ~ c9 ~ c10 ~ c11 ~ c12 ~ c13 ~ c14 ~ c15 ~ c16 ~ c17 ~ c18) =>
+    case c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 ~ c9 ~ c10 ~ c11 ~ c12 ~ c13 ~ c14 ~ c15 ~ c16 ~ c17 ~ c18 =>
       (c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18)
   }
 }
@@ -524,7 +524,7 @@ sealed trait TupleFlattenerPriority18 extends TupleFlattenerPriority17 {
         T1 ~ T2 ~ T3 ~ T4 ~ T5 ~ T6 ~ T7 ~ T8 ~ T9 ~ T10 ~ T11 ~ T12 ~ T13 ~ T14 ~ T15 ~ T16 ~ T17 ~ T18 ~ T19
     ) => (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19)
   ] {
-    case (c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 ~ c9 ~ c10 ~ c11 ~ c12 ~ c13 ~ c14 ~ c15 ~ c16 ~ c17 ~ c18 ~ c19) =>
+    case c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 ~ c9 ~ c10 ~ c11 ~ c12 ~ c13 ~ c14 ~ c15 ~ c16 ~ c17 ~ c18 ~ c19 =>
       (c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19)
   }
 }
@@ -568,7 +568,7 @@ sealed trait TupleFlattenerPriority19 extends TupleFlattenerPriority18 {
         T1 ~ T2 ~ T3 ~ T4 ~ T5 ~ T6 ~ T7 ~ T8 ~ T9 ~ T10 ~ T11 ~ T12 ~ T13 ~ T14 ~ T15 ~ T16 ~ T17 ~ T18 ~ T19 ~ T20
     ) => (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20)
   ] {
-    case (c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 ~ c9 ~ c10 ~ c11 ~ c12 ~ c13 ~ c14 ~ c15 ~ c16 ~ c17 ~ c18 ~ c19 ~ c20) =>
+    case c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 ~ c9 ~ c10 ~ c11 ~ c12 ~ c13 ~ c14 ~ c15 ~ c16 ~ c17 ~ c18 ~ c19 ~ c20 =>
       (c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20)
   }
 }
@@ -634,7 +634,7 @@ sealed trait TupleFlattenerPriority20 extends TupleFlattenerPriority19 {
         T1 ~ T2 ~ T3 ~ T4 ~ T5 ~ T6 ~ T7 ~ T8 ~ T9 ~ T10 ~ T11 ~ T12 ~ T13 ~ T14 ~ T15 ~ T16 ~ T17 ~ T18 ~ T19 ~ T20 ~ T21
     ) => (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21)
   ] {
-    case (c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 ~ c9 ~ c10 ~ c11 ~ c12 ~ c13 ~ c14 ~ c15 ~ c16 ~ c17 ~ c18 ~ c19 ~ c20 ~ c21) =>
+    case c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 ~ c9 ~ c10 ~ c11 ~ c12 ~ c13 ~ c14 ~ c15 ~ c16 ~ c17 ~ c18 ~ c19 ~ c20 ~ c21 =>
       (c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21)
   }
 }
@@ -702,7 +702,7 @@ sealed trait TupleFlattenerPriority21 extends TupleFlattenerPriority20 {
         T1 ~ T2 ~ T3 ~ T4 ~ T5 ~ T6 ~ T7 ~ T8 ~ T9 ~ T10 ~ T11 ~ T12 ~ T13 ~ T14 ~ T15 ~ T16 ~ T17 ~ T18 ~ T19 ~ T20 ~ T21 ~ T22
     ) => (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22)
   ] {
-    case (c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 ~ c9 ~ c10 ~ c11 ~ c12 ~ c13 ~ c14 ~ c15 ~ c16 ~ c17 ~ c18 ~ c19 ~ c20 ~ c21 ~ c22) =>
+    case c1 ~ c2 ~ c3 ~ c4 ~ c5 ~ c6 ~ c7 ~ c8 ~ c9 ~ c10 ~ c11 ~ c12 ~ c13 ~ c14 ~ c15 ~ c16 ~ c17 ~ c18 ~ c19 ~ c20 ~ c21 ~ c22 =>
       (c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21, c22)
   }
 }
