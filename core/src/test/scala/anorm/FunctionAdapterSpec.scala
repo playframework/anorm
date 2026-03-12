@@ -10,7 +10,7 @@ import acolyte.jdbc.AcolyteDSL.withQueryResult
 import acolyte.jdbc.Implicits._
 import acolyte.jdbc.RowLists._
 
-import com.github.ghik.silencer.silent
+import scala.annotation.nowarn
 
 import SqlParser.{ bool, str, int, long, get }
 
@@ -25,7 +25,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
 
   "Raw tuple-like" should {
     "be applied with 2 columns to Function2" in {
-      @silent def foo(a: String, b: Int) = "Fn2"
+      @nowarn def foo(a: String, b: Int) = "Fn2"
 
       val schema = rowList2(classOf[String] -> "A", classOf[Int] -> "B")
 
@@ -50,7 +50,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
     }
 
     "be applied with 4 columns to Function4" in {
-      @silent def foo(a: String, b: Int, c: Long, d: Double) = "Fn4"
+      @nowarn def foo(a: String, b: Int, c: Long, d: Double) = "Fn4"
 
       val schema = rowList4(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C", classOf[Double] -> "D")
 
@@ -63,7 +63,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
     }
 
     "be applied with 5 columns to Function5" in {
-      @silent def foo(a: String, b: Int, c: Long, d: Double, e: Short) = "Fn5"
+      @nowarn def foo(a: String, b: Int, c: Long, d: Double, e: Short) = "Fn5"
 
       val schema = rowList5(
         classOf[String] -> "A",
@@ -82,7 +82,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
     }
 
     "be applied with 6 columns to Function6" in {
-      @silent def foo(a: String, b: Int, c: Long, d: Double, e: Short, f: Byte) = "Fn6"
+      @nowarn def foo(a: String, b: Int, c: Long, d: Double, e: Short, f: Byte) = "Fn6"
 
       val schema = rowList6(
         classOf[String] -> "A",
@@ -106,7 +106,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
     }
 
     "be applied with 7 columns to Function7" in {
-      @silent def foo(a: String, b: Int, c: Long, d: Double, e: Short, f: Byte, g: Boolean) = "Fn7"
+      @nowarn def foo(a: String, b: Int, c: Long, d: Double, e: Short, f: Byte, g: Boolean) = "Fn7"
 
       val schema = rowList7(
         classOf[String]  -> "A",
@@ -131,7 +131,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
     }
 
     "be applied with 8 columns to Function8" in {
-      @silent def foo(a: String, b: Int, c: Long, d: Double, e: Short, f: Byte, g: Boolean, h: String) = "Fn8"
+      @nowarn def foo(a: String, b: Int, c: Long, d: Double, e: Short, f: Byte, g: Boolean, h: String) = "Fn8"
 
       val schema = rowList8(
         classOf[String]  -> "A",
@@ -157,7 +157,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
     }
 
     "be applied with 9 columns to Function9" in {
-      @silent def foo(a: String, b: Int, c: Long, d: Double, e: Short, f: Byte, g: Boolean, h: String, i: Int) = "Fn9"
+      @nowarn def foo(a: String, b: Int, c: Long, d: Double, e: Short, f: Byte, g: Boolean, h: String, i: Int) = "Fn9"
 
       val schema = rowList9(
         classOf[String]  -> "A",
@@ -184,7 +184,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
     }
 
     "be applied with 10 columns to Function10" in {
-      @silent def foo(
+      @nowarn def foo(
           a: String,
           b: Int,
           c: Long,
@@ -224,7 +224,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
     }
 
     "be applied with 11 columns to Function11" in {
-      @silent def foo(
+      @nowarn def foo(
           a: String,
           b: Int,
           c: Long,
@@ -266,7 +266,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
     }
 
     "be applied with 12 columns to Function12" in {
-      @silent def foo(
+      @nowarn def foo(
           a: String,
           b: Int,
           c: Long,
@@ -310,7 +310,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
     }
 
     "be applied with 13 columns to Function13" in {
-      @silent def foo(
+      @nowarn def foo(
           a: String,
           b: Int,
           c: Long,
@@ -359,7 +359,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
     }
 
     "be applied with 14 columns to Function14" in {
-      @silent def foo(
+      @nowarn def foo(
           a: String,
           b: Int,
           c: Long,
@@ -410,7 +410,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
     }
 
     "be applied with 15 columns to Function15" in {
-      @silent def foo(
+      @nowarn def foo(
           a: String,
           b: Int,
           c: Long,
@@ -464,7 +464,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
     }
 
     "be applied with 16 columns to Function16" in {
-      @silent def foo(
+      @nowarn def foo(
           a: String,
           b: Int,
           c: Long,
@@ -536,7 +536,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
     }
 
     "be applied with 17 columns to Function17" in {
-      @silent def foo(
+      @nowarn def foo(
           a: String,
           b: Int,
           c: Long,
@@ -611,7 +611,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
     }
 
     "be applied with 18 columns to Function18" in {
-      @silent def foo(
+      @nowarn def foo(
           a: String,
           b: Int,
           c: Long,
@@ -689,7 +689,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
     }
 
     "be applied with 19 columns to Function19" in {
-      @silent def foo(
+      @nowarn def foo(
           a: String,
           b: Int,
           c: Long,
@@ -770,7 +770,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
     }
 
     "be applied with 20 columns to Function20" in {
-      @silent def foo(
+      @nowarn def foo(
           a: String,
           b: Int,
           c: Long,
@@ -854,7 +854,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
     }
 
     "be applied with 21 columns to Function21" in {
-      @silent def foo(
+      @nowarn def foo(
           a: String,
           b: Int,
           c: Long,
@@ -941,7 +941,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
     }
 
     "be applied with 22 columns to Function22" in {
-      @silent def foo(
+      @nowarn def foo(
           a: String,
           b: Int,
           c: Long,

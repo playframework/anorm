@@ -308,15 +308,7 @@ lazy val `anorm-akka` = (project in file("akka"))
         "org.scala-lang.modules" %% "scala-xml"           % xmlVer        % Test,
         ("com.typesafe.akka"     %% "akka-stream-testkit" % akkaVer.value % Test).exclude("org.scala-lang.modules", "*")
       ) ++ specs2Test,
-      scalacOptions ++= {
-        val v = scalaBinaryVersion.value
-
-        if (v == "3" || v == "2.13") {
-          Seq("-Wconf:msg=.*(onDownstreamFinish|ActorMaterializer).*:s")
-        } else {
-          Seq.empty
-        }
-      },
+      scalacOptions ++= Seq("-Wconf:msg=.*(onDownstreamFinish|ActorMaterializer).*:s"),
       Test / unmanagedSourceDirectories += {
         CrossVersion.partialVersion(scalaVersion.value) match {
           case Some((2, n)) if n < 13 =>
@@ -378,15 +370,7 @@ lazy val `anorm-pekko` = (project in file("pekko"))
           Seq.empty
         }
       },
-      scalacOptions ++= {
-        val v = scalaBinaryVersion.value
-
-        if (v == "3" || v == "2.13") {
-          Seq("-Wconf:cat=deprecation&msg=.*(onDownstreamFinish|ActorMaterializer).*:s")
-        } else {
-          Seq.empty
-        }
-      },
+      scalacOptions ++= Seq("-Wconf:cat=deprecation&msg=.*(onDownstreamFinish|ActorMaterializer).*:s"),
       Test / unmanagedSourceDirectories ++= {
         CrossVersion.partialVersion(scalaVersion.value) match {
           case Some((2, n)) if n < 13 =>
@@ -410,7 +394,7 @@ lazy val `anorm-postgres` = (project in file("postgres"))
     Seq(
       mimaPreviousArtifacts := Set.empty,
       scalacOptions ++= {
-        if (scalaBinaryVersion.value == "2.13") {
+        if (scalaBinaryVersion.value != "3") {
           Seq("-Wconf:cat=deprecation&msg=.*package object inheritance is deprecated.*:s")
         } else {
           Seq.empty

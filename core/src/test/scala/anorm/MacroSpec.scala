@@ -14,7 +14,7 @@ import acolyte.jdbc.Implicits._
 import org.specs2.matcher.TypecheckMatchers._
 import org.specs2.specification.core.Fragments
 
-import com.github.ghik.silencer.silent
+import scala.annotation.nowarn
 
 import Macro.ColumnNaming
 import SqlParser.scalar
@@ -275,7 +275,7 @@ final class MacroSpec extends org.specs2.mutable.Specification {
             SqlParser.int("v").map { Bar(_) }
 
           // cannot handle object anorm.MacroSpec.NotCase: no case accessor
-          @silent def familyParser = Macro.sealedParser[Family]
+          @nowarn def familyParser = Macro.sealedParser[Family]
 
           SQL"TEST".as(familyParser.*) must_=== List(Bar(1), CaseObj)
         }
@@ -292,7 +292,7 @@ final class MacroSpec extends org.specs2.mutable.Specification {
             SqlParser.int("v").map { Bar(_) }
 
           // cannot handle object anorm.MacroSpec.NotCase: no case accessor
-          @silent def familyParser =
+          @nowarn def familyParser =
             Macro.sealedParser[Family](Macro.DiscriminatorNaming(_ => "foo"), Macro.Discriminate(_.split("\\.").last))
 
           SQL"TEST".as(familyParser.*) must_=== List(Bar(1), CaseObj)
@@ -349,7 +349,7 @@ final class MacroSpec extends org.specs2.mutable.Specification {
 
     "be successful for sealed family" >> {
       // cannot handle object anorm.MacroSpec.NotCase: no case accessor
-      @silent implicit def familyParams: ToParameterList[Family] = {
+      @nowarn implicit def familyParams: ToParameterList[Family] = {
         implicit val barToParams: ToParameterList[Bar] = Macro.toParameters[Bar]
         implicit val caseObjParam                      = ToParameterList.empty[CaseObj.type]
 

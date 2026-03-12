@@ -198,7 +198,7 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
       def sqlResult = res.copy(resultSet = res.resultSet.and(probe).map(_._1))
 
       // .fold w/o ColumnAliaser is deprecated
-      @com.github.ghik.silencer.silent
+      @scala.annotation.nowarn
       def agg = sqlResult.fold(List[Int](), ColumnAliaser.empty) { (l, _) =>
         i = i + 1; l :+ i
       }
