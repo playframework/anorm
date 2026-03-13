@@ -4,7 +4,7 @@
 
 package anorm
 
-import com.github.ghik.silencer.silent
+import scala.annotation.nowarn
 
 /**
  * @define caseTParam the type of case class
@@ -98,7 +98,7 @@ object Macro extends MacroOptions {
   }
 
   def indexedParserImpl[T: c.WeakTypeTag](c: whitebox.Context): c.Expr[RowParser[T]] = {
-    @silent def p = c.universe.reify(0)
+    @nowarn def p = c.universe.reify(0)
 
     offsetParserImpl[T](c)(p)
   }
@@ -106,8 +106,8 @@ object Macro extends MacroOptions {
   def sealedParserImpl1[T: c.WeakTypeTag](c: whitebox.Context): c.Expr[RowParser[T]] = {
     import c.universe.reify
 
-    @silent def discriminator = reify(DiscriminatorNaming.Default)
-    @silent def discriminate  = reify(Discriminate.Identity)
+    def discriminator = reify(DiscriminatorNaming.Default)
+    def discriminate  = reify(Discriminate.Identity)
 
     sealedParserImpl(c)(discriminator, discriminate)
   }
@@ -320,7 +320,7 @@ object Macro extends MacroOptions {
     } else if (!tpeSym.isClass || !tpeSym.asClass.isCaseClass) {
       abort(s"Either a sealed trait or a case class expected: $tpe")
     } else {
-      @silent def p = c.universe.reify("_")
+      @nowarn def p = c.universe.reify("_")
 
       ToParameterListImpl.caseClass[T](c)(Seq.empty[c.Expr[Macro.ParameterProjection]], p)
     }
@@ -370,7 +370,7 @@ object Macro extends MacroOptions {
   )(projection: c.Expr[Macro.ParameterProjection]*): c.Expr[ToParameterList[T]] = {
     import c.universe.reify
 
-    @silent def p = reify("_")
+    @nowarn def p = reify("_")
 
     ToParameterListImpl.caseClass[T](c)(projection, p)
   }

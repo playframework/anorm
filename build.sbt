@@ -99,7 +99,7 @@ val armShading = Seq(
     }
   },
   pomPostProcess := {
-    val excludeGroups = Seq("com.github.ghik", "com.jsuereth", "com.sksamuel.scapegoat")
+    val excludeGroups = Seq("com.jsuereth", "com.sksamuel.scapegoat")
 
     XmlUtil.transformPomDependencies { d =>
       (d \ "groupId").headOption.collect {
@@ -144,29 +144,9 @@ lazy val `anorm-core` = project
           scaladocExtractorSkipToken.value
         }
       },
-      scalacOptions ++= {
-        val v = scalaBinaryVersion.value
-
-        if (v == "3") {
-          Seq(
-            "-Wconf:msg=.*deprecated\\ .*wildcard\\ arguments.*:s",
-            "-Wconf:msg=.*no\\ longer\\ supported\\ .*vararg\\ splices.*:s"
-          )
-        } else if (v == "2.13") {
-          Seq(
-            "-Wconf:msg=.*method\\ .*in\\ class\\ Parser.*:s",
-            "-Wconf:src=.*/Macro.scala&msg=local\\ val\\ \\$m.*:s"
-          )
-        } else {
-          Seq(
-            "-Xlog-free-terms",
-            "-P:silencer:globalFilters=missing\\ in\\ object\\ ToSql\\ is\\ deprecated;possibilities\\ in\\ class\\ ColumnNotFound\\ is\\ deprecated;DeprecatedSqlParser\\ in\\ package\\ anorm\\ is\\ deprecated;constructor\\ deprecatedName\\ in\\ class\\ deprecatedName\\ is\\ deprecated;.*method ~> in class Parser has changed semantics.*;.*method <~ in class Parser has changed semantics.*;.*method ~ in class Parser has changed semantics.*;.*package object inheritance is deprecated.*;type Seq in package scala has changed semantics in version 2.13.0",
-          )
-        }
-      },
       Test / scalacOptions ++= {
         if (scalaBinaryVersion.value == "2.13") {
-          Seq("-Ypatmat-exhaust-depth", "off", "-P:silencer:globalFilters=multiarg\\ infix\\ syntax")
+          Seq("-Ypatmat-exhaust-depth", "off")
         } else {
           Seq.empty
         }
@@ -309,17 +289,7 @@ lazy val `anorm-akka` = (project in file("akka"))
         "org.scala-lang.modules" %% "scala-xml"           % xmlVer        % Test,
         ("com.typesafe.akka"     %% "akka-stream-testkit" % akkaVer.value % Test).exclude("org.scala-lang.modules", "*")
       ) ++ specs2Test,
-      scalacOptions ++= {
-        val v = scalaBinaryVersion.value
-
-        if (v == "3" || v == "2.13") {
-          Seq("-Wconf:msg=.*(onDownstreamFinish|ActorMaterializer).*:s")
-        } else if (v != "2.13") {
-          Seq("-P:silencer:globalFilters=deprecated")
-        } else {
-          Seq.empty
-        }
-      },
+      scalacOptions ++= Seq("-Wconf:msg=.*(onDownstreamFinish|ActorMaterializer).*:s"),
       Test / unmanagedSourceDirectories += {
         CrossVersion.partialVersion(scalaVersion.value) match {
           case Some((2, n)) if n < 13 =>
@@ -381,15 +351,7 @@ lazy val `anorm-pekko` = (project in file("pekko"))
           Seq.empty
         }
       },
-      scalacOptions ++= {
-        val v = scalaBinaryVersion.value
-
-        if (v == "3" || v == "2.13") {
-          Seq("-Wconf:cat=deprecation&msg=.*(onDownstreamFinish|ActorMaterializer).*:s")
-        } else {
-          Seq("-P:silencer:globalFilters=deprecated")
-        }
-      },
+      scalacOptions ++= Seq("-Wconf:cat=deprecation&msg=.*(onDownstreamFinish|ActorMaterializer).*:s"),
       Test / unmanagedSourceDirectories ++= {
         CrossVersion.partialVersion(scalaVersion.value) match {
           case Some((2, n)) if n < 13 =>
@@ -412,15 +374,6 @@ lazy val `anorm-postgres` = (project in file("postgres"))
   .settings(
     Seq(
       mimaPreviousArtifacts := Set.empty,
-      scalacOptions ++= {
-        if (scalaBinaryVersion.value == "3") {
-          Seq.empty
-        } else {
-          Seq(
-            "-P:silencer:globalFilters=.*package object inheritance is deprecated.*",
-          )
-        }
-      },
       libraryDependencies ++= {
         Seq(
           "org.postgresql"          % "postgresql" % pgVer,
