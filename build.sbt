@@ -144,25 +144,6 @@ lazy val `anorm-core` = project
           scaladocExtractorSkipToken.value
         }
       },
-      scalacOptions ++= {
-        val v = scalaBinaryVersion.value
-
-        if (v == "3") {
-          Seq(
-            "-Wconf:msg=.*deprecated\\ .*wildcard\\ arguments.*:s",
-            "-Wconf:msg=.*no\\ longer\\ supported\\ .*vararg\\ splices.*:s"
-          )
-        } else if (v == "2.13") {
-          Seq(
-            "-Wconf:msg=.*method\\ .*in\\ class\\ Parser.*:s",
-            "-Wconf:src=.*/Macro.scala&msg=local\\ val\\ \\$m.*:s"
-          )
-        } else {
-          Seq(
-            "-Xlog-free-terms"
-          )
-        }
-      },
       Test / scalacOptions ++= {
         if (scalaBinaryVersion.value == "2.13") {
           Seq("-Ypatmat-exhaust-depth", "off")
@@ -393,13 +374,6 @@ lazy val `anorm-postgres` = (project in file("postgres"))
   .settings(
     Seq(
       mimaPreviousArtifacts := Set.empty,
-      scalacOptions ++= {
-        if (scalaBinaryVersion.value != "3") {
-          Seq("-Wconf:cat=deprecation&msg=.*package object inheritance is deprecated.*:s")
-        } else {
-          Seq.empty
-        }
-      },
       libraryDependencies ++= {
         Seq(
           "org.postgresql"          % "postgresql" % pgVer,
