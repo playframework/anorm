@@ -10,6 +10,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test._
 import play.api.test.Helpers._
 
+// format: off
 class ScalaAnorm extends org.specs2.mutable.Specification {
   "Code samples".title
 
@@ -38,6 +39,7 @@ class ScalaAnorm extends org.specs2.mutable.Specification {
     }
   }
 }
+// format: on
 
 object MacroParsers {
   // #macroSealedParser
