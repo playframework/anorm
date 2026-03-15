@@ -225,7 +225,8 @@ lazy val `anorm-core` = project
   )
   .dependsOn(`anorm-tokenizer`)
 
-lazy val `anorm-iteratee` = (project in file("iteratee"))
+lazy val `anorm-iteratee` = project
+  .in(file("iteratee"))
   .settings(
     Seq(
       sourceDirectory := {
@@ -271,7 +272,8 @@ lazy val akkaVer = Def.setting[String] {
   }
 }
 
-lazy val `anorm-akka` = (project in file("akka"))
+lazy val `anorm-akka` = project
+  .in(file("akka"))
   .settings(
     Seq(
       mimaPreviousArtifacts := {
@@ -312,7 +314,8 @@ lazy val pekkoEnabled = Def.setting[Boolean] {
   v != "2.12"
 }
 
-lazy val `anorm-pekko` = (project in file("pekko"))
+lazy val `anorm-pekko` = project
+  .in(file("pekko"))
   .settings(
     Seq(
       mimaPreviousArtifacts := Set.empty,
@@ -370,7 +373,8 @@ lazy val `anorm-pekko` = (project in file("pekko"))
 
 lazy val pgVer = sys.env.get("POSTGRES_VERSION").getOrElse("42.7.10")
 
-lazy val `anorm-postgres` = (project in file("postgres"))
+lazy val `anorm-postgres` = project
+  .in(file("postgres"))
   .settings(
     Seq(
       mimaPreviousArtifacts := Set.empty,
@@ -385,7 +389,8 @@ lazy val `anorm-postgres` = (project in file("postgres"))
   )
   .dependsOn(`anorm-core`)
 
-lazy val `anorm-enumeratum` = (project in file("enumeratum"))
+lazy val `anorm-enumeratum` = project
+  .in(file("enumeratum"))
   .settings(
     Seq(
       sourceDirectory := {
@@ -411,7 +416,8 @@ lazy val `anorm-enumeratum` = (project in file("enumeratum"))
 
 // ---
 
-lazy val `anorm-parent` = (project in file("."))
+lazy val `anorm-parent` = project
+  .in(file("."))
   .enablePlugins(ScalaUnidocPlugin)
   .aggregate(
     `anorm-tokenizer`,
