@@ -371,7 +371,7 @@ lazy val `anorm-pekko` = project
 
 // ---
 
-lazy val pgVer = sys.env.get("POSTGRES_VERSION").getOrElse("42.7.10")
+lazy val pgVer = sys.env.get("POSTGRES_VERSION").getOrElse("42.7.11")
 
 lazy val `anorm-postgres` = project
   .in(file("postgres"))
