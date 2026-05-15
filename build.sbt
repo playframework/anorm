@@ -204,20 +204,12 @@ lazy val `anorm-core` = project
         ProblemFilters.exclude[IncompatibleResultTypeProblem]("anorm.ColumnNotFound.copy$default$2")
       ),
       libraryDependencies ++= {
-        val h2Ver = sys.props.get("java.version") match {
-          case Some(v) if v.startsWith("1.8") =>
-            "2.2.224"
-
-          case _ =>
-            "2.3.230"
-        }
-
         Seq(
           "joda-time"               % "joda-time"                % "2.14.2",
           "org.joda"                % "joda-convert"             % "3.0.1",
           "org.scala-lang.modules" %% "scala-parser-combinators" % parserCombinatorsVer.value,
-          "org.scala-lang.modules" %% "scala-xml"                % xmlVer % Test,
-          "com.h2database"          % "h2"                       % h2Ver  % Test,
+          "org.scala-lang.modules" %% "scala-xml"                % xmlVer    % Test,
+          "com.h2database"          % "h2"                       % "2.3.230" % Test,
           acolyte
         ) ++ specs2Test
       },

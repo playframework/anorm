@@ -24,9 +24,9 @@ object Common extends AutoPlugin {
       val v = scalaBinaryVersion.value
 
       if (v == "2.13") {
-        Seq("-release", "8") :+ "-Xlint"
+        Seq("-release", "17") :+ "-Xlint"
       } else {
-        Seq("-release", "8")
+        Seq("-release", "17")
       }
     },
     scalacOptions ++= {
