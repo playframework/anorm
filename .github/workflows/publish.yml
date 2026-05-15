@@ -12,4 +12,4 @@ jobs:
     uses: playframework/.github/.github/workflows/publish.yml@v4
     secrets: inherit
     with:
-      java: 8
+      java: 17
