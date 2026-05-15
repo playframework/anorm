@@ -201,12 +201,30 @@ lazy val `anorm-core` = project
         coreMimaFilter,
         // was deprecated
         ProblemFilters.exclude[IncompatibleMethTypeProblem]("anorm.ColumnNotFound.copy"),
-        ProblemFilters.exclude[IncompatibleResultTypeProblem]("anorm.ColumnNotFound.copy$default$2")
+        ProblemFilters.exclude[IncompatibleResultTypeProblem]("anorm.ColumnNotFound.copy$default$2"),
+        // Joda-Time support moved to anorm-joda module
+        ProblemFilters.exclude[MissingClassProblem]("anorm.JodaColumn"),
+        ProblemFilters.exclude[MissingClassProblem]("anorm.JodaToStatement"),
+        ProblemFilters.exclude[MissingClassProblem]("anorm.JodaParameterMetaData"),
+        ProblemFilters.exclude[MissingClassProblem]("anorm.JodaParameterMetaData$"),
+        ProblemFilters.exclude[MissingClassProblem]("anorm.JodaParameterMetaData$JodaTimeMetaData"),
+        ProblemFilters.exclude[MissingClassProblem]("anorm.JodaParameterMetaData$JodaDateTimeMetaData$"),
+        ProblemFilters.exclude[MissingClassProblem]("anorm.JodaParameterMetaData$JodaLocalDateTimeMetaData$"),
+        ProblemFilters.exclude[MissingClassProblem]("anorm.JodaParameterMetaData$JodaInstantMetaData$"),
+        ProblemFilters.exclude[MissingClassProblem]("anorm.JodaParameterMetaData$JodaLocalDateMetaData$"),
+        ProblemFilters.exclude[MissingTypesProblem]("anorm.Column$"),
+        ProblemFilters.exclude[MissingTypesProblem]("anorm.ToStatement$"),
+        ProblemFilters.exclude[DirectMissingMethodProblem]("anorm.Column.columnToJodaLocalDate"),
+        ProblemFilters.exclude[DirectMissingMethodProblem]("anorm.Column.columnToJodaLocalDateTime"),
+        ProblemFilters.exclude[DirectMissingMethodProblem]("anorm.Column.columnToJodaDateTime"),
+        ProblemFilters.exclude[DirectMissingMethodProblem]("anorm.Column.columnToJodaInstant"),
+        ProblemFilters.exclude[DirectMissingMethodProblem]("anorm.ToStatement.jodaDateTimeToStatement"),
+        ProblemFilters.exclude[DirectMissingMethodProblem]("anorm.ToStatement.jodaLocalDateTimeToStatement"),
+        ProblemFilters.exclude[DirectMissingMethodProblem]("anorm.ToStatement.jodaLocalDateToStatement"),
+        ProblemFilters.exclude[DirectMissingMethodProblem]("anorm.ToStatement.jodaInstantToStatement")
       ),
       libraryDependencies ++= {
         Seq(
-          "joda-time"               % "joda-time"                % "2.14.2",
-          "org.joda"                % "joda-convert"             % "3.0.1",
           "org.scala-lang.modules" %% "scala-parser-combinators" % parserCombinatorsVer.value,
           "org.scala-lang.modules" %% "scala-xml"                % xmlVer    % Test,
           "com.h2database"          % "h2"                       % "2.3.230" % Test,
@@ -317,6 +335,21 @@ lazy val `anorm-enumeratum` = project
   )
   .dependsOn(`anorm-core`)
 
+lazy val `anorm-joda` = project
+  .in(file("joda"))
+  .settings(
+    Seq(
+      mimaPreviousArtifacts := Set.empty,
+      libraryDependencies ++= Seq(
+        "joda-time"      % "joda-time"    % "2.14.2",
+        "org.joda"       % "joda-convert" % "3.0.1",
+        "com.h2database" % "h2"           % "2.3.230" % Test,
+        acolyte
+      ) ++ specs2Test
+    ) ++ licensing
+  )
+  .dependsOn(`anorm-core`)
+
 // ---
 
 lazy val `anorm-parent` = project
@@ -328,7 +361,8 @@ lazy val `anorm-parent` = project
     `anorm-akka`,
     `anorm-pekko`,
     `anorm-postgres`,
-    `anorm-enumeratum`
+    `anorm-enumeratum`,
+    `anorm-joda`
   )
   .settings(
     Seq(
