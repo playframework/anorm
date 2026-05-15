@@ -17,24 +17,16 @@ object Common extends AutoPlugin {
 
   override def projectSettings = Seq(
     organization       := "org.playframework.anorm",
-    scalaVersion       := "2.12.21",
-    crossScalaVersions := Seq(scalaVersion.value, "2.13.18", "3.3.7"),
-    Compile / unmanagedSourceDirectories ++= {
-      val sv = scalaVersion.value
-
-      scalaUnmanaged(sv, (Compile / sourceDirectory).value)
-    },
-    Test / unmanagedSourceDirectories ++= scalaUnmanaged(scalaVersion.value, (Test / sourceDirectory).value),
+    scalaVersion       := "2.13.18",
+    crossScalaVersions := Seq(scalaVersion.value, "3.3.7"),
     scalacOptions ++= Seq("-Xfatal-warnings"),
     scalacOptions ++= {
       val v = scalaBinaryVersion.value
 
       if (v == "2.13") {
         Seq("-release", "8") :+ "-Xlint"
-      } else if (v == "3") {
-        Seq("-release", "8")
       } else {
-        Seq("-target:jvm-1.8", "-g:vars") :+ "-Xlint"
+        Seq("-release", "8")
       }
     },
     scalacOptions ++= {
@@ -49,20 +41,7 @@ object Common extends AutoPlugin {
           "-Wconf:msg=.*vararg\\ splices.*:s",
           "-Wconf:cat=deprecation&msg=.*(reflectiveSelectableFromLangReflectiveCalls|DeprecatedSqlParser|missing .*ToSql|deprecatedName).*:s"
         )
-      } else if (v == "2.12") {
-        Seq(
-          "-Xmax-classfile-name",
-          "128",
-          "-Ywarn-numeric-widen",
-          "-Ywarn-dead-code",
-          "-Ywarn-value-discard",
-          "-Ywarn-infer-any",
-          "-Ywarn-unused",
-          "-Ywarn-unused-import",
-          "-Ywarn-macros:after"
-        )
       } else {
-        // 2.13
         Seq(
           "-explaintypes",
           "-Werror",
@@ -101,18 +80,6 @@ object Common extends AutoPlugin {
 
   @inline def incoRet(n: String) =
     ProblemFilters.exclude[IncompatibleResultTypeProblem](n)
-
-  def scalaUnmanaged(ver: String, base: File): Seq[File] =
-    CrossVersion.partialVersion(ver) match {
-      case Some((2, 12)) =>
-        Seq(base / "scala-2.13-")
-
-      case Some((3, _) | (2, 13)) =>
-        Seq(base / "scala-2.13+")
-
-      case _ =>
-        sys.error(s"Unexpected version: $ver")
-    }
 
 }
 

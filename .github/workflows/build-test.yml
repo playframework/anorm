@@ -23,33 +23,13 @@ jobs:
     name: Binary Compatibility
     uses: playframework/.github/.github/workflows/binary-check.yml@v4
 
-  check-docs-8:
-    name: Docs Java 8
-    uses: playframework/.github/.github/workflows/cmd.yml@v4
-    with:
-      java: 8
-      scala: 2.12.x
-      cmd: sbt ++$MATRIX_SCALA docs/test
-
   check-docs-11:
     name: Docs
     uses: playframework/.github/.github/workflows/cmd.yml@v4
     with:
       java: 11
-      scala: 2.12.x, 2.13.x, 3.x
+      scala: 2.13.x, 3.x
       cmd: sbt ++$MATRIX_SCALA docs/test
-
-  tests-8:
-    name: Tests
-    needs:
-      - "check-code-style"
-      - "check-binary-compatibility"
-      - "check-docs-8"
-    uses: playframework/.github/.github/workflows/cmd.yml@v4
-    with:
-      java: 8
-      scala: 2.12.x
-      cmd: sbt ++$MATRIX_SCALA publishLocal test
 
   tests-11:
     name: Tests
@@ -60,13 +40,12 @@ jobs:
     uses: playframework/.github/.github/workflows/cmd.yml@v4
     with:
       java: 11
-      scala: 2.12.x, 2.13.x, 3.x
+      scala: 2.13.x, 3.x
       cmd: sbt ++$MATRIX_SCALA publishLocal test
 
   finish:
     name: Finish
     if: github.event_name == 'pull_request'
     needs: # Should be last
-      - "tests-8"
       - "tests-11"
     uses: playframework/.github/.github/workflows/rtm.yml@v4

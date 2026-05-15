@@ -225,42 +225,6 @@ lazy val `anorm-core` = project
   )
   .dependsOn(`anorm-tokenizer`)
 
-lazy val `anorm-iteratee` = project
-  .in(file("iteratee"))
-  .settings(
-    Seq(
-      sourceDirectory := {
-        val v = scalaBinaryVersion.value
-
-        if (v == "3" || v == "2.13") new java.io.File("/no/sources")
-        else sourceDirectory.value
-      },
-      mimaPreviousArtifacts := {
-        val v = scalaBinaryVersion.value
-
-        if (v == "3" || v == "2.13") Set.empty[ModuleID]
-        else Set(organization.value %% name.value % "2.6.10")
-      },
-      publish / skip := {
-        val v = scalaBinaryVersion.value
-
-        v == "3" || v == "2.13"
-      },
-      libraryDependencies ++= {
-        val v = scalaBinaryVersion.value
-
-        if (v == "3" || v == "2.13") Seq.empty[ModuleID]
-        else
-          Seq(
-            "com.typesafe.play"      %% "play-iteratees" % "2.6.1",
-            "org.scala-lang.modules" %% "scala-xml"      % xmlVer % Test,
-            acolyte
-          ) ++ specs2Test
-      }
-    ) ++ licensing
-  )
-  .dependsOn(`anorm-core`)
-
 // ---
 
 lazy val akkaVer = Def.setting[String] {
@@ -291,80 +255,27 @@ lazy val `anorm-akka` = project
         "org.scala-lang.modules" %% "scala-xml"           % xmlVer        % Test,
         ("com.typesafe.akka"     %% "akka-stream-testkit" % akkaVer.value % Test).exclude("org.scala-lang.modules", "*")
       ) ++ specs2Test,
-      scalacOptions ++= Seq("-Wconf:msg=.*(onDownstreamFinish|ActorMaterializer).*:s"),
-      Test / unmanagedSourceDirectories += {
-        CrossVersion.partialVersion(scalaVersion.value) match {
-          case Some((2, n)) if n < 13 =>
-            (Test / sourceDirectory).value / "scala-2.13-"
-
-          case _ =>
-            (Test / sourceDirectory).value / "scala-2.13+"
-
-        }
-      }
+      scalacOptions ++= Seq("-Wconf:msg=.*(onDownstreamFinish|ActorMaterializer).*:s")
     ) ++ licensing
   )
   .dependsOn(`anorm-core`)
 
 lazy val pekkoVer = Def.setting[String]("1.6.0")
 
-lazy val pekkoEnabled = Def.setting[Boolean] {
-  val v = scalaBinaryVersion.value
-
-  v != "2.12"
-}
-
 lazy val `anorm-pekko` = project
   .in(file("pekko"))
   .settings(
     Seq(
       mimaPreviousArtifacts := Set.empty,
-      sourceDirectory       := {
-        if (!pekkoEnabled.value) new java.io.File("/no/sources")
-        else sourceDirectory.value
+      libraryDependencies ++= Seq("pekko-testkit", "pekko-stream").map { m =>
+        ("org.apache.pekko" %% m % pekkoVer.value % Provided).exclude("org.scala-lang.modules", "*")
       },
-      publishArtifact := pekkoEnabled.value,
-      publish         := Def.taskDyn {
-        val ver = scalaBinaryVersion.value
-        val go  = publish.value
-
-        Def.task {
-          if (pekkoEnabled.value) {
-            go
-          }
-        }
-      }.value,
-      libraryDependencies ++= {
-        if (pekkoEnabled.value) {
-          Seq("pekko-testkit", "pekko-stream").map { m =>
-            ("org.apache.pekko" %% m % pekkoVer.value % Provided).exclude("org.scala-lang.modules", "*")
-          }
-        } else {
-          Seq.empty
-        }
-      },
-      libraryDependencies ++= {
-        if (pekkoEnabled.value) {
-          Seq(
-            acolyte,
-            "org.scala-lang.modules" %% "scala-xml"            % xmlVer         % Test,
-            "org.apache.pekko"       %% "pekko-stream-testkit" % pekkoVer.value % Test
-          ) ++ specs2Test
-        } else {
-          Seq.empty
-        }
-      },
-      scalacOptions ++= Seq("-Wconf:cat=deprecation&msg=.*(onDownstreamFinish|ActorMaterializer).*:s"),
-      Test / unmanagedSourceDirectories ++= {
-        CrossVersion.partialVersion(scalaVersion.value) match {
-          case Some((2, n)) if n < 13 =>
-            Seq((Test / sourceDirectory).value / "scala-2.13-")
-
-          case _ =>
-            Seq((Test / sourceDirectory).value / "scala-2.13+")
-
-        }
-      }
+      libraryDependencies ++= Seq(
+        acolyte,
+        "org.scala-lang.modules" %% "scala-xml"            % xmlVer         % Test,
+        "org.apache.pekko"       %% "pekko-stream-testkit" % pekkoVer.value % Test
+      ) ++ specs2Test,
+      scalacOptions ++= Seq("-Wconf:cat=deprecation&msg=.*(onDownstreamFinish|ActorMaterializer).*:s")
     ) ++ licensing
   )
   .dependsOn(`anorm-core`)
@@ -422,7 +333,6 @@ lazy val `anorm-parent` = project
   .aggregate(
     `anorm-tokenizer`,
     `anorm-core`,
-    `anorm-iteratee`,
     `anorm-akka`,
     `anorm-pekko`,
     `anorm-postgres`,
@@ -452,19 +362,10 @@ lazy val docs = project
 
         (manualDir / "javaGuide" ** "code").get ++ (manualDir / "scalaGuide" ** "code").get
       },
-      libraryDependencies ++= {
-        if (scalaBinaryVersion.value == "2.12") {
-          Seq(
-            "com.typesafe.play" %% "play-jdbc"   % "2.8.22" % Test,
-            "com.typesafe.play" %% "play-specs2" % "2.8.22" % Test
-          )
-        } else {
-          Seq(
-            "org.playframework" %% "play-jdbc"   % "3.0.10" % Test,
-            "org.playframework" %% "play-specs2" % "3.0.10" % Test
-          )
-        }
-      },
+      libraryDependencies ++= Seq(
+        "org.playframework" %% "play-jdbc"   % "3.0.10" % Test,
+        "org.playframework" %% "play-specs2" % "3.0.10" % Test
+      ),
       libraryDependencies ++= Seq(
         "com.h2database" % "h2" % "1.4.199"
       ),

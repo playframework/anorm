@@ -1016,32 +1016,6 @@ def source(implicit m: Materializer, connection: Connection): Source[String, Fut
     })
 ```
 
-#### Iteratee
-
-It's possible to use Anorm along with [Play Iteratees](https://www.playframework.com/documentation/latest/Iteratees), using the following dependencies.
-
-```scala
-libraryDependencies ++= Seq(
-  "org.playframework.anorm" %% "anorm-iteratee" % "ANORM_VERSION",
-  "com.typesafe.play" %% "play-iteratees" % "ITERATEES_VERSION")
-```
-
-> For a Play application, as `play-iteratees` is provided there is no need to add this dependency.
-
-> Since Scala 2.13, `play-iteratees` is no longer available.
-
-Then the parsed results from Anorm can be turned into [`Enumerator`](https://www.playframework.com/documentation/latest/api/scala/index.html#play.api.libs.iteratee.Enumerator).
-
-```scala
-import java.sql.Connection
-import scala.concurrent.ExecutionContext.Implicits.global
-import anorm._
-import play.api.libs.iteratee._
-
-def resultAsEnumerator(implicit con: Connection): Enumerator[String] =
-  Iteratees.from(SQL"SELECT * FROM Test", SqlParser.scalar[String])
-```
-
 ### Retrieving data along with execution context
 
 Moreover data, query execution involves context information like SQL warnings that may be raised (and may be fatal or not), especially when working with stored SQL procedure.
