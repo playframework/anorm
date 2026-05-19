@@ -227,7 +227,7 @@ lazy val `anorm-core` = project
         Seq(
           "org.scala-lang.modules" %% "scala-parser-combinators" % parserCombinatorsVer.value,
           "org.scala-lang.modules" %% "scala-xml"                % xmlVer    % Test,
-          "com.h2database"          % "h2"                       % "2.3.232" % Test,
+          "com.h2database"          % "h2"                       % "2.4.240" % Test,
           acolyte
         ) ++ specs2Test
       },
@@ -343,7 +343,7 @@ lazy val `anorm-joda` = project
       libraryDependencies ++= Seq(
         "joda-time"      % "joda-time"    % "2.14.2",
         "org.joda"       % "joda-convert" % "3.0.1",
-        "com.h2database" % "h2"           % "2.3.232" % Test,
+        "com.h2database" % "h2"           % "2.4.240" % Test,
         acolyte
       ) ++ specs2Test
     ) ++ licensing
