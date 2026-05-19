@@ -97,10 +97,16 @@ trait RowParser[+A] extends (Row => SqlResult[A]) { parent =>
    * that will turn missing or null column as None.
    */
   def ? : RowParser[Option[A]] = RowParser {
+    // Note: `UnexpectedNullableFound` is the error raised by `Column` when a
+    // non-nullable column is read but contains NULL.  Previously the SqlParser
+    // remapped this to `ColumnNotFound` so that this combinator surfaced NULL
+    // as `None`; that remap also caused #560 (misleading "column not found"
+    // errors elsewhere).  Now we recover from both errors here directly, which
+    // is what the scaladoc above already promised.
     parent(_) match {
-      case Success(a)                  => Success(Some(a))
-      case Error(ColumnNotFound(_, _)) =>
-        Success(None)
+      case Success(a)                        => Success(Some(a))
+      case Error(ColumnNotFound(_, _))       => Success(None)
+      case Error(UnexpectedNullableFound(_)) => Success(None)
 
       case e @ Error(_) => e
     }

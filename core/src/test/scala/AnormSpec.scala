@@ -66,6 +66,21 @@ final class AnormSpec
 
       }
 
+      // Regression test for #560: previously this surfaced as
+      // "'X' not found, available columns: X, X" because parseColumn mapped
+      // UnexpectedNullableFound to ColumnNotFound.  After the fix it must
+      // mention the column is NULL, not missing.
+      "surface NULL-aware error when scalar[T].single hits NULL" in withQueryResult(null.asInstanceOf[String]) {
+        implicit c: Connection =>
+
+          SQL("SELECT * FROM test").as(scalar[String].single).aka("scalar single on NULL") must throwA[Exception]
+            .like {
+              case e: Exception =>
+                (e.getMessage.aka("error") must contain("UnexpectedNullableFound"))
+                  .and(e.getMessage.aka("error") must not(contain("not found, available columns")))
+            }
+      }
+
       "throw exception when single result is missing" in withQueryResult(fooBarTable) { implicit c: Connection =>
 
         SQL("SELECT * FROM test").as(fooBarParser1.single).aka("mapping") must throwA[Exception].like {
