@@ -161,6 +161,12 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
 
         SQL"SELECT *".as(SqlParser.str("foo").?.single) must beNone
     }
+
+    "be None when column is NULL for non-nullable type" in withQueryResult(
+      rowList1(classOf[Integer] -> "n") :+ null.asInstanceOf[Integer]
+    ) { implicit c: Connection =>
+      SQL"SELECT *".as(SqlParser.int("n").?.single) must beNone
+    }
   }
 
   "Collecting" should {

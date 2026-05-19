@@ -541,12 +541,7 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
       name: String,
       c: Column[T],
       input: (Any, MetaDataItem)
-  ): Either[SqlRequestError, T] = c.tupled(input).left.map {
-    case UnexpectedNullableFound(_) =>
-      ColumnNotFound(name, row)
-
-    case cause => cause
-  }
+  ): Either[SqlRequestError, T] = c.tupled(input)
 }
 
 @deprecated("Do not use these combinators", "2.5.4")

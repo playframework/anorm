@@ -98,9 +98,9 @@ trait RowParser[+A] extends (Row => SqlResult[A]) { parent =>
    */
   def ? : RowParser[Option[A]] = RowParser {
     parent(_) match {
-      case Success(a)                  => Success(Some(a))
-      case Error(ColumnNotFound(_, _)) =>
-        Success(None)
+      case Success(a)                        => Success(Some(a))
+      case Error(ColumnNotFound(_, _))       => Success(None)
+      case Error(UnexpectedNullableFound(_)) => Success(None)
 
       case e @ Error(_) => e
     }
