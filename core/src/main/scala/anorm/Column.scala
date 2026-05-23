@@ -719,21 +719,15 @@ sealed trait JavaTimeColumn {
    *     as(SqlParser.scalar[LocalDateTime].single)
    * }}}
    */
-  implicit val columnToLocalDateTime: Column[LocalDateTime] = {
-    def instantToLocalDateTime(instant: Instant) =
-      LocalDateTime.ofInstant(instant, ZoneId.systemDefault)
+  implicit val columnToLocalDateTime: Column[LocalDateTime] = nonNull { (value, meta) =>
+    value match {
+      case localDateTime: LocalDateTime => Right(localDateTime)
 
-    nonNull { (value, meta) =>
-      value match {
-        case localDateTime: LocalDateTime => Right(localDateTime)
-
-        case _ =>
-          // Route through instantValueTo so Timestamp values keep nanosecond
-          // precision (via Timestamp#toInstant) instead of being truncated to
-          // milliseconds through Timestamp#getTime.  See #525, mirrors the
-          // fixes in #326 (Instant) and #409 (ZonedDateTime).
-          instantValueTo[LocalDateTime](instantToLocalDateTime, "Java8 LocalDateTime")(value, meta)
-      }
+      case _ =>
+        instantValueTo[LocalDateTime](LocalDateTime.ofInstant(_: Instant, ZoneId.systemDefault), "Java8 LocalDateTime")(
+          value,
+          meta
+        )
     }
   }
 
