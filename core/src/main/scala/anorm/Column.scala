@@ -719,17 +719,15 @@ sealed trait JavaTimeColumn {
    *     as(SqlParser.scalar[LocalDateTime].single)
    * }}}
    */
-  implicit val columnToLocalDateTime: Column[LocalDateTime] = {
-    def millisToLocalDateTime(ts: Long) =
-      LocalDateTime.ofInstant(Instant.ofEpochMilli(ts), ZoneId.systemDefault)
+  implicit val columnToLocalDateTime: Column[LocalDateTime] = nonNull { (value, meta) =>
+    value match {
+      case localDateTime: LocalDateTime => Right(localDateTime)
 
-    nonNull { (value, meta) =>
-      value match {
-        case localDateTime: LocalDateTime => Right(localDateTime)
-
-        case _ =>
-          temporalValueTo[LocalDateTime](millisToLocalDateTime, "Java8 LocalDateTime")(value, meta)
-      }
+      case _ =>
+        instantValueTo[LocalDateTime](LocalDateTime.ofInstant(_: Instant, ZoneId.systemDefault), "Java8 LocalDateTime")(
+          value,
+          meta
+        )
     }
   }
 

@@ -86,6 +86,15 @@ final class JavaTimeColumnSpec extends Specification {
         SQL("SELECT ts").as(scalar[LocalDateTime].single).aka("parsed local date/time") must_=== date
     }
 
+    "be parsed from timestamp with nano precision" in {
+      val instantWithNanoPrecision = Instant.parse("2021-01-06T08:45:26.441477Z")
+      val expected                 = LocalDateTime.ofInstant(instantWithNanoPrecision, ZoneId.systemDefault)
+
+      withQueryResult(timestampList :+ Timestamp.from(instantWithNanoPrecision)) { implicit c: Connection =>
+        SQL("SELECT ts").as(scalar[LocalDateTime].single).aka("parsed local date/time") must_=== expected
+      }
+    }
+
     "be parsed from numeric time" in withQueryResult(longList :+ time) { implicit c: Connection =>
       SQL("SELECT time").as(scalar[LocalDateTime].single).aka("parsed local date/time") must_=== date
 
