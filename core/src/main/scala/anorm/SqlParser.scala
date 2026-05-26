@@ -29,8 +29,12 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
         } yield v -> m).toRight(NoColumnsInReturnedResult)
 
         val parsed = Compat.rightFlatMap[SqlMappingError, SqlRequestError, (Any, MetaDataItem), T](input) {
-          case in @ (_, m) =>
-            parseColumn(row, m.column.qualified, c, in)
+          case in @ (_, _) =>
+            // Previously a `parseColumn` helper mapped `UnexpectedNullableFound` to
+            // `ColumnNotFound` here, producing misleading "column not found" errors
+            // when the column existed but contained NULL (#560).  Surface the
+            // original `Column` error instead.
+            c.tupled(in)
         }
 
         parsed.fold(Error(_), Success(_))
@@ -491,7 +495,7 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
     row =>
       Compat
         .rightFlatMap(row.get(name)) { in =>
-          parseColumn(row, name, c, in)
+          c.tupled(in)
         }
         .fold(Error(_), Success(_))
   }
@@ -514,7 +518,7 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
     RowParser { row =>
       Compat
         .rightFlatMap(row.getIndexed(position - 1)) { in =>
-          parseColumn(row, in._2.column.qualified, c, in)
+          c.tupled(in)
         }
         .fold(Error(_), Success(_))
     }
@@ -536,17 +540,6 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
   def matches[T: Column](column: String, value: T): RowParser[Boolean] =
     get[T](column).?.map(_.fold(false) { _ == value })
 
-  @inline private def parseColumn[T](
-      row: Row,
-      name: String,
-      c: Column[T],
-      input: (Any, MetaDataItem)
-  ): Either[SqlRequestError, T] = c.tupled(input).left.map {
-    case UnexpectedNullableFound(_) =>
-      ColumnNotFound(name, row)
-
-    case cause => cause
-  }
 }
 
 @deprecated("Do not use these combinators", "2.5.4")
