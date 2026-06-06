@@ -124,6 +124,9 @@ lazy val coreMimaFilter: ProblemFilter = {
     old.fullName.indexOf("Macro") == -1 &&
     !old.fullName.startsWith("anorm.macros.")
 
+  case ReversedMissingMethodProblem(n) =>
+    Set("OffsetDateTime", "LocalTime", "OffsetTime").map(m => s"${m}ParameterMetaData").contains(n.fullName)
+
   case _ => true
 }
 
