@@ -212,12 +212,15 @@ final class MacroSpec extends org.specs2.mutable.Specification {
         .append(3.4F, "str3", 5, 3L, nullBoolean)
         .append(5.6F, "str4", 6, nullLong, false)
     ) { implicit con =>
+      implicit val generated: Column[ValidValueClass] =
+        Macro.valueColumn[ValidValueClass]
+
       val parser: RowParser[Goo[Int]] = Macro.offsetParser[Goo[Int]](2)
 
       SQL"TEST".as(parser.*) must_=== List(
-        Goo(1, Some(2L), Some(true)),
+        Goo(1, Some(new ValidValueClass(2.0D)), Some(true)),
         Goo(4, None, None),
-        Goo(5, Some(3L), None),
+        Goo(5, Some(new ValidValueClass(3.0D)), None),
         Goo(6, None, Some(false))
       )
     }
@@ -328,13 +331,15 @@ final class MacroSpec extends org.specs2.mutable.Specification {
     }
 
     "be successful for Goo[Int]" >> {
-      val fixture = Goo(1, Some(2L), None)
+      val fixture = Goo(1, Some(new ValidValueClass(2.0D)), None)
+
+      implicit val valToStmt: ToStatement[ValidValueClass] = Macro.valueToStatement
 
       Fragments.foreach(
         Seq[(ToParameterList[Goo[Int]], List[NamedParameter])](
           Macro.toParameters[Goo[Int]]() -> List(
             named("loremIpsum" -> 1),
-            named("opt"        -> Some(2L)),
+            named("opt"        -> Some(2.0D)),
             named("x"          -> Option.empty[Boolean])
           ),
           Macro.toParameters[Goo[Int]](proj("loremIpsum", "value")) -> List(named("value" -> 1))
@@ -455,7 +460,7 @@ final class MacroSpec extends org.specs2.mutable.Specification {
     override lazy val toString = s"Foo($r, $bar)($loremIpsum, $opt)($x)"
   }
 
-  case class Goo[T](loremIpsum: T, opt: Option[Long], x: Option[Boolean]) {
+  case class Goo[T](loremIpsum: T, opt: Option[ValidValueClass], x: Option[Boolean]) {
     override lazy val toString = s"Goo($loremIpsum, $opt, $x)"
   }
 
