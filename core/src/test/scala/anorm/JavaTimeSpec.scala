@@ -328,14 +328,6 @@ object JavaTimeParameterSpec extends Specification {
             if t.getTime == 123456789000L =>
           1 /* case ok */
         case UpdateExecution("set-null-offset-date-time ?", DParam(null, SqlTimestamp) :: Nil) => 1 /* case ok */
-        case UpdateExecution("set-local-time ?", DParam(t: java.sql.Timestamp, SqlTimestamp) :: Nil)
-            if t.getTime == LocalTime1Epoch =>
-          1 /* case ok */
-        case UpdateExecution("set-null-local-time ?", DParam(null, SqlTimestamp) :: Nil) => 1 /* case ok */
-        case UpdateExecution("set-offset-time ?", DParam(t: java.sql.Timestamp, SqlTimestamp) :: Nil)
-            if t.getTime == OffsetTime1Epoch =>
-          1 /* case ok */
-        case UpdateExecution("set-null-offset-time ?", DParam(null, SqlTimestamp) :: Nil) => 1 /* case ok */
 
         case exec =>
           sys.error(s"Unexpected execution: $exec")

@@ -4,7 +4,7 @@
 
 package anorm
 
-import java.lang.{ Boolean => JBool, Long => JLong }
+import java.lang.{ Boolean => JBool, Double => JDouble, Long => JLong }
 import java.sql.Connection
 
 import scala.annotation.nowarn
@@ -40,6 +40,14 @@ final class MacroSpec extends org.specs2.mutable.Specification {
     classOf[Int]    -> "lorem_ipsum",
     classOf[JLong]  -> "opt",
     classOf[JBool]  -> "x"
+  ) // java types to avoid conv
+
+  val fooRow3 = RowLists.rowList5(
+    classOf[Float]   -> "r",
+    classOf[String]  -> "bar",
+    classOf[Int]     -> "loremIpsum",
+    classOf[JDouble] -> "opt",
+    classOf[JBool]   -> "x"
   ) // java types to avoid conv
 
   "Column naming" should {
@@ -206,11 +214,11 @@ final class MacroSpec extends org.specs2.mutable.Specification {
     }
 
     "be successful for Goo[T] with offset = 2" in withQueryResult(
-      fooRow1
-        .append(1.2F, "str1", 1, 2L, true)
-        .append(2.3F, "str2", 4, nullLong, nullBoolean)
-        .append(3.4F, "str3", 5, 3L, nullBoolean)
-        .append(5.6F, "str4", 6, nullLong, false)
+      fooRow3
+        .append(1.2F, "str1", 1, 2.0D, true)
+        .append(2.3F, "str2", 4, nullDouble, nullBoolean)
+        .append(3.4F, "str3", 5, 3.0D, nullBoolean)
+        .append(5.6F, "str4", 6, nullDouble, false)
     ) { implicit con =>
       implicit val generated: Column[ValidValueClass] =
         Macro.valueColumn[ValidValueClass]
@@ -223,6 +231,16 @@ final class MacroSpec extends org.specs2.mutable.Specification {
         Goo(5, Some(new ValidValueClass(3.0D)), None),
         Goo(6, None, Some(false))
       )
+    }
+  }
+
+  "Meta data" should {
+    "be generated for value class" in {
+      val meta: ParameterMetaData[ValidValueClass] = Macro.valueParameterMetaData
+
+      (meta.sqlType must_=== "DOUBLE PRECISION").and {
+        meta.jdbcType must_=== java.sql.JDBCType.DOUBLE.getVendorTypeNumber
+      }
     }
   }
 
@@ -339,7 +357,7 @@ final class MacroSpec extends org.specs2.mutable.Specification {
         Seq[(ToParameterList[Goo[Int]], List[NamedParameter])](
           Macro.toParameters[Goo[Int]]() -> List(
             named("loremIpsum" -> 1),
-            named("opt"        -> Some(2.0D)),
+            named("opt"        -> Some(new ValidValueClass(2.0D))),
             named("x"          -> Option.empty[Boolean])
           ),
           Macro.toParameters[Goo[Int]](proj("loremIpsum", "value")) -> List(named("value" -> 1))
@@ -372,6 +390,8 @@ final class MacroSpec extends org.specs2.mutable.Specification {
     }
 
     "be successful for Goo[Bar]" >> {
+      implicit val valToStmt: ToStatement[ValidValueClass] = Macro.valueToStatement
+
       implicit def barToParams: ToParameterList[Bar] =
         Macro.toParameters[Bar]()
 
@@ -443,6 +463,7 @@ final class MacroSpec extends org.specs2.mutable.Specification {
   // Avoid implicit conversions
   lazy val nullBoolean = null.asInstanceOf[JBool]
   lazy val nullLong    = null.asInstanceOf[JLong]
+  lazy val nullDouble  = null.asInstanceOf[JDouble]
 
   sealed trait NoSubclass
   object NotFamilly
@@ -468,7 +489,9 @@ final class MacroSpec extends org.specs2.mutable.Specification {
   case class Self(id: String, next: Self)
 }
 
-final class ValidValueClass(val foo: Double) extends AnyVal
+final class ValidValueClass(val foo: Double) extends AnyVal {
+  override def toString = s"$foo"
+}
 
 final class InvalidValueClass(val foo: MacroSpec) extends AnyVal {
   // No support as `foo` is not itself a ValueClass

@@ -216,7 +216,6 @@ private[anorm] trait TopLevelDefinitions extends PackageCompat {
      * import anorm.features.columnByteToBoolean
      * }}}
      */
-
     implicit val columnByteToBoolean: Column[Boolean] = Column.columnByteToBoolean
   }
 }

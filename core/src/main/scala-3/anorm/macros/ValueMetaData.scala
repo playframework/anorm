@@ -7,11 +7,10 @@ package anorm.macros
 import scala.quoted.{ Expr, Quotes, Type }
 
 import anorm.Macro.debugEnabled
-import anorm.ToStatement
+import anorm.ParameterMetaData
 
-private[anorm] trait ValueToStatement {
-  protected def valueToStatementImpl[A <: AnyVal](using q: Quotes, tpe: Type[A]): Expr[ToStatement[A]] = {
-
+private[anorm] trait ValueMetaData {
+  protected def valueParameterMetaDataImpl[A <: AnyVal](using q: Quotes, tpe: Type[A]): Expr[ParameterMetaData[A]] = {
     import q.reflect.*
 
     val aTpr = TypeRepr.of[A](using tpe)
@@ -25,25 +24,24 @@ private[anorm] trait ValueToStatement {
 
             tpr.asType match {
               case vtpe @ '[t] =>
-                Expr.summon[ToStatement[t]] match {
-                  case Some(ts) => {
-                    def inner(a: Expr[A]) = {
-                      val term = asTerm(a)
-
-                      term
-                        .select(term.symbol.fieldMember(v.name))
-                        .asExprOf[t](using vtpe)
-                    }
+                Expr.summon[ParameterMetaData[t]] match {
+                  case Some(meta) => {
+                    def mapf(in: Expr[t]): Expr[A] =
+                      New(Inferred(aTpr))
+                        .select(ctor)
+                        .appliedTo(in.asTerm)
+                        .asExprOf[A]
 
                     val generated = '{
-                      new ToStatement[A] {
-                        def set(s: java.sql.PreparedStatement, i: Int, a: A): Unit =
-                          ${ ts }.set(s, i, ${ inner('a) })
+                      new _root_.anorm.ParameterMetaData[A] {
+                        val underlying = ${ meta }
+                        val sqlType    = underlying.sqlType
+                        val jdbcType   = underlying.jdbcType
                       }
                     }
 
                     if (debugEnabled) {
-                      report.info(s"ToStatement for $tpe: ${generated.show}")
+                      report.info(s"meta data generated for ${aTpr.show}: ${generated.show}")
                     }
 
                     generated
@@ -51,10 +49,9 @@ private[anorm] trait ValueToStatement {
 
                   case _ =>
                     report.errorAndAbort(
-                      s"Instance not found: ${classOf[ToStatement[?]].getName}[${tpr.typeSymbol.fullName}]"
+                      s"Instance not found: ${classOf[ParameterMetaData[?]].getName}[${tpr.typeSymbol.fullName}]"
                     )
                 }
-
             }
           }
 
@@ -67,7 +64,7 @@ private[anorm] trait ValueToStatement {
 
       case _ =>
         report.errorAndAbort(
-          s"Cannot resolve value ToStatement for '${aTpr.typeSymbol.name}'"
+          s"Cannot resolve value ParameterMetaData for '${aTpr.typeSymbol.name}'"
         )
     }
   }

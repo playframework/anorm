@@ -43,7 +43,7 @@ private[anorm] trait ValueColumn {
 
                   case _ =>
                     report.errorAndAbort(
-                      s"Instance not found: ${classOf[Column[_]].getName}[${tpr.typeSymbol.fullName}]"
+                      s"Instance not found: ${classOf[Column[?]].getName}[${tpr.typeSymbol.fullName}]"
                     )
                 }
             }
