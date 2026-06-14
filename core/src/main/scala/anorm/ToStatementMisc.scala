@@ -659,8 +659,8 @@ sealed trait ToStatementPriority0 {
   /**
    * Sets multi-value parameter from stream on statement.
    */
-  implicit def streamToStatement[A](implicit c: ToStatement[A]): ToStatement[Compat.LazyLst[A]] =
-    traversableToStatement[A, Compat.LazyLst[A]]
+  implicit def streamToStatement[A](implicit c: ToStatement[A]): ToStatement[LazyList[A]] =
+    traversableToStatement[A, LazyList[A]]
 
   /**
    * Sets multi-value parameter from vector on statement.
@@ -695,10 +695,10 @@ sealed trait ToStatementPriority0 {
         c.set(s, offset, ps.values)
     }
 
-  @inline private def traversableToStatement[A, T <: Compat.Trav[A]](implicit c: ToStatement[A]) = new ToStatement[T]
+  @inline private def traversableToStatement[A, T <: Iterable[A]](implicit c: ToStatement[A]) = new ToStatement[T]
     with NotNullGuard {
     def set(s: PreparedStatement, offset: Int, ps: T) =
-      if (ps == (null: Compat.Trav[A])) throw new IllegalArgumentException()
+      if (ps == (null: Iterable[A])) throw new IllegalArgumentException()
       else {
         ps.foldLeft(offset) { (i, p) => c.set(s, i, p); i + 1 }
         ()

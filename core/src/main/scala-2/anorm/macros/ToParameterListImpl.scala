@@ -6,7 +6,7 @@ package anorm.macros
 
 import scala.reflect.macros.whitebox
 
-import anorm.{ Compat, ToParameterList, ToSql, ToStatement }
+import anorm.{ ToParameterList, ToSql, ToStatement }
 import anorm.Macro.{ debugEnabled, ParameterProjection }
 import anorm.macros.Inspect.pretty
 
@@ -210,25 +210,29 @@ private[anorm] object ToParameterListImpl {
     val bufVal        = q"val ${bufName} = ${ImuList}.newBuilder[${NamedParamTpe}]"
 
     // def of functions to append named parameters to a local list buffer
-    val appendDefs = Compat.mapValues(appendParameters)(_._2).values.toSeq
+    val appendDefs = appendParameters.view.mapValues(_._2).values.toSeq
 
     // applies/call of the functions according the projection
     val effectiveProj: Map[String, String] = {
       if (compiledProj.nonEmpty) {
-        Compat.toMap(compiledProj) {
-          case ParameterProjection(propName, Some(paramName)) =>
-            propName -> paramName
+        compiledProj.view
+          .map {
+            case ParameterProjection(propName, Some(paramName)) =>
+              propName -> paramName
 
-          case ParameterProjection(propName, _) =>
-            propName -> propName
-        }
-      } else
-        Compat.collectToMap(properties) {
-          case term: TermSymbol => {
-            val propName = term.name.toString
-            propName -> propName
+            case ParameterProjection(propName, _) =>
+              propName -> propName
           }
-        }
+          .to(Map)
+      } else
+        properties.view
+          .collect {
+            case term: TermSymbol => {
+              val propName = term.name.toString
+              propName -> propName
+            }
+          }
+          .to(Map)
     }
 
     val appendCalls = effectiveProj.flatMap {

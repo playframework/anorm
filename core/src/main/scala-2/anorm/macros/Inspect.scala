@@ -6,8 +6,6 @@ package anorm.macros
 
 import scala.reflect.macros.whitebox
 
-import anorm.Compat
-
 private[anorm] object Inspect {
   def directKnownSubclasses(c: whitebox.Context)(tpe: c.Type): List[c.Type] = {
     // Workaround for SI-7046: https://issues.scala-lang.org/browse/SI-7046
@@ -16,7 +14,7 @@ private[anorm] object Inspect {
     val tpeSym = tpe.typeSymbol.asClass
 
     @annotation.tailrec
-    def allSubclasses(path: Compat.Trav[Symbol], subclasses: Set[Type]): Set[Type] = path.headOption match {
+    def allSubclasses(path: Iterable[Symbol], subclasses: Set[Type]): Set[Type] = path.headOption match {
       case Some(cls: ClassSymbol) if tpeSym != cls && cls.selfType.baseClasses.contains(tpeSym) => {
         val newSub: Set[Type] = if (!cls.isCaseClass) {
           c.warning(c.enclosingPosition, s"cannot handle class ${cls.fullName}: no case accessor")
@@ -74,10 +72,13 @@ private[anorm] object Inspect {
       if (apply.paramLists.isEmpty) {
         Map.empty
       } else {
-        Compat.toMap(Compat.lazyZip(apply.typeParams, tpeArgs)) {
-          case (sym, ty) =>
-            sym.fullName -> ty
-        }
+        apply.typeParams
+          .lazyZip(tpeArgs)
+          .map {
+            case (sym, ty) =>
+              sym.fullName -> ty
+          }
+          .to(Map)
       }
     }
   }

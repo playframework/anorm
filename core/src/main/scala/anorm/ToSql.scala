@@ -74,8 +74,8 @@ object ToSql {
   /**
    * Returns fragment for each value, separated by ", ".
    */
-  implicit def streamToSql[A](implicit conv: ToSql[A] = ToSql.missing[A]): ToSql[Compat.LazyLst[A]] =
-    traversableToSql[A, Compat.LazyLst[A]]
+  implicit def streamToSql[A](implicit conv: ToSql[A] = ToSql.missing[A]): ToSql[LazyList[A]] =
+    traversableToSql[A, LazyList[A]]
 
   /**
    * Returns fragment for each value, separated by ", ".
@@ -109,7 +109,7 @@ object ToSql {
       sql._1.toString -> sql._2
     }
 
-  @inline private def traversableToSql[A, T <: Compat.Trav[A]](implicit conv: ToSql[A]) = ToSql[T] { values =>
+  @inline private def traversableToSql[A, T <: Iterable[A]](implicit conv: ToSql[A]) = ToSql[T] { values =>
     val c: A => (String, Int) =
       if (conv == null) _ => "?" -> 1 else conv.fragment
 

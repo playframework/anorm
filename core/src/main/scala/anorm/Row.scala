@@ -23,8 +23,8 @@ trait Row {
    *
    * @see #as
    */
-  lazy val asList: List[Any] = Compat
-    .lazyZip(data, metaData.ms)
+  lazy val asList: List[Any] = data
+    .lazyZip(metaData.ms)
     .map { (v, m) =>
       if (m.nullable) Option(v) else v
     }
@@ -42,12 +42,15 @@ trait Row {
    * @see #as
    */
   lazy val asMap: Map[String, Any] =
-    Compat.toMap(Compat.lazyZip(data, metaData.ms)) {
-      case (v, m) =>
-        val k = m.column.qualified
+    data
+      .lazyZip(metaData.ms)
+      .map {
+        case (v, m) =>
+          val k = m.column.qualified
 
-        if (m.nullable) k -> Option(v) else k -> v
-    }
+          if (m.nullable) k -> Option(v) else k -> v
+      }
+      .to(Map)
 
   /**
    * Returns row as `T`.
@@ -117,10 +120,13 @@ trait Row {
 
   // Data per column name
   private lazy val columnsDictionary: Map[String, Any] =
-    Compat.toMap(Compat.lazyZip(metaData.ms, data)) {
-      case (m, v) =>
-        m.column.qualified.toUpperCase -> v
-    }
+    metaData.ms
+      .lazyZip(data)
+      .map {
+        case (m, v) =>
+          m.column.qualified.toUpperCase -> v
+      }
+      .to(Map)
 
   // Data per column alias
   private lazy val aliasesDictionary: Map[String, Any] = {
@@ -138,7 +144,7 @@ trait Row {
    * @param a Column qualified name, or label/alias
    */
   private[anorm] def get(a: String): Either[SqlRequestError, (Any, MetaDataItem)] =
-    Compat.rightFlatMap(metaData.get(a.toUpperCase).toRight(ColumnNotFound(a, this))) { m =>
+    metaData.get(a.toUpperCase).toRight(ColumnNotFound(a, this)).flatMap { m =>
       def d = if (a.indexOf(".") > 0) {
         // if expected to be a qualified (dotted) name
         columnsDictionary.get(m.column.qualified.toUpperCase).orElse(m.column.alias.flatMap(aliasesDictionary.get(_)))
@@ -149,13 +155,13 @@ trait Row {
           .orElse(columnsDictionary.get(m.column.qualified.toUpperCase))
       }
 
-      Compat.rightMap(d.toRight(ColumnNotFound(m.column.qualified, metaData.availableColumns))) { _ -> m }
+      d.toRight(ColumnNotFound(m.column.qualified, metaData.availableColumns)).map { _ -> m }
     }
 
   /** Try to get data matching index. */
   private[anorm] def getIndexed(i: Int): Either[SqlRequestError, (Any, MetaDataItem)] =
-    Compat.rightFlatMap(metaData.ms.lift(i).toRight(ColumnNotFound(s"#${i + 1}", metaData.availableColumns))) { m =>
-      Compat.rightMap(data.lift(i).toRight(ColumnNotFound(m.column.qualified, metaData.availableColumns))) { _ -> m }
+    metaData.ms.lift(i).toRight(ColumnNotFound(s"#${i + 1}", metaData.availableColumns)).flatMap { m =>
+      data.lift(i).toRight(ColumnNotFound(m.column.qualified, metaData.availableColumns)).map { _ -> m }
     }
 }
 
