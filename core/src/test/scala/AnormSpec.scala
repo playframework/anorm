@@ -75,6 +75,15 @@ final class AnormSpec
         }
       }
 
+      "throw ColumnNotFound when parser asks for a column not in the result" in withQueryResult(
+        rowList1(classOf[String] -> "a") :+ "value"
+      ) { implicit c: Connection =>
+        SQL("SELECT * FROM test").as(SqlParser.str("b").single) must throwA[AnormException].like {
+          case e: AnormException =>
+            e.getMessage must startWith("'b' not found, available columns:")
+        }
+      }
+
       "throw exception when single result is missing" in withQueryResult(fooBarTable) { implicit c: Connection =>
 
         SQL("SELECT * FROM test").as(fooBarParser1.single).aka("mapping") must throwA[Exception].like {
