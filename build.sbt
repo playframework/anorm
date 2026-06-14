@@ -221,7 +221,9 @@ lazy val `anorm-core` = project
         ProblemFilters.exclude[DirectMissingMethodProblem]("anorm.ToStatement.jodaDateTimeToStatement"),
         ProblemFilters.exclude[DirectMissingMethodProblem]("anorm.ToStatement.jodaLocalDateTimeToStatement"),
         ProblemFilters.exclude[DirectMissingMethodProblem]("anorm.ToStatement.jodaLocalDateToStatement"),
-        ProblemFilters.exclude[DirectMissingMethodProblem]("anorm.ToStatement.jodaInstantToStatement")
+        ProblemFilters.exclude[DirectMissingMethodProblem]("anorm.ToStatement.jodaInstantToStatement"),
+        ProblemFilters.exclude[MissingClassProblem]("anorm.Compat"),
+        ProblemFilters.exclude[MissingClassProblem]("anorm.Compat$")
       ),
       libraryDependencies ++= {
         Seq(
