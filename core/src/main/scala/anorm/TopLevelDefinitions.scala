@@ -5,8 +5,10 @@
 package anorm
 
 import java.util.StringTokenizer
+
 import java.lang.reflect.InvocationTargetException
 import java.sql.{ PreparedStatement, ResultSet, SQLException }
+
 import scala.jdk.CollectionConverters._
 import scala.reflect.ClassTag
 
