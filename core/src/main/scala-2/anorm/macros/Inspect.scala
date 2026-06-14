@@ -74,9 +74,8 @@ private[anorm] object Inspect {
       } else {
         apply.typeParams
           .lazyZip(tpeArgs)
-          .map {
-            case (sym, ty) =>
-              sym.fullName -> ty
+          .map { (sym, ty) =>
+            sym.fullName -> ty
           }
           .to(Map)
       }

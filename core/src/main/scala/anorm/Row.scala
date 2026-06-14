@@ -44,11 +44,10 @@ trait Row {
   lazy val asMap: Map[String, Any] =
     data
       .lazyZip(metaData.ms)
-      .map {
-        case (v, m) =>
-          val k = m.column.qualified
+      .map { (v, m) =>
+        val k = m.column.qualified
 
-          if (m.nullable) k -> Option(v) else k -> v
+        if (m.nullable) k -> Option(v) else k -> v
       }
       .to(Map)
 
@@ -122,9 +121,8 @@ trait Row {
   private lazy val columnsDictionary: Map[String, Any] =
     metaData.ms
       .lazyZip(data)
-      .map {
-        case (m, v) =>
-          m.column.qualified.toUpperCase -> v
+      .map { (m, v) =>
+        m.column.qualified.toUpperCase -> v
       }
       .to(Map)
 

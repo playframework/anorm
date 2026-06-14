@@ -41,7 +41,7 @@ private[anorm] case class MetaData(ms: Seq[MetaDataItem]) {
   private lazy val aliasedDictionary: Map[String, MetaDataItem] =
     ms.view
       .flatMap { m =>
-        m.column.alias.map(a => Map(a.toUpperCase() -> m)).getOrElse(Map.empty)
+        m.column.alias.iterator.map(a => a.toUpperCase() -> m)
       }
       .to(Map)
 
