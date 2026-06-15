@@ -9,6 +9,7 @@ import java.util.StringTokenizer
 import java.lang.reflect.InvocationTargetException
 import java.sql.{ PreparedStatement, ResultSet, SQLException }
 
+import scala.jdk.CollectionConverters._
 import scala.reflect.ClassTag
 
 private[anorm] trait TopLevelDefinitions extends PackageCompat {
@@ -157,7 +158,7 @@ private[anorm] trait TopLevelDefinitions extends PackageCompat {
       } else {
         parts.headOption match {
           case Some(part) =>
-            val it = Compat.javaEnumIterator[java.lang.Object](new StringTokenizer(part, "%", true))
+            val it: Iterator[java.lang.Object] = new StringTokenizer(part, "%", true).asScala
 
             if (!it.hasNext /* empty */ ) {
               tokenize(it, List(StringToken("")), parts.tail, ps, gs, ns, m)

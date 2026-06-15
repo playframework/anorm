@@ -58,7 +58,7 @@ sealed trait BatchSql {
    */
   @throws[IllegalArgumentException](BatchSqlErrors.MissingParameter)
   @throws[IllegalArgumentException](BatchSqlErrors.ParameterNamesNotMatchingPlaceholders)
-  def addBatchParamsList(args: Compat.Trav[Seq[ParameterValue]]): BatchSql = {
+  def addBatchParamsList(args: Iterable[Seq[ParameterValue]]): BatchSql = {
     if (params.isEmpty) {
       BatchSql.Checked(sql, args.map(Sql.zipParams(sql.paramsInitialOrder, _, Map.empty)))
 
@@ -222,7 +222,7 @@ object BatchSql {
   @throws[IllegalArgumentException](BatchSqlErrors.HeterogeneousParameterMaps)
   @throws[IllegalArgumentException](BatchSqlErrors.ParameterNamesNotMatchingPlaceholders)
   @SuppressWarnings(Array("MethodNames"))
-  private[anorm] def Checked[M](query: SqlQuery, ps: Compat.Trav[Map[String, ParameterValue]]): BatchSql =
+  private[anorm] def Checked[M](query: SqlQuery, ps: Iterable[Map[String, ParameterValue]]): BatchSql =
     ps.headOption.fold(Copy(query, Set.empty, Nil)) { m =>
       val ks = m.keySet
 
@@ -249,7 +249,7 @@ object BatchSql {
 
   /** Get parameter names */
   @annotation.tailrec
-  private def paramNames(ps: Compat.Trav[Map[String, ParameterValue]], ns: Set[String]): Either[String, Set[String]] =
+  private def paramNames(ps: Iterable[Map[String, ParameterValue]], ns: Set[String]): Either[String, Set[String]] =
     ps.headOption match {
       case Some(m) =>
         if (ns.intersect(m.keySet).size != m.size)

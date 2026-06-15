@@ -28,9 +28,7 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
           v <- row.data.headOption
         } yield v -> m).toRight(NoColumnsInReturnedResult)
 
-        val parsed = Compat.rightFlatMap[SqlMappingError, SqlRequestError, (Any, MetaDataItem), T](input) { in =>
-          parseColumn(c, in)
-        }
+        val parsed = input.flatMap { in => parseColumn(c, in) }
 
         parsed.fold(Error(_), Success(_))
       }
@@ -488,10 +486,9 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    */
   def get[T](name: String)(implicit @deprecatedName(Symbol("extractor")) c: Column[T]): RowParser[T] = RowParser {
     row =>
-      Compat
-        .rightFlatMap(row.get(name)) { in =>
-          parseColumn(c, in)
-        }
+      row
+        .get(name)
+        .flatMap { in => parseColumn(c, in) }
         .fold(Error(_), Success(_))
   }
 
@@ -511,10 +508,9 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    */
   def get[T](position: Int)(implicit @deprecatedName(Symbol("extractor")) c: Column[T]): RowParser[T] =
     RowParser { row =>
-      Compat
-        .rightFlatMap(row.getIndexed(position - 1)) { in =>
-          parseColumn(c, in)
-        }
+      row
+        .getIndexed(position - 1)
+        .flatMap { in => parseColumn(c, in) }
         .fold(Error(_), Success(_))
     }
 
