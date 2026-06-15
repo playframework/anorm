@@ -39,7 +39,7 @@ case class ColumnNotFound(
 
   @deprecated("Use constructor with `available` sequence", "2.5.4")
   def this(column: String, possibilities: List[String]) =
-    this(column, available = possibilities.toSeq)
+    this(column, possibilities: Seq[String])
 
   lazy val message = s"'$column' not found, available columns: " +
     available.map(_.dropWhile(_ == '.')).mkString(", ")
