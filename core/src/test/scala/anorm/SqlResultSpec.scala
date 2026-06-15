@@ -158,9 +158,9 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
 
     "be None when NULL" in withQueryResult(rowList1(classOf[String] -> "foo") :+ null.asInstanceOf[String]) {
       implicit c: Connection =>
-
         SQL"SELECT *".as(SqlParser.str("foo").?.single) must beNone
     }
+
   }
 
   "Collecting" should {

@@ -6,8 +6,6 @@ package anorm.macros
 
 import scala.quoted.{ Expr, Quotes, Type }
 
-import anorm.Compat
-
 private[anorm] object Inspect:
 
   /**

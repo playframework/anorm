@@ -28,10 +28,7 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
           v <- row.data.headOption
         } yield v -> m).toRight(NoColumnsInReturnedResult)
 
-        val parsed = Compat.rightFlatMap[SqlMappingError, SqlRequestError, (Any, MetaDataItem), T](input) {
-          case in @ (_, m) =>
-            parseColumn(row, m.column.qualified, c, in)
-        }
+        val parsed = input.flatMap { in => parseColumn(c, in) }
 
         parsed.fold(Error(_), Success(_))
       }
@@ -489,10 +486,9 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    */
   def get[T](name: String)(implicit @deprecatedName(Symbol("extractor")) c: Column[T]): RowParser[T] = RowParser {
     row =>
-      Compat
-        .rightFlatMap(row.get(name)) { in =>
-          parseColumn(row, name, c, in)
-        }
+      row
+        .get(name)
+        .flatMap { in => parseColumn(c, in) }
         .fold(Error(_), Success(_))
   }
 
@@ -512,10 +508,9 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    */
   def get[T](position: Int)(implicit @deprecatedName(Symbol("extractor")) c: Column[T]): RowParser[T] =
     RowParser { row =>
-      Compat
-        .rightFlatMap(row.getIndexed(position - 1)) { in =>
-          parseColumn(row, in._2.column.qualified, c, in)
-        }
+      row
+        .getIndexed(position - 1)
+        .flatMap { in => parseColumn(c, in) }
         .fold(Error(_), Success(_))
     }
 
@@ -537,16 +532,9 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
     get[T](column).?.map(_.fold(false) { _ == value })
 
   @inline private def parseColumn[T](
-      row: Row,
-      name: String,
       c: Column[T],
       input: (Any, MetaDataItem)
-  ): Either[SqlRequestError, T] = c.tupled(input).left.map {
-    case UnexpectedNullableFound(_) =>
-      ColumnNotFound(name, row)
-
-    case cause => cause
-  }
+  ): Either[SqlRequestError, T] = c.tupled(input)
 }
 
 @deprecated("Do not use these combinators", "2.5.4")

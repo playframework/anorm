@@ -224,7 +224,9 @@ lazy val `anorm-core` = project
         ProblemFilters.exclude[DirectMissingMethodProblem]("anorm.ToStatement.jodaDateTimeToStatement"),
         ProblemFilters.exclude[DirectMissingMethodProblem]("anorm.ToStatement.jodaLocalDateTimeToStatement"),
         ProblemFilters.exclude[DirectMissingMethodProblem]("anorm.ToStatement.jodaLocalDateToStatement"),
-        ProblemFilters.exclude[DirectMissingMethodProblem]("anorm.ToStatement.jodaInstantToStatement")
+        ProblemFilters.exclude[DirectMissingMethodProblem]("anorm.ToStatement.jodaInstantToStatement"),
+        ProblemFilters.exclude[MissingClassProblem]("anorm.Compat"),
+        ProblemFilters.exclude[MissingClassProblem]("anorm.Compat$")
       ),
       libraryDependencies ++= {
         Seq(
@@ -327,7 +329,7 @@ lazy val `anorm-enumeratum` = project
         if (scalaBinaryVersion.value != "3") {
           Seq(
             "org.scala-lang.modules" %% "scala-xml"  % xmlVer % Test,
-            "com.beachape"           %% "enumeratum" % "1.9.7",
+            "com.beachape"           %% "enumeratum" % "1.9.8",
             acolyte
           ) ++ specs2Test
         } else {

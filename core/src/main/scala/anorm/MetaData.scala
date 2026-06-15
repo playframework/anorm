@@ -27,19 +27,23 @@ private[anorm] case class MetaData(ms: Seq[MetaDataItem]) {
   }
 
   private lazy val dictionary: Map[String, MetaDataItem] =
-    Compat.toMap(ms) { m => m.column.qualified.toUpperCase() -> m }
+    ms.view.map { m => m.column.qualified.toUpperCase() -> m }.to(Map)
 
   private lazy val dictionary2: Map[String, MetaDataItem] =
-    Compat.toMap(ms) { m =>
-      val column = m.column.qualified.split('.').last
+    ms.view
+      .map { m =>
+        val column = m.column.qualified.split('.').last
 
-      column.toUpperCase() -> m
-    }
+        column.toUpperCase() -> m
+      }
+      .to(Map)
 
   private lazy val aliasedDictionary: Map[String, MetaDataItem] =
-    Compat.toFlatMap(ms) { m =>
-      m.column.alias.map(a => Map(a.toUpperCase() -> m)).getOrElse(Map.empty)
-    }
+    ms.view
+      .flatMap { m =>
+        m.column.alias.iterator.map(a => a.toUpperCase() -> m)
+      }
+      .to(Map)
 
   lazy val columnCount = ms.size
 

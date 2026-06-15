@@ -66,6 +66,24 @@ final class AnormSpec
 
       }
 
+      "throw UnexpectedNullableFound when non-nullable scalar result is null" in withQueryResult(
+        rowList1(classOf[Integer] -> "n") :+ null.asInstanceOf[Integer]
+      ) { implicit c: Connection =>
+        SQL("SELECT * FROM test").as(scalar[Int].single) must throwA[AnormException].like {
+          case e: AnormException =>
+            e.getMessage must startWith("UnexpectedNullableFound(")
+        }
+      }
+
+      "throw ColumnNotFound when parser asks for a column not in the result" in withQueryResult(
+        rowList1(classOf[String] -> "a") :+ "value"
+      ) { implicit c: Connection =>
+        SQL("SELECT * FROM test").as(SqlParser.str("b").single) must throwA[AnormException].like {
+          case e: AnormException =>
+            e.getMessage must startWith("'b' not found, available columns:")
+        }
+      }
+
       "throw exception when single result is missing" in withQueryResult(fooBarTable) { implicit c: Connection =>
 
         SQL("SELECT * FROM test").as(fooBarParser1.single).aka("mapping") must throwA[Exception].like {

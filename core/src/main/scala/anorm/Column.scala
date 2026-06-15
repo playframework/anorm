@@ -54,7 +54,7 @@ trait Column[A] extends ((Any, MetaDataItem) => Either[SqlRequestError, A]) { pa
    */
   final def mapResult[B](f: A => Either[SqlRequestError, B]): Column[B] =
     Column[B] { (v: Any, m: MetaDataItem) =>
-      Compat.rightFlatMap(parent(v, m))(f)
+      parent(v, m).flatMap(f)
     }
 
   /**
@@ -365,7 +365,7 @@ object Column extends JavaTimeColumn {
    * }}}
    */
   implicit val columnToBigInt: Column[BigInt] = nonNull { (value, meta) =>
-    Compat.rightMap(anyToBigInteger(value, meta))(BigInt(_))
+    anyToBigInteger(value, meta).map(BigInt(_))
   }
 
   implicit val columnToUUID: Column[UUID] = nonNull { (value, meta) =>
@@ -447,7 +447,7 @@ object Column extends JavaTimeColumn {
    * }}}
    */
   implicit val columnToScalaBigDecimal: Column[BigDecimal] =
-    nonNull((value, meta) => Compat.rightMap(anyToBigDecimal(value, meta))(BigDecimal(_)))
+    nonNull((value, meta) => anyToBigDecimal(value, meta).map(BigDecimal(_)))
 
   /**
    * Parses column as Java Date.
@@ -475,7 +475,7 @@ object Column extends JavaTimeColumn {
 
   implicit def columnToOption[T](implicit transformer: Column[T]): Column[Option[T]] = Column { (value, meta) =>
     if (value != null) {
-      Compat.rightMap(transformer(value, meta))(Some(_))
+      transformer(value, meta).map(Some(_))
     } else Right[SqlRequestError, Option[T]](None)
   }
 

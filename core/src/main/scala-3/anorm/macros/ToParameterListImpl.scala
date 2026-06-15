@@ -6,7 +6,7 @@ package anorm.macros
 
 import scala.quoted.{ Expr, Quotes, Type }
 
-import anorm.{ Compat, Macro, NamedParameter, ToParameterList, ToParameterValue, ToSql, ToStatement }
+import anorm.{ Macro, NamedParameter, ToParameterList, ToParameterValue, ToSql, ToStatement }
 
 import Macro.{ debugEnabled, ParameterProjection }
 
