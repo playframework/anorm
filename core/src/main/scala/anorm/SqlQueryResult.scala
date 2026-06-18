@@ -48,8 +48,6 @@ final case class SqlQueryResult(
    * }}}
    */
   def statementWarning: Option[SQLWarning] = {
-    import resource.extractedEitherToEither
-
     statement.acquireFor(_.getWarnings).fold[Option[SQLWarning]](_.headOption.map(new SQLWarning(_)), Option(_))
   }
 }
