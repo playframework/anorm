@@ -6,7 +6,7 @@ package anorm.macros
 
 import scala.quoted.{ Expr, Quotes, Type }
 
-import anorm.{ Macro, NamedParameter, ToParameterList, ToParameterValue, ToSql, ToStatement }
+import anorm.{ Macro, NamedParameter, ParameterMetaData, ToParameterList, ToParameterValue, ToSql, ToStatement }
 
 import Macro.{ debugEnabled, ParameterProjection }
 
@@ -174,6 +174,8 @@ private[anorm] object ToParameterListImpl {
 
     val namedAppends = Map.newBuilder[String, (TypeRepr, Append[Any])]
 
+    type IsAnyVal[T <: AnyVal] = T
+
     properties.foreach { sym =>
       if (!selectedProperties.contains(sym.name)) {
         debug(s"${sym.name} is filtered: ${selectedProperties.mkString(", ")}")
@@ -216,8 +218,33 @@ private[anorm] object ToParameterListImpl {
                 namedAppends += sym.name -> (tt -> append.asInstanceOf[Append[Any]])
               }
 
-              case None =>
-                Expr.summon[ToStatement[t]] match {
+              case None => {
+                val toStmtResolution: Option[Expr[ToStatement[t]]] = pt match {
+                  case '[Option[IsAnyVal[inner]]] =>
+                    Expr
+                      .summon[ToStatement[inner]]
+                      .map { innerToStmt =>
+                        Expr.summon[ParameterMetaData[inner]] match {
+                          case None =>
+                            '{
+                              val meta: ParameterMetaData[inner] = _root_.anorm.Macro.valueParameterMetaData[inner]
+
+                              ToStatement.optionToStatement[inner]($innerToStmt, meta)
+                            }
+
+                          case Some(meta) =>
+                            '{
+                              ToStatement.optionToStatement[inner]($innerToStmt, $meta)
+                            }
+                        }
+                      }
+                      .map(_.asExprOf[ToStatement[t]])
+
+                  case _ =>
+                    Expr.summon[ToStatement[t]]
+                }
+
+                toStmtResolution match {
                   case None =>
                     abort(s"cannot find either anorm.ToParameterList or anorm.ToStatement for ${sym.name}:${tt.show}")
 
@@ -232,6 +259,7 @@ private[anorm] object ToParameterListImpl {
                     namedAppends += sym.name -> (tt -> append.asInstanceOf[Append[Any]])
                   }
                 }
+              }
 
               case Some((toParams, _)) => { // use ToParameterList
                 val append: Function2[Expr[t], Expr[Builder], Expr[Builder]] = { (v, buf) =>

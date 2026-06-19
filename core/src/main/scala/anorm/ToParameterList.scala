@@ -25,7 +25,7 @@ object ToParameterList {
    * case class Bar(v: String)
    *
    * implicit def toBar: ToParameterList[Bar] = ToParameterList[Bar] { bar =>
-   *   List(anorm.NamedParameter.namedWithString("v" -> bar.v))
+   *   List(NamedParameter.namedWithString("v" -> bar.v))
    * }
    * }}}
    */

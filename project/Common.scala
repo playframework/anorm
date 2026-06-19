@@ -18,7 +18,7 @@ object Common extends AutoPlugin {
   override def projectSettings = Seq(
     organization       := "org.playframework.anorm",
     scalaVersion       := "2.13.18",
-    crossScalaVersions := Seq(scalaVersion.value, "3.3.8"),
+    crossScalaVersions := Seq(scalaVersion.value, "3.4.3"),
     scalacOptions ++= Seq("-Xfatal-warnings"),
     scalacOptions ++= {
       val v = scalaBinaryVersion.value
@@ -35,11 +35,13 @@ object Common extends AutoPlugin {
       if (v == "3") {
         Seq(
           "-explaintypes",
+          "-Wunused:imports",
           "-Werror",
           "-Wconf:msg=.*with\\ as\\ a\\ type\\ operator.*:s",
           "-Wconf:msg=.*deprecated.*uninitialized.*:s",
           "-Wconf:msg=.*vararg\\ splices.*:s",
-          "-Wconf:cat=deprecation&msg=.*(reflectiveSelectableFromLangReflectiveCalls|DeprecatedSqlParser|missing .*ToSql|deprecatedName).*:s"
+          "-Wconf:cat=deprecation&msg=.*(reflectiveSelectableFromLangReflectiveCalls|DeprecatedSqlParser|missing .*ToSql|deprecatedName).*:s",
+          "-Wconf:msg=.*wildcard\\ arguments.*:s"
         )
       } else {
         Seq(
@@ -61,6 +63,16 @@ object Common extends AutoPlugin {
     },
     Test / console / scalacOptions ~= {
       _.filterNot { opt => opt.startsWith("-X") || opt.startsWith("-Y") }
+    },
+    Test / scalacOptions ++= {
+      if (scalaBinaryVersion.value == "2.11") {
+        Seq.empty
+      } else {
+        Seq(
+          "-Wconf:src=.*test/.*&msg=.*type\\ was\\ inferred.*(Any|Object).*:s",
+          "-Wconf:src=.*test/anorm/scaladoc-.*&msg=.*never\\ used.*:s"
+        )
+      }
     },
     Test / scalacOptions ++= {
       if (scalaBinaryVersion.value != "3") Seq("-Yrangepos")

@@ -6,7 +6,7 @@ package anorm.macros
 
 import scala.reflect.macros.whitebox
 
-import anorm.{ ToParameterList, ToSql, ToStatement }
+import anorm.{ ParameterMetaData, ToParameterList, ToSql, ToStatement }
 import anorm.Macro.{ debugEnabled, ParameterProjection }
 import anorm.macros.Inspect.pretty
 
@@ -73,6 +73,7 @@ private[anorm] object ToParameterListImpl {
     val toPListTpe     = c.weakTypeTag[ToParameterList[_]].tpe
     lazy val toSqlTpe  = c.weakTypeTag[ToSql[_]].tpe
     lazy val toStmtTpe = c.weakTypeTag[ToStatement[_]].tpe
+    lazy val pmetaTpe  = c.weakTypeTag[ParameterMetaData[_]].tpe
 
     import c.universe._
 
@@ -139,6 +140,8 @@ private[anorm] object ToParameterListImpl {
     val bufName      = TermName(c.freshName("buf"))
     val namedAppends = Map.newBuilder[String, (TermName, Tree)]
 
+    val optionTpe = typeOf[Option[_]].typeConstructor
+
     if (ctor.paramLists.tail.nonEmpty) {
       c.echo(
         c.enclosingPosition,
@@ -155,6 +158,7 @@ private[anorm] object ToParameterListImpl {
 
           boundTypes.getOrElse(t.typeSymbol.fullName, t)
         }
+
         val resolv = resolveImplicit(term.name, tt, _: Type)
 
         lazy val toSql = resolv(toSqlTpe) match {
@@ -176,10 +180,38 @@ private[anorm] object ToParameterListImpl {
             namedAppends += pc.propertyName -> (pc.defName -> defDef)
           }
 
-          case Implicit.Unresolved() =>
-            resolv(toStmtTpe) match {
+          case Implicit.Unresolved() => {
+            val toStmtResolution = tt.typeArgs.headOption match {
+              case Some(innerTpe) if tt.typeConstructor <:< optionTpe => {
+                resolveImplicit(term.name, innerTpe, toStmtTpe) match {
+                  case un @ Implicit.Unresolved() =>
+                    un
+
+                  case innerToStmt => {
+                    val optToStmt = resolveImplicit(term.name, innerTpe, pmetaTpe) match {
+                      case Implicit.Unresolved() =>
+                        q"""{
+                          implicit val m: _root_.anorm.ParameterMetaData[${innerTpe}] = _root_.anorm.Macro.valueParameterMetaData[${innerTpe}]
+
+                          implicitly[_root_.anorm.ToStatement[Option[${innerTpe}]]]
+                        }"""
+
+                      case _ =>
+                        q"implicitly[_root_.anorm.ToStatement[Option[${innerTpe}]]]"
+                    }
+
+                    innerToStmt.copy(neededImplicit = optToStmt)
+                  }
+                }
+              }
+
+              case _ =>
+                resolveImplicit(term.name, tt, toStmtTpe)
+            }
+
+            toStmtResolution match {
               case Implicit.Unresolved() =>
-                abort(s"cannot find either $toPListTpe or $toStmtTpe for ${term.name}:$tt")
+                abort(s"cannot find either $toPListTpe or $toStmtTpe for ${term.name}: $tt")
 
               case toStmt => { // use ToSql+ToStatement
                 val pc = ParameterContext(c)(term)
@@ -190,6 +222,7 @@ private[anorm] object ToParameterListImpl {
                 namedAppends += pc.propertyName -> (pc.defName -> defDef)
               }
             }
+          }
 
           case toParams => { // use ToParameterList
             val pc = ParameterContext(c)(term)

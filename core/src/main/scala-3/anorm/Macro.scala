@@ -22,7 +22,7 @@ import scala.quoted.{ Expr, FromExpr, Quotes, ToExpr, Type }
  * @define projectionParam The optional projection for the properties as parameters; If none, using the all the class properties.
  * @define valueClassTParam the type of the value class
  */
-object Macro extends MacroOptions with macros.ValueColumn with macros.ValueToStatement:
+object Macro extends MacroOptions with macros.ValueColumn with macros.ValueToStatement with macros.ValueMetaData:
 
   /**
    * Returns a row parser generated for a case class `T`,
@@ -186,6 +186,23 @@ object Macro extends MacroOptions with macros.ValueColumn with macros.ValueToSta
    */
   inline def valueColumn[T <: AnyVal]: Column[T] =
     ${ valueColumnImpl[T] }
+
+  /**
+   * Returns a meta data for specified value class.
+   *
+   * {{{
+   * import anorm._
+   *
+   * class ValueClassType(val v: Int) extends AnyVal
+   *
+   * implicit val column: ParameterMetaData[ValueClassType] =
+   *   Macro.valueParameterMetaData[ValueClassType]
+   * }}}
+   *
+   * @tparam T $valueClassTParam
+   */
+  inline def valueParameterMetaData[T <: AnyVal]: ParameterMetaData[T] =
+    ${ valueParameterMetaDataImpl[T] }
 
   // ---
 
@@ -438,8 +455,6 @@ object Macro extends MacroOptions with macros.ValueColumn with macros.ValueToSta
   private[anorm] given parameterProjectionToExpr: ToExpr[ParameterProjection] =
     new ToExpr[ParameterProjection] {
       def apply(p: ParameterProjection)(using q: Quotes): Expr[ParameterProjection] = {
-        import q.reflect.*
-
         val propertyName  = Expr(p.propertyName)
         val parameterName = Expr(p.parameterName)
 
@@ -452,8 +467,6 @@ object Macro extends MacroOptions with macros.ValueColumn with macros.ValueToSta
       tpe: Type[T],
       proj: Type[ParameterProjection]
   ): Expr[ToParameterList[T]] = {
-    import q.reflect.*
-
     '{
       withSelfToParameterList[T] { selfRef =>
         ${
@@ -470,8 +483,6 @@ object Macro extends MacroOptions with macros.ValueColumn with macros.ValueToSta
   private def configuredParameters[T](
       projection: Expr[Seq[ParameterProjection]]
   )(using q: Quotes, tpe: Type[T], proj: Type[ParameterProjection]): Expr[ToParameterList[T]] = {
-    import q.reflect.*
-
     '{
       withSelfToParameterList[T] { selfRef =>
         ${ macros.ToParameterListImpl.caseClass[T]('selfRef, projection, '{ "_" }) }
@@ -483,8 +494,6 @@ object Macro extends MacroOptions with macros.ValueColumn with macros.ValueToSta
       separator: Expr[String],
       projection: Expr[Seq[ParameterProjection]]
   )(using q: Quotes, tpe: Type[T], proj: Type[ParameterProjection]): Expr[ToParameterList[T]] = {
-    import q.reflect.*
-
     '{
       withSelfToParameterList[T] { selfRef =>
         ${ macros.ToParameterListImpl.caseClass[T]('selfRef, projection, separator) }

@@ -499,6 +499,7 @@ sealed trait ToStatementPriority0 {
    */
   implicit object dateToStatement extends ToStatement[java.util.Date] {
     val jdbcType = implicitly[ParameterMetaData[java.util.Date]].jdbcType
+
     def set(s: PreparedStatement, index: Int, date: java.util.Date): Unit =
       if (date != (null: java.util.Date)) {
         s.setTimestamp(index, new Timestamp(date.getTime))
@@ -530,6 +531,7 @@ sealed trait ToStatementPriority0 {
         s.setTimestamp(index, tsw.getTimestamp)
       } else s.setNull(index, timestampWrapper1JdbcType)
   }
+
   private val timestampWrapper1JdbcType =
     implicitly[ParameterMetaData[TimestampWrapper1]].jdbcType
 
