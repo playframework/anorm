@@ -30,7 +30,7 @@ private[anorm] object SealedRowParserImpl {
 
     type CaseType[U <: A] = U
 
-    val subParsers = List.newBuilder[(TypeRepr, Expr[RowParser[_]])]
+    val subParsers = List.newBuilder[(TypeRepr, Expr[RowParser[?]])]
 
     val missing: List[TypeRepr] = subclasses.flatMap { subcls =>
       subcls.asType match {

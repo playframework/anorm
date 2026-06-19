@@ -46,7 +46,7 @@ private[anorm] object ValueColumnImpl {
                 c.echo(c.enclosingPosition, s"column generated for $tpe: ${pretty(c)(generated)}")
               }
 
-              c.Expr[Column[T]](generated)
+              c.Expr[Column[T]](c.typecheck(generated))
             }
           }
         }

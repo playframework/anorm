@@ -11,7 +11,7 @@ package anorm
 private[anorm] case class TokenizedStatement(tokens: Seq[TokenGroup], names: Seq[String])
 
 private[anorm] object TokenizedStatement {
-  import scala.quoted.{ Expr, FromExpr, Quotes, Type }
+  import scala.quoted.{ Expr, Quotes, Type }
 
   /** Returns empty tokenized statement. */
   lazy val empty = TokenizedStatement(Nil, Nil)
