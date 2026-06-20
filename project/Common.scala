@@ -18,7 +18,7 @@ object Common extends AutoPlugin {
   override def projectSettings = Seq(
     organization       := "org.playframework.anorm",
     scalaVersion       := "2.13.18",
-    crossScalaVersions := Seq(scalaVersion.value, "3.4.3"),
+    crossScalaVersions := Seq(scalaVersion.value, "3.8.4"),
     scalacOptions ++= Seq("-Xfatal-warnings"),
     scalacOptions ++= {
       val v = scalaBinaryVersion.value
