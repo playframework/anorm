@@ -12,7 +12,7 @@ import acolyte.jdbc.Implicits._
 
 import anorm._
 
-import RowLists.{ stringList, longList, rowList1, rowList2, rowList3 }
+import RowLists.{ longList, rowList1, rowList2, rowList3, stringList }
 import SqlParser.scalar
 
 final class AnormSpec
