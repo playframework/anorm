@@ -8,7 +8,7 @@ import acolyte.jdbc.AcolyteDSL.withQueryResult
 import acolyte.jdbc.Implicits._
 import acolyte.jdbc.RowLists._
 
-import SqlParser.{ bool, str, int, long, get }
+import SqlParser.{ bool, get, int, long, str }
 
 final class TupleFlattenerSpec extends org.specs2.mutable.Specification {
   "Tuple flattener".title
