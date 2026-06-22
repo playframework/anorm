@@ -210,7 +210,7 @@ object ParameterMetaData extends JavaTimeParameterMetaData {
 }
 
 sealed trait JavaTimeParameterMetaData {
-  import java.time.{ Instant, LocalDate, LocalDateTime, ZonedDateTime }
+  import java.time.{ Instant, LocalDate, LocalDateTime, OffsetDateTime, ZonedDateTime }
 
   /** Parameter metadata for Java8 instant */
   implicit object InstantParameterMetaData extends ParameterMetaData[Instant] {
@@ -234,6 +234,13 @@ sealed trait JavaTimeParameterMetaData {
 
   /** Parameter metadata for Java8 zoned date/time */
   implicit object ZonedDateTimeParameterMetaData extends ParameterMetaData[ZonedDateTime] {
+
+    val sqlType  = "TIMESTAMP"
+    val jdbcType = Types.TIMESTAMP
+  }
+
+  /** Parameter metadata for Java8 offset date/time */
+  implicit object OffsetDateTimeParameterMetaData extends ParameterMetaData[OffsetDateTime] {
 
     val sqlType  = "TIMESTAMP"
     val jdbcType = Types.TIMESTAMP

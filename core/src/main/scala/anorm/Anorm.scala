@@ -8,9 +8,7 @@ import java.sql.{ Connection, PreparedStatement, ResultSet }
 
 import scala.util.{ Failure, Try }
 
-import scala.reflect.ClassTag
-
-import resource.{ managed, ManagedResource, Resource }
+import resource.{ managed, ManagedResource }
 
 /**
  * Untyped value wrapper.
@@ -56,11 +54,6 @@ object SeqParameter {
 }
 
 private[anorm] trait Sql extends WithResult {
-  private implicit val statementCls: ClassTag[PreparedStatement] =
-    statementClassTag
-
-  private implicit val resultSetCls: ClassTag[ResultSet] = resultSetClassTag
-
   private[anorm] def unsafeStatement(connection: Connection, getGeneratedKeys: Boolean = false): PreparedStatement
 
   private[anorm] def unsafeStatement(
@@ -72,29 +65,21 @@ private[anorm] trait Sql extends WithResult {
   protected final def preparedStatement(
       connection: Connection,
       getGeneratedKeys: Boolean = false
-  ): ManagedResource[PreparedStatement] = {
-    implicit val res: Resource[PreparedStatement] = StatementResource
-
+  ): ManagedResource[PreparedStatement] =
     managed(unsafeStatement(connection, getGeneratedKeys))
-  }
 
   final def preparedStatement(
       connection: Connection,
       generatedColumn: String,
       generatedColumns: Seq[String]
-  ): ManagedResource[PreparedStatement] = {
-    implicit val res: Resource[PreparedStatement] = StatementResource
-
+  ): ManagedResource[PreparedStatement] =
     managed(unsafeStatement(connection, generatedColumn, generatedColumns))
-  }
 
   /**
    * Executes this statement as query (see [[executeQuery]]) and returns result.
    */
   protected def resultSet(connection: Connection): ManagedResource[ResultSet] =
     preparedStatement(connection).flatMap { stmt =>
-      implicit val res: Resource[ResultSet] = ResultSetResource
-
       managed(stmt.executeQuery())
     }
 

@@ -12,7 +12,7 @@ import acolyte.jdbc.AcolyteDSL.withQueryResult
 import acolyte.jdbc.Implicits._
 import acolyte.jdbc.RowLists._
 
-import SqlParser.{ bool, str, int, long, get }
+import SqlParser.{ bool, get, int, long, str }
 
 final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
   "Function flattener".title
@@ -39,6 +39,7 @@ final class FunctionAdapterSpec extends org.specs2.mutable.Specification {
 
     "be applied with 3 columns to Function3" in {
       case class Foo(a: String, b: Int, c: Long)
+
       val schema = rowList3(classOf[String] -> "A", classOf[Int] -> "B", classOf[Long] -> "C")
 
       withQueryResult(schema.append("A", 2, 3L)) { implicit c: Connection =>

@@ -499,6 +499,7 @@ sealed trait ToStatementPriority0 {
    */
   implicit object dateToStatement extends ToStatement[java.util.Date] {
     val jdbcType = implicitly[ParameterMetaData[java.util.Date]].jdbcType
+
     def set(s: PreparedStatement, index: Int, date: java.util.Date): Unit =
       if (date != (null: java.util.Date)) {
         s.setTimestamp(index, new Timestamp(date.getTime))
@@ -530,6 +531,7 @@ sealed trait ToStatementPriority0 {
         s.setTimestamp(index, tsw.getTimestamp)
       } else s.setNull(index, timestampWrapper1JdbcType)
   }
+
   private val timestampWrapper1JdbcType =
     implicitly[ParameterMetaData[TimestampWrapper1]].jdbcType
 
@@ -724,7 +726,7 @@ sealed trait ToStatementPriority0 {
 }
 
 sealed trait JavaTimeToStatement {
-  import java.time.{ Instant, LocalDate, LocalDateTime, ZonedDateTime }
+  import java.time.{ Instant, LocalDate, LocalDateTime, OffsetDateTime, ZonedDateTime }
 
   /**
    * Sets a temporal instant on statement.
@@ -791,6 +793,25 @@ sealed trait JavaTimeToStatement {
     new ToStatement[ZonedDateTime] {
       def set(s: PreparedStatement, i: Int, t: ZonedDateTime): Unit =
         if (t == (null: ZonedDateTime)) s.setNull(i, meta.jdbcType)
+        else s.setTimestamp(i, Timestamp.from(t.toInstant))
+    }
+
+  /**
+   * Sets an offset date/time on statement.
+   *
+   * {{{
+   * import java.time.OffsetDateTime
+   * import anorm._
+   *
+   * SQL("SELECT * FROM Test WHERE time < {b}").on("b" -> OffsetDateTime.now)
+   * }}}
+   */
+  implicit def offsetDateTimeToStatement(implicit
+      meta: ParameterMetaData[OffsetDateTime]
+  ): ToStatement[OffsetDateTime] =
+    new ToStatement[OffsetDateTime] {
+      def set(s: PreparedStatement, i: Int, t: OffsetDateTime): Unit =
+        if (t == (null: OffsetDateTime)) s.setNull(i, meta.jdbcType)
         else s.setTimestamp(i, Timestamp.from(t.toInstant))
     }
 }

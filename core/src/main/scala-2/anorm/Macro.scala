@@ -290,6 +290,22 @@ object Macro extends MacroOptions {
    */
   def valueColumn[T <: AnyVal]: Column[T] = macro anorm.macros.ValueColumnImpl[T]
 
+  /**
+   * Returns a meta data parser for specified value class.
+   *
+   * {{{
+   * import anorm._
+   *
+   * class ValueClassType(val v: Int) extends AnyVal
+   *
+   * implicit val parameterMetaData: ParameterMetaData[ValueClassType] =
+   *   Macro.valueParameterMetaData[ValueClassType]
+   * }}}
+   *
+   * @tparam T $valueClassTParam
+   */
+  def valueParameterMetaData[T <: AnyVal]: ParameterMetaData[T] = macro anorm.macros.ValueMetaDataImpl[T]
+
   // --- ToParameter ---
 
   import anorm.macros.ToParameterListImpl

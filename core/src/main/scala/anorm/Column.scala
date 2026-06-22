@@ -613,10 +613,7 @@ object Column extends JavaTimeColumn {
     unsafe
   }
 
-  @inline private def streamBytes(in: InputStream): Either[SqlRequestError, Array[Byte]] = {
-    import resource.extractedEitherToEither
-    implicit val cls: ClassTag[InputStream] = inputStreamClassTag
-
+  @inline private def streamBytes(in: InputStream): Either[SqlRequestError, Array[Byte]] =
     managed(in)
       .acquireFor(streamToBytes(_))
       .fold(
@@ -625,7 +622,6 @@ object Column extends JavaTimeColumn {
         },
         Right(_)
       )
-  }
 
   @annotation.tailrec
   private def streamToBytes(
@@ -644,7 +640,8 @@ object Column extends JavaTimeColumn {
 }
 
 sealed trait JavaTimeColumn {
-  import java.time.{ ZonedDateTime, ZoneOffset, ZoneId, LocalDate, LocalDateTime, Instant }
+  import java.time.{ OffsetDateTime, ZonedDateTime, ZoneOffset, ZoneId, LocalDate, LocalDateTime, Instant }
+
   import Column.{ nonNull, className, timestamp => Ts }
 
   /**
@@ -771,4 +768,22 @@ sealed trait JavaTimeColumn {
    */
   implicit val columnToZonedDateTime: Column[ZonedDateTime] =
     nonNull(instantValueTo(ZonedDateTime.ofInstant(_: Instant, ZoneId.systemDefault), "Java8 ZonedDateTime"))
+
+  /**
+   * Parses column as Java8 offset date/time.
+   * Time zone offset is the one of default JVM time offset
+   * (see `java.time.ZoneId.systemDefault`).
+   *
+   * {{{
+   * import java.time.OffsetDateTime
+   *
+   * import anorm._
+   *
+   * def i(implicit con: java.sql.Connection): OffsetDateTime =
+   *   SQL("SELECT last_mod FROM tbl").
+   *     as(SqlParser.scalar[OffsetDateTime].single)
+   * }}}
+   */
+  implicit val columnToOffsetDateTime: Column[OffsetDateTime] =
+    nonNull(instantValueTo(OffsetDateTime.ofInstant(_: Instant, ZoneId.systemDefault), "Java8 OffsetDateTime"))
 }

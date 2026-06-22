@@ -5,7 +5,17 @@
 package anorm
 
 import java.sql.{ Connection, Timestamp }
-import java.time.{ Instant, LocalDate, LocalDateTime, ZoneId, ZonedDateTime }
+import java.time.{
+  Instant,
+  LocalDate,
+  LocalDateTime,
+  LocalTime,
+  OffsetDateTime,
+  OffsetTime,
+  ZoneId,
+  ZoneOffset,
+  ZonedDateTime
+}
 
 import acolyte.jdbc.AcolyteDSL._
 import acolyte.jdbc.Implicits._
@@ -194,7 +204,58 @@ final class JavaTimeColumnSpec extends Specification {
     }
   }
 
+  "Column mapped as Java8 offset date/time" should {
+    val instant = Instant.now.`with`( // As sql.Data is not nano precision
+      java.time.temporal.ChronoField.NANO_OF_SECOND,
+      0
+    )
+
+    val date = OffsetDateTime.ofInstant(instant, ZoneId.systemDefault)
+    val time = instant.toEpochMilli
+
+    "be parsed from date" in withQueryResult(dateList :+ new java.sql.Date(time)) { implicit c: Connection =>
+      SQL("SELECT d").as(scalar[OffsetDateTime].single).aka("parsed zoned date/time") must_=== date
+    }
+
+    "be parsed from time" in withQueryResult(timeList :+ new java.sql.Time(time)) { implicit c: Connection =>
+      SQL("SELECT ts").as(scalar[OffsetDateTime].single).aka("parsed zoned date/time") must_=== date
+    }
+
+    "be parsed from timestamp" in withQueryResult(timestampList :+ new java.sql.Timestamp(time)) {
+      implicit c: Connection =>
+        SQL("SELECT ts").as(scalar[OffsetDateTime].single).aka("parsed zoned date/time") must_=== date
+    }
+
+    "be parsed from timestamp with nano precision" in {
+      val instantWithNanoPrecision = Instant.parse("2021-01-06T08:45:26.441477Z")
+
+      withQueryResult(timestampList :+ java.sql.Timestamp.from(instantWithNanoPrecision)) { implicit c: Connection =>
+        SQL("SELECT ts").as(scalar[OffsetDateTime].single).aka("parsed zoned date/time") must_=== OffsetDateTime
+          .ofInstant(instantWithNanoPrecision, ZoneId.systemDefault)
+      }
+    }
+
+    "be parsed from numeric time" in withQueryResult(longList :+ time) { implicit c: Connection =>
+      SQL("SELECT time").as(scalar[OffsetDateTime].single).aka("parsed zoned date/time") must_=== date
+
+    }
+
+    "be parsed from timestamp wrapper" >> {
+      "with not null value" in withQueryResult(rowList1(classOf[TWrapper]) :+ tsw1(time)) { implicit c: Connection =>
+        SQL("SELECT ts").as(scalar[OffsetDateTime].single).aka("parsed zoned date/time") must_=== date
+      }
+
+      "with null value" in withQueryResult(rowList1(classOf[TWrapper]) :+ null.asInstanceOf[TWrapper]) {
+        implicit c: Connection =>
+          SQL("SELECT ts").as(scalar[OffsetDateTime].singleOpt).aka("parsed zoned date/time") must beNone
+      }
+    }
+  }
+
+  // ---
+
   trait TWrapper { def getTimestamp: java.sql.Timestamp }
+
   def tsw1(time: Long) = new TWrapper {
     lazy val getTimestamp = new java.sql.Timestamp(time)
   }
@@ -218,6 +279,10 @@ object JavaTimeParameterMetaDataSpec extends Specification {
       s"of type ZonedDateTime" in {
         Option(implicitly[ParameterMetaData[ZonedDateTime]].sqlType).aka("SQL type") must beSome
       }
+
+      s"of type OffsetDateTime" in {
+        Option(implicitly[ParameterMetaData[OffsetDateTime]].sqlType).aka("SQL type") must beSome
+      }
     }
   }
 }
@@ -232,7 +297,13 @@ object JavaTimeParameterSpec extends Specification {
   val LocalDate1          = LocalDate.of(2017, 1, 9)
   val LocalDate1Epoch     = LocalDate1.atStartOfDay(ZoneId.systemDefault()).toEpochSecond * 1000
   val ZonedDateTime1      = ZonedDateTime.ofInstant(Instant1, ZoneId.of("UTC"))
-  val SqlTimestamp        = ParamMeta.Timestamp
+  val OffsetDateTime1     = OffsetDateTime.ofInstant(Instant1, ZoneOffset.UTC)
+  val LocalTime1          = LocalTime.of(12, 34, 56)
+  val LocalTime1Epoch     =
+    LocalDate.ofEpochDay(0).atTime(LocalTime1).atZone(ZoneId.systemDefault()).toInstant.toEpochMilli
+  val OffsetTime1      = OffsetTime.of(LocalTime1, ZoneOffset.UTC)
+  val OffsetTime1Epoch = OffsetTime1.atDate(LocalDate.ofEpochDay(0)).toInstant.toEpochMilli
+  val SqlTimestamp     = ParamMeta.Timestamp
 
   def withJavaTimeConnection[A](ps: (String, String)*)(f: java.sql.Connection => A): A = f(
     connection(
@@ -253,6 +324,10 @@ object JavaTimeParameterSpec extends Specification {
             if t.getTime == 123456789000L =>
           1 /* case ok */
         case UpdateExecution("set-null-zoned-date-time ?", DParam(null, SqlTimestamp) :: Nil) => 1 /* case ok */
+        case UpdateExecution("set-offset-date-time ?", DParam(t: java.sql.Timestamp, SqlTimestamp) :: Nil)
+            if t.getTime == 123456789000L =>
+          1 /* case ok */
+        case UpdateExecution("set-null-offset-date-time ?", DParam(null, SqlTimestamp) :: Nil) => 1 /* case ok */
 
         case exec =>
           sys.error(s"Unexpected execution: $exec")
@@ -310,6 +385,19 @@ object JavaTimeParameterSpec extends Specification {
     "be undefined zoned date/time" in withJavaTimeConnection() { implicit c =>
       SQL("set-null-zoned-date-time {p}").on("p" -> Option.empty[ZonedDateTime]).execute() must beFalse
     }
+
+    "be offset date/time" in withJavaTimeConnection() { implicit c =>
+      SQL("set-offset-date-time {p}").on("p" -> OffsetDateTime1).execute() must beFalse
+    }
+
+    "be null offset date/time" in withJavaTimeConnection() { implicit c =>
+      SQL("set-null-offset-date-time {p}").on("p" -> null.asInstanceOf[OffsetDateTime]).execute() must beFalse
+    }
+
+    "be undefined offset date/time" in withJavaTimeConnection() { implicit c =>
+      SQL("set-null-offset-date-time {p}").on("p" -> Option.empty[OffsetDateTime]).execute() must beFalse
+    }
+
   }
 
   "Java time parameter in order" should {
@@ -327,6 +415,10 @@ object JavaTimeParameterSpec extends Specification {
 
     "be one zoned date/time" in withJavaTimeConnection() { implicit c =>
       SQL("set-zoned-date-time {p}").onParams(pv(ZonedDateTime1)).execute() must beFalse
+    }
+
+    "be one offset date/time" in withJavaTimeConnection() { implicit c =>
+      SQL("set-offset-date-time {p}").onParams(pv(OffsetDateTime1)).execute() must beFalse
     }
   }
 

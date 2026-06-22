@@ -4,7 +4,7 @@
 
 package anorm.macros
 
-import scala.quoted.{ Expr, Quotes, Type }
+import scala.quoted.{ Quotes, Type }
 
 private[anorm] object Inspect:
 
