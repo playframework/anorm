@@ -42,8 +42,6 @@ val licensing = Seq(
   ),
 )
 
-ThisBuild / resolvers ++= Seq("Tatami Snapshots".at("https://raw.github.com/cchantep/tatami/master/snapshots"))
-
 ThisBuild / mimaFailOnNoPrevious := false
 
 lazy val `anorm-tokenizer` = project
@@ -69,48 +67,6 @@ lazy val `anorm-tokenizer` = project
 
 // ---
 
-val armShading = Seq(
-  libraryDependencies += ("com.jsuereth" %% "scala-arm" % "2.1-SNAPSHOT").cross(CrossVersion.for3Use2_13),
-  assembly / test                        := {},
-  assembly / assemblyOption ~= {
-    _.withIncludeScala(false) // java libraries shouldn't include scala
-  },
-  (assembly / assemblyJarName) := {
-    CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((maj, min)) => s"anorm_${maj}.${min}-${version.value}.jar"
-      case _                => "anorm.jar"
-    }
-  },
-  assembly / assemblyShadeRules     := Seq.empty,
-  (assembly / assemblyExcludedJars) := (assembly / fullClasspath).value.filter {
-    !_.data.getName.startsWith("scala-arm")
-  },
-  (assembly / assemblyMergeStrategy) := {
-    val tokPrefixes =
-      Seq("PercentToken", "Show", "StatementToken", "StringShow", "StringToken", "TokenGroup", "TokenizedStatement")
-
-    {
-      case path if tokPrefixes.exists(p => path.startsWith(s"anorm/$p")) =>
-        MergeStrategy.discard
-
-      case x =>
-        val oldStrategy = (assembly / assemblyMergeStrategy).value
-        oldStrategy(x)
-    }
-  },
-  pomPostProcess := {
-    val excludeGroups = Seq("com.jsuereth", "com.sksamuel.scapegoat")
-
-    XmlUtil.transformPomDependencies { d =>
-      (d \ "groupId").headOption.collect {
-        case g if !excludeGroups.contains(g.text) => d
-      }
-    }
-  },
-  makePom                := makePom.dependsOn(assembly).value,
-  (Compile / packageBin) := assembly.value
-)
-
 lazy val parserCombinatorsVer = Def.setting[String] {
   CrossVersion.partialVersion(scalaVersion.value) match {
     case Some((2, n)) => "1.1.2"
@@ -126,6 +82,12 @@ lazy val coreMimaFilter: ProblemFilter = {
 
   case ReversedMissingMethodProblem(n) =>
     !n.fullName.contains("OffsetDateTime")
+
+  case IncompatibleResultTypeProblem(old, _) =>
+    !old.toString.contains("Lresource.")
+
+  case IncompatibleMethTypeProblem(old, _) =>
+    !old.toString.contains("Lresource.")
 
   case _ => true
 }
@@ -236,7 +198,7 @@ lazy val `anorm-core` = project
           acolyte
         ) ++ specs2Test
       },
-    ) ++ armShading ++ licensing
+    ) ++ licensing
   )
   .dependsOn(`anorm-tokenizer`)
 

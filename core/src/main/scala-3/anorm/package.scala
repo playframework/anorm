@@ -6,17 +6,7 @@ package anorm
 
 private[anorm] object TopLevel extends TopLevelDefinitions
 
-export TopLevel.{
-  TimestampWrapper1,
-  TimestampWrapper2,
-  StringWrapper2,
-  SQL,
-  StatementResource,
-  statementClassTag,
-  resultSetClassTag,
-  ResultSetResource,
-  features
-}
+export TopLevel.{ TimestampWrapper1, TimestampWrapper2, StringWrapper2, SQL, features }
 
 implicit class SqlStringInterpolation(val sc: StringContext) extends AnyVal {
   def SQL(args: ParameterValue*) = {

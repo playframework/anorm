@@ -613,10 +613,7 @@ object Column extends JavaTimeColumn {
     unsafe
   }
 
-  @inline private def streamBytes(in: InputStream): Either[SqlRequestError, Array[Byte]] = {
-    import resource.extractedEitherToEither
-    implicit val cls: ClassTag[InputStream] = inputStreamClassTag
-
+  @inline private def streamBytes(in: InputStream): Either[SqlRequestError, Array[Byte]] =
     managed(in)
       .acquireFor(streamToBytes(_))
       .fold(
@@ -625,7 +622,6 @@ object Column extends JavaTimeColumn {
         },
         Right(_)
       )
-  }
 
   @annotation.tailrec
   private def streamToBytes(

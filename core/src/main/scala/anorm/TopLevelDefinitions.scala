@@ -7,10 +7,9 @@ package anorm
 import java.util.StringTokenizer
 
 import java.lang.reflect.InvocationTargetException
-import java.sql.{ PreparedStatement, ResultSet, SQLException }
+import java.sql.SQLException
 
 import scala.jdk.CollectionConverters._
-import scala.reflect.ClassTag
 
 private[anorm] trait TopLevelDefinitions extends PackageCompat {
 
@@ -178,27 +177,6 @@ private[anorm] trait TopLevelDefinitions extends PackageCompat {
       }
     }
   }
-
-  // Optimized resource typeclass not using reflection
-  object StatementResource extends resource.Resource[PreparedStatement] {
-    def close(stmt: PreparedStatement) = stmt.close()
-
-    @deprecated("Deprecated by Scala-ARM upgrade", "2.5.4")
-    def fatalExceptions = Seq[Class[_]](classOf[Exception])
-  }
-
-  private[anorm] lazy val statementClassTag =
-    implicitly[ClassTag[PreparedStatement]]
-
-  // Optimized resource typeclass not using reflection
-  object ResultSetResource extends resource.Resource[ResultSet] {
-    def close(rs: ResultSet) = rs.close()
-
-    @deprecated("Deprecated by Scala-ARM upgrade", "2.5.4")
-    def fatalExceptions = Seq[Class[_]](classOf[Exception])
-  }
-
-  private[anorm] lazy val resultSetClassTag = implicitly[ClassTag[ResultSet]]
 
   /** Activable features */
   object features {
