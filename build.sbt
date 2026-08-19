@@ -237,7 +237,7 @@ lazy val `anorm-akka` = project
   )
   .dependsOn(`anorm-core`)
 
-lazy val pekkoVer = Def.setting[String]("1.6.0")
+lazy val pekkoVer = Def.setting[String]("1.7.0")
 
 lazy val `anorm-pekko` = project
   .in(file("pekko"))
