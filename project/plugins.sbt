@@ -12,7 +12,7 @@ addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "2.5.0")
 
 addSbtPlugin("cchantep" % "sbt-scaladoc-compiler" % "0.9")
 
-addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.14.7")
+addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.14.8")
 
 addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.6.2")
 
