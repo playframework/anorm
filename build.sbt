@@ -92,7 +92,7 @@ lazy val coreMimaFilter: ProblemFilter = {
   case _ => true
 }
 
-lazy val xmlVer = "2.4.0"
+lazy val xmlVer = "2.5.0"
 
 lazy val `anorm-core` = project
   .in(file("core"))
