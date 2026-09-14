@@ -162,6 +162,10 @@ lazy val `anorm-core` = project
         ProblemFilters.exclude[DirectMissingMethodProblem]( // private
           "anorm.Sql.asTry"
         ),
+        // scala-arm resource management was replaced by Anorm's internal implementation
+        ProblemFilters.exclude[DirectMissingMethodProblem]("anorm.Sql.preparedStatement"),
+        ProblemFilters.exclude[DirectMissingMethodProblem]("anorm.Sql.resultSet"),
+        ProblemFilters.exclude[ReversedMissingMethodProblem]("anorm.WithResult.resultSet"),
         ProblemFilters.exclude[ReversedMissingMethodProblem]("anorm.JavaTimeToStatement.localDateToStatement"),
         coreMimaFilter,
         // was deprecated
@@ -177,6 +181,7 @@ lazy val `anorm-core` = project
         ProblemFilters.exclude[MissingClassProblem]("anorm.JodaParameterMetaData$JodaLocalDateTimeMetaData$"),
         ProblemFilters.exclude[MissingClassProblem]("anorm.JodaParameterMetaData$JodaInstantMetaData$"),
         ProblemFilters.exclude[MissingClassProblem]("anorm.JodaParameterMetaData$JodaLocalDateMetaData$"),
+        ProblemFilters.exclude[MissingTypesProblem]("anorm.ToStatementConversions"),
         ProblemFilters.exclude[MissingTypesProblem]("anorm.Column$"),
         ProblemFilters.exclude[MissingTypesProblem]("anorm.ToStatement$"),
         ProblemFilters.exclude[DirectMissingMethodProblem]("anorm.Column.columnToJodaLocalDate"),
@@ -187,6 +192,10 @@ lazy val `anorm-core` = project
         ProblemFilters.exclude[DirectMissingMethodProblem]("anorm.ToStatement.jodaLocalDateTimeToStatement"),
         ProblemFilters.exclude[DirectMissingMethodProblem]("anorm.ToStatement.jodaLocalDateToStatement"),
         ProblemFilters.exclude[DirectMissingMethodProblem]("anorm.ToStatement.jodaInstantToStatement"),
+        ProblemFilters.exclude[DirectMissingMethodProblem]("anorm.ToStatementConversions.jodaDateTimeToStatement"),
+        ProblemFilters.exclude[DirectMissingMethodProblem]("anorm.ToStatementConversions.jodaLocalDateTimeToStatement"),
+        ProblemFilters.exclude[DirectMissingMethodProblem]("anorm.ToStatementConversions.jodaLocalDateToStatement"),
+        ProblemFilters.exclude[DirectMissingMethodProblem]("anorm.ToStatementConversions.jodaInstantToStatement"),
         ProblemFilters.exclude[MissingClassProblem]("anorm.Compat"),
         ProblemFilters.exclude[MissingClassProblem]("anorm.Compat$")
       ),
