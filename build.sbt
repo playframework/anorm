@@ -70,7 +70,7 @@ lazy val `anorm-tokenizer` = project
 lazy val parserCombinatorsVer = Def.setting[String] {
   CrossVersion.partialVersion(scalaVersion.value) match {
     case Some((2, n)) => "1.1.2"
-    case _            => "2.4.0"
+    case _            => "2.5.0"
   }
 }
 
