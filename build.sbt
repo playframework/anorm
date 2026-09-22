@@ -320,7 +320,7 @@ lazy val `anorm-joda` = project
     Seq(
       mimaPreviousArtifacts := Set.empty,
       libraryDependencies ++= Seq(
-        "joda-time"      % "joda-time"    % "2.14.3",
+        "joda-time"      % "joda-time"    % "2.14.4",
         "org.joda"       % "joda-convert" % "3.0.1",
         "com.h2database" % "h2"           % "2.5.250" % Test,
         acolyte
