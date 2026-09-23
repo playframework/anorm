@@ -252,7 +252,7 @@ private[anorm] object ToParameterListImpl {
                     val append: Function2[Expr[t], Expr[Builder], Expr[Builder]] = { (v, buf) =>
                       '{
                         $buf += NamedParameter
-                          .namedWithString($pname -> $v)(ToParameterValue($toSql, $toStmt))
+                          .namedWithString(($pname, $v))(ToParameterValue($toSql, $toStmt))
                       }
                     }
 
