@@ -14,22 +14,22 @@ object Publish {
     Test / publishArtifact := false,
     pomIncludeRepository   := { _ => false },
     autoAPIMappings        := true,
-    apiURL                 := Some(url(s"$siteUrl/unidoc/anorm/")),
+    apiURL                 := Some(uri(s"$siteUrl/unidoc/anorm/")),
     pomPostProcess         := transformPomDependencies { (dep: XmlElem) =>
       if ((dep \ "groupId").text == "com.sksamuel.scapegoat") {
         Option.empty[XmlElem] // discard
       } else Some(dep)
     },
     licenses             := Seq(License.Apache2),
-    homepage             := Some(url(siteUrl)),
+    homepage             := Some(uri(siteUrl)),
     organizationName     := "The Play Framework Project",
-    organizationHomepage := Some(url("https://playframework.com/")),
+    organizationHomepage := Some(uri("https://playframework.com/")),
     developers           := List(
       Developer(
         id = "playframework",
         name = "The Play Framework Contributors",
         email = "contact@playframework.com",
-        url = url("https://github.com/playframework")
+        url = uri("https://github.com/playframework")
       )
     )
   )
