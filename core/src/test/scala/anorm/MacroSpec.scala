@@ -13,7 +13,6 @@ import acolyte.jdbc.{ DefinedParameter => DParam, ParameterMetaData => ParamMeta
 import acolyte.jdbc.AcolyteDSL.{ connection, handleStatement, withQueryResult }
 import acolyte.jdbc.Implicits._
 
-import org.specs2.matcher.TypecheckMatchers._
 import org.specs2.specification.core.Fragments
 
 import Macro.ColumnNaming
@@ -22,7 +21,7 @@ import SqlParser.scalar
 final class MacroSpec extends org.specs2.mutable.Specification {
   "Macro".title
 
-  import TestUtils.typecheck
+  import TestUtils.{ failWith, typecheck }
 
   val barRow1 = RowLists.rowList1(classOf[Int] -> "v")
 
