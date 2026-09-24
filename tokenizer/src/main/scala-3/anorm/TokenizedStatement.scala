@@ -38,7 +38,7 @@ private[anorm] object TokenizedStatement {
       ti: Iterator[String],
       tks: List[StatementToken],
       parts: Seq[String],
-      ps: Seq[T with Show],
+      ps: Seq[T & Show],
       gs: Seq[TokenGroup],
       ns: Seq[String],
       m: Map[String, T]
