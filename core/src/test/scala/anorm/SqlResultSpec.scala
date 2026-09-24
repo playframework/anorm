@@ -407,8 +407,8 @@ final class SqlResultSpec extends org.specs2.mutable.Specification with H2Databa
           .on("param" -> "test-proc-2")
           .executeQuery()
           .statementWarning
-          .aka("statement warning") must beSome.which {
-          _.getMessage.aka("message") must_=== "Warning for test-proc-2"
+          .aka("statement warning") must beSome[java.sql.SQLWarning].which { warning =>
+          warning.getMessage.aka("message") must_=== "Warning for test-proc-2"
         }
     }
   }

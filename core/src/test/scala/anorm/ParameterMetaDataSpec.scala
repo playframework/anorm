@@ -22,12 +22,10 @@ import java.lang.{
 }
 import java.sql.Timestamp
 
-import org.specs2.matcher.TypecheckMatchers._
-
 final class ParameterMetaDataSpec extends org.specs2.mutable.Specification {
   "Parameter metadata".title
 
-  import TestUtils.typecheck
+  import TestUtils.{ failWith, typecheck }
 
   "Metadata" should {
     "not be resolved" in {

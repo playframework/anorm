@@ -16,21 +16,22 @@ final class CursorSpec extends org.specs2.mutable.Specification {
     }
 
     "be returned for one row" in {
-      Cursor((stringList :+ "A").resultSet, ColumnAliaser.empty).aka("cursor") must beSome.which { cur =>
+      Cursor((stringList :+ "A").resultSet, ColumnAliaser.empty).aka("cursor") must beSome[Cursor].which { cur =>
         (cur.row[String]("str").aka("row") must_=== "A").and(cur.next.aka("after first") must beNone)
       }
     }
 
     "be return for three rows" in {
-      Cursor((stringList :+ "red" :+ "green" :+ "blue").resultSet, ColumnAliaser.empty).aka("cursor") must beSome
+      Cursor((stringList :+ "red" :+ "green" :+ "blue").resultSet, ColumnAliaser.empty)
+        .aka("cursor") must beSome[Cursor]
         .which { first =>
           (first
             .row[String]("str")
-            .aka("row #1") must_=== "red").and(first.next.aka("after first") must beSome.which { snd =>
-            (snd.row[String]("str").aka("row #2") must_=== "green").and(snd.next.aka("after second") must beSome.which {
-              third =>
+            .aka("row #1") must_=== "red").and(first.next.aka("after first") must beSome[Cursor].which { snd =>
+            (snd.row[String]("str").aka("row #2") must_=== "green")
+              .and(snd.next.aka("after second") must beSome[Cursor].which { third =>
                 (third.row[String]("str").aka("row #1") must_=== "blue").and(third.next.aka("after third") must beNone)
-            })
+              })
           })
         }
     }
