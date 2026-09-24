@@ -293,8 +293,8 @@ object Sql { // TODO: Rename to SQL
   ): Try[(String, Seq[(Int, ParameterValue)])] =
     (tok.headOption, ns.headOption.flatMap(ps.lift(_))) match {
       case (Some(TokenGroup(pr, Some(_))), Some(p)) => {
-        val (frag, c): (String, Int) = p.toSql
-        val prepared                 = toSql(pr, buf) ++= frag
+        val (frag, c) = p.toSql
+        val prepared  = toSql(pr, buf) ++= frag
 
         query(tok.tail, ns.tail, ps, i + c, prepared, (i, p) :: vs)
       }

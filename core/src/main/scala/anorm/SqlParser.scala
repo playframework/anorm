@@ -86,7 +86,7 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    *       "sqlArrayOfString")).map(SqlParser.flatten).single)
    * }}}
    */
-  def array[T](columnName: String)(implicit c: Column[Array[T]]): RowParser[Array[T]] = get[Array[T]](columnName)(c)
+  def array[T](columnName: String)(implicit c: Column[Array[T]]): RowParser[Array[T]] = get[Array[T]](columnName)
 
   /**
    * Parses specified array column.
@@ -102,7 +102,7 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    * }}}
    */
   def array[T](columnPosition: Int)(implicit c: Column[Array[T]]): RowParser[Array[T]] =
-    get[Array[T]](columnPosition)(c)
+    get[Array[T]](columnPosition)
 
   /**
    * Parses specified column as float.
@@ -117,7 +117,7 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    * }}}
    */
   def float(columnName: String)(implicit c: Column[Float]): RowParser[Float] =
-    get[Float](columnName)(c)
+    get[Float](columnName)
 
   /**
    * Parses specified column as float.
@@ -133,7 +133,7 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    * }}}
    */
   def float(columnPosition: Int)(implicit c: Column[Float]): RowParser[Float] =
-    get[Float](columnPosition)(c)
+    get[Float](columnPosition)
 
   /**
    * Parses specified column as string.
@@ -148,7 +148,7 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    * }}}
    */
   def str(columnName: String)(implicit c: Column[String]): RowParser[String] =
-    get[String](columnName)(c)
+    get[String](columnName)
 
   /**
    * Parses specified column as string.
@@ -164,7 +164,7 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    * }}}
    */
   def str(columnPosition: Int)(implicit c: Column[String]): RowParser[String] =
-    get[String](columnPosition)(c)
+    get[String](columnPosition)
 
   /**
    * Parses specified column as binary stream.
@@ -181,7 +181,7 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    * }}}
    */
   def binaryStream(columnName: String)(implicit c: Column[InputStream]): RowParser[InputStream] =
-    get[InputStream](columnName)(c)
+    get[InputStream](columnName)
 
   /**
    * Parses specified column as binary stream.
@@ -198,7 +198,7 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    * }}}
    */
   def binaryStream(columnPosition: Int)(implicit c: Column[InputStream]): RowParser[InputStream] =
-    get[InputStream](columnPosition)(c)
+    get[InputStream](columnPosition)
 
   /**
    * Parses specified column as boolean.
@@ -212,7 +212,7 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    *       map(SqlParser.flatten).single)
    * }}}
    */
-  def bool(columnName: String)(implicit c: Column[Boolean]): RowParser[Boolean] = get[Boolean](columnName)(c)
+  def bool(columnName: String)(implicit c: Column[Boolean]): RowParser[Boolean] = get[Boolean](columnName)
 
   /**
    * Parses specified column as boolean.
@@ -227,7 +227,7 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    *       map(SqlParser.flatten).single)
    * }}}
    */
-  def bool(columnPosition: Int)(implicit c: Column[Boolean]): RowParser[Boolean] = get[Boolean](columnPosition)(c)
+  def bool(columnPosition: Int)(implicit c: Column[Boolean]): RowParser[Boolean] = get[Boolean](columnPosition)
 
   /**
    * Parses specified column as byte.
@@ -242,7 +242,7 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    * }}}
    */
   def byte(columnName: String)(implicit c: Column[Byte]): RowParser[Byte] =
-    get[Byte](columnName)(c)
+    get[Byte](columnName)
 
   /**
    * Parses specified column as byte.
@@ -258,7 +258,7 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    * }}}
    */
   def byte(columnPosition: Int)(implicit c: Column[Byte]): RowParser[Byte] =
-    get[Byte](columnPosition)(c)
+    get[Byte](columnPosition)
 
   /**
    * Parses specified column as binary stream.
@@ -273,7 +273,7 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    * }}}
    */
   def byteArray(columnName: String)(implicit c: Column[Array[Byte]]): RowParser[Array[Byte]] =
-    get[Array[Byte]](columnName)(c)
+    get[Array[Byte]](columnName)
 
   /**
    * Parses specified column as binary stream.
@@ -289,7 +289,7 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    * }}}
    */
   def byteArray(columnPosition: Int)(implicit c: Column[Array[Byte]]): RowParser[Array[Byte]] =
-    get[Array[Byte]](columnPosition)(c)
+    get[Array[Byte]](columnPosition)
 
   /**
    * Parses specified column as double.
@@ -303,7 +303,7 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    *       map(SqlParser.flatten).single)
    * }}}
    */
-  def double(columnName: String)(implicit c: Column[Double]): RowParser[Double] = get[Double](columnName)(c)
+  def double(columnName: String)(implicit c: Column[Double]): RowParser[Double] = get[Double](columnName)
 
   /**
    * Parses specified column as double.
@@ -318,7 +318,7 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    *       map(SqlParser.flatten).single)
    * }}}
    */
-  def double(columnPosition: Int)(implicit c: Column[Double]): RowParser[Double] = get[Double](columnPosition)(c)
+  def double(columnPosition: Int)(implicit c: Column[Double]): RowParser[Double] = get[Double](columnPosition)
 
   /**
    * Parses specified column as short.
@@ -333,7 +333,7 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    * }}}
    */
   def short(columnName: String)(implicit c: Column[Short]): RowParser[Short] =
-    get[Short](columnName)(c)
+    get[Short](columnName)
 
   /**
    * Parses specified column as short.
@@ -349,7 +349,7 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    * }}}
    */
   def short(columnPosition: Int)(implicit c: Column[Short]): RowParser[Short] =
-    get[Short](columnPosition)(c)
+    get[Short](columnPosition)
 
   /**
    * Parses specified column as integer.
@@ -364,7 +364,7 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    * }}}
    */
   def int(columnName: String)(implicit c: Column[Int]): RowParser[Int] =
-    get[Int](columnName)(c)
+    get[Int](columnName)
 
   /**
    * Parses specified column as integer.
@@ -380,7 +380,7 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    * }}}
    */
   def int(columnPosition: Int)(implicit c: Column[Int]): RowParser[Int] =
-    get[Int](columnPosition)(c)
+    get[Int](columnPosition)
 
   /**
    * Parses specified array column as list.
@@ -394,7 +394,7 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    *     map(SqlParser.flatten).single)
    * }}}
    */
-  def list[T](columnName: String)(implicit c: Column[List[T]]): RowParser[List[T]] = get[List[T]](columnName)(c)
+  def list[T](columnName: String)(implicit c: Column[List[T]]): RowParser[List[T]] = get[List[T]](columnName)
 
   /**
    * Parses specified array column as list.
@@ -409,7 +409,7 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    *     map(SqlParser.flatten).single)
    * }}}
    */
-  def list[T](columnPosition: Int)(implicit c: Column[List[T]]): RowParser[List[T]] = get[List[T]](columnPosition)(c)
+  def list[T](columnPosition: Int)(implicit c: Column[List[T]]): RowParser[List[T]] = get[List[T]](columnPosition)
 
   /**
    * Parses specified column as long.
@@ -424,7 +424,7 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    * }}}
    */
   def long(columnName: String)(implicit c: Column[Long]): RowParser[Long] =
-    get[Long](columnName)(c)
+    get[Long](columnName)
 
   /**
    * Parses specified column as long.
@@ -440,7 +440,7 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    * }}}
    */
   def long(columnPosition: Int)(implicit c: Column[Long]): RowParser[Long] =
-    get[Long](columnPosition)(c)
+    get[Long](columnPosition)
 
   /**
    * Parses specified column as date.
@@ -455,7 +455,7 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    * }}}
    */
   def date(columnName: String)(implicit c: Column[Date]): RowParser[Date] =
-    get[Date](columnName)(c)
+    get[Date](columnName)
 
   /**
    * Parses specified column as date.
@@ -471,7 +471,7 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
    * }}}
    */
   def date(columnPosition: Int)(implicit c: Column[Date]): RowParser[Date] =
-    get[Date](columnPosition)(c)
+    get[Date](columnPosition)
 
   /**
    * Returns row parser for column with given `name`.
@@ -540,10 +540,16 @@ object SqlParser extends FunctionAdapter with DeprecatedSqlParser {
 @deprecated("Do not use these combinators", "2.5.4")
 sealed trait DeprecatedSqlParser { _parser: SqlParser.type =>
 
+  private def getWithColumn[T](column: String, selected: Column[T]): RowParser[T] = {
+    implicit val c: Column[T] = selected
+
+    get[T](column)
+  }
+
   @deprecated("Use `matches[T]`", "2.5.4")
   @SuppressWarnings(Array("AsInstanceOf"))
   def matches[TT: Column, T <: TT](column: String, value: T)(implicit c: Column[TT]): RowParser[Boolean] =
-    get[TT](column)(c).?.map(_.fold(false) {
+    getWithColumn(column, c).?.map(_.fold(false) {
       _.asInstanceOf[T] == value
     })
 

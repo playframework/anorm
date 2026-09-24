@@ -59,7 +59,7 @@ sealed trait PGJson {
    * }}}
    */
   def asJson[T](value: T)(implicit w: Writes[T]): ParameterValue =
-    anorm.postgresql.PGUtil.asJson[T](value)(w)
+    anorm.postgresql.PGUtil.asJson[T](value)
 
   /**
    * Sets an optional value as a JSON parameters.

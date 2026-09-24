@@ -75,14 +75,6 @@ object Common extends AutoPlugin {
         )
       }
     },
-    scalacOptions ++= {
-      if (scalaBinaryVersion.value == "3" && !scalaVersion.value.startsWith("3.3.")) {
-        Seq(
-          "-Wconf:msg=.*Implicit parameters should be provided with.*:s",
-          "-Wconf:msg=.*Type ascriptions after patterns other than.*:s"
-        )
-      } else Seq.empty
-    },
     Compile / console / scalacOptions ~= {
       _.filterNot { opt => opt.startsWith("-X") || opt.startsWith("-Y") }
     },

@@ -92,7 +92,7 @@ trait Row {
    * }}}
    */
   def apply[B](name: String)(implicit c: Column[B]): B =
-    unsafeGet(SqlParser.get(name)(c))
+    unsafeGet(SqlParser.get[B](name))
 
   /**
    * Returns parsed column.
@@ -109,7 +109,7 @@ trait Row {
    * }}}
    */
   def apply[B](position: Int)(implicit c: Column[B]): B =
-    unsafeGet(SqlParser.get(position)(c))
+    unsafeGet(SqlParser.get[B](position))
 
   @inline def unsafeGet[T](rowparser: => RowParser[T]): T =
     rowparser(this) match {
