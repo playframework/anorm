@@ -77,7 +77,7 @@ private[anorm] trait SqlQueryCompat { query: SqlQuery =>
   def fold[T](z: => T, aliaser: ColumnAliaser)(
       op: (T, Row) => T
   )(using connection: Connection): Either[List[Throwable], T] =
-    query.asSimple.fold[T](z, aliaser)(op)(connection)
+    query.asSimple.fold[T](z, aliaser)(op)(using connection)
 
   /**
    * Aggregates over part of or the while row stream,
@@ -92,7 +92,7 @@ private[anorm] trait SqlQueryCompat { query: SqlQuery =>
   def foldWhile[T](z: => T, aliaser: ColumnAliaser)(
       op: (T, Row) => (T, Boolean)
   )(using connection: Connection): Either[List[Throwable], T] =
-    query.asSimple.foldWhile[T](z, aliaser)(op)(connection)
+    query.asSimple.foldWhile[T](z, aliaser)(op)(using connection)
 
   /**
    * Processes all or some rows from current result.
@@ -139,7 +139,7 @@ private[anorm] trait SqlQueryCompat { query: SqlQuery =>
   def withResult[T](op: Option[Cursor] => T, aliaser: ColumnAliaser)(implicit
       connection: Connection
   ): Either[List[Throwable], T] =
-    query.asSimple.withResult[T](op, aliaser)(connection)
+    query.asSimple.withResult[T](op, aliaser)(using connection)
 
   /**
    * Converts this query result as `T`, using parser.
@@ -158,7 +158,7 @@ private[anorm] trait SqlQueryCompat { query: SqlQuery =>
    */
   def asTry[T](parser: ResultSetParser[T], aliaser: ColumnAliaser = ColumnAliaser.empty)(implicit
       connection: Connection
-  ): Try[T] = query.asSimple.asTry[T](parser, aliaser)(connection)
+  ): Try[T] = query.asSimple.asTry[T](parser, aliaser)(using connection)
 
   /**
    * Executes this SQL statement.

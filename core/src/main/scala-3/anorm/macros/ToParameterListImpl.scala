@@ -229,12 +229,12 @@ private[anorm] object ToParameterListImpl {
                             '{
                               val meta: ParameterMetaData[inner] = _root_.anorm.Macro.valueParameterMetaData[inner]
 
-                              ToStatement.optionToStatement[inner]($innerToStmt, meta)
+                              ToStatement.optionToStatement[inner](using $innerToStmt, meta)
                             }
 
                           case Some(meta) =>
                             '{
-                              ToStatement.optionToStatement[inner]($innerToStmt, $meta)
+                              ToStatement.optionToStatement[inner](using $innerToStmt, $meta)
                             }
                         }
                       }
@@ -252,7 +252,7 @@ private[anorm] object ToParameterListImpl {
                     val append: Function2[Expr[t], Expr[Builder], Expr[Builder]] = { (v, buf) =>
                       '{
                         $buf += NamedParameter
-                          .namedWithString(($pname, $v))(ToParameterValue($toSql, $toStmt))
+                          .namedWithString(($pname, $v))(using ToParameterValue(using $toSql, $toStmt))
                       }
                     }
 

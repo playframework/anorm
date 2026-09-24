@@ -288,7 +288,7 @@ object Macro extends MacroOptions with macros.ValueColumn with macros.ValueToSta
 
   private def namedParserImpl[A](using q: Quotes, tpe: Type[A]): Expr[RowParser[A]] = {
     parserImpl[A](q) { [T] => (_: Type[T]) ?=> (col: Expr[Column[T]], n: String, _: Int) =>
-      '{ SqlParser.get[T](${ Expr(n) })($col) }
+      '{ SqlParser.get[T](${ Expr(n) })(using $col) }
     }
   }
 
@@ -296,7 +296,7 @@ object Macro extends MacroOptions with macros.ValueColumn with macros.ValueToSta
       naming: Expr[ColumnNaming]
   )(using q: Quotes, tpe: Type[A], colNme: Type[ColumnNaming]): Expr[RowParser[A]] = {
     parserImpl[A](q) { [T] => (_: Type[T]) ?=> (col: Expr[Column[T]], n: String, _: Int) =>
-      '{ SqlParser.get[T]($naming(${ Expr(n) }))($col) }
+      '{ SqlParser.get[T]($naming(${ Expr(n) }))(using $col) }
     }
   }
 
@@ -341,7 +341,7 @@ object Macro extends MacroOptions with macros.ValueColumn with macros.ValueToSta
           case Some(n) => {
             val cn = naming(Expr(n))
 
-            '{ SqlParser.get[T]($cn)($col) }
+            '{ SqlParser.get[T]($cn)(using $col) }
           }
 
           case _ =>
@@ -353,7 +353,7 @@ object Macro extends MacroOptions with macros.ValueColumn with macros.ValueToSta
 
   private def offsetParserImpl[A](offset: Expr[Int])(using q: Quotes, tpe: Type[A]): Expr[RowParser[A]] = {
     parserImpl[A](q) { [T] => (_: Type[T]) ?=> (col: Expr[Column[T]], _: String, i: Int) =>
-      '{ SqlParser.get[T]($offset + ${ Expr(i + 1) })($col) }
+      '{ SqlParser.get[T]($offset + ${ Expr(i + 1) })(using $col) }
     }
   }
 

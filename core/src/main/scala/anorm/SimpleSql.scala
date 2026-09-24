@@ -84,7 +84,7 @@ case class SimpleSql[T](
       .query(sql.stmt.tokens, sql.paramsInitialOrder, params, 0, new StringBuilder(), List.empty[(Int, ParameterValue)])
       .get
 
-    val (psql, vs): (String, Seq[(Int, ParameterValue)]) = unsafe
+    val (psql, vs) = unsafe
 
     val stmt = prep(connection, psql)
 

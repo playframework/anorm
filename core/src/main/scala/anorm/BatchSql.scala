@@ -43,7 +43,7 @@ sealed trait BatchSql {
       val m = checkedMap(
         sql.paramsInitialOrder
           .zip(args)
-          .foldLeft(Seq.empty[NamedParameter])((ps, t) => ps :+ implicitly[NamedParameter](t))
+          .foldLeft(Seq.empty[NamedParameter])((ps, t) => ps :+ NamedParameter(t._1, t._2))
       )
 
       copy(params = this.params :+ m)
@@ -67,7 +67,7 @@ sealed trait BatchSql {
         checkedMap(
           sql.paramsInitialOrder
             .zip(x)
-            .foldLeft(Seq.empty[NamedParameter])((ps, t) => ps :+ implicitly[NamedParameter](t))
+            .foldLeft(Seq.empty[NamedParameter])((ps, t) => ps :+ NamedParameter(t._1, t._2))
         )
       )
 
@@ -116,7 +116,7 @@ sealed trait BatchSql {
 
     (statement, pm.headOption) match {
       case (null, Some(ps)) => { // First with parameters
-        val (psql, vs): (String, Seq[(Int, ParameterValue)]) = unsafe(ps)
+        val (psql, vs) = unsafe(ps)
 
         val stmt =
           if (getGeneratedKeys) con.prepareStatement(psql, java.sql.Statement.RETURN_GENERATED_KEYS)
@@ -129,7 +129,7 @@ sealed trait BatchSql {
       }
 
       case (null, _ /*None*/ ) => { // First with no parameter
-        val (psql, _): (String, Seq[(Int, ParameterValue)]) = unsafe(Map.empty)
+        val (psql, _) = unsafe(Map.empty)
 
         val stmt =
           if (getGeneratedKeys) con.prepareStatement(psql, java.sql.Statement.RETURN_GENERATED_KEYS)
