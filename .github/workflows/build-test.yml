@@ -28,8 +28,8 @@ jobs:
     uses: playframework/.github/.github/workflows/cmd.yml@v4
     with:
       java: 17
-      scala: 2.13.x, 3.x
-      cmd: sbt ++$MATRIX_SCALA docs/test
+      scala: 2.13.x, 3.3.x, 3.9.x, 3.next
+      cmd: sbt -Dscala.version=$MATRIX_SCALA docs/test
 
   tests:
     name: Tests
@@ -40,8 +40,8 @@ jobs:
     uses: playframework/.github/.github/workflows/cmd.yml@v4
     with:
       java: 17
-      scala: 2.13.x, 3.x
-      cmd: 'sbt ";++$MATRIX_SCALA ;publishLocal ;test"'
+      scala: 2.13.x, 3.3.x, 3.9.x, 3.next
+      cmd: "sbt -Dscala.version=$MATRIX_SCALA ';publishLocal;test'"
 
   finish:
     name: Finish

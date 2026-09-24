@@ -15,10 +15,26 @@ object Common extends AutoPlugin {
 
   val previousVersion: Option[String] = Some("2.6.10")
 
+  val scala213Version   = "2.13.18"
+  val scala3Version     = "3.3.8"
+  val scala39LTSVersion = "3.9.0"
+  val scala3NextVersion = "3.10.0-RC2"
+
+  val publishedScalaVersions = Seq(scala213Version, scala3Version)
+
+  private val scalaVersionAliases = Map(
+    "2.13.x" -> scala213Version,
+    "3.3.x"  -> scala3Version,
+    "3.9.x"  -> scala39LTSVersion,
+    "3.next" -> scala3NextVersion,
+  )
+
+  def resolveScalaVersion(version: String): String = scalaVersionAliases.getOrElse(version, version)
+
   override def projectSettings = Seq(
     organization       := "org.playframework.anorm",
-    scalaVersion       := "2.13.18",
-    crossScalaVersions := Seq(scalaVersion.value, "3.3.8"),
+    scalaVersion       := resolveScalaVersion(sys.props.getOrElse("scala.version", scala213Version)),
+    crossScalaVersions := publishedScalaVersions,
     scalacOptions ++= Seq("-Xfatal-warnings"),
     scalacOptions ++= {
       val v = scalaBinaryVersion.value
@@ -26,7 +42,8 @@ object Common extends AutoPlugin {
       if (v == "2.13") {
         Seq("-release", "17") :+ "-Xlint"
       } else {
-        Seq("-release", "17")
+        Seq("-release", "17") ++
+          (if (scalaVersion.value.startsWith("3.3.")) Seq("-Yfuture-lazy-vals") else Seq.empty)
       }
     },
     scalacOptions ++= {
@@ -57,6 +74,14 @@ object Common extends AutoPlugin {
           "-Wconf:cat=deprecation&msg=.*(reflectiveSelectableFromLangReflectiveCalls|DeprecatedSqlParser|missing .*ToSql|deprecatedName).*:s"
         )
       }
+    },
+    scalacOptions ++= {
+      if (scalaBinaryVersion.value == "3" && !scalaVersion.value.startsWith("3.3.")) {
+        Seq(
+          "-Wconf:msg=.*Implicit parameters should be provided with.*:s",
+          "-Wconf:msg=.*Type ascriptions after patterns other than.*:s"
+        )
+      } else Seq.empty
     },
     Compile / console / scalacOptions ~= {
       _.filterNot { opt => opt.startsWith("-X") || opt.startsWith("-Y") }
