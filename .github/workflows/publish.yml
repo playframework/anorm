@@ -11,5 +11,3 @@ jobs:
     name: Publish / Artifacts
     uses: playframework/.github/.github/workflows/publish.yml@v4
     secrets: inherit
-    with:
-      java: 17
