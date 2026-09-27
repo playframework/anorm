@@ -16,7 +16,7 @@ object Common extends AutoPlugin {
   val previousVersion: Option[String] = Some("2.6.10")
 
   val scala213Version   = "2.13.18"
-  val scala33LTSVersion = "3.3.8"
+  val scala33LTSVersion = "3.9.0"
   val scala39LTSVersion = "3.9.0"
   val scala3NextVersion = "3.10.0-RC2"
 
