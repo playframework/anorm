@@ -6,9 +6,6 @@ import Common._
 import com.typesafe.tools.mima.core._
 import com.typesafe.tools.mima.plugin.MimaKeys.{ mimaBinaryIssueFilters, mimaPreviousArtifacts }
 
-// Temporary workaround to avoid sbt complaining with Play 3.0.x (Play main already upgraded to scala-parser-combinators v2)
-ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-parser-combinators" % VersionScheme.Always
-
 // Scalafix
 inThisBuild(
   List(
