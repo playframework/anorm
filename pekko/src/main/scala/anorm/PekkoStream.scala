@@ -168,10 +168,12 @@ object PekkoStream {
           }
         }
 
-        override def onDownstreamFinish() = {
-          result.tryFailure(new InterruptedException("Downstream finished"))
+        override def onDownstreamFinish(cause: Throwable): Unit = {
+          val interrupted = new InterruptedException("Downstream finished")
+          interrupted.initCause(cause)
+          result.tryFailure(interrupted)
           release()
-          super.onDownstreamFinish()
+          super.onDownstreamFinish(cause)
         }
 
         setHandler(out, this)
