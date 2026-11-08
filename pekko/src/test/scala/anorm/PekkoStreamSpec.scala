@@ -30,7 +30,7 @@ final class PekkoStreamSpec(implicit ee: ExecutionEnv) extends org.specs2.mutabl
   implicit lazy val system: ActorSystem = ActorSystem("anorm-tests")
 
   implicit def materializer: Materializer =
-    org.apache.pekko.stream.ActorMaterializer.create(system)
+    Materializer.matFromSystem(system)
 
   "Pekko Stream" should {
     "expose the query result as source" in assertAllStagesStopped {
