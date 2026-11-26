@@ -29,7 +29,7 @@ jobs:
     with:
       java: 25, 21, 17
       scala: 2.13.x, 3.3.x, 3.9.x, 3.next
-      cmd: sbt -Dscala.version=$MATRIX_SCALA docs/test
+      cmd: sbt -Dscala.version=$MATRIX_SCALA docs/testFull
 
   tests:
     name: Tests
@@ -41,7 +41,7 @@ jobs:
     with:
       java: 25, 21, 17
       scala: 2.13.x, 3.3.x, 3.9.x, 3.next
-      cmd: "sbt -Dscala.version=$MATRIX_SCALA ';publishLocal;test'"
+      cmd: "sbt -Dscala.version=$MATRIX_SCALA ';publishLocal;testFull'"
 
   finish:
     name: Finish
